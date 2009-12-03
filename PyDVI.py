@@ -1,5 +1,16 @@
 #####################################################################################################
 
+#####################################################################################################
+
+class Opcode(object):
+
+    def __init__(self, opcode, name, description, parameters):
+
+        self.opcode = opcode
+        self.name = name
+        self.description = description
+
+        for parameter in parameters
 
 #####################################################################################################
 
@@ -7,7 +18,9 @@ DVI_FORMAT = 2
 DVIV_FORMAT = 3
 XDVI_FORMAT = 5
 
+# use opcode_definitions
 NOP_OPCODE = 138
+BOP_OPCODE = 139
 FNT_DEF1_OPCODE = 243
 FNT_DEF2_OPCODE = 244
 FNT_DEF3_OPCODE = 245
@@ -22,7 +35,55 @@ SEEK_RELATIVE_TO_START   = 0
 SEEK_RELATIVE_TO_CURRENT = 1
 SEEK_RELATIVE_TO_END     = 2
 
-# opcodes =
+opcode_definitions = (
+    ( [0, 127], 'set', 'typeset a character and move right', None ),
+    ( 128, 'set', 'typeset a character and move right', ([1,4]) ),
+    ( 132, 'set rule', 'typeset a rule and move right', (4,4) ),
+    ( 133, 'put', 'typeset a character', ([1,4]) ),
+    ( 137, 'put rule', 'typeset a rule', (4,4) ),
+    ( 138, 'nop', 'no operation', None ),
+    ( 139, 'bop', 'beginning of page', () ),
+    ( 140, 'eop', 'ending of page', None ),
+    ( 141, 'push', 'save the current positions', None ),
+    ( 142, 'pop', 'restore previous positions', None ),
+    ( 143, 'right', 'move right', ([1,4]) ),
+    ( 147, 'w0', 'move right by w', None ),
+    ( 147, 'w', 'move right and set w', ([1,4]) ),
+    ( 152, 'x0', 'move right by x', None ),
+    ( 152, 'x', 'move right and set x', ([1,4]) ),
+    ( 157, 'down', 'move down', ([1,4]) ),
+    ( 161, 'y0', 'move down by y', None ),
+    ( 162, 'y', 'move down and set y', ([1,4]) ),
+    ( 166, 'z0', 'move down by z', None ),
+    ( 167, 'z', 'move down and set z', ([1,4]) ),
+    ( [171, 234], 'fnt num', 'set current font to i', None ),
+    ( 235, 'fnt', 'set current font', ([1,4]) ),
+    ( 239, 'xxx', 'extension to DVI primitives' ),
+    ( 243, 'fnt def', 'define the meaning of a font number', () ),
+    ( 247, 'pre', 'preamble', () ),
+    ( 248, 'post', 'postamble beginning', None ),
+    ( 249, 'post post', 'postamble ending', None ),
+    # [250, 255]
+    )
+
+opcodes_callback = [None]*255
+
+for definition in opcode_definition:
+
+    index, name, description, parameters = definition
+
+    if isinstance(index, list):
+
+        for i in xrange(index[0], index[1] +1):
+            opcodes_callback[i] = (definition, parameters)
+
+    else:
+
+        if len(parameters) > 0 and isinstance(parameters[0], list):
+            for i in xrange(parameters[0][0], parameters[0][1] +1):
+                opcodes_callback[index] = (definition, (i))
+        else:
+            opcodes_callback[index] = (definition, parameters)
 
 class DviProcessor(object):
    
@@ -56,6 +117,7 @@ class DviProcessor(object):
 
         self.process_preambule()
         self.process_postambule()
+        self.process_pages()
 
     ###############################################
 
@@ -106,9 +168,6 @@ class DviProcessor(object):
     def read_signed_byte3(self):
         return self.read_big_endian_number(3, signed = True)
 
-    def read_unsigned_byte4(self):
-        return self.read_big_endian_number(4, signed = False)
-
     def read_signed_byte4(self):
         return self.read_big_endian_number(4, signed = True)
 
@@ -125,9 +184,9 @@ class DviProcessor(object):
         if self.dvi_id not in (DVI_FORMAT, DVIV_FORMAT, XDVI_FORMAT):
             raise NameError('Bad DVI Format')
 
-        self.numerator     = self.read_unsigned_byte4()
-        self.denominator   = self.read_unsigned_byte4()
-        self.magnification = self.read_unsigned_byte4()
+        self.numerator     = self.read_signed_byte4()
+        self.denominator   = self.read_signed_byte4()
+        self.magnification = self.read_signed_byte4()
 
         self.comment = self.read_stream(self.read_unsigned_byte1())
 
@@ -157,7 +216,7 @@ class DviProcessor(object):
         dvi_format = opcode
 
         self.stream.seek(-5, SEEK_RELATIVE_TO_CURRENT)
-        self.post_pointer = self.read_unsigned_byte4()
+        self.post_pointer = self.read_signed_byte4()
 
         # Move to post
         self.stream.seek(self.post_pointer)
@@ -165,14 +224,14 @@ class DviProcessor(object):
         if self.read_unsigned_byte1() != POST_OPCODE:
             raise NameError('Bad DVI stream')            
 
-        self.bop_pointer_stack.append(self.read_unsigned_byte4())
+        self.bop_pointer_stack.append(self.read_signed_byte4())
 
-        numerator     = self.read_unsigned_byte4()
-        denominator   = self.read_unsigned_byte4()
-        magnification = self.read_unsigned_byte4()
+        numerator     = self.read_signed_byte4()
+        denominator   = self.read_signed_byte4()
+        magnification = self.read_signed_byte4()
 
-        self.max_height = self.read_unsigned_byte4()
-        self.max_width  = self.read_unsigned_byte4()
+        self.max_height = self.read_signed_byte4()
+        self.max_width  = self.read_signed_byte4()
         self.stack_depth = self.read_unsigned_byte2()
         self.number_of_pages = self.read_unsigned_byte2()
 
@@ -185,24 +244,26 @@ class DviProcessor(object):
             if   opcode == FNT_DEF1_OPCODE: font_id = self.read_unsigned_byte1()
             elif opcode == FNT_DEF2_OPCODE: font_id = self.read_unsigned_byte2()
             elif opcode == FNT_DEF3_OPCODE: font_id = self.read_unsigned_byte3()
-            elif opcode == FNT_DEF4_OPCODE: font_id = self.read_unsigned_byte4()
+            elif opcode == FNT_DEF4_OPCODE: font_id = self.read_signed_byte4()
             elif opcode != NOP_OPCODE: break
 
             self.define_font(font_id)
 
+        # POST POST
+
         if opcode != POST_POST_OPCODE:
             raise NameError('Bad DVI stream')
 
-        post_pointer = self.read_unsigned_byte4()
+        post_pointer = self.read_signed_byte4()
         dvi_format = self.read_unsigned_byte1()
 
     ###############################################
 
     def define_font(self, font_id):
 
-        font_checksum     = self.read_unsigned_byte4()
-        font_scale_factor = self.read_unsigned_byte4()
-        font_design_size  = self.read_unsigned_byte4()
+        font_checksum     = self.read_signed_byte4()
+        font_scale_factor = self.read_signed_byte4()
+        font_design_size  = self.read_signed_byte4()
         
         font_name = self.read_stream(self.read_unsigned_byte1() + self.read_unsigned_byte1())
 
@@ -210,6 +271,41 @@ class DviProcessor(object):
                                'checksum':font_checksum,
                                'scale_factor':font_scale_factor,
                                'design_size':font_design_size}
+
+    ###############################################
+
+    def process_pages(self):
+
+        bop_pointer = self.bop_pointer_stack[0]
+
+        while loc >= 0:
+
+            self.stream.seek(bop_pointer)
+
+            opcode = self.read_unsigned_byte1()
+
+            if opcode != BOP_OPCODE:
+                raise NameError('Bad DVI stream')
+
+            counts = [self.read_signed_byte4() for i in xrange(10)]
+
+            bop_pointer = self.read_signed_byte4()
+
+            self.bop_pointer_stack.append(bop_pointer)
+
+            page = self.process_page()
+
+    ###############################################
+
+    def process_page(self):
+
+        while True:
+
+            opcode = self.read_unsigned_byte1()
+
+            definition, parameters = opcodes_callback[opcode]
+
+            for parameter in parameters:
 
     ###############################################
 
