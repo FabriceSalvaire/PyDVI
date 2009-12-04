@@ -10,7 +10,26 @@ class Opcode(object):
         self.name = name
         self.description = description
 
-        for parameter in parameters
+        self.parameter_readers = []
+
+        if parameters is not None:
+            for parameter in parameters:
+                if   parameter == 1:
+                    parameter_reader = DviProcessor.read_unsigned_byte1
+                elif parameter == 2:
+                    parameter_reader = DviProcessor.read_unsigned_byte2
+                elif parameter == 3:
+                    parameter_reader = DviProcessor.read_unsigned_byte3
+                elif parameter == 4:
+                    parameter_reader = DviProcessor.read_signed_byte4
+                elif parameter == -1:
+                    parameter_reader = DviProcessor.read_signed_byte1
+                elif parameter == -2:
+                    parameter_reader = DviProcessor.read_signed_byte2
+                elif parameter == -3:
+                    parameter_reader = DviProcessor.read_signed_byte3
+
+                self.parameter_readers.append(parameter_reader)
 
 #####################################################################################################
 
@@ -42,7 +61,7 @@ opcode_definitions = (
     ( 133, 'put', 'typeset a character', ([1,4]) ),
     ( 137, 'put rule', 'typeset a rule', (4,4) ),
     ( 138, 'nop', 'no operation', None ),
-    ( 139, 'bop', 'beginning of page', () ),
+    ( 139, 'bop', 'beginning of page', (4,4,4,4,4,4,4,4,4,4) ),
     ( 140, 'eop', 'ending of page', None ),
     ( 141, 'push', 'save the current positions', None ),
     ( 142, 'pop', 'restore previous positions', None ),
@@ -58,7 +77,7 @@ opcode_definitions = (
     ( 167, 'z', 'move down and set z', ([1,4]) ),
     ( [171, 234], 'fnt num', 'set current font to i', None ),
     ( 235, 'fnt', 'set current font', ([1,4]) ),
-    ( 239, 'xxx', 'extension to DVI primitives' ),
+    ( 239, 'xxx', 'extension to DVI primitives', () ),
     ( 243, 'fnt def', 'define the meaning of a font number', () ),
     ( 247, 'pre', 'preamble', () ),
     ( 248, 'post', 'postamble beginning', None ),
@@ -66,7 +85,7 @@ opcode_definitions = (
     # [250, 255]
     )
 
-opcodes_callback = [None]*255
+opcode_objects = [None]*255
 
 for definition in opcode_definition:
 
@@ -75,15 +94,15 @@ for definition in opcode_definition:
     if isinstance(index, list):
 
         for i in xrange(index[0], index[1] +1):
-            opcodes_callback[i] = (definition, parameters)
+            opcode_objects[i] = (definition, parameters)
 
     else:
 
         if len(parameters) > 0 and isinstance(parameters[0], list):
             for i in xrange(parameters[0][0], parameters[0][1] +1):
-                opcodes_callback[index] = (definition, (i))
+                opcode_objects[index] = Opcode(index, name, definition, (i))
         else:
-            opcodes_callback[index] = (definition, parameters)
+            opcode_objects[index] = Opcode(index, name, definition, parameters)
 
 class DviProcessor(object):
    
@@ -303,9 +322,9 @@ class DviProcessor(object):
 
             opcode = self.read_unsigned_byte1()
 
-            definition, parameters = opcodes_callback[opcode]
+            opcode_obj = opcode_objects[opcode]
 
-            for parameter in parameters:
+            opcode_obj.read_parameters()
 
     ###############################################
 
