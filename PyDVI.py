@@ -4,6 +4,8 @@
 
 class Opcode(object):
 
+    ###############################################
+
     def __init__(self, opcode, name, description, parameters):
 
         self.opcode = opcode
@@ -12,24 +14,41 @@ class Opcode(object):
 
         self.parameter_readers = []
 
-        if parameters is not None:
-            for parameter in parameters:
-                if   parameter == 1:
-                    parameter_reader = DviProcessor.read_unsigned_byte1
-                elif parameter == 2:
-                    parameter_reader = DviProcessor.read_unsigned_byte2
-                elif parameter == 3:
-                    parameter_reader = DviProcessor.read_unsigned_byte3
-                elif parameter == 4:
-                    parameter_reader = DviProcessor.read_signed_byte4
-                elif parameter == -1:
-                    parameter_reader = DviProcessor.read_signed_byte1
-                elif parameter == -2:
-                    parameter_reader = DviProcessor.read_signed_byte2
-                elif parameter == -3:
-                    parameter_reader = DviProcessor.read_signed_byte3
+        if parameters is not None and len(parameters) > 0:
+            self.__init_parameter_readers__(parameters)
 
-                self.parameter_readers.append(parameter_reader)
+    ###############################################
+
+    def __init_parameter_readers__(self, parameters):
+
+        for parameter in parameters:
+            if   parameter == 1:
+                parameter_reader = DviProcessor.read_unsigned_byte1
+            elif parameter == 2:
+                parameter_reader = DviProcessor.read_unsigned_byte2
+            elif parameter == 3:
+                parameter_reader = DviProcessor.read_unsigned_byte3
+            elif parameter == 4:
+                parameter_reader = DviProcessor.read_signed_byte4
+            elif parameter == -1:
+                parameter_reader = DviProcessor.read_signed_byte1
+            elif parameter == -2:
+                parameter_reader = DviProcessor.read_signed_byte2
+            elif parameter == -3:
+                parameter_reader = DviProcessor.read_signed_byte3
+                
+            self.parameter_readers.append(parameter_reader)
+
+    ###############################################
+
+    def read_parameters(dvi_processor):
+
+        parameters = []
+
+        for parameter_reader in self.parameter_readers:
+            parameters.append(parameter_readers(dvi_processor))
+
+        return parameters
 
 #####################################################################################################
 
@@ -77,7 +96,7 @@ opcode_definitions = (
     ( 167, 'z', 'move down and set z', ([1,4]) ),
     ( [171, 234], 'fnt num', 'set current font to i', None ),
     ( 235, 'fnt', 'set current font', ([1,4]) ),
-    ( 239, 'xxx', 'extension to DVI primitives', () ),
+    ( 239, 'xxx', 'extension to DVI primitives', ([1,4]) ),
     ( 243, 'fnt def', 'define the meaning of a font number', () ),
     ( 247, 'pre', 'preamble', () ),
     ( 248, 'post', 'postamble beginning', None ),
