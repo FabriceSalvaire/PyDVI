@@ -558,7 +558,7 @@ class DviMachineRegisters(object):
 
     def __str__(self):
 
-        return 'h %8u v %8u w %8u x %8u y %8u z %8u' % (self.h, self.v, self.w, self.x, self.y, self.z)
+        return '(h=%u v=%u w=%u x=%u y=%u z=%u)' % (self.h, self.v, self.w, self.x, self.y, self.z)
 
     ###############################################
 
@@ -607,7 +607,7 @@ class DviMachine(object):
         for opcode in opcode_program:
             print opcode
             opcode.run(self)
-            print self.registers()
+            print 'level %u' % (len(self.registers_stack)), self.registers()
 
 #####################################################################################################
 
@@ -859,7 +859,7 @@ class DviParser(object):
 
     ###############################################
 
-    def print_dvi(self):
+    def print_summary(self):
 
         print '''DVI
 
@@ -882,9 +882,9 @@ Fonts''' % (self.dvi_format, self.numerator, self.denominator, self.magnificatio
         for font_id in self.fonts.keys():
             print '  id = %4u' % (font_id), self.fonts[font_id]
 
-        for i in xrange(self.number_of_pages):
-            print '\nPage', i
-            self.page_opcode_programs[i].print_program()
+        # for i in xrange(self.number_of_pages):
+        #     print '\nPage', i
+        #     self.page_opcode_programs[i].print_program()
 
     ###############################################
 
@@ -1129,11 +1129,12 @@ if __name__ == '__main__':
 
     dvi_parser.process_stream(dvi_stream)
 
-    # dvi_parser.print_dvi()
+    dvi_parser.print_summary()
 
     dvi_machine = DviMachine()
 
-    dvi_machine.run(dvi_parser.page_opcode_programs[0])
+    print '\nRun last page'
+    dvi_machine.run(dvi_parser.page_opcode_programs[-1])
 
     dvi_stream.close()
 
