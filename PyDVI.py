@@ -81,6 +81,8 @@ POST_POST_OPCODE = 249
 
 EOF_SIGNATURE = 223
 
+set_char_description = 'typeset a character and move right'
+
 opcode_parsers = [None]*255
 
 #####################################################################################################
@@ -92,6 +94,13 @@ class OpcodeProgram(object):
     def __init__(self):
 
         self.program = []
+
+    ###############################################
+
+    def __iter__(self):
+
+        for opcode in self.program:
+            yield opcode
 
     ###############################################
 
@@ -132,6 +141,14 @@ class Opcode_put_char(Opcode):
 
         return 'put char "%s"' % (chr(self.char))
 
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        pass
+
+#####################################################################################################
+
 class Opcode_set_char(Opcode):
 
     ###############################################
@@ -142,15 +159,22 @@ class Opcode_set_char(Opcode):
 
     ###############################################
 
+    def __str__(self):
+
+        return 'set char "%s"' % (string.join(map(chr, self.characters), sep = ''))
+        # return 'set char "%s"' % str(self.characters)
+
+    ###############################################
+
     def append(self, char):
 
         self.characters.append(* char)
 
     ###############################################
 
-    def __str__(self):
+    def run(self, dvi_machine):
 
-        return 'set char "%s"' % (string.join(map(chr, self.characters), sep = ''))
+        pass
 
 #####################################################################################################
 
@@ -169,6 +193,14 @@ class Opcode_put_rule(Opcode):
 
         return 'put rule height %u width %u' % (self.height, self.width)
 
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        pass
+
+#####################################################################################################
+
 class Opcode_set_rule(Opcode_put_rule):
 
     ###############################################
@@ -182,6 +214,13 @@ class Opcode_set_rule(Opcode_put_rule):
     def __str__(self):
 
         return 'set rule height %u width %u, h += width' % (self.height, self.width)
+
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        registers = dvi_machine.registers()
+        registers.h += self.width
 
 #####################################################################################################
 
@@ -199,6 +238,12 @@ class Opcode_push(Opcode):
 
         return 'push'
 
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        dvi_machine.push_registers()
+
 #####################################################################################################
 
 class Opcode_pop(Opcode):
@@ -208,11 +253,18 @@ class Opcode_pop(Opcode):
     def __init__(self):
 
         pass
+
     ###############################################
 
     def __str__(self):
 
         return 'pop'
+
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        dvi_machine.pop_registers()
 
 #####################################################################################################
 
@@ -230,6 +282,13 @@ class Opcode_right(Opcode):
 
         return 'h += %u' %  (self.x)
 
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        registers = dvi_machine.registers()
+        registers.h += self.x
+
 #####################################################################################################
 
 class Opcode_w0(Opcode):
@@ -245,6 +304,13 @@ class Opcode_w0(Opcode):
     def __str__(self):
 
         return 'h += w'
+
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        registers = dvi_machine.registers()
+        registers.h += registers.w
 
 #####################################################################################################
 
@@ -262,6 +328,14 @@ class Opcode_w(Opcode):
 
         return 'w = %u, h += w' % (self.x)
 
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        registers = dvi_machine.registers()
+        registers.w  = self.x
+        registers.h += self.x
+
 #####################################################################################################
 
 class Opcode_x0(Opcode):
@@ -277,6 +351,13 @@ class Opcode_x0(Opcode):
     def __str__(self):
 
         return 'h += x'
+
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        registers = dvi_machine.registers()
+        registers.h += registers.x
 
 #####################################################################################################
 
@@ -294,6 +375,14 @@ class Opcode_x(Opcode):
 
         return 'x = %u, h += x' % (self.x)
 
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        registers = dvi_machine.registers()
+        registers.x  = self.x
+        registers.h += self.x
+
 #####################################################################################################
 
 class Opcode_down(Opcode):
@@ -309,6 +398,13 @@ class Opcode_down(Opcode):
     def __str__(self):
 
         return 'v += %u' % (self.x)
+
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        registers = dvi_machine.registers()
+        registers.v += self.x
 
 #####################################################################################################
 
@@ -326,8 +422,15 @@ class Opcode_y0(Opcode):
 
         return 'v += y'
 
-#####################################################################################################
+    ###############################################
 
+    def run(self, dvi_machine):
+
+        registers = dvi_machine.registers()
+        registers.v += registers.y
+
+#####################################################################################################
+ 
 class Opcode_y(Opcode):
 
     ###############################################
@@ -341,6 +444,14 @@ class Opcode_y(Opcode):
     def __str__(self):
 
         return 'y = %u, y += x' % (self.x)
+
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        registers = dvi_machine.registers()
+        registers.y  = self.x
+        registers.h += self.x
 
 #####################################################################################################
 
@@ -358,6 +469,13 @@ class Opcode_z0(Opcode):
 
         return 'v += z'
 
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        registers = dvi_machine.registers()
+        registers.v += registers.z
+
 #####################################################################################################
 
 class Opcode_z(Opcode):
@@ -373,6 +491,14 @@ class Opcode_z(Opcode):
     def __str__(self):
 
         return 'z = %u, v += z' % (self.x)
+
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        registers = dvi_machine.registers()
+        registers.z  = self.x
+        registers.v += self.x
 
 #####################################################################################################
 
@@ -390,6 +516,12 @@ class Opcode_font(Opcode):
 
         return 'font %u' % (self.font_id)
 
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        dvi_machine.font = self.font_id
+
 #####################################################################################################
 
 class Opcode_xxx(Opcode):
@@ -405,6 +537,77 @@ class Opcode_xxx(Opcode):
     def __str__(self):
 
         return 'xxx', self.opcode
+
+    ###############################################
+
+    def run(self, dvi_machine):
+
+        pass
+
+#####################################################################################################
+
+class DviMachineRegisters(object):
+
+    ###############################################
+
+    def __init__(self, h = 0, v = 0, w = 0, x = 0, y = 0, z = 0):
+
+        self.h, self.v, self.w, self.x, self.y, self.z = h, v, w, x, y, z
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'h %8u v %8u w %8u x %8u y %8u z %8u' % (self.h, self.v, self.w, self.x, self.y, self.z)
+
+    ###############################################
+
+    def duplicate(self):
+
+        return DviMachineRegisters(self.h, self.v, self.w, self.x, self.y, self.z)
+
+class DviMachine(object):
+    
+    ###############################################
+
+    def __init__(self):
+
+        self.reset()
+
+    ###############################################
+
+    def reset(self):
+
+        self.font = None
+
+        self.registers_stack = [DviMachineRegisters()]
+
+    ###############################################
+
+    def registers(self):
+
+        return self.registers_stack[-1]
+
+    ###############################################
+
+    def push_registers(self):
+
+        self.registers_stack.append(self.registers().duplicate())
+
+    ###############################################
+
+    def pop_registers(self):
+
+        del self.registers_stack[-1]
+
+    ###############################################
+
+    def run(self, opcode_program):
+
+        for opcode in opcode_program:
+            print opcode
+            opcode.run(self)
+            print self.registers()
 
 #####################################################################################################
 
@@ -658,7 +861,8 @@ class DviParser(object):
 
     def print_dvi(self):
 
-        print '''
+        print '''DVI
+
 Preambule
   - DVI format    %u
   - numerator     %u
@@ -667,18 +871,16 @@ Preambule
   - comment       '%s'
 
 Postamble
-  - pointer         %u
   - max height      %u
   - max width       %u
   - stack depth     %u
   - number of pages %u
 
-Fonts
-''' % (self.dvi_format, self.numerator, self.denominator, self.magnification, self.comment,
-       self.post_pointer, self.max_height, self.max_width, self.stack_depth, self.number_of_pages)
+Fonts''' % (self.dvi_format, self.numerator, self.denominator, self.magnification, self.comment,
+            self.max_height, self.max_width, self.stack_depth, self.number_of_pages)
 
         for font_id in self.fonts.keys():
-            print 'id = %4u' % (font_id), self.fonts[font_id]
+            print '  id = %4u' % (font_id), self.fonts[font_id]
 
         for i in xrange(self.number_of_pages):
             print '\nPage', i
@@ -741,17 +943,12 @@ class OpcodeParser(object):
 
     def read_parameters(self, dvi_processor):
 
-        if self.opcode < SETC_127_OPCODE:
-            return [self.opcode]
-        elif self.opcode >= FONT_00_OPCODE and self.opcode <= FONT_63_OPCODE:
-            return [self.opcode - FONT_00_OPCODE]
-        else:
-            parameters = []
-
-            for parameter_reader in self.parameter_readers:
-                parameters.append(parameter_reader(dvi_processor))
-
-            return parameters
+        parameters = []
+        
+        for parameter_reader in self.parameter_readers:
+            parameters.append(parameter_reader(dvi_processor))
+            
+        return parameters
 
     ###############################################
 
@@ -761,6 +958,40 @@ class OpcodeParser(object):
             return self.opcode_class(* parameters)
         else:
             return None
+
+#####################################################################################################
+
+class OpcodeParser_set_char(OpcodeParser):
+
+    ###############################################
+
+    def __init__(self, opcode):
+
+        super(OpcodeParser_set_char, self).__init__(opcode, 'set', set_char_description,
+                                                    opcode_class = Opcode_set_char)
+
+    ###############################################
+
+    def read_parameters(self, dvi_processor):
+
+        return [self.opcode]
+
+#####################################################################################################
+
+class OpcodeParser_font(OpcodeParser):
+
+    ###############################################
+
+    def __init__(self, opcode):
+
+        super(OpcodeParser_font, self).__init__(opcode, 'fnt num', 'set current font to i',
+                                                opcode_class = Opcode_font)
+
+    ###############################################
+
+    def read_parameters(self, dvi_processor):
+
+        return [self.opcode - FONT_00_OPCODE]
 
 #####################################################################################################
 
@@ -814,11 +1045,9 @@ class OpcodeParser_fnt_def(OpcodeParser):
 
 #####################################################################################################
 
-set_description = 'typeset a character and move right'
-
 opcode_definitions = (
-    ( [SETC_000_OPCODE, SETC_127_OPCODE], 'set', set_description, None, Opcode_set_char ),
-    ( SET1_OPCODE, 'set', set_description, ([1,4]), Opcode_set_char ),
+    ( [SETC_000_OPCODE, SETC_127_OPCODE], OpcodeParser_set_char ),
+    ( SET1_OPCODE, 'set', set_char_description, ([1,4]), Opcode_set_char ),
     ( SET_RULE_OPCODE, 'set rule', 'typeset a rule and move right', (4,4), Opcode_set_rule ),
     ( PUT1_OPCODE, 'put', 'typeset a character', ([1,4]), Opcode_put_char ),
     ( PUT_RULE_OPCODE, 'put rule', 'typeset a rule', (4,4), Opcode_put_rule ),
@@ -837,7 +1066,7 @@ opcode_definitions = (
     ( Y1_OPCODE, 'y', 'move down and set y', ([1,4]), Opcode_y ),
     ( Z0_OPCODE, 'z0', 'move down by z', None, Opcode_z0 ),
     ( Z1_OPCODE, 'z', 'move down and set z', ([1,4]), Opcode_z ),
-    ( [FONT_00_OPCODE, FONT_63_OPCODE], 'fnt num', 'set current font to i', None, Opcode_font ),
+    ( [FONT_00_OPCODE, FONT_63_OPCODE], OpcodeParser_font ),
     ( FNT1_OPCODE, 'fnt', 'set current font', ([1,4]), Opcode_font ),
     ( [XXX1_OPCODE, XXX4_OPCODE], OpcodeParser_xxx ),
     ( [FNT_DEF1_OPCODE, FNT_DEF4_OPCODE], OpcodeParser_fnt_def ),
@@ -900,7 +1129,11 @@ if __name__ == '__main__':
 
     dvi_parser.process_stream(dvi_stream)
 
-    dvi_parser.print_dvi()
+    # dvi_parser.print_dvi()
+
+    dvi_machine = DviMachine()
+
+    dvi_machine.run(dvi_parser.page_opcode_programs[0])
 
     dvi_stream.close()
 
