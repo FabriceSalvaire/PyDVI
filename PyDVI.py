@@ -1,5 +1,7 @@
 #####################################################################################################
 
+import string
+
 #####################################################################################################
 
 SEEK_RELATIVE_TO_START   = 0
@@ -12,24 +14,401 @@ DVI_FORMAT = 2
 DVIV_FORMAT = 3
 XDVI_FORMAT = 5
 
-# Fixme: use opcode_definitions?
-NOP_OPCODE = 138
-BOP_OPCODE = 139
-EOP_OPCODE = 140
-FNT_OPCODE = 171
-FNT_DEF1_OPCODE = 243
-FNT_DEF4_OPCODE = 246
-PRE_OPCODE = 247
-POST_OPCODE = 248
+#####################################################################################################
+
+SETC_000_OPCODE  =   0
+SETC_127_OPCODE  = 127
+SET1_OPCODE      = 128
+SET2_OPCODE      = 129
+SET3_OPCODE      = 130
+SET4_OPCODE      = 131
+SET_RULE_OPCODE  = 132
+PUT1_OPCODE      = 133
+PUT2_OPCODE      = 134
+PUT3_OPCODE      = 135
+PUT4_OPCODE      = 136
+PUT_RULE_OPCODE  = 137
+NOP_OPCODE       = 138
+BOP_OPCODE       = 139
+EOP_OPCODE       = 140
+PUSH_OPCODE      = 141
+POP_OPCODE       = 142
+RIGHT1_OPCODE    = 143
+RIGHT2_OPCODE    = 144
+RIGHT3_OPCODE    = 145
+RIGHT4_OPCODE    = 146
+W0_OPCODE        = 147
+W1_OPCODE        = 148
+W2_OPCODE        = 149
+W3_OPCODE        = 150
+W4_OPCODE        = 151
+X0_OPCODE        = 152
+X1_OPCODE        = 153
+X2_OPCODE        = 154
+X3_OPCODE        = 155
+X4_OPCODE        = 156
+DOWN1_OPCODE     = 157
+DOWN2_OPCODE     = 158
+DOWN3_OPCODE     = 159
+DOWN4_OPCODE     = 160
+Y0_OPCODE        = 161
+Y1_OPCODE        = 162
+Y2_OPCODE        = 163
+Y3_OPCODE        = 164
+Y4_OPCODE        = 165
+Z0_OPCODE        = 166
+Z1_OPCODE        = 167
+Z2_OPCODE        = 168
+Z3_OPCODE        = 169
+Z4_OPCODE        = 170
+FONT_00_OPCODE   = 171
+FONT_63_OPCODE   = 234
+FNT1_OPCODE      = 235
+FNT2_OPCODE      = 236
+FNT3_OPCODE      = 237
+FNT4_OPCODE      = 238
+XXX1_OPCODE      = 239
+XXX2_OPCODE      = 240
+XXX3_OPCODE      = 241
+XXX4_OPCODE      = 242
+FNT_DEF1_OPCODE  = 243
+FNT_DEF2_OPCODE  = 244
+FNT_DEF3_OPCODE  = 245
+FNT_DEF4_OPCODE  = 246
+PRE_OPCODE       = 247
+POST_OPCODE      = 248
 POST_POST_OPCODE = 249
 
 EOF_SIGNATURE = 223
 
-opcode_objects = [None]*255
+opcode_parsers = [None]*255
 
 #####################################################################################################
 
-class DviProcessor(object):
+class OpcodeProgram(object):
+
+    ###############################################
+
+    def __init__(self):
+
+        self.program = []
+
+    ###############################################
+
+    def append(self, opcode):
+
+        self.program.append(opcode)
+
+    ###############################################
+
+    def print_program(self):
+
+        for opcode in self.program:
+            print opcode
+
+#####################################################################################################
+
+class Opcode(object):
+
+    ###############################################
+
+    def __init__(self):
+
+        pass
+
+#####################################################################################################
+
+class Opcode_put_char(Opcode):
+
+    ###############################################
+
+    def __init__(self, char):
+
+        self.char = char
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'put char "%s"' % (chr(self.char))
+
+class Opcode_set_char(Opcode):
+
+    ###############################################
+
+    def __init__(self, char):
+
+        self.characters = [char]
+
+    ###############################################
+
+    def append(self, char):
+
+        self.characters.append(* char)
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'set char "%s"' % (string.join(map(chr, self.characters), sep = ''))
+
+#####################################################################################################
+
+class Opcode_put_rule(Opcode):
+
+    ###############################################
+
+    def __init__(self, height, width):
+
+        self.height = height
+        self.width = width
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'put rule height %u width %u' % (self.height, self.width)
+
+class Opcode_set_rule(Opcode_put_rule):
+
+    ###############################################
+
+    def __init__(self, height, width):
+
+        super(Opcode_set_rule, self).__init__(height, width)
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'set rule height %u width %u, h += width' % (self.height, self.width)
+
+#####################################################################################################
+
+class Opcode_push(Opcode):
+
+    ###############################################
+
+    def __init__(self):
+
+        pass
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'push'
+
+#####################################################################################################
+
+class Opcode_pop(Opcode):
+
+    ###############################################
+
+    def __init__(self):
+
+        pass
+    ###############################################
+
+    def __str__(self):
+
+        return 'pop'
+
+#####################################################################################################
+
+class Opcode_right(Opcode):
+
+    ###############################################
+
+    def __init__(self, x):
+
+        self.x = x
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'h += %u' %  (self.x)
+
+#####################################################################################################
+
+class Opcode_w0(Opcode):
+
+    ###############################################
+
+    def __init__(self):
+
+        pass
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'h += w'
+
+#####################################################################################################
+
+class Opcode_w(Opcode):
+
+    ###############################################
+
+    def __init__(self, x):
+
+        self.x = x
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'w = %u, h += w' % (self.x)
+
+#####################################################################################################
+
+class Opcode_x0(Opcode):
+
+    ###############################################
+
+    def __init__(self):
+
+        pass
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'h += x'
+
+#####################################################################################################
+
+class Opcode_x(Opcode):
+
+    ###############################################
+
+    def __init__(self, x):
+
+        self.x = x
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'x = %u, h += x' % (self.x)
+
+#####################################################################################################
+
+class Opcode_down(Opcode):
+
+    ###############################################
+
+    def __init__(self, x):
+
+        self.x = x
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'v += %u' % (self.x)
+
+#####################################################################################################
+
+class Opcode_y0(Opcode):
+
+    ###############################################
+
+    def __init__(self):
+
+        pass
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'v += y'
+
+#####################################################################################################
+
+class Opcode_y(Opcode):
+
+    ###############################################
+
+    def __init__(self, x):
+
+        self.x = x
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'y = %u, y += x' % (self.x)
+
+#####################################################################################################
+
+class Opcode_z0(Opcode):
+
+    ###############################################
+
+    def __init__(self):
+
+        pass
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'v += z'
+
+#####################################################################################################
+
+class Opcode_z(Opcode):
+
+    ###############################################
+
+    def __init__(self, x):
+
+        self.x = x
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'z = %u, v += z' % (self.x)
+
+#####################################################################################################
+
+class Opcode_font(Opcode):
+
+    ###############################################
+
+    def __init__(self, font_id):
+
+        self.font_id = font_id
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'font %u' % (self.font_id)
+
+#####################################################################################################
+
+class Opcode_xxx(Opcode):
+
+    ###############################################
+
+    def __init__(self, code):
+
+        self.code = code
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'xxx', self.opcode
+
+#####################################################################################################
+
+class DviParser(object):
     
     ###############################################
 
@@ -47,10 +426,14 @@ class DviProcessor(object):
         self.magnification = 1000
         self.comment       = ''
 
-        self.bop_pointer_stack = []
-
         self.fonts = {}
 
+        self.bop_pointer_stack = []
+
+        self.page_opcode_programs = []
+
+        self.page_number = None
+        
     ###############################################
 
     def process_stream(self, stream):
@@ -61,7 +444,6 @@ class DviProcessor(object):
 
         self.process_preambule()
         self.process_postambule()
-        self.print_object()
         self.process_pages()
 
     ###############################################
@@ -185,7 +567,7 @@ class DviProcessor(object):
         while True:
             opcode = self.read_unsigned_byte1()
             if opcode >= FNT_DEF1_OPCODE and opcode <= FNT_DEF4_OPCODE:
-                opcode_objects[opcode].read_parameters(self)
+                opcode_parsers[opcode].read_parameters(self)
             elif opcode != NOP_OPCODE:
                 break
 
@@ -210,9 +592,16 @@ class DviProcessor(object):
 
     def process_pages(self):
 
+        for i in xrange(self.number_of_pages):
+            self.page_opcode_programs.append(OpcodeProgram())
+
+        self.page_number = self.number_of_pages
+
         bop_pointer = self.bop_pointer_stack[0]
 
         while bop_pointer >= 0:
+
+            self.page_number -= 1
 
             self.stream.seek(bop_pointer)
 
@@ -222,8 +611,6 @@ class DviProcessor(object):
                 raise NameError('Bad DVI stream')
 
             counts = [self.read_signed_byte4() for i in xrange(10)]
-
-            print '\nPage', counts
 
             bop_pointer = self.read_signed_byte4()
 
@@ -235,6 +622,10 @@ class DviProcessor(object):
 
     def process_page(self):
 
+        opcode_program = self.page_opcode_programs[self.page_number]
+        
+        previous_opcode_obj = None
+
         while True:
 
             opcode = self.read_unsigned_byte1()
@@ -242,13 +633,30 @@ class DviProcessor(object):
             if opcode == EOP_OPCODE:
                 break
             else:
-                opcode_obj = opcode_objects[opcode]
+                opcode_parser = opcode_parsers[opcode]
+                
+                parameters = opcode_parser.read_parameters(self)
 
-                opcode_obj.read_parameters(self)
+                # print opcode, opcode_parser.name, parameters
+
+                is_set_char = opcode <= SET4_OPCODE
+
+                if is_set_char is True and previous_opcode_obj is not None:
+                    previous_opcode_obj.append(parameters)
+                else:
+                    opcode_obj = opcode_parser.to_opcode(parameters) 
+
+                    if opcode_obj is not None:
+                        opcode_program.append(opcode_obj)
+
+                    if is_set_char is True:
+                        previous_opcode_obj = opcode_obj
+                    else:
+                        previous_opcode_obj = None
 
     ###############################################
 
-    def print_object(self):
+    def print_dvi(self):
 
         print '''
 Preambule
@@ -272,6 +680,10 @@ Fonts
         for font_id in self.fonts.keys():
             print 'id = %4u' % (font_id), self.fonts[font_id]
 
+        for i in xrange(self.number_of_pages):
+            print '\nPage', i
+            self.page_opcode_programs[i].print_program()
+
     ###############################################
 
     read_unsigned_byten_pointer = (read_unsigned_byte1, 
@@ -281,15 +693,16 @@ Fonts
 
 #####################################################################################################
 
-class Opcode(object):
+class OpcodeParser(object):
 
     ###############################################
 
-    def __init__(self, opcode, name, description, parameters = ()):
+    def __init__(self, opcode, name, description, parameters = (), opcode_class = None):
 
         self.opcode = opcode
         self.name = name
         self.description = description
+        self.opcode_class = opcode_class
 
         self.parameter_readers = []
 
@@ -308,19 +721,19 @@ class Opcode(object):
 
         for parameter in parameters:
             if   parameter == 1:
-                parameter_reader = DviProcessor.read_unsigned_byte1
+                parameter_reader = DviParser.read_unsigned_byte1
             elif parameter == 2:
-                parameter_reader = DviProcessor.read_unsigned_byte2
+                parameter_reader = DviParser.read_unsigned_byte2
             elif parameter == 3:
-                parameter_reader = DviProcessor.read_unsigned_byte3
+                parameter_reader = DviParser.read_unsigned_byte3
             elif parameter == 4:
-                parameter_reader = DviProcessor.read_signed_byte4
+                parameter_reader = DviParser.read_signed_byte4
             elif parameter == -1:
-                parameter_reader = DviProcessor.read_signed_byte1
+                parameter_reader = DviParser.read_signed_byte1
             elif parameter == -2:
-                parameter_reader = DviProcessor.read_signed_byte2
+                parameter_reader = DviParser.read_signed_byte2
             elif parameter == -3:
-                parameter_reader = DviProcessor.read_signed_byte3
+                parameter_reader = DviParser.read_signed_byte3
                 
             self.parameter_readers.append(parameter_reader)
 
@@ -328,23 +741,30 @@ class Opcode(object):
 
     def read_parameters(self, dvi_processor):
 
-        parameters = []
-
-        for parameter_reader in self.parameter_readers:
-            parameters.append(parameter_reader(dvi_processor))
-            
-        if self.name == 'fnt num':
-            print self.name, self.opcode - FNT_OPCODE
-        elif self.opcode < 128:
-            print self.name, chr(self.opcode)
+        if self.opcode < SETC_127_OPCODE:
+            return [self.opcode]
+        elif self.opcode >= FONT_00_OPCODE and self.opcode <= FONT_63_OPCODE:
+            return [self.opcode - FONT_00_OPCODE]
         else:
-            print self.name, self.opcode, parameters
+            parameters = []
 
-        return parameters
+            for parameter_reader in self.parameter_readers:
+                parameters.append(parameter_reader(dvi_processor))
+
+            return parameters
+
+    ###############################################
+
+    def to_opcode(self, parameters):
+
+        if self.opcode_class is not None:
+            return self.opcode_class(* parameters)
+        else:
+            return None
 
 #####################################################################################################
 
-class Opcode_xxx(Opcode):
+class OpcodeParser_xxx(OpcodeParser):
 
     base_opcode = 239
 
@@ -352,9 +772,10 @@ class Opcode_xxx(Opcode):
 
     def __init__(self, opcode):
 
-        super(Opcode_xxx, self).__init__(opcode, 'xxx', 'extension to DVI primitives')
+        super(OpcodeParser_xxx, self).__init__(opcode, 'xxx', 'extension to DVI primitives',
+                                               opcode_class = Opcode_xxx)
 
-        self.read_unsigned_byten = DviProcessor.read_unsigned_byten_pointer[opcode-self.base_opcode]
+        self.read_unsigned_byten = DviParser.read_unsigned_byten_pointer[opcode-self.base_opcode]
 
     ###############################################
 
@@ -364,7 +785,7 @@ class Opcode_xxx(Opcode):
 
 #####################################################################################################
 
-class Opcode_fnt_def(Opcode):
+class OpcodeParser_fnt_def(OpcodeParser):
 
     base_opcode = 243
 
@@ -372,9 +793,9 @@ class Opcode_fnt_def(Opcode):
 
     def __init__(self, opcode):
 
-        super(Opcode_fnt_def, self).__init__(opcode, 'fnt def', 'define the meaning of a font number')
+        super(OpcodeParser_fnt_def, self).__init__(opcode, 'fnt def', 'define the meaning of a font number')
 
-        self.read_unsigned_byten = DviProcessor.read_unsigned_byten_pointer[opcode-self.base_opcode]
+        self.read_unsigned_byten = DviParser.read_unsigned_byten_pointer[opcode-self.base_opcode]
 
     ###############################################
 
@@ -396,34 +817,33 @@ class Opcode_fnt_def(Opcode):
 set_description = 'typeset a character and move right'
 
 opcode_definitions = (
-    ( [0, 127], 'set', set_description, None ),
-    ( 128, 'set', set_description, ([1,4]) ),
-    ( 132, 'set rule', 'typeset a rule and move right', (4,4) ),
-    ( 133, 'put', 'typeset a character', ([1,4]) ),
-    ( 137, 'put rule', 'typeset a rule', (4,4) ),
-    ( 138, 'nop', 'no operation', None ),
-    ( 139, 'bop', 'beginning of page', tuple([4]*10) ),
-    ( 140, 'eop', 'ending of page', None ),
-    ( 141, 'push', 'save the current positions', None ),
-    ( 142, 'pop', 'restore previous positions', None ),
-    ( 143, 'right', 'move right', ([1,4]) ),
-    ( 147, 'w0', 'move right by w', None ),
-    ( 148, 'w', 'move right and set w', ([1,4]) ),
-    ( 152, 'x0', 'move right by x', None ),
-    ( 153, 'x', 'move right and set x', ([1,4]) ),
-    ( 157, 'down', 'move down', ([1,4]) ),
-    ( 161, 'y0', 'move down by y', None ),
-    ( 162, 'y', 'move down and set y', ([1,4]) ),
-    ( 166, 'z0', 'move down by z', None ),
-    ( 167, 'z', 'move down and set z', ([1,4]) ),
-    ( [171, 234], 'fnt num', 'set current font to i', None ),
-    ( 235, 'fnt', 'set current font', ([1,4]) ),
-    ( [239, 242], Opcode_xxx ),
-    ( [243, 246], Opcode_fnt_def ),
-    ( 247, 'pre', 'preamble', () ),
-    ( 248, 'post', 'postamble beginning', None ),
-    ( 249, 'post post', 'postamble ending', None ),
-    # [250, 255]
+    ( [SETC_000_OPCODE, SETC_127_OPCODE], 'set', set_description, None, Opcode_set_char ),
+    ( SET1_OPCODE, 'set', set_description, ([1,4]), Opcode_set_char ),
+    ( SET_RULE_OPCODE, 'set rule', 'typeset a rule and move right', (4,4), Opcode_set_rule ),
+    ( PUT1_OPCODE, 'put', 'typeset a character', ([1,4]), Opcode_put_char ),
+    ( PUT_RULE_OPCODE, 'put rule', 'typeset a rule', (4,4), Opcode_put_rule ),
+    ( NOP_OPCODE, 'nop', 'no operation', None, None ),
+    ( BOP_OPCODE, 'bop', 'beginning of page', tuple([4]*10), None ),
+    ( EOP_OPCODE, 'eop', 'ending of page', None, None ),
+    ( PUSH_OPCODE, 'push', 'save the current positions', None, Opcode_push ),
+    ( POP_OPCODE, 'pop', 'restore previous positions', None, Opcode_pop ),
+    ( RIGHT1_OPCODE, 'right', 'move right', ([1,4]), Opcode_right ),
+    ( W0_OPCODE, 'w0', 'move right by w', None, Opcode_w0 ),
+    ( W1_OPCODE, 'w', 'move right and set w', ([1,4]), Opcode_w ),
+    ( X0_OPCODE, 'x0', 'move right by x', None, Opcode_x0 ),
+    ( X1_OPCODE, 'x', 'move right and set x', ([1,4]), Opcode_x ),
+    ( DOWN1_OPCODE, 'down', 'move down', ([1,4]), Opcode_down ),
+    ( Y0_OPCODE, 'y0', 'move down by y', None, Opcode_y0 ),
+    ( Y1_OPCODE, 'y', 'move down and set y', ([1,4]), Opcode_y ),
+    ( Z0_OPCODE, 'z0', 'move down by z', None, Opcode_z0 ),
+    ( Z1_OPCODE, 'z', 'move down and set z', ([1,4]), Opcode_z ),
+    ( [FONT_00_OPCODE, FONT_63_OPCODE], 'fnt num', 'set current font to i', None, Opcode_font ),
+    ( FNT1_OPCODE, 'fnt', 'set current font', ([1,4]), Opcode_font ),
+    ( [XXX1_OPCODE, XXX4_OPCODE], OpcodeParser_xxx ),
+    ( [FNT_DEF1_OPCODE, FNT_DEF4_OPCODE], OpcodeParser_fnt_def ),
+    ( PRE_OPCODE, 'pre', 'preamble', (), None ),
+    ( POST_OPCODE, 'post', 'postamble beginning', None, None ),
+    ( POST_POST_OPCODE, 'post post', 'postamble ending', None, None ),
     )
 
 for definition in opcode_definitions:
@@ -438,23 +858,23 @@ for definition in opcode_definitions:
 
     if isinstance(definition[1], str):
 
-        name, description, parameters = definition[1:]
+        name, description, parameters, opcode_class = definition[1:]
 
         if parameters is not None and isinstance(parameters, list):
             lower_n, upper_n = parameters
             for n in xrange(lower_n, upper_n +1):
                 i = index + n -1
-                opcode_objects[i] = Opcode(i, name, description, tuple([n]))
+                opcode_parsers[i] = OpcodeParser(i, name, description, tuple([n]), opcode_class)
         else:
             for i in xrange(lower_index, upper_index +1):
-                opcode_objects[i] = Opcode(i, name, description, parameters)
+                opcode_parsers[i] = OpcodeParser(i, name, description, parameters, opcode_class)
 
     else:
         for i in xrange(lower_index, upper_index +1):
-            opcode_objects[i] = definition[1](i)
+            opcode_parsers[i] = definition[1](i)
 
-# for opcode_object in opcode_objects:
-#     print opcode_object
+# for opcode_parsers in opcode_parsers:
+#     print opcode_parsers
 
 #####################################################################################################
 #
@@ -476,9 +896,11 @@ if __name__ == '__main__':
 
     dvi_stream = open(dvi_file)
 
-    dvi_processor = DviProcessor()
+    dvi_parser = DviParser()
 
-    dvi_processor.process_stream(dvi_stream)
+    dvi_parser.process_stream(dvi_stream)
+
+    dvi_parser.print_dvi()
 
     dvi_stream.close()
 
