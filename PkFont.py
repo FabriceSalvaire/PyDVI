@@ -109,8 +109,11 @@ Char %u
        self.horizontal_offset, self.vertical_offset)
 
         self.nybbles = dvi_processor.read_stream(self.packet_length-self.preambule_length)
+        print 'nybbles: ', map(hex, map(ord, self.nybbles))
         self.nybble_index = 0
         self.upper_nybble = True
+
+        self.decode()
 
         return [self.opcode]
 
@@ -118,13 +121,17 @@ Char %u
 
     def get_nybble(self):
 
+        # print 'get_nybble', self.nybble_index, self.upper_nybble
+
         if self.upper_nybble is True:
-            self.upper_nybble = False
-            nybble = self.nybbles[self.nybble_index] >> 16
+            nybble = ord(self.nybbles[self.nybble_index]) >> 4
         else:
-            self.upper_nybble = True
-            nybble = self.nybbles[self.nybble_index] & 0xF
+            nybble = ord(self.nybbles[self.nybble_index]) & 0xF
             self.nybble_index += 1
+
+        self.upper_nybble = not self.upper_nybble
+
+        # print '  ', nybble
 
         return nybble
 
@@ -144,24 +151,26 @@ Char %u
             while i > 0:
                 j  = j * 16 + self.get_nybble()
                 i -= 1
-            return j - 15 + (13 - dyn_f) * 16 + dyn_f
+            return j - 15 + (13 - self.dyn_f) * 16 + self.dyn_f
 
-        elif i <= dyn_f:
+        elif i <= self.dyn_f:
             return i
 
         elif i < 14:
-            return (i - dyn_f - 1) * 16 + self.get_nybble() + dyn_f + 1
+            return (i - self.dyn_f - 1) * 16 + self.get_nybble() + self.dyn_f + 1
 
         else:
             if i == 14:
-                repeatcount = pk_packed_num()
+                self.repeat_count = self.pk_packed_num()
             else :
-                repeatcount = 1;
-            return pk_packed_num()
+                self.repeat_count = 1;
+            return self.pk_packed_num()
 
     ###############################################
 
     def decode(self):
+
+        char_bitmap = [0]*(4*self.height*self.width)
 
         if self.dyn_f == 14:
             pass
@@ -179,7 +188,7 @@ Char %u
 ## 		}
 ## 	      if (count & bitweight)
 ## 		{
-## 		  buffer[i + j * width] = 1
+## 		  char_bitmap[i + j * width] = 1
 ## 		}
 ## 	    }
 ## 	  DEBUG_PRINT (DEBUG_GLYPH, ("|\n"))
@@ -187,23 +196,34 @@ Char %u
 ##     }
         else: # get packed raster
 
-            paint_switch = self.black_count
-            repeat_count = 0
-            i_offset = 0
-            j_offset = 0
-            i = i_offset
-            j = j_offset
+            packed_string = ''
 
-            while j < self.height:
+            paint_switch = self.black_count
+            self.repeat_count = 0
+            i_offset = 0
+            y_offset = 0
+            i = i_offset
+            y = y_offset
+
+            transition = False
+
+            while y < self.height:
 
                 count = self.pk_packed_num()
+
+                if transition is True:
+                    packed_string += '[%u]' % (self.repeat_count)
+                if paint_switch is True:
+                    packed_string += '%u' % (count)
+                else:
+                    packed_string += '(%u)' % (count)
 
                 while count > 0:
 
                     if i + count < self.width:
                         if paint_switch:
                             for k in xrange(count):
-                                buffer[k + i + j * self.width] = 1
+                                pass #char_bitmap[y*self.width + i + k] = 1
 
                         i += count
                         count = 0
@@ -211,21 +231,25 @@ Char %u
                     else:
                         if paint_switch is True:
                             for k in xrange(i, self.width):
-                                buffer[k + j * self.width] = 1
+                                pass #char_bitmap[y*self.width + k] = 1
 
-                        j++
+                        y += 1
                         count -= self.width - i
 
                         # Repeat row(s)
-                        while repeat_count > 0:
-                            for i in xrange (i_offset,  self.width):
-                                buffer[i + j * self.width] = buffer[i + (j - 1) * self.width]
-                            repeat_count -= 1
-                            j += 1
+                        # print 'reapeat row', y, self.repeat_count
+                        while self.repeat_count > 0:
+                            for i in xrange (i_offset, self.width):
+                                pass #char_bitmap[y*self.width + i] = char_bitmap[(y-1)*self.width + i]
+                            self.repeat_count -= 1
+                            y += 1
 
                         i = i_offset
 
                 paint_switch = not paint_switch
+                transition = not transition
+
+            print packed_string
 
 #####################################################################################################
 
@@ -315,6 +339,8 @@ class PkFont(OpcodeStreamParser):
                 parameters = opcode_parser.read_parameters(self)
 
                 print opcode_parser, parameters
+                
+                break
 
     ###############################################
 
