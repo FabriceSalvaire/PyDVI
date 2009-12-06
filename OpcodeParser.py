@@ -105,6 +105,9 @@ class OpcodeStreamParser(object):
     def read_signed_byte3(self):
         return self.read_big_endian_number(3, signed = True)
 
+    def read_unsigned_byte4(self):
+        return self.read_big_endian_number(4, signed = False)
+
     def read_signed_byte4(self):
         return self.read_big_endian_number(4, signed = True)
 

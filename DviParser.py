@@ -54,7 +54,7 @@ class OpcodeParser_font(OpcodeParser):
 
 class OpcodeParser_xxx(OpcodeParser):
 
-    base_opcode = 239
+    base_opcode = XXX1_OPCODE
 
     ###############################################
 
@@ -63,7 +63,7 @@ class OpcodeParser_xxx(OpcodeParser):
         super(OpcodeParser_xxx, self).__init__(opcode, 'xxx', 'extension to DVI primitives',
                                                opcode_class = Opcode_xxx)
 
-        self.read_unsigned_byten = DviParser.read_unsigned_byten_pointer[opcode-self.base_opcode]
+        self.read_unsigned_byten = OpcodeStreamParser.read_unsigned_byten_pointer[opcode-self.base_opcode]
 
     ###############################################
 
@@ -83,7 +83,7 @@ class OpcodeParser_fnt_def(OpcodeParser):
 
         super(OpcodeParser_fnt_def, self).__init__(opcode, 'fnt def', 'define the meaning of a font number')
 
-        self.read_unsigned_byten = DviParser.read_unsigned_byten_pointer[opcode-self.base_opcode]
+        self.read_unsigned_byten = OpcodeStreamParser.read_unsigned_byten_pointer[opcode-self.base_opcode]
 
     ###############################################
 
@@ -91,7 +91,7 @@ class OpcodeParser_fnt_def(OpcodeParser):
 
         font_id = self.read_unsigned_byten(dvi_processor)
 
-        font_checksum     = dvi_processor.read_signed_byte4()
+        font_checksum     = dvi_processor.read_unsigned_byte4()
         font_scale_factor = dvi_processor.read_signed_byte4()
         font_design_size  = dvi_processor.read_signed_byte4()
         
@@ -334,16 +334,16 @@ class DviParser(OpcodeStreamParser):
 
 Preambule
   - DVI format    %u
-  - numerator     %u
-  - denominator   %u
-  - magnification %u
-  - comment       '%s'
+  - Numerator     %u
+  - Denominator   %u
+  - Magnification %u
+  - Comment       '%s'
 
 Postamble
-  - max height      %u
-  - max width       %u
-  - stack depth     %u
-  - number of pages %u
+  - Max Height      %u
+  - Max Width       %u
+  - Stack Depth     %u
+  - Number of Pages %u
 
 Fonts''' % (self.dvi_format, self.numerator, self.denominator, self.magnification, self.comment,
             self.max_height, self.max_width, self.stack_depth, self.number_of_pages)
