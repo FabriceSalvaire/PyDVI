@@ -41,83 +41,191 @@ class OpcodeParser_char(OpcodeParser):
 
     def read_parameters(self, dvi_processor):
 
-        print hex(dvi_processor.read_unsigned_byte1())
-        print hex(dvi_processor.read_unsigned_byte1())
-        print hex(dvi_processor.read_unsigned_byte1())
-        print hex(dvi_processor.read_unsigned_byte1())
+        flag = self.flag = self.opcode
 
-        flag = self.opcode
-
-        dyn_f = flag >> 4
-        black_count = (flag & 8) != 0
-        two_bytes =  (flag & 4) != 0
+        self.dyn_f = flag >> 4
+        self.black_count = (flag & 8) != 0
+        self.two_bytes =  (flag & 4) != 0
 
         three_least_significant = flag & 7
         two_least_significant = flag & 3
 
         if three_least_significant <= 3:
-            format = 1
+            self.format = 1
         elif three_least_significant == 7:
-            format = 3
+            self.format = 3
         else:
-            format = 2
+            self.format = 2
 
-        if format == 1:
+        if self.format == 1:
             # (flag mod 4)*256 + pl
-            packet_length = two_least_significant << 8 + dvi_processor.read_unsigned_byte1()
-        elif format == 2:
-            packet_length = two_least_significant << 16 + dvi_processor.read_unsigned_byte2()
+            self.packet_length = (two_least_significant << 8) + dvi_processor.read_unsigned_byte1()
+            self.preambule_length = 3 + 5
+        elif self.format == 2:
+            self.packet_length = (two_least_significant << 16) + dvi_processor.read_unsigned_byte2()
+            self.preambule_length = 3 + 5*2
         else:
-            packet_length = dvi_processor.read_unsigned_byte4()
+            self.packet_length = dvi_processor.read_unsigned_byte4()
+            self.preambule_length = 7*4
 
-        if format == 3:
-            char_code =  dvi_processor.read_unsigned_byte4()
-            tfm =  dvi_processor.read_unsigned_byte4()
-            dm = None
-            dx = dvi_processor.read_unsigned_byte4()
-            dy = dvi_processor.read_unsigned_byte4()
-            width = dvi_processor.read_unsigned_byte4()
-            height = dvi_processor.read_unsigned_byte4()
-            horizontal_offset = dvi_processor.read_unsigned_byte4()
-            vertical_offset = dvi_processor.read_unsigned_byte4()
+        if self.format == 3:
+            (self.char_code, self.tfm,
+             self.dx, self.dy,
+             self.width, self.height,
+             self.horizontal_offset, self.vertical_offset) = [dvi_processor.read_unsigned_byte4() for i in xrange(8)]
+            self.dm = None
         else:
-            char_code =  dvi_processor.read_unsigned_byte1()
-            tfm =  dvi_processor.read_unsigned_byte3()
-            if format == 1:
-                dm = dvi_processor.read_unsigned_byte1()
-                width = dvi_processor.read_unsigned_byte1()
-                height = dvi_processor.read_unsigned_byte1()
-                horizontal_offset = dvi_processor.read_unsigned_byte1()
-                vertical_offset = dvi_processor.read_unsigned_byte1()
+            self.char_code = dvi_processor.read_unsigned_byte1()
+            self.tfm = dvi_processor.read_unsigned_byte3()
+            if self.format == 1:
+                (self.dm, self.width, self.height) = [dvi_processor.read_unsigned_byte1() for i in xrange(3)]
+                (self.horizontal_offset, self.vertical_offset) = [dvi_processor.read_signed_byte1() for i in xrange(2)]
             else:
-                dm = dvi_processor.read_unsigned_byte2()
-                width = dvi_processor.read_unsigned_byte2()
-                height = dvi_processor.read_unsigned_byte2()
-                horizontal_offset = dvi_processor.read_unsigned_byte2()
-                vertical_offset = dvi_processor.read_unsigned_byte2()
-            dx = dm
-            dy = 0
+                (self.dm, self.width, self.height) = [dvi_processor.read_unsigned_byte2() for i in xrange(3)]
+                (self.horizontal_offset, self.vertical_offset) = [dvi_processor.read_signed_byte2() for i in xrange(2)]
+            self.dx = self.dm
+            self.dy = 0
 
         print '''
-Char
+Char %u
  - Flag: %u
  - Dynamic Packing Variable: %u
  - Black Count: %s
  - Two Bytes: %s
  - Format: %u
  - Packet Length: %u
+ - TFM width: %u
+ - dm: %u
+ - dx: %u
+ ' dy: %u
+ - Height: %u
+ - Width: %u
+ - Horizontal Offset: %u
+ - Vertical Offset: %u
+''' % (self.char_code,
+       self.flag, self.dyn_f, self.black_count, self.two_bytes, self.format, self.packet_length,
+       self.tfm, self.dm, self.dx, self.dy,
+       self.height, self.width,
+       self.horizontal_offset, self.vertical_offset)
 
- - TFM width:
- - dx:
- - Height:
- - Width:
- - X-offset:
- - Y-offset:
-''' % (self.opcode, flag,  dyn_f, black_count, two_bytes, format, packet_length)
-
-        dvi_processor.read_stream(packet_length)
+        self.nybbles = dvi_processor.read_stream(self.packet_length-self.preambule_length)
+        self.nybble_index = 0
+        self.upper_nybble = True
 
         return [self.opcode]
+
+    ###############################################
+
+    def get_nybble(self):
+
+        if self.upper_nybble is True:
+            self.upper_nybble = False
+            nybble = self.nybbles[self.nybble_index] >> 16
+        else:
+            self.upper_nybble = True
+            nybble = self.nybbles[self.nybble_index] & 0xF
+            self.nybble_index += 1
+
+        return nybble
+
+    ###############################################
+
+    def pk_packed_num(self):
+
+        # cf. pktype.web
+
+        i = self.get_nybble()
+
+        if i == 0:
+            while True:
+                j  = self.get_nybble()
+                i += 1
+                if j == 0: break
+            while i > 0:
+                j  = j * 16 + self.get_nybble()
+                i -= 1
+            return j - 15 + (13 - dyn_f) * 16 + dyn_f
+
+        elif i <= dyn_f:
+            return i
+
+        elif i < 14:
+            return (i - dyn_f - 1) * 16 + self.get_nybble() + dyn_f + 1
+
+        else:
+            if i == 14:
+                repeatcount = pk_packed_num()
+            else :
+                repeatcount = 1;
+            return pk_packed_num()
+
+    ###############################################
+
+    def decode(self):
+
+        if self.dyn_f == 14:
+            pass
+##     { /* get raster by bits */
+##       int bitweight = 0
+##       for (j = j_offset j < (int) height j++)
+## 	{ /* get all rows */
+## 	  for (i = i_offset i < (int) width i++)
+## 	    { /* get one row */
+## 	      bitweight /= 2
+## 	      if (bitweight == 0)
+## 		{
+## 		  count = *pos++
+## 		  bitweight = 128
+## 		}
+## 	      if (count & bitweight)
+## 		{
+## 		  buffer[i + j * width] = 1
+## 		}
+## 	    }
+## 	  DEBUG_PRINT (DEBUG_GLYPH, ("|\n"))
+## 	}
+##     }
+        else: # get packed raster
+
+            paint_switch = self.black_count
+            repeat_count = 0
+            i_offset = 0
+            j_offset = 0
+            i = i_offset
+            j = j_offset
+
+            while j < self.height:
+
+                count = self.pk_packed_num()
+
+                while count > 0:
+
+                    if i + count < self.width:
+                        if paint_switch:
+                            for k in xrange(count):
+                                buffer[k + i + j * self.width] = 1
+
+                        i += count
+                        count = 0
+
+                    else:
+                        if paint_switch is True:
+                            for k in xrange(i, self.width):
+                                buffer[k + j * self.width] = 1
+
+                        j++
+                        count -= self.width - i
+
+                        # Repeat row(s)
+                        while repeat_count > 0:
+                            for i in xrange (i_offset,  self.width):
+                                buffer[i + j * self.width] = buffer[i + (j - 1) * self.width]
+                            repeat_count -= 1
+                            j += 1
+
+                        i = i_offset
+
+                paint_switch = not paint_switch
 
 #####################################################################################################
 
