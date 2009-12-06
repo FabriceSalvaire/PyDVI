@@ -675,7 +675,7 @@ class DviParser(object):
             number -= 256
 
         for i in xrange(1,n):
-            number <<= 8
+            number *= 256
             number += bytes[i]
 
         return number

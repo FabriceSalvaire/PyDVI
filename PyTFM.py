@@ -4,34 +4,22 @@ import mmap
 
 #####################################################################################################
 
-ENTIRE_FILE_LOCATION = 0
-HEADER_DATA_LOCATION = ENTIRE_FILE_LOCATION +2
-SMALLEST_CHARACTER_CODE_LOCATION = HEADER_DATA_LOCATION +2
-LARGEST_CHARACTER_CODE_LOCATION = SMALLEST_CHARACTER_CODE_LOCATION +2
-WIDTH_TABLE_LOCATION = LARGEST_CHARACTER_CODE_LOCATION +2
-HEIGHT_TABLE_LOCATION = WIDTH_TABLE_LOCATION +2
-DEPTH_TABLE_LOCATION = HEIGHT_TABLE_LOCATION +2
-ITALIC_CORRECTION_TABLE_LOCATION = DEPTH_TABLE_LOCATION +2
-LIG_KERN_TABLE_LOCATION = ITALIC_CORRECTION_TABLE_LOCATION +2
-KERN_TABLE_LOCATION = LIG_KERN_TABLE_LOCATION +2
-EXTENSIBLE_CHARACTER_TABLE_LOCATION = KERN_TABLE_LOCATION +2
-NUMBER_OF_FONT_PARAMETER_LOCATION = EXTENSIBLE_CHARACTER_TABLE_LOCATION +2
-HEADER_LOCATION = 24
-CHECKSUM_LOCATION = HEADER_LOCATION
-DESIGN_FONT_SIZE_LOCATION = CHECKSUM_LOCATION +4
-CHARACTER_CODING_SCHEME_LOCATION = DESIGN_FONT_SIZE_LOCATION +4
-FAMILY_LOCATION = CHARACTER_CODING_SCHEME_LOCATION +40
-SEVEN_BIT_SAFE_FLAG_LOCATION = FAMILY_LOCATION +20
-
 HEADER_DATA_LENGTH_MIN = 18
 
-SLANT_LOCATION = 0
-SPACING_LOCATION = SLANT_LOCATION +4
-SPACE_STRETCH_LOCATION = SPACING_LOCATION +4
-SPACE_SHRINK_LOCATION = SPACE_STRETCH_LOCATION +4
-X_HEIGHT_LOCATION = SPACE_SHRINK_LOCATION +4
-QUAD_LOCATION = X_HEIGHT_LOCATION +4
-EXTRA_SPACE_LOCATION = QUAD_LOCATION +4
+CHARACTER_CODING_SCHEME_LENGTH = 40
+FAMILY_LENGTH= 20
+
+HEADER_INDEX = 24
+CHECKSUM_INDEX = HEADER_INDEX
+DESIGN_FONT_SIZE_INDEX = CHECKSUM_INDEX +4
+CHARACTER_CODING_SCHEME_INDEX = DESIGN_FONT_SIZE_INDEX +4
+FAMILY_INDEX = CHARACTER_CODING_SCHEME_INDEX + CHARACTER_CODING_SCHEME_LENGTH
+SEVEN_BIT_SAFE_FLAG_INDEX = FAMILY_INDEX + FAMILY_LENGTH
+
+def word_index(base, index):
+    return (base + index)*4
+
+#####################################################################################################
 
 class TfmFile(object):
 
@@ -45,64 +33,58 @@ class TfmFile(object):
 
         self.map = mmap.mmap(self.tfm_file.fileno(), 0)
 
-        self.entire_file_length = self.read_unsigned_byte2(ENTIRE_FILE_LOCATION)
-        self.header_data_length = self.read_unsigned_byte2(HEIGHT_TABLE_LOCATION)
-        self.smallest_character_code = self.read_unsigned_byte2(SMALLEST_CHARACTER_CODE_LOCATION)
-        self.largest_character_code = self.read_unsigned_byte2(LARGEST_CHARACTER_CODE_LOCATION)
-        self.width_table_length = self.read_unsigned_byte2(WIDTH_TABLE_LOCATION)
-        self.height_table_length = self.read_unsigned_byte2(HEIGHT_TABLE_LOCATION)
-        self.depth_table_length = self.read_unsigned_byte2(DEPTH_TABLE_LOCATION)
-        self.italic_correction_table_length = self.read_unsigned_byte2(ITALIC_CORRECTION_TABLE_LOCATION)
-        self.lig_kern_table_length = self.read_unsigned_byte2(LIG_KERN_TABLE_LOCATION)
-        self.kern_table_length = self.read_unsigned_byte2(KERN_TABLE_LOCATION)
-        self.extensible_character_table_length = self.read_unsigned_byte2(EXTENSIBLE_CHARACTER_TABLE_LOCATION)
-        self.number_of_font_parameter = self.read_unsigned_byte2(NUMBER_OF_FONT_PARAMETER_LOCATION)
+        # Read lengths
+
+        (self.entire_file_length,
+         self.header_data_length,
+         self.smallest_character_code,
+         self.largest_character_code,
+         self.width_table_length,
+         self.height_table_length,
+         self.depth_table_length,
+         self.italic_correction_table_length,
+         self.lig_kern_table_length,
+         self.kern_table_length,
+         self.extensible_character_table_length,
+         self.font_parameter_length) =  map(lambda i: self.read_unsigned_byte2(2*i), range(12))
 
         if self.header_data_length < HEADER_DATA_LENGTH_MIN:
             self.header_data_length = HEADER_DATA_LENGTH_MIN
 
-        self.character_info_location = 6 + self.header_data_length
-        self.width_table_location = (self.character_info_location + 
-                                     self.largest_character_code -
-                                     self.smallest_character_code +1)
-        self.height_table_location = self.width_table_location + self.width_table_length
-        self.depth_table_location = self.height_table_location + self.height_table_length
-        self.italic_correction_table_location = self.depth_table_location + self.depth_table_length
-        self.lig_kern_table_location = self.italic_correction_table_location + self.italic_correction_table_length
-        self.kern_table_location = self.lig_kern_table_location + self.lig_kern_table_length
-        self.extensible_character_table_location = self.kern_table_location + self.kern_table_length
-        self.font_parameter_location = self.extensible_character_table_location + self.extensible_character_table_length
+        # Compute index
 
-        length = self.font_parameter_location + self.number_of_font_parameter
+        self.character_info_index = 6 + self.header_data_length
+        self.width_table_index = (self.character_info_index + 
+                                  self.largest_character_code - self.smallest_character_code +1)
+        self.height_table_index = self.width_table_index + self.width_table_length
+        self.depth_table_index = self.height_table_index + self.height_table_length
+        self.italic_correction_table_index = self.depth_table_index + self.depth_table_length
+        self.lig_kern_table_index = self.italic_correction_table_index + self.italic_correction_table_length
+        self.kern_table_index = self.lig_kern_table_index + self.lig_kern_table_length
+        self.extensible_character_table_index = self.kern_table_index + self.kern_table_length
+        self.font_parameter_index = self.extensible_character_table_index + self.extensible_character_table_length
+
+        length = self.font_parameter_index + self.font_parameter_length
         if self.entire_file_length != length:
-            print self.entire_file_length, '!=', length
+            # print self.entire_file_length, '!=', length
             raise NameError('Bad TFM file')
 
-        self.character_info_location *= 4
-        self.width_table_location *= 4
-        self.height_table_location *= 4
-        self.depth_table_location *= 4
-        self.italic_correction_table_location *= 4
-        self.lig_kern_table_location *= 4
-        self.kern_table_location *= 4
-        self.extensible_character_table_location *= 4
-        self.font_parameter_location *= 4
-
-        self.checksum = self.read_unsigned_byte4(CHECKSUM_LOCATION)
-        self.design_font_size = self.read_fix_word(DESIGN_FONT_SIZE_LOCATION)
-        self.character_coding_scheme = self.read_bcpl(CHARACTER_CODING_SCHEME_LOCATION)
-        self.family = self.read_bcpl(FAMILY_LOCATION)
+        self.checksum = self.read_unsigned_byte4(CHECKSUM_INDEX)
+        self.design_font_size = self.read_fix_word(DESIGN_FONT_SIZE_INDEX)
+        self.character_coding_scheme = self.read_bcpl(CHARACTER_CODING_SCHEME_INDEX)
+        self.family = self.read_bcpl(FAMILY_INDEX)
 
         # Read Font Parameters
 
-        self.slant = self.read_fix_word(self.font_parameter_location + SLANT_LOCATION)
-        self.spacing = self.read_fix_word(self.font_parameter_location + SPACING_LOCATION)
-        self.space_stretch = self.read_fix_word(self.font_parameter_location + SPACE_STRETCH_LOCATION)
-        self.space_shrink = self.read_fix_word(self.font_parameter_location + SPACE_SHRINK_LOCATION)
-        self.x_height = self.read_fix_word(self.font_parameter_location + X_HEIGHT_LOCATION)
-        self.quad = self.read_fix_word(self.font_parameter_location + QUAD_LOCATION)
-        self.extra_space = self.read_fix_word(self.font_parameter_location + EXTRA_SPACE_LOCATION)
-
+        (self.slant,
+         self.spacing,
+         self.space_stretch,
+         self.space_shrink,
+         self.x_height,
+         self.quad,
+         self.extra_space) = map(lambda i: self.read_fix_word(word_index(self.font_parameter_index, i)),
+                                 range(self.font_parameter_length))
+         
         # Read Chars 
         
         self.widths = []
@@ -112,8 +94,8 @@ class TfmFile(object):
             
             width_index, height_index, depth_index, italic_index, tag, remainder = self.read_char_info(c)
 
-            width = self.read_fix_word(self.width_table_location + width_index*4)
-            height = self.read_fix_word(self.height_table_location + height_index*4)
+            width = self.read_fix_word(word_index(self.width_table_index, width_index))
+            height = self.read_fix_word(word_index(self.height_table_index, height_index))
 
             self.widths.append(width)
             self.heights.append(height)
@@ -124,7 +106,11 @@ class TfmFile(object):
 
         length = ord(self.map[i])
 
-        return self.map[i+1:i+length+1]
+        k = i + 1
+
+        return self.map[k:k+length]
+
+    ###############################################
 
     def read_unsigned_byte2(self, i):
 
@@ -132,11 +118,15 @@ class TfmFile(object):
 
         return (bytes[0] << 8) + bytes[1]
 
+    ###############################################
+
     def read_unsigned_byte4(self, i):
 
         bytes = map(ord, self.map[i:i+4])
 
         return (((((bytes[0] << 8) + bytes[1]) << 8) + bytes[2]) << 8) + bytes[3]
+
+    ###############################################
 
     def read_fix_word(self, i):
 
@@ -146,39 +136,31 @@ class TfmFile(object):
         # bytes = [0x80,0x0F,0xFF,0xFF]
         # bytes = [0x80,0x00,0x0,0x0]
 
-        # print map(hex, bytes)
-
-        number = bytes[0]
-        if number >= 128:
-            number -= 256
+        integral_part = bytes[0]
+        if integral_part >= 128:
+            integral_part -= 256
             negative = True
         else:
             negative = False
-        number *= 16
+        integral_part *= 16
 
-        number += (bytes[1] >> 4)
+        integral_part += (bytes[1] >> 4)
 
-        encoded_fraction = ((((bytes[1] & 0xF) << 8) + bytes[2]) << 8) + bytes[3]
+        fractional_part = float(((((bytes[1] & 0xF) << 8) + bytes[2]) << 8) + bytes[3])
+        fractional_part /= 2**20
 
-        # print hex(number), hex(encoded_fraction)
-
-        fraction = .0
-        for i in xrange(20):
-            if encoded_fraction & (1<<i) != 0:
-                fraction += 2**(-20+i)
-
-        # print negative, number, fraction
+        # print negative, integral_part, fractional_part
 
         if negative is True:
-            number -= fraction
+            return integral_part - fractional_part
         else:
-            number += fraction
+            return integral_part + fractional_part
 
-        return number
+    ###############################################
 
     def read_char_info(self, k):
  
-        i = self.character_info_location + k*4
+        i = word_index(self.character_info_index, k)
  
         bytes = map(ord, self.map[i:i+4])
 
@@ -213,7 +195,7 @@ TFM %s
 
  - Checksum: %u
  - Design Font Size: %f
- - Character coding scheme location: "%s"
+ - Character coding scheme: "%s"
  - Family: "%s"
 
 Font Parameters:
@@ -224,7 +206,6 @@ Font Parameters:
  - X Height: %f
  - Quad: %f
  - Extra Space: %f
-
 ''' % (self.tfm_file_name,
        self.entire_file_length,
        self.header_data_length,
@@ -237,7 +218,7 @@ Font Parameters:
        self.lig_kern_table_length,
        self.kern_table_length,
        self.extensible_character_table_length,
-       self.number_of_font_parameter,
+       self.font_parameter_length,
        self.checksum,
        self.design_font_size,
        self.character_coding_scheme,
