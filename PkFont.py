@@ -46,7 +46,7 @@ class OpcodeParser_char(OpcodeParser):
         print hex(dvi_processor.read_unsigned_byte1())
         print hex(dvi_processor.read_unsigned_byte1())
 
-        flag = self.opcode # dvi_processor.read_unsigned_byte1()
+        flag = self.opcode
 
         dyn_f = flag >> 4
         black_count = (flag & 8) != 0
@@ -63,14 +63,43 @@ class OpcodeParser_char(OpcodeParser):
             format = 2
 
         if format == 1:
+            # (flag mod 4)*256 + pl
             packet_length = two_least_significant << 8 + dvi_processor.read_unsigned_byte1()
         elif format == 2:
             packet_length = two_least_significant << 16 + dvi_processor.read_unsigned_byte2()
         else:
-            packet_length = two_least_significant << 32 + dvi_processor.read_unsigned_byte4()
+            packet_length = dvi_processor.read_unsigned_byte4()
+
+        if format == 3:
+            char_code =  dvi_processor.read_unsigned_byte4()
+            tfm =  dvi_processor.read_unsigned_byte4()
+            dm = None
+            dx = dvi_processor.read_unsigned_byte4()
+            dy = dvi_processor.read_unsigned_byte4()
+            width = dvi_processor.read_unsigned_byte4()
+            height = dvi_processor.read_unsigned_byte4()
+            horizontal_offset = dvi_processor.read_unsigned_byte4()
+            vertical_offset = dvi_processor.read_unsigned_byte4()
+        else:
+            char_code =  dvi_processor.read_unsigned_byte1()
+            tfm =  dvi_processor.read_unsigned_byte3()
+            if format == 1:
+                dm = dvi_processor.read_unsigned_byte1()
+                width = dvi_processor.read_unsigned_byte1()
+                height = dvi_processor.read_unsigned_byte1()
+                horizontal_offset = dvi_processor.read_unsigned_byte1()
+                vertical_offset = dvi_processor.read_unsigned_byte1()
+            else:
+                dm = dvi_processor.read_unsigned_byte2()
+                width = dvi_processor.read_unsigned_byte2()
+                height = dvi_processor.read_unsigned_byte2()
+                horizontal_offset = dvi_processor.read_unsigned_byte2()
+                vertical_offset = dvi_processor.read_unsigned_byte2()
+            dx = dm
+            dy = 0
 
         print '''
-Char %u
+Char
  - Flag: %u
  - Dynamic Packing Variable: %u
  - Black Count: %s
