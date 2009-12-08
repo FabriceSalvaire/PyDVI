@@ -178,26 +178,24 @@ Char %u
         char_bitmap = np.zeros((self.height, self.width))
 
         if self.dyn_f == 14: # get raster by bits
-            pass 
-##       int bitweight = 0
-##       for (j = j_offset j < (int) height j++)
-## 	{ /* get all rows */
-## 	  for (i = i_offset i < (int) width i++)
-## 	    { /* get one row */
-## 	      bitweight /= 2
-## 	      if (bitweight == 0)
-## 		{
-## 		  count = *pos++
-## 		  bitweight = 128
-## 		}
-## 	      if (count & bitweight)
-## 		{
-## 		  char_bitmap[i + j * width] = 1
-## 		}
-## 	    }
-## 	  DEBUG_PRINT (DEBUG_GLYPH, ("|\n"))
-## 	}
-##     }
+
+            i = 0
+            bit_map = 0
+            bit_weight = 0
+
+            for y in xrange(self.height):
+                for x in xrange(self.width):
+
+                    bit_weight >> 1
+
+                    if bit_weight == 0:
+                        bit_map = self.nybbles[i]
+                        i += 1
+                        bit_weight = 0xFF
+
+                    if bit_map & bit_weight:
+                        char_bitmap[y,x] = 1
+
         else: # get packed raster
 
             packed_string = ''
