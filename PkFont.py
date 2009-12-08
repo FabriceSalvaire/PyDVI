@@ -44,7 +44,7 @@ class OpcodeParser_char(OpcodeParser):
         flag = self.flag = self.opcode
 
         self.dyn_f = flag >> 4
-        self.black_count = (flag & 8) != 0
+        self.first_pixel_is_black = (flag & 8) != 0
         self.two_bytes =  (flag & 4) != 0
 
         three_least_significant = flag & 7
@@ -90,20 +90,20 @@ class OpcodeParser_char(OpcodeParser):
 Char %u
  - Flag: %u
  - Dynamic Packing Variable: %u
- - Black Count: %s
+ - First pixel is black: %s
  - Two Bytes: %s
  - Format: %u
  - Packet Length: %u
  - TFM width: %u
  - dm: %u
  - dx: %u
- ' dy: %u
+ - dy: %u
  - Height: %u
  - Width: %u
  - Horizontal Offset: %u
  - Vertical Offset: %u
 ''' % (self.char_code,
-       self.flag, self.dyn_f, self.black_count, self.two_bytes, self.format, self.packet_length,
+       self.flag, self.dyn_f, self.first_pixel_is_black, self.two_bytes, self.format, self.packet_length,
        self.tfm, self.dm, self.dx, self.dy,
        self.height, self.width,
        self.horizontal_offset, self.vertical_offset)
@@ -111,6 +111,7 @@ Char %u
         self.nybbles = dvi_processor.read_stream(self.packet_length-self.preambule_length)
         print 'nybbles: ', map(hex, map(ord, self.nybbles))
         self.nybble_index = 0
+        self.nybble_index_max = len(self.nybbles) -1
         self.upper_nybble = True
 
         self.decode()
@@ -147,7 +148,7 @@ Char %u
             while True:
                 j  = self.get_nybble()
                 i += 1
-                if j == 0: break
+                if j != 0: break
             while i > 0:
                 j  = j * 16 + self.get_nybble()
                 i -= 1
@@ -196,57 +197,48 @@ Char %u
 ##     }
         else: # get packed raster
 
+            black_pixel = self.first_pixel_is_black
+            transition = False
+            self.repeat_count = 0
+
             packed_string = ''
 
-            paint_switch = self.black_count
-            self.repeat_count = 0
-            i_offset = 0
-            y_offset = 0
-            i = i_offset
-            y = y_offset
+            line = ''
+            y = 0
+            y_max = self.width -1
 
-            transition = False
+            while True:
 
-            while y < self.height:
+                if self.nybble_index > self.nybble_index_max:
+                    break
 
                 count = self.pk_packed_num()
 
                 if transition is True:
                     packed_string += '[%u]' % (self.repeat_count)
-                if paint_switch is True:
+                if black_pixel is True:
                     packed_string += '%u' % (count)
                 else:
                     packed_string += '(%u)' % (count)
 
-                while count > 0:
+                if black_pixel is True:
+                    pixel = 'X'
+                else:
+                    pixel = ' '
 
-                    if i + count < self.width:
-                        if paint_switch:
-                            for k in xrange(count):
-                                pass #char_bitmap[y*self.width + i + k] = 1
+                y += count
 
-                        i += count
-                        count = 0
+                if y >= y_max:
+                    y = y - self.width
+                    count -= y
+                    line += pixel*count 
+                    for i in xrange(self.repeat_count +1):
+                        print line
+                    line = pixel*y
+                else:
+                    line += pixel*count 
 
-                    else:
-                        if paint_switch is True:
-                            for k in xrange(i, self.width):
-                                pass #char_bitmap[y*self.width + k] = 1
-
-                        y += 1
-                        count -= self.width - i
-
-                        # Repeat row(s)
-                        # print 'reapeat row', y, self.repeat_count
-                        while self.repeat_count > 0:
-                            for i in xrange (i_offset, self.width):
-                                pass #char_bitmap[y*self.width + i] = char_bitmap[(y-1)*self.width + i]
-                            self.repeat_count -= 1
-                            y += 1
-
-                        i = i_offset
-
-                paint_switch = not paint_switch
+                black_pixel = not black_pixel
                 transition = not transition
 
             print packed_string
@@ -339,7 +331,7 @@ class PkFont(OpcodeStreamParser):
                 parameters = opcode_parser.read_parameters(self)
 
                 print opcode_parser, parameters
-                
+
                 break
 
     ###############################################
