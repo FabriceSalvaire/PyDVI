@@ -111,7 +111,6 @@ Char %u
         self.nybbles = dvi_processor.read_stream(self.packet_length-self.preambule_length)
         print 'nybbles: ', map(hex, map(ord, self.nybbles))
         self.nybble_index = 0
-        self.nybble_index_max = len(self.nybbles) -1
         self.upper_nybble = True
 
         self.decode()
@@ -197,20 +196,16 @@ Char %u
 ##     }
         else: # get packed raster
 
+            packed_string = ''
+
             black_pixel = self.first_pixel_is_black
             transition = False
             self.repeat_count = 0
-
-            packed_string = ''
-
-            line = ''
+            x = 0
             y = 0
-            y_max = self.width -1
+            line = ''
 
-            while True:
-
-                if self.nybble_index > self.nybble_index_max:
-                    break
+            while y < self.height:
 
                 count = self.pk_packed_num()
 
@@ -226,17 +221,28 @@ Char %u
                 else:
                     pixel = ' '
 
-                y += count
+                # print 'count', count, y, x, self.repeat_count, '[%s]' % (line)
+                    
+                while count > 0:
+                    # print '  -count', count, y, x, self.repeat_count, '[%s]' % (line)
 
-                if y >= y_max:
-                    y = y - self.width
-                    count -= y
-                    line += pixel*count 
-                    for i in xrange(self.repeat_count +1):
-                        print line
-                    line = pixel*y
-                else:
-                    line += pixel*count 
+                    if x + count < self.width:
+                        line += pixel*count
+                        x += count
+                        count = 0
+
+                    else:
+                        left_count = self.width - x
+                        line += pixel*left_count
+                        count -= left_count
+
+                        for i in xrange(self.repeat_count +1):
+                            print '%3u |%s|' % (y, line)
+                            y += 1
+
+                        x = 0
+                        self.repeat_count = 0
+                        line = ''
 
                 black_pixel = not black_pixel
                 transition = not transition
@@ -331,8 +337,6 @@ class PkFont(OpcodeStreamParser):
                 parameters = opcode_parser.read_parameters(self)
 
                 print opcode_parser, parameters
-
-                break
 
     ###############################################
 
