@@ -1,6 +1,12 @@
 #####################################################################################################
 
+import sys
 import string
+
+import numpy as np
+
+import matplotlib as mpl
+import pylab as pl
 
 #####################################################################################################
 
@@ -109,7 +115,6 @@ Char %u
        self.horizontal_offset, self.vertical_offset)
 
         self.nybbles = dvi_processor.read_stream(self.packet_length-self.preambule_length)
-        print 'nybbles: ', map(hex, map(ord, self.nybbles))
         self.nybble_index = 0
         self.upper_nybble = True
 
@@ -168,13 +173,12 @@ Char %u
 
     ###############################################
 
-    def decode(self):
+    def decode(self, count_list = False):
 
-        char_bitmap = [0]*(4*self.height*self.width)
+        char_bitmap = np.zeros((self.height, self.width))
 
-        if self.dyn_f == 14:
-            pass
-##     { /* get raster by bits */
+        if self.dyn_f == 14: # get raster by bits
+            pass 
 ##       int bitweight = 0
 ##       for (j = j_offset j < (int) height j++)
 ## 	{ /* get all rows */
@@ -203,50 +207,64 @@ Char %u
             self.repeat_count = 0
             x = 0
             y = 0
-            line = ''
 
             while y < self.height:
 
                 count = self.pk_packed_num()
 
-                if transition is True:
-                    packed_string += '[%u]' % (self.repeat_count)
-                if black_pixel is True:
-                    packed_string += '%u' % (count)
-                else:
-                    packed_string += '(%u)' % (count)
+                if count_list is True:
 
-                if black_pixel is True:
-                    pixel = 'X'
-                else:
-                    pixel = ' '
+                    if transition is True:
+                        packed_string += '[%u]' % (self.repeat_count)
 
-                # print 'count', count, y, x, self.repeat_count, '[%s]' % (line)
-                    
-                while count > 0:
-                    # print '  -count', count, y, x, self.repeat_count, '[%s]' % (line)
-
-                    if x + count < self.width:
-                        line += pixel*count
-                        x += count
-                        count = 0
-
+                    if black_pixel is True:
+                        packed_string += '%u' % (count)
                     else:
-                        left_count = self.width - x
-                        line += pixel*left_count
-                        count -= left_count
+                        packed_string += '(%u)' % (count)
 
-                        for i in xrange(self.repeat_count +1):
-                            print '%3u |%s|' % (y, line)
+                while count > 0:
+
+                    upper_x = x + count
+
+                    if upper_x < self.width: # fill
+
+                        if black_pixel is True:
+                            char_bitmap[y,x:upper_x] = 1
+
+                        count = 0
+                        x = upper_x
+
+                    else: # split count and repeat row if necessary
+
+                        if black_pixel is True:
+                            char_bitmap[y,x:] = 1
+
+                        y_src = y
+                        y += 1
+                        for i in xrange(self.repeat_count):
+                            char_bitmap[y,:] = char_bitmap[y_src,:]
                             y += 1
-
-                        x = 0
                         self.repeat_count = 0
-                        line = ''
+
+                        count -= self.width - x
+                        x = 0
 
                 black_pixel = not black_pixel
                 transition = not transition
 
+        pl.imshow(char_bitmap)
+        pl.show()
+
+        for y in xrange(self.height):
+            line = ''
+            for x in xrange(self.width):
+                if char_bitmap[y,x] == 1:
+                    line += 'x'
+                else:
+                    line += ' '
+            print '%3u |%s|' % (y, line)
+
+        if count_list is True:
             print packed_string
 
 #####################################################################################################
