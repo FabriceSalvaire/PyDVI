@@ -4,6 +4,10 @@ import numpy as np
 
 #####################################################################################################
 
+from TeXUnit import sp2pt, sp2mm
+
+#####################################################################################################
+
 class PkGlyph(object):
 
     ###############################################
@@ -76,6 +80,10 @@ class PkGlyph(object):
     ###############################################
 
     def raster_glyph(self, count_list = False):
+
+        '''
+        Unpack the glyph
+        '''
 
         self.nybble_index = 0
         self.upper_nybble = True
@@ -182,6 +190,27 @@ class PkGlyph(object):
                     line += ' '
             print '%3u |%s|' % (y, line)
 
+
+    ###############################################
+
+    def print_summary(self):
+
+        print '''
+Char %u
+ - TFM width: %u sp %.1f pt %.1f mm
+ - dm: %u px
+ - dx: %u px
+ - dy: %u px
+ - Height: %u px
+ - Width: %u px
+ - Horizontal Offset: %u px
+ - Vertical Offset: %u px
+''' % (self.char_code,
+       self.tfm, sp2pt(self.tfm), sp2mm(self.tfm),
+       self.dm, self.dx, self.dy,
+       self.height, self.width,
+       self.horizontal_offset, self.vertical_offset)
+        
 #####################################################################################################
 #
 # End

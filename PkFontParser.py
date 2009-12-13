@@ -6,8 +6,8 @@ import string
 #####################################################################################################
 
 from OpcodeParser import *
-
 from PkGlyph import PkGlyph
+from TeXUnit import sp2in
 
 #####################################################################################################
 
@@ -194,10 +194,10 @@ class PkFontParser(OpcodeStreamParser):
 
         self.pk_font.set_preambule_data(pk_id = pk_id,
                                         comment = self.read_stream(self.read_unsigned_byte1()),
-                                        design_size = self.read_signed_byte4(),
+                                        design_size = float(self.read_signed_byte4())/2**20,
                                         checksum = self.read_signed_byte4(),
-                                        horizontal_pixels_per_point = self.read_signed_byte4(),
-                                        vertical_pixels_per_point = self.read_signed_byte4())
+                                        horizontal_pixels_per_point = sp2in(self.read_signed_byte4()),
+                                        vertical_pixels_per_point = sp2in(self.read_signed_byte4()))
 
     ###############################################
 

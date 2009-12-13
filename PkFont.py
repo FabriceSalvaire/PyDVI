@@ -57,10 +57,10 @@ class PkFont(Font):
 Preambule
   - PK ID        %u
   - Comment      '%s'
-  - Design Size  %u
+  - Design Size  %.1f pt
   - Checksum     %u
-  - Horizontal Pixels per Point %u
-  - Vertical   Pixels per Point %u
+  - Horizontal Pixels per Point %.1f dpi
+  - Vertical   Pixels per Point %.1f dpi
   ''' % (self.font_name,
          self.pk_id,
          self.comment,

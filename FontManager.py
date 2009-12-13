@@ -53,11 +53,23 @@ class FontManager(object):
         
 if __name__ == '__main__':
 
+    import pylab as pl
+
     font_manager = FontManager()
 
     cmr10 = font_manager.load_font(FontManager.Pk, 'cmr10')
 
-    cmr10.get_glyph(65).print_glyph()
+    cmr10.print_summary()
+
+    glyph = cmr10.get_glyph(ord('x'))
+
+    glyph.print_summary()
+    glyph.print_glyph()
+    
+    glyph_bitmap = glyph.get_glyph_bitmap()
+    
+    pl.imshow(glyph_bitmap)
+    pl.show()
 
 #####################################################################################################
 #
