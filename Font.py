@@ -23,6 +23,12 @@ class Font(object):
 
     ###############################################
 
+    def __len__(self):
+
+        return len(self.glyphs)
+
+    ###############################################
+
     def relative_file_name(self):
 
         return self.font_name + '.' + self.font_extension
