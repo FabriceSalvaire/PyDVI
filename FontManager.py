@@ -37,6 +37,8 @@ class FontManager(object):
 
     def load_font(self, font_type, font_name):
 
+        print 'Font Manager load font %s of type %s' % (font_type, font_name)
+
         return self.get_font_class(font_type)(font_name)
 
     ###############################################

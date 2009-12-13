@@ -1,9 +1,11 @@
 #####################################################################################################
 
+import fractions
 import string
 
 #####################################################################################################
 
+from FontManager import FontManager
 from TeXUnit import *
 
 #####################################################################################################
@@ -95,7 +97,17 @@ class Opcode_set_char(Opcode):
 
     def run(self, dvi_machine):
 
-        pass
+        current_font = dvi_machine.get_current_font()
+
+        for char_code in self.characters:
+
+            glyph = current_font.get_glyph(char_code)
+            
+            glyph.print_summary()
+
+            # Fixme: factor .75 ?
+
+            print 'set char %u "%s" width %u' % (char_code, chr(char_code), glyph.tfm)
 
 #####################################################################################################
 
@@ -443,7 +455,7 @@ class Opcode_font(Opcode):
 
     def run(self, dvi_machine):
 
-        dvi_machine.font = self.font_id
+        dvi_machine.current_font = self.font_id
 
 #####################################################################################################
 
@@ -513,13 +525,14 @@ class DviProgam(object):
     def set_preambule_data(self,
                            comment,
                            dvi_format,
-                           numerator, denominator,
-                           magnification):
+                           numerator, denominator, magnification):
 
         self.comment = comment
         self.dvi_format = dvi_format
-        self.numerator, self.denominator = numerator, denominator
-        self.magnification = magnification
+        self.numerator, self.denominator, self.magnification = numerator, denominator, magnification
+
+        # Fixme: use it to convert
+        self.dvi_unit = fractions.Fraction(self.magnification * self.numerator, 1000 * self.denominator) # 1e-7 m
 
     ###############################################
 
@@ -539,7 +552,10 @@ class DviProgam(object):
         
     def register_font(self, font):
 
-        self.fonts[font.id] = font
+        if self.fonts.has_key(font.id):
+            print 'Font ID %u already registered' % (font.id)
+        else:
+            self.fonts[font.id] = font
         
     ###############################################
 
@@ -565,6 +581,7 @@ Preambule
   - Numerator     %u
   - Denominator   %u
   - Magnification %u
+  - DVI unit      %.1f nm
 
 Postamble
   - Number of Pages %u
@@ -577,6 +594,7 @@ Postamble
             self.numerator,
             self.denominator,
             self.magnification,
+            self.dvi_unit * 100,
             self.number_of_pages,
             self.stack_depth,
             self.max_height, sp2mm(self.max_height),
@@ -632,13 +650,17 @@ class DviMachine(object):
 
     def __init__(self):
 
+        self.font_manager = FontManager()
+
+        self.fonts = {}
+
         self.reset()
 
     ###############################################
 
     def reset(self):
 
-        self.font = None
+        self.current_font = None
 
         self.registers_stack = [DviMachineRegisters()]
 
@@ -662,7 +684,16 @@ class DviMachine(object):
 
     ###############################################
 
+    def get_current_font(self):
+
+        return self.fonts[self.current_font]
+
+    ###############################################
+
     def run(self, dvi_program, page):
+
+        for font in dvi_program.fonts.values():
+            self.fonts[font.id] = self.font_manager.load_font(FontManager.Pk, font.name)
 
         opcode_program = dvi_program.get_page(page)
 

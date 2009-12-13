@@ -48,9 +48,13 @@ class OpcodeStreamParser(object):
         
                 if parameters is not None and isinstance(parameters, list):
                     lower_n, upper_n = parameters
-                    for n in xrange(lower_n, upper_n +1):
+                    if lower_n < 0:
+                        signe = -1
+                    else:
+                        signe = 1
+                    for n in xrange(abs(lower_n), abs(upper_n) +1):
                         i = index + n -1
-                        self.opcode_parsers[i] = OpcodeParser(i, name, description, tuple([n]), opcode_class)
+                        self.opcode_parsers[i] = OpcodeParser(i, name, description, tuple([signe*n]), opcode_class)
                 else:
                     for i in xrange(lower_index, upper_index +1):
                         self.opcode_parsers[i] = OpcodeParser(i, name, description, parameters, opcode_class)
@@ -82,13 +86,19 @@ class OpcodeStreamParser(object):
 
     ###############################################
 
+    def tell(self):
+
+        return self.stream.tell()
+
+    ###############################################
+
     def read_big_endian_number(self, n, signed = False):
 
         '''
         Read a number coded in big endian format from the DVI input stream
         '''
 
-        # Thos code can be unrolled
+        # This code can be unrolled
 
         bytes = map(ord, self.read_stream(n))
 
@@ -120,7 +130,7 @@ class OpcodeStreamParser(object):
     read_unsigned_byten_pointer = (read_unsigned_byte1, 
                                    read_unsigned_byte2,
                                    read_unsigned_byte3,
-                                   read_signed_byte4)
+                                   read_unsigned_byte4)
 
 #####################################################################################################
 
@@ -154,10 +164,11 @@ class OpcodeParser(object):
             if   parameter ==  1: parameter_reader = OpcodeStreamParser.read_unsigned_byte1
             elif parameter ==  2: parameter_reader = OpcodeStreamParser.read_unsigned_byte2
             elif parameter ==  3: parameter_reader = OpcodeStreamParser.read_unsigned_byte3
-            elif parameter ==  4: parameter_reader = OpcodeStreamParser.read_signed_byte4
+            elif parameter ==  4: parameter_reader = OpcodeStreamParser.read_unsigned_byte4
             elif parameter == -1: parameter_reader = OpcodeStreamParser.read_signed_byte1
             elif parameter == -2: parameter_reader = OpcodeStreamParser.read_signed_byte2
             elif parameter == -3: parameter_reader = OpcodeStreamParser.read_signed_byte3
+            elif parameter == -4: parameter_reader = OpcodeStreamParser.read_signed_byte4
                 
             self.parameter_readers.append(parameter_reader)
 

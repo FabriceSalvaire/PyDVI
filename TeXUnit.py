@@ -4,6 +4,19 @@ import fractions
 
 #####################################################################################################
 
+#
+# 7227 TeX points in 254 cm
+#
+# 2**16 scaled points (sp) in a point
+#
+# DVI use 1e-7 m unit
+# 
+#  num = 254e-2 * 1e7 =  25400000
+#  den = 7227 * 2**16 = 473628672
+#  1 sp = num/den = 5.4 nm
+#  @ 1200 dpi: 1 pt = 21 um
+#  
+
 point_in_inch = fractions.Fraction(7227,100)
 big_point_in_inch = 72
 inch_in_mm = fractions.Fraction(254, 10)
