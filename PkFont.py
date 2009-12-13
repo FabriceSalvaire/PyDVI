@@ -59,8 +59,8 @@ Preambule
   - Comment      '%s'
   - Design Size  %.1f pt
   - Checksum     %u
-  - Horizontal Pixels per Point %.1f dpi
-  - Vertical   Pixels per Point %.1f dpi
+  - Horizontal Resolution %.1f dpi
+  - Vertical   Resolution %.1f dpi
   ''' % (self.font_name,
          self.pk_id,
          self.comment,
