@@ -17,9 +17,9 @@ class PkFont(Font):
 
     ###############################################
 
-    def __init__(self, font_name):
+    def __init__(self, name):
 
-        super(PkFont, self).__init__('pk', font_name)
+        super(PkFont, self).__init__('pk', name)
 
         pk_font_parser.process_pk_font(self)
 
@@ -29,7 +29,7 @@ class PkFont(Font):
 
         # --destdir
 
-        process = subprocess.Popen(string.join(('mktexpk', self.font_name), sep = ' '), shell=True)
+        process = subprocess.Popen(string.join(('mktexpk', self.name), sep = ' '), shell=True)
 
     ###############################################
 
@@ -61,7 +61,7 @@ Preambule
   - Checksum     %u
   - Horizontal Resolution %.1f dpi
   - Vertical   Resolution %.1f dpi
-  ''' % (self.font_name,
+  ''' % (self.name,
          self.pk_id,
          self.comment,
          self.design_size,

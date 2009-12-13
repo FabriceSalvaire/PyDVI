@@ -9,16 +9,16 @@ class Font(object):
 
     ###############################################
 
-    def __init__(self, font_extension, font_name):
+    def __init__(self, extension, name):
 
-        self.font_extension = font_extension
-        self.font_name = font_name
+        self.extension = extension
+        self.name = name
 
         self.glyphs = {}
 
-        self.font_file_name = self.find_font()
+        self.file_name = self.find_font()
 
-        # if self.font_file_name is None:
+        # if self.file_name is None:
         #     self.make_pk()
 
     ###############################################
@@ -31,7 +31,7 @@ class Font(object):
 
     def relative_file_name(self):
 
-        return self.font_name + '.' + self.font_extension
+        return self.name + '.' + self.extension
 
     ###############################################
 

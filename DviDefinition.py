@@ -1,12 +1,15 @@
 #####################################################################################################
 
-DVI_FORMAT = 2
+DVI_FORMAT  = 2
 DVIV_FORMAT = 3
 XDVI_FORMAT = 5
 
 #####################################################################################################
 
+# Fixme: use an iterator?
+
 SETC_000_OPCODE  =   0
+# ...
 SETC_127_OPCODE  = 127
 SET1_OPCODE      = 128
 SET2_OPCODE      = 129
@@ -52,6 +55,7 @@ Z2_OPCODE        = 168
 Z3_OPCODE        = 169
 Z4_OPCODE        = 170
 FONT_00_OPCODE   = 171
+# ...
 FONT_63_OPCODE   = 234
 FNT1_OPCODE      = 235
 FNT2_OPCODE      = 236
@@ -68,6 +72,7 @@ FNT_DEF4_OPCODE  = 246
 PRE_OPCODE       = 247
 POST_OPCODE      = 248
 POST_POST_OPCODE = 249
+# ...
 
 EOF_SIGNATURE = 223
 

@@ -4,6 +4,10 @@ import string
 
 #####################################################################################################
 
+from TeXUnit import *
+
+#####################################################################################################
+
 class OpcodeProgram(object):
 
     ###############################################
@@ -197,7 +201,9 @@ class Opcode_right(Opcode):
 
     def __str__(self):
 
-        return 'h += %u' %  (self.x)
+        # Fixme: -> function
+
+        return 'h += %+u sp %+.2f mm' % (self.x, sp2mm(self.x))
 
     ###############################################
 
@@ -243,7 +249,7 @@ class Opcode_w(Opcode):
 
     def __str__(self):
 
-        return 'w = %u, h += w' % (self.x)
+        return 'w = %+u sp %+.2f mm, h += w' % (self.x, sp2mm(self.x))
 
     ###############################################
 
@@ -290,7 +296,7 @@ class Opcode_x(Opcode):
 
     def __str__(self):
 
-        return 'x = %u, h += x' % (self.x)
+        return 'x = %+u sp %+.2f mm, h += x' % (self.x, sp2mm(self.x))
 
     ###############################################
 
@@ -314,7 +320,7 @@ class Opcode_down(Opcode):
 
     def __str__(self):
 
-        return 'v += %u' % (self.x)
+        return 'v += %+u sp %+.2f mm' % (self.x, sp2mm(self.x))
 
     ###############################################
 
@@ -360,7 +366,7 @@ class Opcode_y(Opcode):
 
     def __str__(self):
 
-        return 'y = %u, y += x' % (self.x)
+        return 'y = %+u sp %+.2f mm, y += x' % (self.x, sp2mm(self.x))
 
     ###############################################
 
@@ -407,7 +413,7 @@ class Opcode_z(Opcode):
 
     def __str__(self):
 
-        return 'z = %u, v += z' % (self.x)
+        return 'z = %+u sp %+.2f mm, v += z' % (self.x, sp2mm(self.x))
 
     ###############################################
 
@@ -453,13 +459,138 @@ class Opcode_xxx(Opcode):
 
     def __str__(self):
 
-        return 'xxx', self.opcode
+        return 'xxx [%s]' % (self.code)
 
     ###############################################
 
     def run(self, dvi_machine):
 
         pass
+
+#####################################################################################################
+
+class DviFont(object):
+
+    ###############################################
+
+    def __init__(self, id, name, checksum, scale_factor, design_size):
+
+        self.id = id
+        self.name = name
+        self.checksum = checksum
+        self.scale_factor = scale_factor
+        self.design_size = design_size
+
+    ###############################################
+
+    def __str__(self):
+
+        return '''Font ID %u
+ - Name         %s
+ - Checksum     %u
+ - Scale factor %u
+ - Design size  %u
+''' % (self.id,
+       self.name,
+       self.checksum,
+       self.scale_factor,
+       self.design_size)
+
+#####################################################################################################
+
+class DviProgam(object):
+
+    ###############################################
+
+    def __init__(self):
+
+        self.fonts = {}
+
+        self.pages = []
+
+    ###############################################
+
+    def set_preambule_data(self,
+                           comment,
+                           dvi_format,
+                           numerator, denominator,
+                           magnification):
+
+        self.comment = comment
+        self.dvi_format = dvi_format
+        self.numerator, self.denominator = numerator, denominator
+        self.magnification = magnification
+
+    ###############################################
+
+    def set_postambule_data(self,
+                            max_height, max_width,
+                            stack_depth,
+                            number_of_pages):
+
+        self.max_height, self.max_width = max_height, max_width
+        self.stack_depth = stack_depth
+        self.number_of_pages = number_of_pages
+
+        for i in xrange(self.number_of_pages):
+            self.pages.append(OpcodeProgram())
+
+    ###############################################
+        
+    def register_font(self, font):
+
+        self.fonts[font.id] = font
+        
+    ###############################################
+
+    def get_font(self, i):
+
+        return self.fonts[i]
+
+    ###############################################
+
+    def get_page(self, i):
+
+        return self.pages[i]
+
+    ###############################################
+
+    def print_summary(self):
+
+        print '''DVI Program
+
+Preambule
+  - Comment       '%s'
+  - DVI format    %u
+  - Numerator     %u
+  - Denominator   %u
+  - Magnification %u
+
+Postamble
+  - Number of Pages %u
+  - Stack Depth     %u
+  - Max Height      %u sp %.1f mm
+  - Max Width       %u sp %.1f mm
+''' % (
+            self.comment,
+            self.dvi_format,
+            self.numerator,
+            self.denominator,
+            self.magnification,
+            self.number_of_pages,
+            self.stack_depth,
+            self.max_height, sp2mm(self.max_height),
+            self.max_width, sp2mm(self.max_width),
+            )
+
+        print 'List of fonts:'
+
+        for font in self.fonts.values():
+            print font
+
+        # for i in xrange(self.number_of_pages):
+        #     print '\nPage', i
+        #     self.page_opcode_programs[i].print_program()
 
 #####################################################################################################
 
@@ -474,14 +605,26 @@ class DviMachineRegisters(object):
     ###############################################
 
     def __str__(self):
-
-        return '(h=%u v=%u w=%u x=%u y=%u z=%u)' % (self.h, self.v, self.w, self.x, self.y, self.z)
+        
+        return '''
+(h=+%10u sp %+10.2f mm v=+%10u sp %+10.2f mm
+ w=+%10u sp %+10.2f mm x=+%10u sp %+10.2f mm
+ y=+%10u sp %+10.2f mm z=+%10u sp %+10.2f mm)
+''' % (self.h, sp2mm(self.h),
+       self.v, sp2mm(self.v),
+       self.w, sp2mm(self.w),
+       self.x, sp2mm(self.x),
+       self.y, sp2mm(self.y),
+       self.z, sp2mm(self.z),
+       )
 
     ###############################################
 
     def duplicate(self):
 
         return DviMachineRegisters(self.h, self.v, self.w, self.x, self.y, self.z)
+
+#####################################################################################################
 
 class DviMachine(object):
     
@@ -519,7 +662,9 @@ class DviMachine(object):
 
     ###############################################
 
-    def run(self, opcode_program):
+    def run(self, dvi_program, page):
+
+        opcode_program = dvi_program.get_page(page)
 
         for opcode in opcode_program:
             print opcode

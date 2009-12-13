@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'pkfont_viewer.ui'
 #
-# Created: Sun Dec 13 13:58:22 2009
+# Created: Sun Dec 13 14:04:09 2009
 #      by: PyQt4 UI code generator 4.5.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -54,6 +54,7 @@ class Ui_main_window(object):
         main_window.setStatusBar(self.statusbar)
 
         self.retranslateUi(main_window)
+        QtCore.QObject.connect(self.font_name_line_edit, QtCore.SIGNAL("editingFinished()"), self.load_font_button.click)
         QtCore.QMetaObject.connectSlotsByName(main_window)
 
     def retranslateUi(self, main_window):

@@ -168,7 +168,7 @@ class PkFontParser(OpcodeStreamParser):
 
         self.pk_font = pk_font
 
-        stream = open(pk_font.font_file_name)
+        stream = open(pk_font.file_name)
 
         self.set_stream(stream)
 

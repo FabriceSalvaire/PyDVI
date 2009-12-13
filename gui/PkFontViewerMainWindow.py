@@ -69,16 +69,19 @@ class MainWindow(QtGui.QMainWindow):
 
         font_name = str(form.font_name_line_edit.text())
 
-        try:
-            self.font = self.font_manager.load_font(FontManager.Pk, font_name)
-        except:
-            self.font = None
-
+        #try:
+        self.font = self.font_manager.load_font(FontManager.Pk, font_name)
+        
         form.char_code_spin_box.setMaximum(len(self.font) -1)
-
+        
         self.font.print_summary()
-
+        
         self.show_glyph(0)
+
+        #except:
+            #pass
+            #self.font = None
+            #form.char_code_spin_box.setMaximum(0)
 
     ###############################################
 
@@ -94,19 +97,17 @@ class MainWindow(QtGui.QMainWindow):
         
         glyph_bitmap = glyph.get_glyph_bitmap()
 
-        glyph_image = QtGui.QImage(glyph.width, glyph.height, QtGui.QImage.Format_Mono)
+        glyph_image = QtGui.QImage(glyph.width, glyph.height, QtGui.QImage.Format_ARGB32) # Format_Mono
 
         for y in xrange(glyph.height):
             for x in xrange(glyph.width):
 
                 if glyph_bitmap[y, x] == 1:
-                    index = 0
+                    glyph_image.setPixel(x, y, 0xFF000000)
                 else:
-                    index = 1
+                    glyph_image.setPixel(x, y, 0xFFFFFFFF)
 
-                glyph_image.setPixel(x, y, index)
-
-        self.glyph_bitmap = QtGui.QBitmap.fromImage(glyph_image)
+        self.glyph_bitmap = QtGui.QPixmap.fromImage(glyph_image)
 
         self.scene.clear()
         self.scene.addPixmap(self.glyph_bitmap)

@@ -29,7 +29,7 @@ class OpcodeParser_set_char(OpcodeParser):
 
     ###############################################
 
-    def read_parameters(self, dvi_processor):
+    def read_parameters(self, dvi_parser):
 
         return [self.opcode]
 
@@ -46,7 +46,7 @@ class OpcodeParser_font(OpcodeParser):
 
     ###############################################
 
-    def read_parameters(self, dvi_processor):
+    def read_parameters(self, dvi_parser):
 
         return [self.opcode - FONT_00_OPCODE]
 
@@ -63,13 +63,13 @@ class OpcodeParser_xxx(OpcodeParser):
         super(OpcodeParser_xxx, self).__init__(opcode, 'xxx', 'extension to DVI primitives',
                                                opcode_class = Opcode_xxx)
 
-        self.read_unsigned_byten = OpcodeStreamParser.read_unsigned_byten_pointer[opcode-self.base_opcode]
+        self.read_unsigned_byten = OpcodeStreamParser.read_unsigned_byten_pointer[self.opcode-self.base_opcode]
 
     ###############################################
 
-    def read_parameters(self, dvi_processor):
+    def read_parameters(self, dvi_parser):
 
-        return dvi_processor.read_stream(self.read_unsigned_byten(dvi_processor))
+        return [dvi_parser.read_stream(self.read_unsigned_byten(dvi_parser))]
 
 #####################################################################################################
 
@@ -87,18 +87,22 @@ class OpcodeParser_fnt_def(OpcodeParser):
 
     ###############################################
 
-    def read_parameters(self, dvi_processor):
+    def read_parameters(self, dvi_parser):
 
-        font_id = self.read_unsigned_byten(dvi_processor)
+        font_id = self.read_unsigned_byten(dvi_parser)
 
-        font_checksum     = dvi_processor.read_unsigned_byte4()
-        font_scale_factor = dvi_processor.read_signed_byte4()
-        font_design_size  = dvi_processor.read_signed_byte4()
+        font_checksum     = dvi_parser.read_unsigned_byte4()
+        font_scale_factor = dvi_parser.read_signed_byte4()
+        font_design_size  = dvi_parser.read_signed_byte4()
         
-        font_name = dvi_processor.read_stream(dvi_processor.read_unsigned_byte1() +
-                                              dvi_processor.read_unsigned_byte1())
+        font_name = dvi_parser.read_stream(dvi_parser.read_unsigned_byte1() +
+                                           dvi_parser.read_unsigned_byte1())
 
-        dvi_processor.define_font(font_id, font_name, font_checksum, font_scale_factor, font_design_size)
+        dvi_parser.dvi_program.register_font(DviFont(font_id,
+                                                     font_name,
+                                                     font_checksum,
+                                                     font_scale_factor,
+                                                     font_design_size))
 
 #####################################################################################################
 
@@ -144,17 +148,9 @@ class DviParser(OpcodeStreamParser):
 
     def reset(self):
 
-        self.dvi_format    = DVI_FORMAT
-        self.numerator     = 25400000
-        self.denominator   = 7227*2**16
-        self.magnification = 1000
-        self.comment       = ''
-
-        self.fonts = {}
+        self.dvi_program = DviProgam()
 
         self.bop_pointer_stack = []
-
-        self.page_opcode_programs = []
 
         self.page_number = None
         
@@ -170,6 +166,10 @@ class DviParser(OpcodeStreamParser):
         self.process_postambule()
         self.process_pages()
 
+        self.set_stream(None)
+
+        return self.dvi_program
+
     ###############################################
 
     def process_preambule(self):
@@ -179,15 +179,20 @@ class DviParser(OpcodeStreamParser):
         if self.read_unsigned_byte1() != PRE_OPCODE:
             raise NameError('Bad DVI stream')
 
-        self.dvi_id = self.read_unsigned_byte1()
-        if self.dvi_id not in (DVI_FORMAT, DVIV_FORMAT, XDVI_FORMAT):
+        dvi_format = self.read_unsigned_byte1()
+        if dvi_format not in (DVI_FORMAT, DVIV_FORMAT, XDVI_FORMAT):
             raise NameError('Bad DVI Format')
 
-        self.numerator     = self.read_signed_byte4()
-        self.denominator   = self.read_signed_byte4()
-        self.magnification = self.read_signed_byte4()
+        numerator     = self.read_signed_byte4()
+        denominator   = self.read_signed_byte4()
+        magnification = self.read_signed_byte4()
 
-        self.comment = self.read_stream(self.read_unsigned_byte1())
+        comment = self.read_stream(self.read_unsigned_byte1())
+
+        self.dvi_program.set_preambule_data(comment,
+                                            dvi_format,
+                                            numerator, denominator,
+                                            magnification)
 
     ###############################################
 
@@ -229,11 +234,13 @@ class DviParser(OpcodeStreamParser):
         denominator   = self.read_signed_byte4()
         magnification = self.read_signed_byte4()
 
-        self.max_height = self.read_signed_byte4()
-        self.max_width  = self.read_signed_byte4()
-        self.stack_depth = self.read_unsigned_byte2()
-        self.number_of_pages = self.read_unsigned_byte2()
-
+        max_height = self.read_signed_byte4()
+        max_width  = self.read_signed_byte4()
+        stack_depth = self.read_unsigned_byte2()
+        number_of_pages = self.read_unsigned_byte2()
+                                             
+        self.number_of_pages = number_of_pages
+                                             
         # Read Font definition
 
         while True:
@@ -251,21 +258,13 @@ class DviParser(OpcodeStreamParser):
         post_pointer = self.read_signed_byte4()
         dvi_format = self.read_unsigned_byte1()
 
-    ###############################################
-
-    def define_font(self, font_id, font_name, font_checksum, font_scale_factor, font_design_size):
-
-        self.fonts[font_id] = {'name':font_name,
-                               'checksum':font_checksum,
-                               'scale_factor':font_scale_factor,
-                               'design_size':font_design_size}
+        self.dvi_program.set_postambule_data(max_height, max_width,
+                                             stack_depth,
+                                             number_of_pages)
 
     ###############################################
 
     def process_pages(self):
-
-        for i in xrange(self.number_of_pages):
-            self.page_opcode_programs.append(OpcodeProgram())
 
         self.page_number = self.number_of_pages
 
@@ -294,7 +293,7 @@ class DviParser(OpcodeStreamParser):
 
     def process_page(self):
 
-        opcode_program = self.page_opcode_programs[self.page_number]
+        opcode_program = self.dvi_program.get_page(self.page_number)
         
         previous_opcode_obj = None
 
@@ -326,35 +325,6 @@ class DviParser(OpcodeStreamParser):
                     else:
                         previous_opcode_obj = None
 
-    ###############################################
-
-    def print_summary(self):
-
-        print '''DVI
-
-Preambule
-  - DVI format    %u
-  - Numerator     %u
-  - Denominator   %u
-  - Magnification %u
-  - Comment       '%s'
-
-Postamble
-  - Max Height      %u
-  - Max Width       %u
-  - Stack Depth     %u
-  - Number of Pages %u
-
-Fonts''' % (self.dvi_format, self.numerator, self.denominator, self.magnification, self.comment,
-            self.max_height, self.max_width, self.stack_depth, self.number_of_pages)
-
-        for font_id in self.fonts.keys():
-            print '  id = %4u' % (font_id), self.fonts[font_id]
-
-        # for i in xrange(self.number_of_pages):
-        #     print '\nPage', i
-        #     self.page_opcode_programs[i].print_program()
-
 #####################################################################################################
 #
 #                                               Test
@@ -373,20 +343,25 @@ if __name__ == '__main__':
 
     dvi_file = args[0]
 
-    dvi_stream = open(dvi_file)
+    ###############################################
 
     dvi_parser = DviParser()
 
-    dvi_parser.process_stream(dvi_stream)
-
-    dvi_parser.print_summary()
-
     dvi_machine = DviMachine()
 
-    print '\nRun last page'
-    dvi_machine.run(dvi_parser.page_opcode_programs[-1])
+
+    dvi_stream = open(dvi_file)
+
+    dvi_program = dvi_parser.process_stream(dvi_stream)
 
     dvi_stream.close()
+
+
+    dvi_program.print_summary()
+
+    print 'Run last page:'
+    if len(dvi_program.pages) > 0:
+        dvi_machine.run(dvi_program, -1)
 
 #####################################################################################################
 #

@@ -14,11 +14,27 @@ class OpcodeStreamParser(object):
 
     def __init_opcode_parsers(self, opcode_definitions):
 
+        '''
+        opcode_definitions =
+        (
+        (opcode_indexes, opcode_description, parameters, opcode_class),
+        (opcode_indexes, opcode_parser_class),
+        )
+
+        opcode_indexes : index |
+                         [lower_index, upper_index]
+
+        parameters : (p0, p1, ... |
+                     ([lower_n, upper_n]) # opcode_indexes = lower opcode index
+        '''
+
         self.opcode_parsers = [None]*255
 
-        for definition in opcode_definitions:
+        for opcode_definition in opcode_definitions:
         
-            index = definition[0]
+            # opcode index
+
+            index = opcode_definition[0]
             
             if isinstance(index, list):
                 lower_index = index[0]
@@ -26,9 +42,9 @@ class OpcodeStreamParser(object):
             else:
                 lower_index = upper_index = index
         
-            if isinstance(definition[1], str):
+            if isinstance(opcode_definition[1], str): # opcode description string
         
-                name, description, parameters, opcode_class = definition[1:]
+                name, description, parameters, opcode_class = opcode_definition[1:]
         
                 if parameters is not None and isinstance(parameters, list):
                     lower_n, upper_n = parameters
@@ -39,9 +55,9 @@ class OpcodeStreamParser(object):
                     for i in xrange(lower_index, upper_index +1):
                         self.opcode_parsers[i] = OpcodeParser(i, name, description, parameters, opcode_class)
         
-            else:
+            else: # OpcodeParser Class
                 for i in xrange(lower_index, upper_index +1):
-                    self.opcode_parsers[i] = definition[1](i)
+                    self.opcode_parsers[i] = opcode_definition[1](i)
 
         # for opcode_parser in self.opcode_parsers:
         #     print opcode_parser
@@ -56,10 +72,11 @@ class OpcodeStreamParser(object):
 
     def read_stream(self, n):
 
-        '''Read the DVI input stream
-
-        n > 0, exception ...
         '''
+        Read the DVI input stream
+        '''
+
+        # Fixme: n > 0, exception ...
 
         return self.stream.read(n)
 
@@ -67,10 +84,11 @@ class OpcodeStreamParser(object):
 
     def read_big_endian_number(self, n, signed = False):
 
-        '''Read a number coded in big endian format from the DVI input stream
-
-        can unroll
         '''
+        Read a number coded in big endian format from the DVI input stream
+        '''
+
+        # Thos code can be unrolled
 
         bytes = map(ord, self.read_stream(n))
 
@@ -79,7 +97,7 @@ class OpcodeStreamParser(object):
         if signed is True and number >= 128:
             number -= 256
 
-        for i in xrange(1,n):
+        for i in xrange(1, n):
             number *= 256
             number += bytes[i]
 
@@ -87,29 +105,15 @@ class OpcodeStreamParser(object):
 
     ###############################################
             
-    def read_unsigned_byte1(self):
-        return self.read_big_endian_number(1, signed = False)
+    def read_signed_byte1(self):   return self.read_big_endian_number(1, signed = True)
+    def read_signed_byte2(self):   return self.read_big_endian_number(2, signed = True)
+    def read_signed_byte3(self):   return self.read_big_endian_number(3, signed = True) 
+    def read_signed_byte4(self):   return self.read_big_endian_number(4, signed = True)
 
-    def read_signed_byte1(self):
-        return self.read_big_endian_number(1, signed = True)
-
-    def read_unsigned_byte2(self):
-        return self.read_big_endian_number(2, signed = False)
-
-    def read_signed_byte2(self):
-        return self.read_big_endian_number(2, signed = True)
-
-    def read_unsigned_byte3(self):
-        return self.read_big_endian_number(3, signed = False)
-
-    def read_signed_byte3(self):
-        return self.read_big_endian_number(3, signed = True)
-
-    def read_unsigned_byte4(self):
-        return self.read_big_endian_number(4, signed = False)
-
-    def read_signed_byte4(self):
-        return self.read_big_endian_number(4, signed = True)
+    def read_unsigned_byte1(self): return self.read_big_endian_number(1, signed = False)
+    def read_unsigned_byte2(self): return self.read_big_endian_number(2, signed = False)
+    def read_unsigned_byte3(self): return self.read_big_endian_number(3, signed = False)
+    def read_unsigned_byte4(self): return self.read_big_endian_number(4, signed = False) 
 
     ###############################################
 
@@ -147,33 +151,21 @@ class OpcodeParser(object):
     def __init_parameter_readers__(self, parameters):
 
         for parameter in parameters:
-            if   parameter == 1:
-                parameter_reader = OpcodeStreamParser.read_unsigned_byte1
-            elif parameter == 2:
-                parameter_reader = OpcodeStreamParser.read_unsigned_byte2
-            elif parameter == 3:
-                parameter_reader = OpcodeStreamParser.read_unsigned_byte3
-            elif parameter == 4:
-                parameter_reader = OpcodeStreamParser.read_signed_byte4
-            elif parameter == -1:
-                parameter_reader = OpcodeStreamParser.read_signed_byte1
-            elif parameter == -2:
-                parameter_reader = OpcodeStreamParser.read_signed_byte2
-            elif parameter == -3:
-                parameter_reader = OpcodeStreamParser.read_signed_byte3
+            if   parameter ==  1: parameter_reader = OpcodeStreamParser.read_unsigned_byte1
+            elif parameter ==  2: parameter_reader = OpcodeStreamParser.read_unsigned_byte2
+            elif parameter ==  3: parameter_reader = OpcodeStreamParser.read_unsigned_byte3
+            elif parameter ==  4: parameter_reader = OpcodeStreamParser.read_signed_byte4
+            elif parameter == -1: parameter_reader = OpcodeStreamParser.read_signed_byte1
+            elif parameter == -2: parameter_reader = OpcodeStreamParser.read_signed_byte2
+            elif parameter == -3: parameter_reader = OpcodeStreamParser.read_signed_byte3
                 
             self.parameter_readers.append(parameter_reader)
 
     ###############################################
 
-    def read_parameters(self, dvi_processor):
+    def read_parameters(self, opcode_parser):
 
-        parameters = []
-        
-        for parameter_reader in self.parameter_readers:
-            parameters.append(parameter_reader(dvi_processor))
-            
-        return parameters
+        return map(lambda x: x(opcode_parser), self.parameter_readers)
 
     ###############################################
 
