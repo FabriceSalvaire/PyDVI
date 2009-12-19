@@ -106,8 +106,14 @@ class Opcode_set_char(Opcode):
             glyph.print_summary()
 
             # Fixme: factor .75 ?
+            #   use read_fix_word from TFM
+            #     width = tfm * font_size = .75 * 65535
 
-            print 'set char %u "%s" width %u' % (char_code, chr(char_code), glyph.tfm)
+            dvi_font = dvi_machine.dvi_program.get_font(dvi_machine.current_font)
+
+            tfm = glyph.tfm * dvi_font.scale_factor / (1 << 20)
+
+            print 'set char %u "%s" width %u' % (char_code, chr(char_code), tfm)
 
 #####################################################################################################
 
@@ -691,6 +697,8 @@ class DviMachine(object):
     ###############################################
 
     def run(self, dvi_program, page):
+
+        self.dvi_program = dvi_program
 
         for font in dvi_program.fonts.values():
             self.fonts[font.id] = self.font_manager.load_font(FontManager.Pk, font.name)

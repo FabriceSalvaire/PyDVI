@@ -147,7 +147,7 @@ class TfmFile(object):
         integral_part += (bytes[1] >> 4)
 
         fractional_part = float(((((bytes[1] & 0xF) << 8) + bytes[2]) << 8) + bytes[3])
-        fractional_part /= 2**20
+        fractional_part /= 2**20 # 1 << 20
 
         # print negative, integral_part, fractional_part
 
@@ -231,7 +231,7 @@ Font Parameters:
        self.quad,
        self.extra_space)
 
-        print 'Char 0', self.widths[0], self.heights[0]
+        print 'Char 65', self.widths[65], self.heights[65]
 
 #####################################################################################################
 #
