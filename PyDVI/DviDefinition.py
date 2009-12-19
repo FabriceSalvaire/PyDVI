@@ -6,8 +6,16 @@
 #####################################################################################################
 
 #####################################################################################################
+#
+# Audit
+#
+#  - 19/12/2009 fabrice
+#
+#####################################################################################################
 
-__all__ = ['dvi_format', 'dvi_opcode', 'DVI_EOF_SIGNATURE']
+#####################################################################################################
+
+__all__ = ['dvi_formats', 'dvi_opcodes', 'DVI_EOF_SIGNATURE']
 
 #####################################################################################################
 
@@ -15,17 +23,17 @@ from EnumFactory import *
 
 #####################################################################################################
 
-dvi_format = ExplicitEnumFactory('DviFormat',
-                                 {'DVI':  2,
-                                  'DVIV': 3,
-                                  'XDVI': 5,
-                                  })
+dvi_formats = ExplicitEnumFactory('DviFormat',
+                                  {'DVI':  2,
+                                   'DVIV': 3,
+                                   'XDVI': 5,
+                                   })
 
 #####################################################################################################
 
 dvi_opcodes_tuple = []
 
-for i in xrange(0, 128):
+for i in xrange(128):
     dvi_opcodes_tuple.append('SETC_%03u' % (i))
 
 dvi_opcodes_tuple += [
@@ -46,7 +54,7 @@ dvi_opcodes_tuple += [
     'Z0', 'Z1', 'Z2', 'Z3', 'Z4',
     ]
 
-for i in xrange(171, 235):
+for i in xrange(64):
     dvi_opcodes_tuple.append('FONT_%02u' % (i))
 
 dvi_opcodes_tuple += [
@@ -58,7 +66,7 @@ dvi_opcodes_tuple += [
     'POST_POST',
     ]
 
-dvi_opcode = EnumFactory('DviOpcode', dvi_opcodes_tuple)
+dvi_opcodes = EnumFactory('DviOpcode', dvi_opcodes_tuple)
 
 #####################################################################################################
 

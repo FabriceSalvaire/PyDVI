@@ -6,6 +6,14 @@
 #####################################################################################################
 
 #####################################################################################################
+#
+# Audit
+#
+#  - 19/12/2009 fabrice
+#
+#####################################################################################################
+
+#####################################################################################################
 
 import sys
 import string
@@ -15,12 +23,6 @@ import string
 from OpcodeParser import *
 from PkGlyph import PkGlyph
 from TeXUnit import sp2in
-
-#####################################################################################################
-
-SEEK_RELATIVE_TO_START   = 0
-SEEK_RELATIVE_TO_CURRENT = 1
-SEEK_RELATIVE_TO_END     = 2
 
 #####################################################################################################
 
@@ -140,7 +142,7 @@ class OpcodeParser_xxx(OpcodeParser):
 
         super(OpcodeParser_xxx, self).__init__(opcode, 'xxx', 'special')
 
-        self.read_unsigned_byten = OpcodeStreamParser.read_unsigned_byten_pointer[opcode-self.base_opcode]
+        self.read_unsigned_byten = OpcodeStreamParser.read_unsigned_byten[opcode-self.base_opcode]
 
     ###############################################
 

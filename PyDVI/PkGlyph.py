@@ -6,12 +6,20 @@
 #####################################################################################################
 
 #####################################################################################################
+#
+# Audit
+#
+#  - 19/12/2009 fabrice
+#
+#####################################################################################################
+
+#####################################################################################################
 
 import numpy as np
 
 #####################################################################################################
 
-from TeXUnit import sp2pt, sp2mm
+from TeXUnit import *
 
 #####################################################################################################
 
@@ -43,10 +51,16 @@ class PkGlyph(object):
 
     def get_nybble(self):
 
+        '''
+        Get the next nyblle
+        '''
+
+        byte = ord(self.nybbles[self.nybble_index])
+
         if self.upper_nybble is True:
-            nybble = ord(self.nybbles[self.nybble_index]) >> 4
+            nybble = byte >> 4
         else:
-            nybble = ord(self.nybbles[self.nybble_index]) & 0xF
+            nybble = byte & 0xF
             self.nybble_index += 1
 
         self.upper_nybble = not self.upper_nybble
@@ -62,13 +76,16 @@ class PkGlyph(object):
         i = self.get_nybble()
 
         if i == 0:
+
             while True:
                 j  = self.get_nybble()
                 i += 1
                 if j != 0: break
+
             while i > 0:
                 j  = j * 16 + self.get_nybble()
                 i -= 1
+
             return j - 15 + (13 - self.dyn_f) * 16 + self.dyn_f
 
         elif i <= self.dyn_f:
@@ -78,10 +95,12 @@ class PkGlyph(object):
             return (i - self.dyn_f - 1) * 16 + self.get_nybble() + self.dyn_f + 1
 
         else:
+
             if i == 14:
                 self.repeat_count = self.pk_packed_num()
             else :
                 self.repeat_count = 1;
+
             return self.pk_packed_num()
 
     ###############################################
@@ -189,14 +208,26 @@ class PkGlyph(object):
         glyph_bitmap = self.get_glyph_bitmap()
 
         for y in xrange(self.height):
+
             line = ''
             for x in xrange(self.width):
                 if glyph_bitmap[y,x] == 1:
                     line += 'x'
                 else:
                     line += ' '
+
             print '%3u |%s|' % (y, line)
 
+        # print horizontal axis
+
+        number_of_digit = int(math.ceil(math.log10(self.width)))
+
+        for i in xrange(number_of_digit, 0, -1):
+            line = ' '*5
+            func = lambda x: line += str(x%10**i)/10**(i-1))
+            for x in xrange(self.width):
+                func(x)
+            print line
 
     ###############################################
 

@@ -6,6 +6,14 @@
 #####################################################################################################
 
 #####################################################################################################
+#
+# Audit
+#
+#  - 19/12/2009 fabrice
+#
+#####################################################################################################
+
+#####################################################################################################
 
 import string
 
@@ -17,9 +25,9 @@ from OpcodeParser import *
 
 #####################################################################################################
 
-SEEK_RELATIVE_TO_START   = 0
-SEEK_RELATIVE_TO_CURRENT = 1
-SEEK_RELATIVE_TO_END     = 2
+(SEEK_RELATIVE_TO_START,
+ SEEK_RELATIVE_TO_CURRENT,
+ SEEK_RELATIVE_TO_END) = range(3)
 
 set_char_description = 'typeset a character and move right'
 
@@ -31,7 +39,8 @@ class OpcodeParser_set_char(OpcodeParser):
 
     def __init__(self, opcode):
 
-        super(OpcodeParser_set_char, self).__init__(opcode, 'set', set_char_description,
+        super(OpcodeParser_set_char, self).__init__(opcode,
+                                                    'set', set_char_description,
                                                     opcode_class = Opcode_set_char)
 
     ###############################################
@@ -48,29 +57,31 @@ class OpcodeParser_font(OpcodeParser):
 
     def __init__(self, opcode):
 
-        super(OpcodeParser_font, self).__init__(opcode, 'fnt num', 'set current font to i',
+        super(OpcodeParser_font, self).__init__(opcode,
+                                                'fnt num', 'set current font to i',
                                                 opcode_class = Opcode_font)
 
     ###############################################
 
     def read_parameters(self, dvi_parser):
 
-        return [self.opcode - FONT_00_OPCODE]
+        return [self.opcode - dvi_opcodes.FONT_00]
 
 #####################################################################################################
 
 class OpcodeParser_xxx(OpcodeParser):
 
-    base_opcode = XXX1_OPCODE
+    base_opcode = dvi_opcodes.XXX1
 
     ###############################################
 
     def __init__(self, opcode):
 
-        super(OpcodeParser_xxx, self).__init__(opcode, 'xxx', 'extension to DVI primitives',
+        super(OpcodeParser_xxx, self).__init__(opcode,
+                                               'xxx', 'extension to DVI primitives',
                                                opcode_class = Opcode_xxx)
 
-        self.read_unsigned_byten = OpcodeStreamParser.read_unsigned_byten_pointer[self.opcode-self.base_opcode]
+        self.read_unsigned_byten = OpcodeStreamParser.read_unsigned_byten[self.opcode - self.base_opcode]
 
     ###############################################
 
@@ -82,15 +93,16 @@ class OpcodeParser_xxx(OpcodeParser):
 
 class OpcodeParser_fnt_def(OpcodeParser):
 
-    base_opcode = 243
+    base_opcode = dvi_opcodes.FNT_DEF1
 
     ###############################################
 
     def __init__(self, opcode):
 
-        super(OpcodeParser_fnt_def, self).__init__(opcode, 'fnt def', 'define the meaning of a font number')
+        super(OpcodeParser_fnt_def, self).__init__(opcode,
+                                                   'fnt def', 'define the meaning of a font number')
 
-        self.read_unsigned_byten = OpcodeStreamParser.read_unsigned_byten_pointer[opcode-self.base_opcode]
+        self.read_unsigned_byten = OpcodeStreamParser.read_unsigned_byten[opcode - self.base_opcode]
 
     ###############################################
 
@@ -113,41 +125,57 @@ class OpcodeParser_fnt_def(OpcodeParser):
 
 #####################################################################################################
 
+BadDviStream = NameError('Bad DVI stream')
+
 class DviParser(OpcodeStreamParser):
 
     opcode_definitions = (
-        ( [SETC_000_OPCODE, SETC_127_OPCODE], OpcodeParser_set_char ),
-        ( SET1_OPCODE, 'set', set_char_description, ([1,4]), Opcode_set_char ),
-        ( SET_RULE_OPCODE, 'set rule', 'typeset a rule and move right', (4,4), Opcode_set_rule ),
-        ( PUT1_OPCODE, 'put', 'typeset a character', ([1,4]), Opcode_put_char ),
-        ( PUT_RULE_OPCODE, 'put rule', 'typeset a rule', (4,4), Opcode_put_rule ),
-        ( NOP_OPCODE, 'nop', 'no operation', None, None ),
-        ( BOP_OPCODE, 'bop', 'beginning of page', tuple([4]*9 + [-4]), None ),
-        ( EOP_OPCODE, 'eop', 'ending of page', None, None ),
-        ( PUSH_OPCODE, 'push', 'save the current positions', None, Opcode_push ),
-        ( POP_OPCODE, 'pop', 'restore previous positions', None, Opcode_pop ),
-        ( RIGHT1_OPCODE, 'right', 'move right', ([-1,-4]), Opcode_right ),
-        ( W0_OPCODE, 'w0', 'move right by w', None, Opcode_w0 ),
-        ( W1_OPCODE, 'w', 'move right and set w', ([-1,-4]), Opcode_w ),
-        ( X0_OPCODE, 'x0', 'move right by x', None, Opcode_x0 ),
-        ( X1_OPCODE, 'x', 'move right and set x', ([-1,-4]), Opcode_x ),
-        ( DOWN1_OPCODE, 'down', 'move down', ([-1,-4]), Opcode_down ),
-        ( Y0_OPCODE, 'y0', 'move down by y', None, Opcode_y0 ),
-        ( Y1_OPCODE, 'y', 'move down and set y', ([-1,-4]), Opcode_y ),
-        ( Z0_OPCODE, 'z0', 'move down by z', None, Opcode_z0 ),
-        ( Z1_OPCODE, 'z', 'move down and set z', ([-1,-4]), Opcode_z ),
-        ( [FONT_00_OPCODE, FONT_63_OPCODE], OpcodeParser_font ),
-        ( FNT1_OPCODE, 'fnt', 'set current font', ([1,4]), Opcode_font ),
-        ( [XXX1_OPCODE, XXX4_OPCODE], OpcodeParser_xxx ),
-        ( [FNT_DEF1_OPCODE, FNT_DEF4_OPCODE], OpcodeParser_fnt_def ),
-        ( PRE_OPCODE, 'pre', 'preamble', (), None ),
-        ( POST_OPCODE, 'post', 'postamble beginning', None, None ),
-        ( POST_POST_OPCODE, 'post post', 'postamble ending', None, None ),
+        ( [dvi_opcodes.SETC_000,
+           dvi_opcodes.SETC_127], OpcodeParser_set_char ),
+        ( dvi_opcodes.SET1, 'set', set_char_description, ([1,4]), Opcode_set_char ),
+        # ... to SET4
+        ( dvi_opcodes.SET_RULE, 'set rule', 'typeset a rule and move right', (4,4), Opcode_set_rule ),
+        ( dvi_opcodes.PUT1, 'put', 'typeset a character', ([1,4]), Opcode_put_char ),
+        # ... to PUT4
+        ( dvi_opcodes.PUT_RULE, 'put rule', 'typeset a rule', (4,4), Opcode_put_rule ),
+        ( dvi_opcodes.NOP, 'nop', 'no operation', None, None ),
+        ( dvi_opcodes.BOP, 'bop', 'beginning of page', tuple([4]*9 + [-4]), None ),
+        ( dvi_opcodes.EOP, 'eop', 'ending of page', None, None ),
+        ( dvi_opcodes.PUSH, 'push', 'save the current positions', None, Opcode_push ),
+        ( dvi_opcodes.POP, 'pop', 'restore previous positions', None, Opcode_pop ),
+        ( dvi_opcodes.RIGHT1, 'right', 'move right', ([-1,-4]), Opcode_right ),
+        # ... to RIGHT4
+        ( dvi_opcodes.W0, 'w0', 'move right by w', None, Opcode_w0 ),
+        ( dvi_opcodes.W1, 'w', 'move right and set w', ([-1,-4]), Opcode_w ),
+        # ... to W4
+        ( dvi_opcodes.X0, 'x0', 'move right by x', None, Opcode_x0 ),
+        ( dvi_opcodes.X1, 'x', 'move right and set x', ([-1,-4]), Opcode_x ),
+        # ... to X4
+        ( dvi_opcodes.DOWN1, 'down', 'move down', ([-1,-4]), Opcode_down ),
+        # ... to DOWN4
+        ( dvi_opcodes.Y0, 'y0', 'move down by y', None, Opcode_y0 ),
+        ( dvi_opcodes.Y1, 'y', 'move down and set y', ([-1,-4]), Opcode_y ),
+        # ... to Y4
+        ( dvi_opcodes.Z0, 'z0', 'move down by z', None, Opcode_z0 ),
+        ( dvi_opcodes.Z1, 'z', 'move down and set z', ([-1,-4]), Opcode_z ),
+        # ... to Z4
+        ( [dvi_opcodes.FONT_00,
+           dvi_opcodes.FONT_63], OpcodeParser_font ),
+        ( dvi_opcodes.FNT1, 'fnt', 'set current font', ([1,4]), Opcode_font ),
+        ( [dvi_opcodes.XXX1,
+           dvi_opcodes.XXX4], OpcodeParser_xxx ),
+        ( [dvi_opcodes.FNT_DEF1,
+           dvi_opcodes.FNT_DEF4], OpcodeParser_fnt_def ),
+        ( dvi_opcodes.PRE, 'pre', 'preamble', (), None ),
+        ( dvi_opcodes.POST, 'post', 'postamble beginning', None, None ),
+        ( dvi_opcodes.POST_POST, 'post post', 'postamble ending', None, None ),
         )
    
     ###############################################
 
-    def __init__(self):
+    def __init__(self, debug = False):
+
+        self.debug = debug
 
         super(DviParser, self).__init__(self.opcode_definitions)
 
@@ -173,10 +201,11 @@ class DviParser(OpcodeStreamParser):
 
         self.process_preambule()
         self.process_postambule()
-        self.process_pages()
+        self.process_pages_backward()
 
-        for bop_pointer in self.bop_pointer_stack:
-            print 'BOP pointer pos = ', bop_pointer
+        if self.debug is True:
+            for bop_pointer in self.bop_pointer_stack:
+                print 'BOP at', bop_pointer
 
         self.set_stream(None)
 
@@ -188,14 +217,15 @@ class DviParser(OpcodeStreamParser):
 
         self.stream.seek(0)
 
-        print 'Preamble Begin pos =', self.tell()
+        if self.debug is True:
+            print 'Preamble begin at', self.tell()
 
-        if self.read_unsigned_byte1() != PRE_OPCODE:
-            raise NameError('Bad DVI stream')
+        if self.read_unsigned_byte1() != dvi_opcodes.PRE:
+            raise NameError("DVI stream don't start by PRE")
 
         dvi_format = self.read_unsigned_byte1()
-        if dvi_format not in (DVI_FORMAT, DVIV_FORMAT, XDVI_FORMAT):
-            raise NameError('Bad DVI Format')
+        if dvi_format not in dvi_formats:
+            raise NameError('Unknown DVI Format')
 
         numerator     = self.read_unsigned_byte4()
         denominator   = self.read_unsigned_byte4()
@@ -207,7 +237,8 @@ class DviParser(OpcodeStreamParser):
                                             dvi_format,
                                             numerator, denominator, magnification)
 
-        print 'Preamble End pos =', self.tell() -1
+        if self.debug is True:
+            print 'Preamble end at', self.tell() -1
 
     ###############################################
 
@@ -215,9 +246,9 @@ class DviParser(OpcodeStreamParser):
 
         # DVI file end with at least four EOF_SIGNATURE
         
-        # Test -5 byte
+        # Test bytes from -5 
 
-        opcode = NOP_OPCODE
+        opcode = dvi_opcodes.NOP
 
         self.stream.seek(-5, SEEK_RELATIVE_TO_END)
 
@@ -226,24 +257,25 @@ class DviParser(OpcodeStreamParser):
             opcode = self.read_unsigned_byte1()
 
             if opcode < 0: # found EOF
-                raise NameError('Bad DVI stream')
-            elif opcode != EOF_SIGNATURE:
+                raise BadDviStream
+            elif opcode != DVI_EOF_SIGNATURE:
                 break
 
-            self.stream.seek(-2, SEEK_RELATIVE_TO_CURRENT)
+            self.stream.seek(-2, SEEK_RELATIVE_TO_CURRENT) # seek to previous byte
 
         dvi_format = opcode
 
         self.stream.seek(-5, SEEK_RELATIVE_TO_CURRENT)
         self.post_pointer = self.read_unsigned_byte4()
 
-        # Move to post
+        # Move to Postamble
         self.stream.seek(self.post_pointer)
 
-        print 'Postamble Start pos', self.tell()
+        if self.debug is True:
+            print 'Postamble start at', self.tell()
 
-        if self.read_unsigned_byte1() != POST_OPCODE:
-            raise NameError('Bad DVI stream')            
+        if self.read_unsigned_byte1() != dvi_opcodes.POST:
+            raise BadDviStream
 
         self.bop_pointer_stack.append(self.read_signed_byte4())
 
@@ -258,19 +290,19 @@ class DviParser(OpcodeStreamParser):
                                              
         self.number_of_pages = number_of_pages
                                              
-        # Read Font definition
+        # Read Font definitions
 
         while True:
             opcode = self.read_unsigned_byte1()
-            if opcode >= FNT_DEF1_OPCODE and opcode <= FNT_DEF4_OPCODE:
+            if opcode >= dvi_opcodes.FNT_DEF1 and opcode <= dvi_opcodes.FNT_DEF4:
                 self.opcode_parsers[opcode].read_parameters(self)
-            elif opcode != NOP_OPCODE:
+            elif opcode != dvi_opcodes.NOP:
                 break
 
         # POST POST
 
-        if opcode != POST_POST_OPCODE:
-            raise NameError('Bad DVI stream')
+        if opcode != dvi_opcodes.POST_POST:
+            raise BadDviStream
 
         post_pointer = self.read_unsigned_byte4()
         dvi_format = self.read_unsigned_byte1()
@@ -281,7 +313,11 @@ class DviParser(OpcodeStreamParser):
 
     ###############################################
 
-    def process_pages(self):
+    def process_pages_backward(self):
+
+        '''
+        Process pages in backward order
+        '''
 
         self.page_number = self.number_of_pages
 
@@ -293,12 +329,13 @@ class DviParser(OpcodeStreamParser):
 
             self.stream.seek(bop_pointer)
 
-            print 'BOP pos', self.tell()
+            if self.debug is True:
+                print 'BOP at', self.tell()
 
             opcode = self.read_unsigned_byte1()
 
-            if opcode != BOP_OPCODE:
-                raise NameError('Bad DVI stream')
+            if opcode != dvi_opcodes.BOP:
+                raise BadDviStream
 
             counts = [self.read_unsigned_byte4() for i in xrange(10)]
 
@@ -320,16 +357,21 @@ class DviParser(OpcodeStreamParser):
 
             opcode = self.read_unsigned_byte1()
 
-            if opcode == EOP_OPCODE:
+            if opcode == dvi_opcodes.EOP:
                 break
+
             else:
                 opcode_parser = self.opcode_parsers[opcode]
 
                 parameters = opcode_parser.read_parameters(self)
 
-                # print opcode, opcode_parser.name, parameters
+                if self.debug is True:
+                    print 'Opcode', opcode, opcode_parser.name, parameters
 
-                is_set_char = opcode <= SET4_OPCODE
+                # If the current and the previous opcode correspond to set char
+                # then the new char is concatenated
+
+                is_set_char = opcode <= dvi_opcodes.SET4
 
                 if is_set_char is True and previous_opcode_obj is not None:
                     previous_opcode_obj.append(parameters)
@@ -337,7 +379,8 @@ class DviParser(OpcodeStreamParser):
                     opcode_obj = opcode_parser.to_opcode(parameters) 
 
                     if opcode_obj is not None:
-                        opcode_program.append(opcode_obj)
+                        pass 
+                        # opcode_program.append(opcode_obj)
 
                     if is_set_char is True:
                         previous_opcode_obj = opcode_obj
@@ -364,7 +407,7 @@ if __name__ == '__main__':
 
     ###############################################
 
-    dvi_parser = DviParser()
+    dvi_parser = DviParser(debug = True)
 
     dvi_machine = DviMachine()
 
@@ -378,9 +421,9 @@ if __name__ == '__main__':
 
     dvi_program.print_summary()
 
-    print 'Run last page:'
-    if len(dvi_program.pages) > 0:
-        dvi_machine.run(dvi_program, -1)
+    # print 'Run last page:'
+    # if len(dvi_program.pages) > 0:
+    #     dvi_machine.run(dvi_program, -1)
 
 #####################################################################################################
 #

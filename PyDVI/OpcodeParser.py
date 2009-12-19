@@ -6,6 +6,12 @@
 #####################################################################################################
 
 #####################################################################################################
+#
+# Audit
+#
+#  - 19/12/2009 fabrice
+#
+#####################################################################################################
 
 #####################################################################################################
 
@@ -15,6 +21,10 @@ class OpcodeStreamParser(object):
 
     def __init__(self, opcode_definitions):
 
+        '''
+        Opcode Stream Parser
+        '''
+
         self.__init_opcode_parsers(opcode_definitions)
 
     ###############################################
@@ -22,19 +32,22 @@ class OpcodeStreamParser(object):
     def __init_opcode_parsers(self, opcode_definitions):
 
         '''
-        opcode_definitions =
-        (
-        (opcode_indexes, opcode_description, parameters, opcode_class),
-        (opcode_indexes, opcode_parser_class),
-        )
+        opcode_definitions : (opcode_definition, ...)
 
-        opcode_indexes : index |
-                         [lower_index, upper_index]
+        opcode_definition : 
+          (opcode_indexes, opcode_name, opcode_description, opcode_parameters = (), opcode_class = None) |
+          (opcode_indexes, opcode_parser_class),
 
-        parameters : (p0, p1, ... |
-                     ([lower_n, upper_n]) # opcode_indexes = lower opcode index
+        opcode_indexes :
+          index |
+          [lower_index, upper_index] # duplicate the opcode in the range
+
+        opcode_parameters :
+          (p0, p1, ...) |
+          ([lower_n, upper_n]) # opcode at [index + i] has parameter p[i]
         '''
 
+        # Allocate 256 opcode
         self.opcode_parsers = [None]*255
 
         for opcode_definition in opcode_definitions:
@@ -62,6 +75,7 @@ class OpcodeStreamParser(object):
                     for n in xrange(abs(lower_n), abs(upper_n) +1):
                         i = index + n -1
                         self.opcode_parsers[i] = OpcodeParser(i, name, description, tuple([signe*n]), opcode_class)
+
                 else:
                     for i in xrange(lower_index, upper_index +1):
                         self.opcode_parsers[i] = OpcodeParser(i, name, description, parameters, opcode_class)
@@ -132,12 +146,15 @@ class OpcodeStreamParser(object):
     def read_unsigned_byte3(self): return self.read_big_endian_number(3, signed = False)
     def read_unsigned_byte4(self): return self.read_big_endian_number(4, signed = False) 
 
-    ###############################################
+    read_unsigned_byten = (read_unsigned_byte1, 
+                           read_unsigned_byte2,
+                           read_unsigned_byte3,
+                           read_unsigned_byte4)
 
-    read_unsigned_byten_pointer = (read_unsigned_byte1, 
-                                   read_unsigned_byte2,
-                                   read_unsigned_byte3,
-                                   read_unsigned_byte4)
+    read_signed_byten = (read_signed_byte1, 
+                         read_signed_byte2,
+                         read_signed_byte3,
+                         read_signed_byte4)
 
 #####################################################################################################
 
@@ -146,6 +163,10 @@ class OpcodeParser(object):
     ###############################################
 
     def __init__(self, opcode, name, description, parameters = (), opcode_class = None):
+
+        '''
+        Opcode Parser
+        '''
 
         self.opcode = opcode
         self.name = name
@@ -183,7 +204,9 @@ class OpcodeParser(object):
 
     def read_parameters(self, opcode_parser):
 
-        return map(lambda x: x(opcode_parser), self.parameter_readers)
+        return map(lambda parameter_reader:
+                       parameter_reader(opcode_parser),
+                   self.parameter_readers)
 
     ###############################################
 

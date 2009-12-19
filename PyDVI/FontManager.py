@@ -6,6 +6,17 @@
 #####################################################################################################
 
 #####################################################################################################
+#
+# Audit
+#
+#  - 19/12/2009 fabrice
+#   - singleton ?
+#   - font plugin ?
+#   - font cache
+#
+#####################################################################################################
+
+#####################################################################################################
 
 import subprocess
 import string
@@ -16,13 +27,9 @@ from PkFont import PkFont
 
 #####################################################################################################
 
-# Singleton
-# Font plugin ?
+font_types = EnumFactory('FontTypes', ('Pk', 'Type1', 'TrueType', 'OpenType'))
 
 class FontManager(object):
-
-    # Enum
-    Pk, Type1, TrueType, OpenType, NumberOfFontClasses = range(5)
 
     ###############################################
 
@@ -30,9 +37,9 @@ class FontManager(object):
 
         self.fonts = {}
 
-        self.font_classes = [None]*self.NumberOfFontClasses
+        self.font_classes = [None]*len(font_types)
 
-        self.font_classes[self.Pk] = PkFont
+        self.font_classes[font_types.Pk] = PkFont
 
     ###############################################
 
@@ -66,7 +73,7 @@ if __name__ == '__main__':
 
     font_manager = FontManager()
 
-    cmr10 = font_manager.load_font(FontManager.Pk, 'cmr10')
+    cmr10 = font_manager.load_font(font_types.Pk, 'cmr10')
 
     cmr10.print_summary()
 
