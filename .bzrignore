@@ -1,1 +1,3 @@
 gui/pkfont_viewer_ui.py
+gui/dvi_viewer.ui
+gui/dvi_viewer_ui.py

@@ -19,8 +19,6 @@ from pkfont_viewer_ui import Ui_main_window
 # Main Window
 #
 
-#####################################################################################################
-
 class MainWindow(QtGui.QMainWindow):
 
     ###############################################
@@ -37,7 +35,7 @@ class MainWindow(QtGui.QMainWindow):
         # Graphics View
 
         self.scene = scene = QtGui.QGraphicsScene(self)
-        scene.setSceneRect(0, 0, 100, 100)
+        scene.setSceneRect(-100, -100, 100, 100)
 
         glyph_graphics_view = form.glyph_graphics_view
         glyph_graphics_view.setScene(scene)
@@ -101,50 +99,78 @@ class MainWindow(QtGui.QMainWindow):
 
         for y in xrange(glyph.height):
             for x in xrange(glyph.width):
-
                 if glyph_bitmap[y, x] == 1:
                     glyph_image.setPixel(x, y, 0xFF000000)
                 else:
-                    glyph_image.setPixel(x, y, 0xFFFFFFFF)
+                    glyph_image.setPixel(x, y, 0x00FFFFFF)
 
         self.glyph_bitmap = QtGui.QPixmap.fromImage(glyph_image)
 
         self.scene.clear()
-        self.scene.addPixmap(self.glyph_bitmap)
+
+        char_pixmap = self.scene.addPixmap(self.glyph_bitmap)
+        char_pixmap.setOffset(-glyph.horizontal_offset, -glyph.vertical_offset)
+
+        box_depth  = max(glyph.height - glyph.vertical_offset, glyph.vertical_offset)
+        box_height = max(glyph.vertical_offset, box_depth)
+
+        red_pen = QtGui.QPen()
+        red_pen.setColor(QtCore.Qt.red)
+
+        box_scale = 1.5
+
+        self.scene.addLine(-box_scale*glyph.width, 0, (box_scale+1)*glyph.width, 0, red_pen)
+        self.scene.addLine(0, box_scale*box_depth, 0, -box_scale*box_height, red_pen)
+
+        char_box = QtCore.QRectF(-glyph.horizontal_offset, -glyph.vertical_offset, glyph.width, glyph.height)
+
+        self.scene.addRect(char_box, red_pen)
+
         self.scene.update()
 
-#    ###############################################
-#
-#    def keyPressEvent(self, event):
-#
-#        key = event.key()
-#
-#        if key == QtCore.Qt.Key_Up:
-#            self.translate(0, -2*self.site_radius)
-#
-#        elif key == QtCore.Qt.Key_Down:
-#            self.translate(0, 2*self.site_radius)
-#
-#        elif key == QtCore.Qt.Key_Left:
-#            self.translate(-2*self.site_radius, 0)
-#
-#        elif key == QtCore.Qt.Key_Right:
-#            self.translate(2*self.site_radius, 0)
-#
-#        elif key == QtCore.Qt.Key_Plus:
-#            self.scale_view(1.2)
-#
-#        elif key == QtCore.Qt.Key_Minus:
-#            self.scale_view(1. / 1.2)
-#
-#        else:
-#            QtGui.QGraphicsView.keyPressEvent(self, event)
+    ###############################################
+
+    def keyPressEvent(self, event):
+
+        key = event.key()
+
+        glyph_graphics_view = self.form.glyph_graphics_view
+
+        dx = 10
+
+        print 'keyPressEvent', key
+
+        if key == QtCore.Qt.Key_Up:
+            glyph_graphics_view.translate(0, -dx)
+
+        elif key == QtCore.Qt.Key_Down:
+            glyph_graphics_view.translate(0, dx)
+
+        elif key == QtCore.Qt.Key_Left:
+            glyph_graphics_view.translate(-dx, 0)
+
+        elif key == QtCore.Qt.Key_Right:
+            glyph_graphics_view.translate(dx, 0)
+
+        elif key == QtCore.Qt.Key_Plus:
+            self.scale_view(2)
+
+        elif key == QtCore.Qt.Key_Minus:
+            self.scale_view(.5)
+
+        else:
+            QtGui.QGraphicsView.keyPressEvent(glyph_graphics_view, event)
 
     ###############################################
 
     def wheelEvent(self, event):
 
-        self.scale_view(math.pow(2.0, event.delta() / 240.))
+        delta = event.delta()
+
+        if delta > 0:
+            self.scale_view(2)
+        else:
+            self.scale_view(0.5)
 
     ###############################################
 

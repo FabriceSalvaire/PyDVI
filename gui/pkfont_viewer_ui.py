@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'pkfont_viewer.ui'
 #
-# Created: Sun Dec 13 14:04:09 2009
+# Created: Sun Dec 20 17:32:03 2009
 #      by: PyQt4 UI code generator 4.5.1
 #
 # WARNING! All changes made in this file will be lost!

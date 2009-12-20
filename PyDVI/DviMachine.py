@@ -72,41 +72,27 @@ class Opcode(object):
 
 #####################################################################################################
 
-class Opcode_put_char(Opcode):
-
-    ###############################################
-
-    def __init__(self, char):
-
-        self.char = char
-
-    ###############################################
-
-    def __str__(self):
-
-        return 'put char "%s"' % (chr(self.char))
-
-    ###############################################
-
-    def run(self, dvi_machine):
-
-        pass
-
-#####################################################################################################
-
 class Opcode_set_char(Opcode):
 
     ###############################################
 
-    def __init__(self, char):
+    def __init__(self, char, set = True):
 
         self.characters = [char]
+
+        self.set = set
+
+        if self.set is True:
+            self.opcode_name = 'set'
+        else:
+            self.opcode_name = 'put'
 
     ###############################################
 
     def __str__(self):
 
-        return 'set char "%s"' % (string.join(map(chr, self.characters), sep = ''))
+        return '%s char "%s"' % (self.opcode_name, string.join(map(chr, self.characters), sep = ''))
+
         # return 'set char "%s"' % str(self.characters)
 
     ###############################################
@@ -117,71 +103,86 @@ class Opcode_set_char(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine): # Fixme
-
-        current_font = dvi_machine.get_current_font()
+    def run(self, dvi_machine):
 
         registers = dvi_machine.get_registers()
+
+        current_font = dvi_machine.get_current_font()
+        dvi_font = dvi_machine.get_current_dvi_font()
 
         for char_code in self.characters:
 
             glyph = current_font[char_code]
             
-            # glyph.print_summary()
+            glyph.print_summary()
 
-            dvi_font = dvi_machine.dvi_program.get_font(dvi_machine.current_font)
+            glyph.print_glyph()
 
-            width = dvi_font.get_width(glyph)
+            dvi_machine.paint_char(registers.h - glyph.horizontal_offset,
+                                   registers.v - glyph.vertical_offset,
+                                   glyph,
+                                   dvi_font.magnification)
 
-            registers.h += width
+            char_width = dvi_font.get_char_width(glyph)
 
-            print 'set char %3u "%s" width %8u h %10u' % (char_code, chr(char_code), width, registers.h)
+            if self.set is True:
+                registers.h += char_width
 
-#####################################################################################################
+            print '%s char %3u "%s" width %8u h %10u' % (self.opcode_name,
+                                                         char_code, chr(char_code),
+                                                         char_width, registers.h)
 
-class Opcode_put_rule(Opcode):
+###################################################
+
+class Opcode_put_char(Opcode):
 
     ###############################################
 
-    def __init__(self, height, width):
+    def __init__(self, char):
+
+        super(Opcode_put_char, self).__init__(char, set = False)
+
+#####################################################################################################
+
+class Opcode_set_rule(Opcode):
+
+    ###############################################
+
+    def __init__(self, height, width, set = True):
 
         self.height = height
         self.width = width
+        self.set = set
 
     ###############################################
 
     def __str__(self):
 
-        return 'put rule height %u width %u' % (self.height, self.width)
-
-    ###############################################
-
-    def run(self, dvi_machine):
-
-        pass
-
-#####################################################################################################
-
-class Opcode_set_rule(Opcode_put_rule):
-
-    ###############################################
-
-    def __init__(self, height, width):
-
-        super(Opcode_set_rule, self).__init__(height, width)
-
-    ###############################################
-
-    def __str__(self):
-
-        return 'set rule height %u width %u, h += width' % (self.height, self.width)
+        if self.set is True:
+            return 'set rule height %u width %u, h += width' % (self.height, self.width)
+        else:
+            return 'put rule height %u width %u' % (self.height, self.width)
 
     ###############################################
 
     def run(self, dvi_machine):
 
         registers = dvi_machine.get_registers()
-        registers.h += self.width
+
+        dvi_machine.paint_rule(registers.h, registers.v, self.width, self.height)
+        
+        if self.set is True:
+            registers.h += self.width
+
+###################################################
+
+class Opcode_put_rule(Opcode_set_rule):
+
+    ###############################################
+
+    def __init__(self, height, width):
+
+        super(Opcode_put_rule, self).__init__(height, width, set = False)
 
 #####################################################################################################
 
@@ -542,7 +543,7 @@ class DviFont(object):
 
     ###############################################
 
-    def get_width(self, glyph):
+    def get_char_width(self, glyph):
 
         return glyph.get_width(self.scale_factor)
 
@@ -554,7 +555,7 @@ class DviProgam(object):
 
     def __init__(self):
 
-        self.fonts = {}
+        self.fonts = {} # dict of DviFont
 
         self.pages = []
 
@@ -728,6 +729,12 @@ class DviMachine(object):
 
     ###############################################
 
+    def get_current_dvi_font(self):
+
+        return self.dvi_program.get_font(self.current_font)
+
+    ###############################################
+
     def run(self, dvi_program, page):
 
         self.dvi_program = dvi_program
@@ -743,6 +750,18 @@ class DviMachine(object):
             print opcode
             opcode.run(self)
             print 'level %u' % (len(self.registers_stack)), self.get_registers()
+
+    ###############################################
+
+    def paint_rule(self, x, y, width, height):
+
+        pass
+
+    ###############################################
+
+    def paint_char(self, x, y, glyph, magnification):
+
+        pass
 
 #####################################################################################################
 #
