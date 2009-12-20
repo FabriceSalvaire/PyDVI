@@ -19,11 +19,58 @@ import string
 
 #####################################################################################################
 
+from EnumFactory import *
 from DviMachine import *
-from DviDefinition import *
 from OpcodeParser import *
 
 #####################################################################################################
+
+dvi_opcodes_tuple = []
+
+for i in xrange(128):
+    dvi_opcodes_tuple.append('SETC_%03u' % (i))
+
+dvi_opcodes_tuple += [
+    'SET1', 'SET2', 'SET3', 'SET4',
+    'SET_RULE',
+    'PUT1', 'PUT2', 'PUT3', 'PUT4',
+    'PUT_RULE',
+    'NOP',
+    'BOP',
+    'EOP',
+    'PUSH',
+    'POP',
+    'RIGHT1', 'RIGHT2', 'RIGHT3', 'RIGHT4',
+    'W0', 'W1', 'W2', 'W3', 'W4',
+    'X0', 'X1', 'X2', 'X3', 'X4',
+    'DOWN1', 'DOWN2', 'DOWN3', 'DOWN4',
+    'Y0', 'Y1', 'Y2', 'Y3', 'Y4',
+    'Z0', 'Z1', 'Z2', 'Z3', 'Z4',
+    ]
+
+for i in xrange(64):
+    dvi_opcodes_tuple.append('FONT_%02u' % (i))
+
+dvi_opcodes_tuple += [
+    'FNT1', 'FNT2', 'FNT3', 'FNT4',
+    'XXX1', 'XXX2', 'XXX3', 'XXX4',
+    'FNT_DEF1', 'FNT_DEF2', 'FNT_DEF3', 'FNT_DEF4',
+    'PRE',
+    'POST',
+    'POST_POST',
+    ]
+
+dvi_opcodes = EnumFactory('DviOpcodes', dvi_opcodes_tuple)
+
+###################################################
+
+DVI_EOF_SIGNATURE = 223
+
+dvi_formats = ExplicitEnumFactory('DviFormats',
+                                  {'DVI':  2,
+                                   'DVIV': 3,
+                                   'XDVI': 5,
+                                   })
 
 (SEEK_RELATIVE_TO_START,
  SEEK_RELATIVE_TO_CURRENT,
@@ -374,13 +421,12 @@ class DviParser(OpcodeStreamParser):
                 is_set_char = opcode <= dvi_opcodes.SET4
 
                 if is_set_char is True and previous_opcode_obj is not None:
-                    previous_opcode_obj.append(parameters)
+                    previous_opcode_obj.append(parameters[0])
                 else:
                     opcode_obj = opcode_parser.to_opcode(parameters) 
 
                     if opcode_obj is not None:
-                        pass 
-                        # opcode_program.append(opcode_obj)
+                        opcode_program.append(opcode_obj)
 
                     if is_set_char is True:
                         previous_opcode_obj = opcode_obj

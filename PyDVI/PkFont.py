@@ -53,15 +53,15 @@ class PkFont(Font):
                            comment,
                            design_size,
                            checksum,
-                           horizontal_pixels_per_point,
-                           vertical_pixels_per_point):
+                           horizontal_dpi,
+                           vertical_dpi):
 
         self.pk_id = pk_id
         self.comment = comment
         self.design_size = design_size
         self.checksum = checksum
-        self.horizontal_pixels_per_point = horizontal_pixels_per_point
-        self.vertical_pixels_per_point = vertical_pixels_per_point
+        self.horizontal_dpi = horizontal_dpi
+        self.vertical_dpi = vertical_dpi
 
     ###############################################
 
@@ -72,17 +72,18 @@ class PkFont(Font):
 Preambule
   - PK ID        %u
   - Comment      '%s'
-  - Design Size  %.1f pt
+  - Design size  %.1f pt
   - Checksum     %u
-  - Horizontal Resolution %.1f dpi
-  - Vertical   Resolution %.1f dpi
+  - Resolution
+   - Horizontal  %.1f dpi
+   - Vertical    %.1f dpi
   ''' % (self.name,
          self.pk_id,
          self.comment,
          self.design_size,
          self.checksum,
-         self.horizontal_pixels_per_point,
-         self.vertical_pixels_per_point)
+         self.horizontal_dpi,
+         self.vertical_dpi)
 
 #####################################################################################################
 #

@@ -15,6 +15,8 @@
 
 #####################################################################################################
 
+import math
+
 import numpy as np
 
 #####################################################################################################
@@ -46,6 +48,12 @@ class PkGlyph(object):
         self.glyph_bitmap = None
 
         self.pk_font.register_glyph(self)
+
+    ###############################################
+
+    def get_width(self, scale_factor):
+
+        return int(self.tfm * scale_factor)
 
     ###############################################
 
@@ -207,6 +215,10 @@ class PkGlyph(object):
 
         glyph_bitmap = self.get_glyph_bitmap()
 
+        axis = ' '*4 + '+' + '-'*self.width + '+'
+
+        print axis
+
         for y in xrange(self.height):
 
             line = ''
@@ -220,31 +232,41 @@ class PkGlyph(object):
 
         # print horizontal axis
 
-        number_of_digit = int(math.ceil(math.log10(self.width)))
+        print axis
 
+        number_of_digit = int(math.ceil(math.log10(self.width)))
+        
         for i in xrange(number_of_digit, 0, -1):
+
+            def digit(x):
+                return str((x%10**i)/10**(i-1))
+                
             line = ' '*5
-            func = lambda x: line += str(x%10**i)/10**(i-1))
             for x in xrange(self.width):
-                func(x)
+                line += digit(x)
+
             print line
 
     ###############################################
 
     def print_summary(self):
 
+        width = self.tfm * self.pk_font.design_size
+
         print '''
 Char %u
- - TFM width: %u sp %.1f pt %.1f mm
- - dm: %u px
- - dx: %u px
- - dy: %u px
- - Height: %u px
- - Width: %u px
- - Horizontal Offset: %u px
- - Vertical Offset: %u px
+ - TFM width: %.3f * design size
+              %.1f pt
+              %.1f mm
+ - dm:                %3u px
+ - dx:                %3u px
+ - dy:                %3u px
+ - Height:            %3u px
+ - Width:             %3u px
+ - Horizontal Offset: %3u px
+ - Vertical Offset:   %3u px
 ''' % (self.char_code,
-       self.tfm, sp2pt(self.tfm), sp2mm(self.tfm),
+       self.tfm, width, pt2mm(width),
        self.dm, self.dx, self.dy,
        self.height, self.width,
        self.horizontal_offset, self.vertical_offset)

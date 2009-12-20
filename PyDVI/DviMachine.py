@@ -6,13 +6,22 @@
 #####################################################################################################
 
 #####################################################################################################
+#
+# Audit
+#
+#  - 19/12/2009 fabrice
+#   - __init__
+#
+#####################################################################################################
+
+#####################################################################################################
 
 import fractions
 import string
 
 #####################################################################################################
 
-from FontManager import FontManager
+from FontManager import *
 from TeXUnit import *
 
 #####################################################################################################
@@ -31,6 +40,12 @@ class OpcodeProgram(object):
 
         for opcode in self.program:
             yield opcode
+
+    ###############################################
+
+    def __len__(self):
+
+        return len(self.program)
 
     ###############################################
 
@@ -98,29 +113,29 @@ class Opcode_set_char(Opcode):
 
     def append(self, char):
 
-        self.characters.append(* char)
+        self.characters.append(char)
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine): # Fixme
 
         current_font = dvi_machine.get_current_font()
 
+        registers = dvi_machine.get_registers()
+
         for char_code in self.characters:
 
-            glyph = current_font.get_glyph(char_code)
+            glyph = current_font[char_code]
             
-            glyph.print_summary()
-
-            # Fixme: factor .75 ?
-            #   use read_fix_word from TFM
-            #     width = tfm * font_size = .75 * 65535
+            # glyph.print_summary()
 
             dvi_font = dvi_machine.dvi_program.get_font(dvi_machine.current_font)
 
-            tfm = glyph.tfm * dvi_font.scale_factor / (1 << 20)
+            width = dvi_font.get_width(glyph)
 
-            print 'set char %u "%s" width %u' % (char_code, chr(char_code), tfm)
+            registers.h += width
+
+            print 'set char %3u "%s" width %8u h %10u' % (char_code, chr(char_code), width, registers.h)
 
 #####################################################################################################
 
@@ -165,7 +180,7 @@ class Opcode_set_rule(Opcode_put_rule):
 
     def run(self, dvi_machine):
 
-        registers = dvi_machine.registers()
+        registers = dvi_machine.get_registers()
         registers.h += self.width
 
 #####################################################################################################
@@ -234,7 +249,7 @@ class Opcode_right(Opcode):
 
     def run(self, dvi_machine):
 
-        registers = dvi_machine.registers()
+        registers = dvi_machine.get_registers()
         registers.h += self.x
 
 #####################################################################################################
@@ -257,7 +272,7 @@ class Opcode_w0(Opcode):
 
     def run(self, dvi_machine):
 
-        registers = dvi_machine.registers()
+        registers = dvi_machine.get_registers()
         registers.h += registers.w
 
 #####################################################################################################
@@ -280,7 +295,7 @@ class Opcode_w(Opcode):
 
     def run(self, dvi_machine):
 
-        registers = dvi_machine.registers()
+        registers = dvi_machine.get_registers()
         registers.w  = self.x
         registers.h += self.x
 
@@ -304,7 +319,7 @@ class Opcode_x0(Opcode):
 
     def run(self, dvi_machine):
 
-        registers = dvi_machine.registers()
+        registers = dvi_machine.get_registers()
         registers.h += registers.x
 
 #####################################################################################################
@@ -327,7 +342,7 @@ class Opcode_x(Opcode):
 
     def run(self, dvi_machine):
 
-        registers = dvi_machine.registers()
+        registers = dvi_machine.get_registers()
         registers.x  = self.x
         registers.h += self.x
 
@@ -351,7 +366,7 @@ class Opcode_down(Opcode):
 
     def run(self, dvi_machine):
 
-        registers = dvi_machine.registers()
+        registers = dvi_machine.get_registers()
         registers.v += self.x
 
 #####################################################################################################
@@ -374,7 +389,7 @@ class Opcode_y0(Opcode):
 
     def run(self, dvi_machine):
 
-        registers = dvi_machine.registers()
+        registers = dvi_machine.get_registers()
         registers.v += registers.y
 
 #####################################################################################################
@@ -397,7 +412,7 @@ class Opcode_y(Opcode):
 
     def run(self, dvi_machine):
 
-        registers = dvi_machine.registers()
+        registers = dvi_machine.get_registers()
         registers.y  = self.x
         registers.h += self.x
 
@@ -421,7 +436,7 @@ class Opcode_z0(Opcode):
 
     def run(self, dvi_machine):
 
-        registers = dvi_machine.registers()
+        registers = dvi_machine.get_registers()
         registers.v += registers.z
 
 #####################################################################################################
@@ -444,7 +459,7 @@ class Opcode_z(Opcode):
 
     def run(self, dvi_machine):
 
-        registers = dvi_machine.registers()
+        registers = dvi_machine.get_registers()
         registers.z  = self.x
         registers.v += self.x
 
@@ -506,20 +521,30 @@ class DviFont(object):
         self.scale_factor = scale_factor
         self.design_size = design_size
 
+        self.magnification = fractions.Fraction(scale_factor, design_size)
+
     ###############################################
 
     def __str__(self):
 
         return '''Font ID %u
- - Name         %s
- - Checksum     %u
- - Scale factor %u
- - Design size  %u
+ - Name          %s
+ - Checksum      %u
+ - Design size   %u
+ - Scale factor  %u
+ - Magnification %u %%
 ''' % (self.id,
        self.name,
        self.checksum,
        self.scale_factor,
-       self.design_size)
+       self.design_size,
+       self.magnification * 100)
+
+    ###############################################
+
+    def get_width(self, glyph):
+
+        return glyph.get_width(self.scale_factor)
 
 #####################################################################################################
 
@@ -566,7 +591,8 @@ class DviProgam(object):
     def register_font(self, font):
 
         if self.fonts.has_key(font.id):
-            print 'Font ID %u already registered' % (font.id)
+            pass 
+            # print 'Font ID %u already registered' % (font.id)
         else:
             self.fonts[font.id] = font
         
@@ -601,18 +627,17 @@ Postamble
   - Stack Depth     %u
   - Max Height      %u sp %.1f mm
   - Max Width       %u sp %.1f mm
-''' % (
-            self.comment,
-            self.dvi_format,
-            self.numerator,
-            self.denominator,
-            self.magnification,
-            self.dvi_unit * 100,
-            self.number_of_pages,
-            self.stack_depth,
-            self.max_height, sp2mm(self.max_height),
-            self.max_width, sp2mm(self.max_width),
-            )
+''' % (self.comment,
+       self.dvi_format,
+       self.numerator,
+       self.denominator,
+       self.magnification,
+       self.dvi_unit * 100,
+       self.number_of_pages,
+       self.stack_depth,
+       self.max_height, sp2mm(self.max_height),
+       self.max_width, sp2mm(self.max_width),
+       )
 
         print 'List of fonts:'
 
@@ -651,7 +676,7 @@ class DviMachineRegisters(object):
 
     ###############################################
 
-    def duplicate(self):
+    def clone(self):
 
         return DviMachineRegisters(self.h, self.v, self.w, self.x, self.y, self.z)
 
@@ -679,7 +704,7 @@ class DviMachine(object):
 
     ###############################################
 
-    def registers(self):
+    def get_registers(self):
 
         return self.registers_stack[-1]
 
@@ -687,7 +712,7 @@ class DviMachine(object):
 
     def push_registers(self):
 
-        self.registers_stack.append(self.registers().duplicate())
+        self.registers_stack.append(self.get_registers().clone())
 
     ###############################################
 
@@ -708,14 +733,16 @@ class DviMachine(object):
         self.dvi_program = dvi_program
 
         for font in dvi_program.fonts.values():
-            self.fonts[font.id] = self.font_manager.load_font(FontManager.Pk, font.name)
+            self.fonts[font.id] = self.font_manager.load_font(font_types.Pk, font.name) # Fixme
 
         opcode_program = dvi_program.get_page(page)
+
+        print 'Program Length:', len(opcode_program)
 
         for opcode in opcode_program:
             print opcode
             opcode.run(self)
-            print 'level %u' % (len(self.registers_stack)), self.registers()
+            print 'level %u' % (len(self.registers_stack)), self.get_registers()
 
 #####################################################################################################
 #

@@ -7,7 +7,7 @@
 
 #####################################################################################################
 
-__all__ = ['in2mm', 'in2pt', 'mm2in', 'pt2in', 'pt2mm', 'sp2in', 'sp2mm', 'sp2pt']
+__all__ = ['in2mm', 'in2pt', 'mm2in', 'pt2in', 'pt2mm', 'sp2in', 'sp2mm', 'sp2pt', 'sp2dpi']
 
 #####################################################################################################
 
@@ -28,17 +28,22 @@ import fractions
 #  @ 1200 dpi: 1 pt = 21 um
 #  
 
+# 1 in = 72 bp
 big_point_in_inch = 72
-cicero_in_didot = 12
-didot_in_point = fractions.Fraction(1238, 1157)
-inch_in_mm = fractions.Fraction(10, 254)
+# 1 cc = 12 dd
+didot_in_cicero = 12
+# 1157 dd = 1238 pt
+didot_in_point = fractions.Fraction(1157, 1238)
+# 1 in = 25.4 mm
+mm_in_inch = fractions.Fraction(254, 10)
+# 1 in = 72.27 pt
 point_in_inch = fractions.Fraction(7227, 100)
+# 1 pt = 2**16 sp
 scaled_point_in_point = 2**16
 
+inch_in_mm = 1 / mm_in_inch
 point_in_mm = point_in_inch * inch_in_mm
-
 inch_in_point = 1 / point_in_inch
-mm_in_inch = 1 / inch_in_mm
 mm_in_point = 1 / point_in_mm
 pt_in_sp = fractions.Fraction(1, scaled_point_in_point)
 
@@ -86,6 +91,10 @@ def sp2in(x):
 def sp2mm(x):
 
     return pt2mm(sp2pt(x))
+
+def sp2dpi(x):
+
+    return in2pt(sp2pt(x))
 
 #####################################################################################################
 #

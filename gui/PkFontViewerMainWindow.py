@@ -8,7 +8,7 @@ from PyQt4 import QtGui, QtCore, uic
 
 #####################################################################################################
 
-from FontManager import FontManager
+from PyDVI.FontManager import *
 
 #####################################################################################################
 
@@ -70,7 +70,7 @@ class MainWindow(QtGui.QMainWindow):
         font_name = str(form.font_name_line_edit.text())
 
         #try:
-        self.font = self.font_manager.load_font(FontManager.Pk, font_name)
+        self.font = self.font_manager.load_font(font_types.Pk, font_name)
         
         form.char_code_spin_box.setMaximum(len(self.font) -1)
         
@@ -90,7 +90,7 @@ class MainWindow(QtGui.QMainWindow):
         if self.font is None:
             return
 
-        glyph = self.font.get_glyph(i)
+        glyph = self.font[i]
         
         glyph.print_summary()
         glyph.print_glyph()

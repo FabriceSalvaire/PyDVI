@@ -137,6 +137,8 @@ class TfmFile(object):
 
     def read_fix_word(self, i):
 
+        # x / 2**20 ?
+
         bytes = map(ord, self.map[i:i+4])
 
         # bytes = [0x7F,0xFF,0xFF,0xFF]
