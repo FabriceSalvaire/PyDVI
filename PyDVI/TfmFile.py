@@ -137,28 +137,14 @@ Font Parameters:
 
 #####################################################################################################
 
-HEADER_ITEMS = 12
-
-HEADER_DATA_LENGTH_MIN = 18
-
-CHARACTER_CODING_SCHEME_LENGTH = 40
-FAMILY_LENGTH= 20
-
-HEADER_INDEX = 24
-CHECKSUM_INDEX = HEADER_INDEX
-DESIGN_FONT_SIZE_INDEX = CHECKSUM_INDEX +4
-CHARACTER_CODING_SCHEME_INDEX = DESIGN_FONT_SIZE_INDEX +4
-FAMILY_INDEX = CHARACTER_CODING_SCHEME_INDEX + CHARACTER_CODING_SCHEME_LENGTH
-SEVEN_BIT_SAFE_FLAG_INDEX = FAMILY_INDEX + FAMILY_LENGTH
-
 NO_TAG, LIG_TAG, LIST_TAG, EXT_TAG = range(4)
 
 KERN_OPCODE = 128
 
 #####################################################################################################
 
-def word_index(base, index):
-    return 4*(base + index)
+def word_ptr(base, ptr):
+    return 4*(base + ptr)
 
 #####################################################################################################
 
@@ -185,24 +171,38 @@ class TfmParser(object):
 
         for i in xrange(self.lig_kern_table_length):
 
-            base = word_index(self.lig_kern_table_index, i)
+            base = word_ptr(self.lig_kern_table_ptr, i)
 
             skip_byte, next_char, op_byte, remainder = map(ord, self.map[base:base+4])
 
-            # print i, skip_byte, chr(next_char), op_byte, remainder
+            print i, skip_byte, chr(next_char), op_byte, remainder
 
             if op_byte >= KERN_OPCODE:
 
-                kern_index = 256*(op_byte-KERN_OPCODE) + remainder
-                kern = self.read_fix_word(word_index(self.kern_table_index, kern_index))
+                kern_ptr = 256*(op_byte-KERN_OPCODE) + remainder
+                kern = self.read_fix_word(word_ptr(self.kern_table_ptr, kern_ptr))
 
-                print 'kern', next_char, chr(next_char), kern_index, kern
+                print 'kern', i, next_char, chr(next_char), kern_ptr, kern
+
+            else:
+
+                a = op_byte >> 2
+                b = op_byte & 0x02
+                c = op_byte & 0x01
+
+                print 'lig', a, b, c, chr(next_char), remainder
 
     ###############################################
 
     def read_lengths(self):
 
         # A font may contain as many as 256 characters.
+        #   sc - 1 <= lc <= 255
+        # extensible_character_table_length <= 256
+
+        self.ptr = 0
+
+        number_of_items = 12
 
         (self.entire_file_length,
          self.header_data_length,
@@ -215,27 +215,30 @@ class TfmParser(object):
          self.lig_kern_table_length,
          self.kern_table_length,
          self.extensible_character_table_length,
-         self.font_parameter_length) =  map(lambda i: self.read_unsigned_byte2(2*i), range(HEADER_ITEMS))
+         self.font_parameter_length) = map(lambda i: self.read_unsigned_byte2(self.ptr),
+                                           range(number_of_items))
 
         self.number_of_chars = self.largest_character_code - self.smallest_character_code +1
 
-        if self.header_data_length < HEADER_DATA_LENGTH_MIN:
-            self.header_data_length = HEADER_DATA_LENGTH_MIN
+        header_data_length_min = 18
+        if self.header_data_length < header_data_length_min:
+            self.header_data_length = header_data_length_min
 
-        # Compute index
+        # Compute table pointers of blocs of 4 bytes
 
-        # HEADER_ITEMS*2/4
-        self.character_info_index = HEADER_ITEMS/2 + self.header_data_length
-        self.width_table_index = self.character_info_index + self.number_of_chars
-        self.height_table_index = self.width_table_index + self.width_table_length
-        self.depth_table_index = self.height_table_index + self.height_table_length
-        self.italic_correction_table_index = self.depth_table_index + self.depth_table_length
-        self.lig_kern_table_index = self.italic_correction_table_index + self.italic_correction_table_length
-        self.kern_table_index = self.lig_kern_table_index + self.lig_kern_table_length
-        self.extensible_character_table_index = self.kern_table_index + self.kern_table_length
-        self.font_parameter_index = self.extensible_character_table_index + self.extensible_character_table_length
+        self.header_ptr = 2*number_of_items
+        # Convert number_of_items * 2 bytes to 4 bytes
+        self.character_info_ptr = number_of_items/2 + self.header_data_length
+        self.width_table_ptr = self.character_info_ptr + self.number_of_chars
+        self.height_table_ptr = self.width_table_ptr + self.width_table_length
+        self.depth_table_ptr = self.height_table_ptr + self.height_table_length
+        self.italic_correction_table_ptr = self.depth_table_ptr + self.depth_table_length
+        self.lig_kern_table_ptr = self.italic_correction_table_ptr + self.italic_correction_table_length
+        self.kern_table_ptr = self.lig_kern_table_ptr + self.lig_kern_table_length
+        self.extensible_character_table_ptr = self.kern_table_ptr + self.kern_table_length
+        self.font_parameter_ptr = self.extensible_character_table_ptr + self.extensible_character_table_length
 
-        length = self.font_parameter_index + self.font_parameter_length
+        length = self.font_parameter_ptr + self.font_parameter_length
         if self.entire_file_length != length:
             raise NameError('Bad TFM file')
 
@@ -243,21 +246,26 @@ class TfmParser(object):
 
     def read_header(self):
 
-        checksum = self.read_unsigned_byte4(CHECKSUM_INDEX)
-        design_font_size = self.read_fix_word(DESIGN_FONT_SIZE_INDEX)
+        # character_coding_scheme_length = 40
+        # family_length= 20
 
-        if self.header_data_length > CHARACTER_CODING_SCHEME_INDEX:
-            character_coding_scheme = self.read_bcpl(CHARACTER_CODING_SCHEME_INDEX)
+        self.ptr = self.header_ptr
+
+        checksum = self.read_unsigned_byte4(self.ptr)
+        design_font_size = self.read_fix_word(self.ptr)
+
+        if self.header_data_length > self.ptr:
+            character_coding_scheme = self.read_bcpl(self.ptr)
         else:
             character_coding_scheme = None
         
-        if self.header_data_length > FAMILY_INDEX:
-            family = self.read_bcpl(FAMILY_INDEX)
+        if self.header_data_length > self.ptr:
+            family = self.read_bcpl(self.ptr)
         else:
             family = None
 
-        if self.header_data_length > SEVEN_BIT_SAFE_FLAG_INDEX:
-            seven_bit_safe_flag = self.read_unsigned_byte4(SEVEN_BIT_SAFE_FLAG)
+        if self.header_data_length > self.ptr:
+            seven_bit_safe_flag = self.read_unsigned_byte4(self.ptr)
             # Fixme: complete
 
         self.tfm = Tfm(self.smallest_character_code,
@@ -271,40 +279,46 @@ class TfmParser(object):
 
     def read_font_parameters(self):
                  
-        base = self.font_parameter_index
+        self.ptr = self.font_parameter_ptr
  
-        # Fixme: func = lambda ...
-        self.tfm.set_font_parameters(map(lambda i: self.read_fix_word(word_index(base, i)),
+        self.tfm.set_font_parameters(map(lambda i: self.read_fix_word(self.ptr),
                                          range(self.font_parameter_length)))
 
-        base += self.font_parameter_length
-
         if self.tfm.character_coding_scheme == 'TeX math symbols':
-            self.tfm.set_math_symbols_parameters(map(lambda i: self.read_fix_word(word_index(base, i)),
+            self.tfm.set_math_symbols_parameters(map(lambda i: self.read_fix_word(self.ptr),
                                                      range(15)))
 
         elif self.tfm.character_coding_scheme == 'TeX math extension':
-            self.tfm.set_math_extension_parameters(map(lambda i: self.read_fix_word(word_index(base, i)),
+            self.tfm.set_math_extension_parameters(map(lambda i: self.read_fix_word(self.ptr),
                                                        range(6)))
 
     ###############################################
 
     def process_char(self, c):
         
-        width_index, height_index, depth_index, italic_index, tag, remainder = self.read_char_info(c)
+        width_ptr, height_ptr, depth_ptr, italic_ptr, tag, remainder = self.read_char_info(c)
 
-        width = self.read_fix_word(word_index(self.width_table_index, width_index))
-        height = self.read_fix_word(word_index(self.height_table_index, height_index))
-        depth = self.read_fix_word(word_index(self.depth_table_index, depth_index))
-        italic_correction = self.read_fix_word(word_index(self.italic_correction_table_index, italic_index))
+        if width_ptr == 0: # unvalid char
+            return
+
+        width = self.read_fix_word(word_ptr(self.width_table_ptr, width_ptr))
+        
+        if height_ptr == 0:
+            height = self.read_fix_word(word_ptr(self.height_table_ptr, height_ptr))
+        else:
+            height = 0
+
+        if depth_ptr == 0:
+            depth = self.read_fix_word(word_ptr(self.depth_table_ptr, depth_ptr))
+        else:
+            depth = 0
+
+        if italic_ptr == 0:
+            italic_correction = self.read_fix_word(word_ptr(self.italic_correction_table_ptr, italic_ptr))
+        else:
+            italic_correction = 0
 
         next_larger_character = None
-
-        if tag == LIST_TAG:
-            next_larger_character = remainder
-
-        elif tag == EXT_TAG:
-            top, mid, bot, rep = self.read_extensible_recipe(remainder)
 
         tfm_char = TfmChar(c,
                            width,
@@ -314,21 +328,43 @@ class TfmParser(object):
 
         tfm_char.print_summary()
 
+        print 'tag', tag
+        
+        if tag == LIG_TAG:
+            lig_kern_program_ptr = remainder
+            print 'lig_kern_program_ptr', lig_kern_program_ptr
+            
+        elif tag == LIST_TAG:
+            next_larger_character = remainder
+            print 'next_larger_character', next_larger_character
+
+        elif tag == EXT_TAG:
+            top, mid, bot, rep = self.read_extensible_recipe(remainder)
+            print 'ext_tag', top, mid, bot, rep
+
+    ###############################################
+
+    def read_four_bytes(self, i):
+
+        return map(ord, self.map[i:i+4])
+
     ###############################################
 
     def read_bcpl(self, i):
 
         length = ord(self.map[i])
+        i += 1
+        self.ptr = i + length
 
-        k = i + 1
-
-        return self.map[k:k+length]
+        return self.map[i:self.ptr]
 
     ###############################################
 
     def read_unsigned_byte2(self, i):
 
-        bytes = map(ord, self.map[i:i+2])
+        self.ptr = i + 2
+
+        bytes = map(ord, self.map[i:self.ptr])
 
         return (bytes[0] << 8) + bytes[1]
 
@@ -336,7 +372,9 @@ class TfmParser(object):
 
     def read_unsigned_byte4(self, i):
 
-        bytes = map(ord, self.map[i:i+4])
+        self.ptr = i + 4
+
+        bytes = map(ord, self.map[i:self.ptr])
 
         return (((((bytes[0] << 8) + bytes[1]) << 8) + bytes[2]) << 8) + bytes[3]
 
@@ -344,61 +382,47 @@ class TfmParser(object):
 
     def read_fix_word(self, i):
 
-        bytes = map(ord, self.map[i:i+4])
+        # A fix word is a signed quantity, with the two's complement of the entire word used to
+        # represent negation.  Of the 32 bits in fix word, exactly 12 are to the left of the binary
+        # point.
 
-        # bytes = [0x7F,0xFF,0xFF,0xFF]
-        # bytes = [0x80,0x0F,0xFF,0xFF]
-        # bytes = [0x80,0x00,0x0,0x0]
+        self.ptr = i + 4
 
-        integral_part = bytes[0]
-        if integral_part >= 128:
-            integral_part -= 256
-            negative = True
-        else:
-            negative = False
-        integral_part *= 16
+        bytes = map(ord, self.map[i:self.ptr])
 
-        integral_part += (bytes[1] >> 4)
+        fix_word = bytes[0]
+        if fix_word >= 128:
+            fix_word -= 256
+        fix_word *= 2**24
 
-        integral_part += ((((bytes[1] & 0xF) << 8) + bytes[2]) << 8) + bytes[3]
-        integral_part = float(integral_part)/2**20
+        fix_word += (((bytes[1] << 8) + bytes[2]) << 8) + bytes[3]
 
-        return integral_part
-
-        # fractional_part = float(((((bytes[1] & 0xF) << 8) + bytes[2]) << 8) + bytes[3])
-        # fractional_part /= 2**20
-        # 
-        # # print negative, integral_part, fractional_part
-        # 
-        # if negative is True:
-        #     return integral_part - fractional_part
-        # else:
-        #     return integral_part + fractional_part
+        return float(fix_word)/2**20
 
     ###############################################
 
     def read_char_info(self, c):
  
-        i = word_index(self.character_info_index, c - self.smallest_character_code)
+        i = word_ptr(self.character_info_ptr, c - self.smallest_character_code)
  
-        bytes = map(ord, self.map[i:i+4])
+        bytes = self.read_four_bytes(i)
 
-        width_index  = bytes[0]
-        height_index = bytes[1] >> 4
-        depth_index  = bytes[1] & 0xF
-        italic_index = bytes[2] >> 6
-        tag          = bytes[2] & 0x3
-        remainder    = bytes[3]
+        width_ptr  = bytes[0]
+        height_ptr = bytes[1] >> 4
+        depth_ptr  = bytes[1] & 0xF
+        italic_ptr = bytes[2] >> 6
+        tag        = bytes[2] & 0x3
+        remainder  = bytes[3]
 
-        return width_index, height_index, depth_index, italic_index, tag, remainder
+        return width_ptr, height_ptr, depth_ptr, italic_ptr, tag, remainder
 
     ###############################################
 
     def read_extensible_recipe(self, c):
  
-        i = word_index(self.extensible_character_table_index, c)
+        i = word_ptr(self.extensible_character_table_ptr, c)
 
-        return map(ord, self.map[i:i+4])
+        return self.read_four_bytes(i)
 
     ###############################################
 
