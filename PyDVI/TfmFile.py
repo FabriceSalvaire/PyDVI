@@ -1,13 +1,88 @@
 #####################################################################################################
-#
-# PyDVI - Python Library to Process DVI Stream
-# Copyright (C) 2009 Salvaire Fabrice
-#
-#####################################################################################################
-
-#####################################################################################################
 
 import mmap
+
+#####################################################################################################
+
+class Tfm(object):
+
+    ###############################################
+
+    def __init__(self, 
+                 smallest_character_code,
+                 largest_character_code,
+                 checksum,
+                 design_font_size,
+                 character_coding_scheme,
+                 family):
+
+        self.smallest_character_code = smallest_character_code
+        self.largest_character_code = largest_character_code
+        self.checksum = checksum
+        self.design_font_size = design_font_size
+        self.character_coding_scheme = character_coding_scheme
+        self.family = family
+
+    ###############################################
+
+    def set_font_parameters(self, 
+                            slant,
+                            spacing,
+                            space_stretch,
+                            space_shrink,
+                            x_height,
+                            quad,
+                            extra_space):
+
+        self.slant = slant
+        self.spacing = spacing
+        self.space_stretch = space_stretch
+        self.space_shrink = space_shrink
+        self.x_height = x_height
+        self.quad quad
+        self.extra_space = extra_space
+
+    ###############################################
+
+    def print_summary(self):
+
+    ###############################################
+
+    def print_summary(self):
+
+        print '''
+TFM %s
+
+ - Smallest character code in the font: %u 
+ - Largest character code in the font: %u 
+
+ - Checksum: %u
+ - Design Font Size: %f
+ - Character coding scheme: "%s"
+ - Family: "%s"
+
+Font Parameters:
+ - Slant: %f
+ - Spacing: %f
+ - Space Stretch: %f
+ - Space Shrink: %f
+ - X Height: %f
+ - Quad: %f
+ - Extra Space: %f
+''' % (self.tfm_file_name,
+       self.smallest_character_code,
+       self.largest_character_code,
+       self.checksum,
+       self.design_font_size,
+       self.character_coding_scheme,
+       self.family,
+       self.slant,
+       self.spacing,
+       self.space_stretch,
+       self.space_shrink,
+       self.x_height,
+       self.quad,
+       self.extra_space)
 
 #####################################################################################################
 
@@ -23,12 +98,19 @@ CHARACTER_CODING_SCHEME_INDEX = DESIGN_FONT_SIZE_INDEX +4
 FAMILY_INDEX = CHARACTER_CODING_SCHEME_INDEX + CHARACTER_CODING_SCHEME_LENGTH
 SEVEN_BIT_SAFE_FLAG_INDEX = FAMILY_INDEX + FAMILY_LENGTH
 
+NO_TAG = 0
+LIG_TAG = 1
+LIST_TAG = 2
+EXT_TAG = 3
+
+#####################################################################################################
+
 def word_index(base, index):
     return (base + index)*4
 
 #####################################################################################################
 
-class TfmFile(object):
+class TfmParser(object):
 
     ###############################################
 
@@ -36,11 +118,21 @@ class TfmFile(object):
 
         self.tfm_file_name = tfm_file_name
 
-        self.tfm_file = open(self.tfm_file_name, 'r+b')
+        self.tfm_file = open(self.tfm_file_name, 'r+b') # Fixme: check
 
         self.map = mmap.mmap(self.tfm_file.fileno(), 0)
 
-        # Read lengths
+        self.read_lengths()
+        self.read_header()
+        self.read_font_parameters()
+
+        # Fixme: from 0 ?
+        for c in xrange(self.smallest_character_code, self.largest_character_code +1):
+            self.process_char(c)
+
+    ###############################################
+
+    def read_lengths(self):
 
         (self.entire_file_length,
          self.header_data_length,
@@ -73,39 +165,74 @@ class TfmFile(object):
 
         length = self.font_parameter_index + self.font_parameter_length
         if self.entire_file_length != length:
-            # print self.entire_file_length, '!=', length
             raise NameError('Bad TFM file')
 
-        self.checksum = self.read_unsigned_byte4(CHECKSUM_INDEX)
-        self.design_font_size = self.read_fix_word(DESIGN_FONT_SIZE_INDEX)
-        self.character_coding_scheme = self.read_bcpl(CHARACTER_CODING_SCHEME_INDEX)
-        self.family = self.read_bcpl(FAMILY_INDEX)
+    ###############################################
 
-        # Read Font Parameters
+    def read_header(self):
 
-        (self.slant,
-         self.spacing,
-         self.space_stretch,
-         self.space_shrink,
-         self.x_height,
-         self.quad,
-         self.extra_space) = map(lambda i: self.read_fix_word(word_index(self.font_parameter_index, i)),
-                                 range(self.font_parameter_length))
-         
-        # Read Chars 
+        checksum = self.read_unsigned_byte4(CHECKSUM_INDEX)
+        design_font_size = self.read_fix_word(DESIGN_FONT_SIZE_INDEX)
+
+        if header_data_length > CHARACTER_CODING_SCHEME_INDEX:
+            character_coding_scheme = self.read_bcpl(CHARACTER_CODING_SCHEME_INDEX)
+        else:
+            character_coding_scheme = None
         
-        self.widths = []
-        self.heights = []
+        if header_data_length > FAMILY_INDEX:
+            family = self.read_bcpl(FAMILY_INDEX))
+        else:
+            family = None
 
-        for c in xrange(self.smallest_character_code, self.largest_character_code +1):
-            
-            width_index, height_index, depth_index, italic_index, tag, remainder = self.read_char_info(c)
+        if header_data_length > SEVEN_BIT_SAFE_FLAG_INDEX:
+            seven_bit_safe_flag = self.read_unsigned_byte4(SEVEN_BIT_SAFE_FLAG)
+            # Fixme: complete
 
-            width = self.read_fix_word(word_index(self.width_table_index, width_index))
-            height = self.read_fix_word(word_index(self.height_table_index, height_index))
+        self.tfm = Tfm(smallest_character_code,
+                       largest_character_code,
+                       checksum,
+                       design_font_size,
+                       character_coding_scheme,
+                       family)
 
-            self.widths.append(width)
-            self.heights.append(height)
+    ###############################################
+
+    def read_font_parameters(self):
+                  
+        (slant,
+         spacing,
+         space_stretch,
+         space_shrink,
+         x_height,
+         quad,
+         extra_space) = map(lambda i: self.read_fix_word(word_index(self.font_parameter_index, i)),
+                            range(self.font_parameter_length))
+                            
+        self.tfm.set_font_parameters(slant,
+                                     spacing,
+                                     space_stretch,
+                                     space_shrink,
+                                     x_height,
+                                     quad,
+                                     extra_space)
+
+    ###############################################
+
+    def process_char(self, c):
+        
+        width_index, height_index, depth_index, italic_index, tag, remainder = self.read_char_info(c)
+
+        next_larger_character = None
+
+        if tag == LIST_TAG:
+            next_larger_character = remainder
+        elif tag == EXT_TAG:
+            top, mid, bot, rep = self.read_extensible_recipe(remainder)
+
+        width = self.read_fix_word(word_index(self.width_table_index, width_index))
+        height = self.read_fix_word(word_index(self.height_table_index, height_index))
+        depth = self.read_fix_word(word_index(self.depth_table_index, depth_index))
+        italic_correction = self.read_fix_word(word_index(self.italic_correction_table_index, italic_index))
 
     ###############################################
 
@@ -137,8 +264,6 @@ class TfmFile(object):
 
     def read_fix_word(self, i):
 
-        # x / 2**20 ?
-
         bytes = map(ord, self.map[i:i+4])
 
         # bytes = [0x7F,0xFF,0xFF,0xFF]
@@ -156,7 +281,7 @@ class TfmFile(object):
         integral_part += (bytes[1] >> 4)
 
         fractional_part = float(((((bytes[1] & 0xF) << 8) + bytes[2]) << 8) + bytes[3])
-        fractional_part /= 2**20 # 1 << 20
+        fractional_part /= 2**20
 
         # print negative, integral_part, fractional_part
 
@@ -167,9 +292,9 @@ class TfmFile(object):
 
     ###############################################
 
-    def read_char_info(self, k):
+    def read_char_info(self, c):
  
-        i = word_index(self.character_info_index, k)
+        i = word_index(self.character_info_index, c)
  
         bytes = map(ord, self.map[i:i+4])
 
@@ -181,6 +306,14 @@ class TfmFile(object):
         remainder    = bytes[3]
 
         return width_index, height_index, depth_index, italic_index, tag, remainder
+
+    ###############################################
+
+    def read_extensible_recipe(self, c):
+ 
+        i = word_index(self.extensible_character_table_index, c)
+
+        return map(ord, self.map[i:i+4])
 
     ###############################################
 
@@ -201,20 +334,6 @@ TFM %s
  - Number of words in the kern table: %u 
  - Number of words in the extensible character table: %u 
  - Number of font parameter words: %u 
-
- - Checksum: %u
- - Design Font Size: %f
- - Character coding scheme: "%s"
- - Family: "%s"
-
-Font Parameters:
- - Slant: %f
- - Spacing: %f
- - Space Stretch: %f
- - Space Shrink: %f
- - X Height: %f
- - Quad: %f
- - Extra Space: %f
 ''' % (self.tfm_file_name,
        self.entire_file_length,
        self.header_data_length,
@@ -228,19 +347,7 @@ Font Parameters:
        self.kern_table_length,
        self.extensible_character_table_length,
        self.font_parameter_length,
-       self.checksum,
-       self.design_font_size,
-       self.character_coding_scheme,
-       self.family,
-       self.slant,
-       self.spacing,
-       self.space_stretch,
-       self.space_shrink,
-       self.x_height,
-       self.quad,
-       self.extra_space)
-
-        print 'Char 65', self.widths[65], self.heights[65]
+       )
 
 #####################################################################################################
 #
@@ -262,7 +369,7 @@ if __name__ == '__main__':
 
     tfm_file_name = args[0]
 
-    tfm_file = TfmFile(tfm_file_name)
+    tfm_file = TfmParser(tfm_file_name)
 
     tfm_file.print_summary()
 
