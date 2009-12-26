@@ -25,26 +25,42 @@ class Tfm(object):
 
     ###############################################
 
-    def set_font_parameters(self, 
-                            slant,
-                            spacing,
-                            space_stretch,
-                            space_shrink,
-                            x_height,
-                            quad,
-                            extra_space):
+    def set_font_parameters(self, parameters):
 
-        self.slant = slant
-        self.spacing = spacing
-        self.space_stretch = space_stretch
-        self.space_shrink = space_shrink
-        self.x_height = x_height
-        self.quad quad
-        self.extra_space = extra_space
+        (self.slant,
+         self.spacing,
+         self.space_stretch,
+         self.space_shrink,
+         self.x_height,
+         self.quad,
+         self.extra_space) = parameters
 
     ###############################################
 
-    def print_summary(self):
+    def set_math_symbols_parameters(self, parameters):
+          
+        (self.num1,
+         self.num2,
+         self.num3,
+         self.denom1,
+         self.denom2,
+         self.sup1,
+         self.sup2,
+         self.sup3,
+         self.sub1,
+         self.sub2,
+         self.supdrop,
+         self.subdrop,
+         self.delim1,
+         self.delim2,
+         self.axis height) = parameters
+
+    ###############################################
+
+    def set_math_extension_parameters(self, parameters):
+
+        self.default_rule_thickness = parameters[0]
+        self.big_op_spacing = parameters[1:]
 
     ###############################################
 
@@ -126,7 +142,6 @@ class TfmParser(object):
         self.read_header()
         self.read_font_parameters()
 
-        # Fixme: from 0 ?
         for c in xrange(self.smallest_character_code, self.largest_character_code +1):
             self.process_char(c)
 
@@ -198,23 +213,22 @@ class TfmParser(object):
     ###############################################
 
     def read_font_parameters(self):
-                  
-        (slant,
-         spacing,
-         space_stretch,
-         space_shrink,
-         x_height,
-         quad,
-         extra_space) = map(lambda i: self.read_fix_word(word_index(self.font_parameter_index, i)),
-                            range(self.font_parameter_length))
-                            
-        self.tfm.set_font_parameters(slant,
-                                     spacing,
-                                     space_stretch,
-                                     space_shrink,
-                                     x_height,
-                                     quad,
-                                     extra_space)
+                 
+        base = self.font_parameter_index
+ 
+        # Fixme: func = lambda ...
+        self.tfm.set_font_parameters(map(lambda i: self.read_fix_word(word_index(base, i)),
+                                         range(self.font_parameter_length)))
+
+        base += self.font_parameter_length
+
+        if self.tfm.character_coding_scheme == 'TeX math symbols':
+            self.tfm.set_math_symbols_parameters(map(lambda i: self.read_fix_word(word_index(base, i)),
+                                                     range(15)))
+
+        elif self.tfm.character_coding_scheme == 'TeX math extension':
+            self.tfm.set_math_extension_parameters(map(lambda i: self.read_fix_word(word_index(base, i)),
+                                                       range(6)))
 
     ###############################################
 
@@ -222,17 +236,18 @@ class TfmParser(object):
         
         width_index, height_index, depth_index, italic_index, tag, remainder = self.read_char_info(c)
 
-        next_larger_character = None
-
-        if tag == LIST_TAG:
-            next_larger_character = remainder
-        elif tag == EXT_TAG:
-            top, mid, bot, rep = self.read_extensible_recipe(remainder)
-
         width = self.read_fix_word(word_index(self.width_table_index, width_index))
         height = self.read_fix_word(word_index(self.height_table_index, height_index))
         depth = self.read_fix_word(word_index(self.depth_table_index, depth_index))
         italic_correction = self.read_fix_word(word_index(self.italic_correction_table_index, italic_index))
+
+        next_larger_character = None
+
+        if tag == LIST_TAG:
+            next_larger_character = remainder
+
+        elif tag == EXT_TAG:
+            top, mid, bot, rep = self.read_extensible_recipe(remainder)
 
     ###############################################
 
@@ -294,7 +309,7 @@ class TfmParser(object):
 
     def read_char_info(self, c):
  
-        i = word_index(self.character_info_index, c)
+        i = word_index(self.character_info_index, c - self.smallest_character_code)
  
         bytes = map(ord, self.map[i:i+4])
 
