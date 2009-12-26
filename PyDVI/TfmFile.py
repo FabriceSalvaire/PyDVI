@@ -4,6 +4,42 @@ import mmap
 
 #####################################################################################################
 
+class TfmChar(object):
+
+    ###############################################
+
+    def __init__(self,
+                 char_code,
+                 width,
+                 height,
+                 depth,
+                 italic_correction):
+
+        self.char_code = char_code
+        self.width = width
+        self.height = height
+        self.depth = depth
+        self.italic_correction = italic_correction
+
+    ###############################################
+
+    def print_summary(self):
+
+        print '''
+Char %u %s
+ - width             %.3f
+ - height            %.3f
+ - depth             %.3f
+ - italic correction %.3f
+''' % (self.char_code, chr(self.char_code),
+       self.width,
+       self.height,
+       self.depth,
+       self.italic_correction,
+       )
+
+#####################################################################################################
+
 class Tfm(object):
 
     ###############################################
@@ -53,7 +89,7 @@ class Tfm(object):
          self.subdrop,
          self.delim1,
          self.delim2,
-         self.axis height) = parameters
+         self.axis_height) = parameters
 
     ###############################################
 
@@ -85,8 +121,7 @@ Font Parameters:
  - X Height: %f
  - Quad: %f
  - Extra Space: %f
-''' % (self.tfm_file_name,
-       self.smallest_character_code,
+''' % (self.smallest_character_code,
        self.largest_character_code,
        self.checksum,
        self.design_font_size,
@@ -102,6 +137,8 @@ Font Parameters:
 
 #####################################################################################################
 
+HEADER_ITEMS = 12
+
 HEADER_DATA_LENGTH_MIN = 18
 
 CHARACTER_CODING_SCHEME_LENGTH = 40
@@ -114,15 +151,14 @@ CHARACTER_CODING_SCHEME_INDEX = DESIGN_FONT_SIZE_INDEX +4
 FAMILY_INDEX = CHARACTER_CODING_SCHEME_INDEX + CHARACTER_CODING_SCHEME_LENGTH
 SEVEN_BIT_SAFE_FLAG_INDEX = FAMILY_INDEX + FAMILY_LENGTH
 
-NO_TAG = 0
-LIG_TAG = 1
-LIST_TAG = 2
-EXT_TAG = 3
+NO_TAG, LIG_TAG, LIST_TAG, EXT_TAG = range(4)
+
+KERN_OPCODE = 128
 
 #####################################################################################################
 
 def word_index(base, index):
-    return (base + index)*4
+    return 4*(base + index)
 
 #####################################################################################################
 
@@ -134,7 +170,7 @@ class TfmParser(object):
 
         self.tfm_file_name = tfm_file_name
 
-        self.tfm_file = open(self.tfm_file_name, 'r+b') # Fixme: check
+        self.tfm_file = open(self.tfm_file_name, 'r+b')
 
         self.map = mmap.mmap(self.tfm_file.fileno(), 0)
 
@@ -142,12 +178,31 @@ class TfmParser(object):
         self.read_header()
         self.read_font_parameters()
 
+        # self.tfm.print_summary()
+
         for c in xrange(self.smallest_character_code, self.largest_character_code +1):
             self.process_char(c)
+
+        for i in xrange(self.lig_kern_table_length):
+
+            base = word_index(self.lig_kern_table_index, i)
+
+            skip_byte, next_char, op_byte, remainder = map(ord, self.map[base:base+4])
+
+            # print i, skip_byte, chr(next_char), op_byte, remainder
+
+            if op_byte >= KERN_OPCODE:
+
+                kern_index = 256*(op_byte-KERN_OPCODE) + remainder
+                kern = self.read_fix_word(word_index(self.kern_table_index, kern_index))
+
+                print 'kern', next_char, chr(next_char), kern_index, kern
 
     ###############################################
 
     def read_lengths(self):
+
+        # A font may contain as many as 256 characters.
 
         (self.entire_file_length,
          self.header_data_length,
@@ -160,16 +215,18 @@ class TfmParser(object):
          self.lig_kern_table_length,
          self.kern_table_length,
          self.extensible_character_table_length,
-         self.font_parameter_length) =  map(lambda i: self.read_unsigned_byte2(2*i), range(12))
+         self.font_parameter_length) =  map(lambda i: self.read_unsigned_byte2(2*i), range(HEADER_ITEMS))
+
+        self.number_of_chars = self.largest_character_code - self.smallest_character_code +1
 
         if self.header_data_length < HEADER_DATA_LENGTH_MIN:
             self.header_data_length = HEADER_DATA_LENGTH_MIN
 
         # Compute index
 
-        self.character_info_index = 6 + self.header_data_length
-        self.width_table_index = (self.character_info_index + 
-                                  self.largest_character_code - self.smallest_character_code +1)
+        # HEADER_ITEMS*2/4
+        self.character_info_index = HEADER_ITEMS/2 + self.header_data_length
+        self.width_table_index = self.character_info_index + self.number_of_chars
         self.height_table_index = self.width_table_index + self.width_table_length
         self.depth_table_index = self.height_table_index + self.height_table_length
         self.italic_correction_table_index = self.depth_table_index + self.depth_table_length
@@ -189,22 +246,22 @@ class TfmParser(object):
         checksum = self.read_unsigned_byte4(CHECKSUM_INDEX)
         design_font_size = self.read_fix_word(DESIGN_FONT_SIZE_INDEX)
 
-        if header_data_length > CHARACTER_CODING_SCHEME_INDEX:
+        if self.header_data_length > CHARACTER_CODING_SCHEME_INDEX:
             character_coding_scheme = self.read_bcpl(CHARACTER_CODING_SCHEME_INDEX)
         else:
             character_coding_scheme = None
         
-        if header_data_length > FAMILY_INDEX:
-            family = self.read_bcpl(FAMILY_INDEX))
+        if self.header_data_length > FAMILY_INDEX:
+            family = self.read_bcpl(FAMILY_INDEX)
         else:
             family = None
 
-        if header_data_length > SEVEN_BIT_SAFE_FLAG_INDEX:
+        if self.header_data_length > SEVEN_BIT_SAFE_FLAG_INDEX:
             seven_bit_safe_flag = self.read_unsigned_byte4(SEVEN_BIT_SAFE_FLAG)
             # Fixme: complete
 
-        self.tfm = Tfm(smallest_character_code,
-                       largest_character_code,
+        self.tfm = Tfm(self.smallest_character_code,
+                       self.largest_character_code,
                        checksum,
                        design_font_size,
                        character_coding_scheme,
@@ -248,6 +305,14 @@ class TfmParser(object):
 
         elif tag == EXT_TAG:
             top, mid, bot, rep = self.read_extensible_recipe(remainder)
+
+        tfm_char = TfmChar(c,
+                           width,
+                           height,
+                           depth,
+                           italic_correction)
+
+        tfm_char.print_summary()
 
     ###############################################
 
@@ -295,15 +360,20 @@ class TfmParser(object):
 
         integral_part += (bytes[1] >> 4)
 
-        fractional_part = float(((((bytes[1] & 0xF) << 8) + bytes[2]) << 8) + bytes[3])
-        fractional_part /= 2**20
+        integral_part += ((((bytes[1] & 0xF) << 8) + bytes[2]) << 8) + bytes[3]
+        integral_part = float(integral_part)/2**20
 
-        # print negative, integral_part, fractional_part
+        return integral_part
 
-        if negative is True:
-            return integral_part - fractional_part
-        else:
-            return integral_part + fractional_part
+        # fractional_part = float(((((bytes[1] & 0xF) << 8) + bytes[2]) << 8) + bytes[3])
+        # fractional_part /= 2**20
+        # 
+        # # print negative, integral_part, fractional_part
+        # 
+        # if negative is True:
+        #     return integral_part - fractional_part
+        # else:
+        #     return integral_part + fractional_part
 
     ###############################################
 
