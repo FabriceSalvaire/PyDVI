@@ -1,139 +1,21 @@
 #####################################################################################################
+#
+# PyDVI - Python Library to Process DVI Stream
+# Copyright (C) 2009 Salvaire Fabrice
+#
+#####################################################################################################
+
+#####################################################################################################
+#
+# Audit
+#
+#  - 26/12/2009 fabrice
+#
+#####################################################################################################
+
+#####################################################################################################
 
 import mmap
-
-#####################################################################################################
-
-class TfmChar(object):
-
-    ###############################################
-
-    def __init__(self,
-                 char_code,
-                 width,
-                 height,
-                 depth,
-                 italic_correction):
-
-        self.char_code = char_code
-        self.width = width
-        self.height = height
-        self.depth = depth
-        self.italic_correction = italic_correction
-
-    ###############################################
-
-    def print_summary(self):
-
-        print '''
-Char %u %s
- - width             %.3f
- - height            %.3f
- - depth             %.3f
- - italic correction %.3f
-''' % (self.char_code, chr(self.char_code),
-       self.width,
-       self.height,
-       self.depth,
-       self.italic_correction,
-       )
-
-#####################################################################################################
-
-class Tfm(object):
-
-    ###############################################
-
-    def __init__(self, 
-                 smallest_character_code,
-                 largest_character_code,
-                 checksum,
-                 design_font_size,
-                 character_coding_scheme,
-                 family):
-
-        self.smallest_character_code = smallest_character_code
-        self.largest_character_code = largest_character_code
-        self.checksum = checksum
-        self.design_font_size = design_font_size
-        self.character_coding_scheme = character_coding_scheme
-        self.family = family
-
-    ###############################################
-
-    def set_font_parameters(self, parameters):
-
-        (self.slant,
-         self.spacing,
-         self.space_stretch,
-         self.space_shrink,
-         self.x_height,
-         self.quad,
-         self.extra_space) = parameters
-
-    ###############################################
-
-    def set_math_symbols_parameters(self, parameters):
-          
-        (self.num1,
-         self.num2,
-         self.num3,
-         self.denom1,
-         self.denom2,
-         self.sup1,
-         self.sup2,
-         self.sup3,
-         self.sub1,
-         self.sub2,
-         self.supdrop,
-         self.subdrop,
-         self.delim1,
-         self.delim2,
-         self.axis_height) = parameters
-
-    ###############################################
-
-    def set_math_extension_parameters(self, parameters):
-
-        self.default_rule_thickness = parameters[0]
-        self.big_op_spacing = parameters[1:]
-
-    ###############################################
-
-    def print_summary(self):
-
-        print '''
-TFM %s
-
- - Smallest character code in the font: %u 
- - Largest character code in the font: %u 
-
- - Checksum: %u
- - Design Font Size: %f
- - Character coding scheme: "%s"
- - Family: "%s"
-
-Font Parameters:
- - Slant: %f
- - Spacing: %f
- - Space Stretch: %f
- - Space Shrink: %f
- - X Height: %f
- - Quad: %f
- - Extra Space: %f
-''' % (self.smallest_character_code,
-       self.largest_character_code,
-       self.checksum,
-       self.design_font_size,
-       self.character_coding_scheme,
-       self.family,
-       self.slant,
-       self.spacing,
-       self.space_stretch,
-       self.space_shrink,
-       self.x_height,
-       self.quad,
-       self.extra_space)
 
 #####################################################################################################
 
@@ -156,7 +38,7 @@ class TfmParser(object):
 
         self.tfm_file_name = tfm_file_name
 
-        self.tfm_file = open(self.tfm_file_name, 'r+b')
+        self.tfm_file = open(self.tfm_file_name, 'rb')
 
         self.map = mmap.mmap(self.tfm_file.fileno(), 0)
 
@@ -221,8 +103,7 @@ class TfmParser(object):
         self.number_of_chars = self.largest_character_code - self.smallest_character_code +1
 
         header_data_length_min = 18
-        if self.header_data_length < header_data_length_min:
-            self.header_data_length = header_data_length_min
+        self.header_data_length = max(header_data_length_min, self.header_data_length)
 
         # Compute table pointers of blocs of 4 bytes
 
@@ -457,30 +338,6 @@ TFM %s
        self.extensible_character_table_length,
        self.font_parameter_length,
        )
-
-#####################################################################################################
-#
-#                                               Test
-#
-#####################################################################################################
-        
-if __name__ == '__main__':
-
-    # subprocess.call('kpsewhich', 'cmr10.tfm')
-
-    from optparse import OptionParser
-
-    usage = 'usage: %prog [options]'
-
-    parser = OptionParser(usage)
-
-    opt, args = parser.parse_args()
-
-    tfm_file_name = args[0]
-
-    tfm_file = TfmParser(tfm_file_name)
-
-    tfm_file.print_summary()
 
 #####################################################################################################
 #
