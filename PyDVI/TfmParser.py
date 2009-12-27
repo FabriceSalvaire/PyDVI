@@ -77,7 +77,7 @@ class TfmParser(FileStream):
 
     def read_four_byte_numbers_in_table(self, table, index):
 
-        return self.read_four_byte_numbers(self.position_in_table(tables.character_info, index))
+        return self.read_four_byte_numbers(self.position_in_table(table, index))
 
     ###############################################
 
@@ -112,13 +112,12 @@ class TfmParser(FileStream):
         self.table_lengths = [None]*len(tables)
 
         (self.entire_file_length,
-         self.table_lengths[tables.header],
+         header_length,
          self.smallest_character_code,
          self.largest_character_code) = self.repeat(self.read_unsigned_byte2, 4)
 
         header_data_length_min = 18
-        if self.table_lengths[tables.header] < header_data_length_min:
-            self.table_lengths[tables.header] = header_data_length_min
+        self.table_lengths[tables.header] = max(header_data_length_min, header_length)
         
         self.number_of_chars = self.largest_character_code - self.smallest_character_code +1
 
@@ -136,7 +135,6 @@ class TfmParser(FileStream):
         self.table_pointers[tables.header] = 24 # 12*2 bytes
 
         for table in xrange(tables.header, tables.font_parameter):
-            print table, self.table_lengths[table]
             self.table_pointers[table+1] = self.position_in_table(table, self.table_lengths[table])
 
         length = self.position_in_table(tables.font_parameter, self.table_lengths[tables.font_parameter])
@@ -215,17 +213,24 @@ class TfmParser(FileStream):
                 kern_index = 256*(op_byte - KERN_OPCODE) + remainder
                 kern = self.read_fix_word_in_table(tables.kern, kern_index)
         
-                print 'Kern index %u char code %u %.3f' % (i, next_char, kern)
+                obj = TfmKern(i, next_char, kern)
         
             else:
         
                 number_of_chars_to_pass_over = op_byte >> 2
                 current_char_is_deleted = (op_byte & 0x02) == 0
-                next_char_is_deleted = (op_byte & 0x01) == 0
+                next_char_is_deleted    = (op_byte & 0x01) == 0
         
                 ligature_char_code = remainder
         
-                print 'Lig index %u char code %u ligature char code %u' % (i, next_char, ligature_char_code)
+                obj = TfmLigature(i,
+                                  next_char,
+                                  ligature_char_code,
+                                  number_of_chars_to_pass_over,
+                                  current_char_is_deleted,
+                                  next_char_is_deleted)
+
+            self.tfm.add_kern_ligature(obj)
 
     ###############################################
 
@@ -238,17 +243,17 @@ class TfmParser(FileStream):
 
         width = self.read_fix_word_in_table(tables.width, width_index)
         
-        if height_index == 0:
+        if height_index != 0:
             height = self.read_fix_word_in_table(tables.height, height_index)
         else:
             height = 0
 
-        if depth_index == 0:
+        if depth_index != 0:
             depth = self.read_fix_word_in_table(tables.depth, depth_index)
         else:
             depth = 0
 
-        if italic_index == 0:
+        if italic_index != 0:
             italic_correction = self.read_fix_word_in_table(tables.italic_correction, italic_index)
         else:
             italic_correction = 0
