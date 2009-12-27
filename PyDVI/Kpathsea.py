@@ -22,14 +22,16 @@ import subprocess
 
 def which(filename, format = None):
 
-    """
+    '''
     Wrapper around kpsewhich program
-    """
+    '''
 
     command = ['kpsewhich']
+
     if format is not None:
-        command += ['--format=' + format]
-    command += [filename]
+        command.append('--format=' + format)
+
+    command.append(filename)
 
     command_string = string.join(command, sep=' ')
 
@@ -37,7 +39,12 @@ def which(filename, format = None):
         
     stdout, stderr = pipe.communicate()
 
-    return stdout.rstrip()
+    path = stdout.rstrip()
+
+    if len(path) > 0:
+        return path
+    else:
+        return None
 
 #####################################################################################################
 #

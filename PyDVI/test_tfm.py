@@ -11,25 +11,41 @@
 #
 #####################################################################################################
 
+#####################################################################################################
+
+import sys
+
+#####################################################################################################
+
+import Kpathsea 
+
 from TfmParser import *
 
 #####################################################################################################
 
-# subprocess.call('kpsewhich', 'cmr10.tfm')
-
 from optparse import OptionParser
 
-usage = 'usage: %prog [options]'
+usage = 'usage: %prog font_name'
 
 parser = OptionParser(usage)
 
 opt, args = parser.parse_args()
 
-tfm_file_name = args[0]
+if len(args) != 1:
+    parser.error("incorrect number of arguments")
 
-tfm_file = TfmParser(tfm_file_name)
+font_name = args[0]
 
-tfm_file.print_summary()
+tfm_file = Kpathsea.which(font_name, format = 'tfm')
+
+if tfm_file is None:
+    sys.exit(1)
+
+tfm_parser = TfmParser(font_name, tfm_file)
+
+tfm = tfm_parser.tfm
+    
+tfm.print_summary()
 
 #####################################################################################################
 #

@@ -15,6 +15,10 @@
 
 #####################################################################################################
 
+__all__ = ['Tfm', 'TfmChar']
+
+#####################################################################################################
+
 #####################################################################################################
 
 class TfmChar(object):
@@ -39,12 +43,12 @@ class TfmChar(object):
     def print_summary(self):
 
         print '''
-Char %u %s
+Char %u
  - width             %.3f
  - height            %.3f
  - depth             %.3f
  - italic correction %.3f
-''' % (self.char_code, chr(self.char_code),
+''' % (self.char_code,
        self.width,
        self.height,
        self.depth,
@@ -57,7 +61,8 @@ class Tfm(object):
 
     ###############################################
 
-    def __init__(self, 
+    def __init__(self,
+                 font_name,
                  smallest_character_code,
                  largest_character_code,
                  checksum,
@@ -65,6 +70,7 @@ class Tfm(object):
                  character_coding_scheme,
                  family):
 
+        self.font_name = font_name
         self.smallest_character_code = smallest_character_code
         self.largest_character_code = largest_character_code
         self.checksum = checksum
@@ -134,7 +140,8 @@ Font Parameters:
  - X Height: %f
  - Quad: %f
  - Extra Space: %f
-''' % (self.smallest_character_code,
+''' % (self.font_name,
+       self.smallest_character_code,
        self.largest_character_code,
        self.checksum,
        self.design_font_size,

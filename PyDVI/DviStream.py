@@ -15,6 +15,10 @@
 
 #####################################################################################################
 
+__all__ = ['DviFileStream']
+
+#####################################################################################################
+
 import mmap
 
 #####################################################################################################
@@ -24,34 +28,6 @@ FIX_WORD_SCALE = 1./2**20
 #####################################################################################################
 
 class DviStream(object):
-    
-    ###############################################
-
-    def __init__(self, stream):
-
-        self.stream = stream
-
-        self.seek(0)
-
-    ###############################################
-
-    def seek(self, postion):
-
-        '''
-        Seek to position
-        '''
-
-        self.postion = postion
-
-    ###############################################
-
-    def tell(self):
-
-        '''
-        Tell the current position
-        '''
-
-        return self.postion
 
     ###############################################
 
@@ -62,13 +38,11 @@ class DviStream(object):
         '''
 
         if position is None:
-            start_position = self.position
+            start_position = self.tell()
         else:
-            self.position = position
+            self.seek(position)
 
-        self.position += number_of_bytes
-
-        return self.stream[start_position:self.position]
+        return self.stream.read(number_of_bytes)
 
     ###############################################
 
@@ -87,7 +61,7 @@ class DviStream(object):
         Read four byte numbers from the optional position or the current position
         '''
 
-        return read_byte_numbers(4, position)
+        return self.read_byte_numbers(4, position)
 
     ###############################################
 
@@ -115,28 +89,28 @@ class DviStream(object):
     ###############################################
             
     def read_signed_byte1(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 1, signed = True, position)
+        return self.read_big_endian_number(number_of_bytes = 1, signed = True, position = position)
 
     def read_signed_byte2(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 2, signed = True, position)
+        return self.read_big_endian_number(number_of_bytes = 2, signed = True, position = position)
 
     def read_signed_byte3(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 3, signed = True, position) 
+        return self.read_big_endian_number(number_of_bytes = 3, signed = True, position = position) 
 
     def read_signed_byte4(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 4, signed = True, position)
+        return self.read_big_endian_number(number_of_bytes = 4, signed = True, position = position)
 
     def read_unsigned_byte1(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 1, signed = False, position)
+        return self.read_big_endian_number(number_of_bytes = 1, signed = False, position = position)
 
     def read_unsigned_byte2(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 2, signed = False, position)
+        return self.read_big_endian_number(number_of_bytes = 2, signed = False, position = position)
 
     def read_unsigned_byte3(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 3, signed = False, position)
+        return self.read_big_endian_number(number_of_bytes = 3, signed = False, position = position)
 
     def read_unsigned_byte4(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 4, signed = False, position)
+        return self.read_big_endian_number(number_of_bytes = 4, signed = False, position = position)
 
     read_unsigned_byten = (read_unsigned_byte1, 
                            read_unsigned_byte2,
@@ -170,7 +144,18 @@ class DviStream(object):
         Read a BCPL string from the optional position or the current position
         '''
 
-        return self.read_bytes(number_of_bytes = self.read_unsigned_byte1(position))
+        return self.read_bytes(self.read_unsigned_byte1(position))
+
+    ###############################################
+
+    def repeat(self, method, count):
+        
+        sequence = []
+        
+        for i in xrange(count):
+            sequence.append(method())
+            
+        return sequence
 
 #####################################################################################################
 
@@ -182,7 +167,9 @@ class DviFileStream(DviStream):
 
         self.file = open(filename, 'rb')
 
-        self.stream = mmap.mmap(self.file.fileno(), 0)
+        self.stream = mmap.mmap(self.file.fileno(), length = 0, access = mmap.ACCESS_READ)
+
+        self.stream.seek(0)
 
     ###############################################
 
@@ -190,6 +177,26 @@ class DviFileStream(DviStream):
 
         self.stream.close()
         self.file.close()
+
+    ###############################################
+
+    def seek(self, postion):
+
+        '''
+        Seek to position
+        '''
+
+        self.stream.seek(postion)
+
+    ###############################################
+
+    def tell(self):
+
+        '''
+        Tell the current position
+        '''
+
+        return self.stream.tell()
 
 #####################################################################################################
 #
