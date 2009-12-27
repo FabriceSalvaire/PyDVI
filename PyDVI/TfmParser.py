@@ -35,6 +35,37 @@ class TfmParser(DviFileStream):
 
     ###############################################
 
+    def reset(self):
+
+        self.tfm = None
+
+        self.entire_file_length = None
+        self.header_data_length = None
+        self.smallest_character_code = None
+        self.largest_character_code = None
+        self.width_table_length = None
+        self.height_table_length = None
+        self.depth_table_length = None
+        self.italic_correction_table_length = None
+        self.lig_kern_table_length = None
+        self.kern_table_length = None
+        self.extensible_character_table_length = None
+        self.font_parameter_length = None
+
+        self.number_of_chars = None
+        self.header_ptr = None
+        self.character_info_ptr = None
+        self.width_table_ptr = None
+        self.height_table_ptr = None
+        self.depth_table_ptr = None
+        self.italic_correction_table_ptr = None
+        self.lig_kern_table_ptr = None
+        self.kern_table_ptr = None
+        self.extensible_character_table_ptr = None
+        self.font_parameter_ptr = None
+
+    ###############################################
+
     def parse(self, font_name, tfm_filename):
 
         self.font_name = font_name
@@ -45,31 +76,32 @@ class TfmParser(DviFileStream):
         self.read_header()
         self.read_font_parameters()
 
-        # for c in xrange(self.smallest_character_code, self.largest_character_code +1):
-        #     self.process_char(c)
-        # 
-        # for i in xrange(self.lig_kern_table_length):
-        # 
-        #     position = word_ptr(self.lig_kern_table_ptr, i)
-        # 
-        #     skip_byte, next_char, op_byte, remainder = self.read_four_byte_numbers(position)
-        # 
-        #     print i, skip_byte, chr(next_char), op_byte, remainder
-        # 
-        #     if op_byte >= KERN_OPCODE:
-        # 
-        #         kern_index = 256*(op_byte-KERN_OPCODE) + remainder
-        #         kern = self.read_fix_word(word_ptr(self.kern_table_ptr, kern_index))
-        # 
-        #         print 'kern', i, next_char, chr(next_char), kern_ptr, kern
-        # 
-        #     else:
-        # 
-        #         a = op_byte >> 2
-        #         b = op_byte & 0x02
-        #         c = op_byte & 0x01
-        # 
-        #         print 'lig', a, b, c, chr(next_char), remainder
+        for c in xrange(self.smallest_character_code, self.largest_character_code +1):
+            self.process_char(c)
+         
+        for i in xrange(self.lig_kern_table_length):
+        
+            (skip_byte,
+             next_char,
+             op_byte,
+             remainder) = self.read_four_byte_numbers(word_ptr(self.lig_kern_table_ptr, i))
+        
+            if op_byte >= KERN_OPCODE:
+        
+                kern_index = 256*(op_byte - KERN_OPCODE) + remainder
+                kern = self.read_fix_word(word_ptr(self.kern_table_ptr, kern_index))
+        
+                print 'Kern index %u char code %u %.3f' % (i, next_char, kern)
+        
+            else:
+        
+                number_of_chars_to_pass_over = op_byte >> 2
+                current_char_is_deleted = (op_byte & 0x02) == 0
+                next_char_is_deleted = (op_byte & 0x01) == 0
+        
+                ligature_char_code = remainder
+
+                print 'Lig index %u char code %u ligature char code %u' % (i, next_char, ligature_char_code)
 
         self.close()
 
@@ -184,22 +216,22 @@ class TfmParser(DviFileStream):
         
         width_index, height_index, depth_index, italic_index, tag, remainder = self.read_char_info(c)
 
-        if width_ptr == 0: # unvalid char
+        if width_index == 0: # unvalid char
             return
 
         width = self.read_fix_word(word_ptr(self.width_table_ptr, width_index))
         
-        if height_ptr == 0:
+        if height_index == 0:
             height = self.read_fix_word(word_ptr(self.height_table_ptr, height_index))
         else:
             height = 0
 
-        if depth_ptr == 0:
+        if depth_index == 0:
             depth = self.read_fix_word(word_ptr(self.depth_table_ptr, depth_index))
         else:
             depth = 0
 
-        if italic_ptr == 0:
+        if italic_index == 0:
             italic_correction = self.read_fix_word(word_ptr(self.italic_correction_table_ptr, italic_index))
         else:
             italic_correction = 0
@@ -217,8 +249,8 @@ class TfmParser(DviFileStream):
         print 'tag', tag
         
         if tag == LIG_TAG:
-            lig_kern_program_ptr = remainder
-            print 'lig_kern_program_ptr', lig_kern_program_ptr
+            lig_kern_program_index = remainder
+            print 'lig_kern_program_index', lig_kern_program_index
             
         elif tag == LIST_TAG:
             next_larger_character = remainder

@@ -19,9 +19,15 @@ __all__ = ['Tfm', 'TfmChar']
 
 #####################################################################################################
 
+import string
+
+#####################################################################################################
+
 #####################################################################################################
 
 class TfmChar(object):
+
+    printable = string.digits + string.letters + string.punctuation
 
     ###############################################
 
@@ -40,15 +46,26 @@ class TfmChar(object):
 
     ###############################################
 
+    def chr(self):
+
+        char = chr(self.char_code)
+        
+        if char not in self.printable:
+            char = ''
+
+        return char
+
+    ###############################################
+
     def print_summary(self):
 
         print '''
-Char %u
+Char %u %s
  - width             %.3f
  - height            %.3f
  - depth             %.3f
  - italic correction %.3f
-''' % (self.char_code,
+''' % (self.char_code, self.chr(),
        self.width,
        self.height,
        self.depth,
