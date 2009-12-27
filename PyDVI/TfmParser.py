@@ -35,11 +35,11 @@ class TfmParser(DviFileStream):
 
     ###############################################
 
-    def __init__(self, font_name, tfm_filename):
-
-        super(TfmParser, self).__init__(tfm_filename)
+    def parse(self, font_name, tfm_filename):
 
         self.font_name = font_name
+
+        self.open(tfm_filename)
 
         self.read_lengths()
         self.read_header()
@@ -70,6 +70,10 @@ class TfmParser(DviFileStream):
         #         c = op_byte & 0x01
         # 
         #         print 'lig', a, b, c, chr(next_char), remainder
+
+        self.close()
+
+        return self.tfm
 
     ###############################################
 

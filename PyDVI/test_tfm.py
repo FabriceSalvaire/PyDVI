@@ -41,9 +41,9 @@ tfm_file = Kpathsea.which(font_name, format = 'tfm')
 if tfm_file is None:
     sys.exit(1)
 
-tfm_parser = TfmParser(font_name, tfm_file)
+tfm_parser = TfmParser()
 
-tfm = tfm_parser.tfm
+tfm = tfm_parser.parse(font_name, tfm_file)
     
 tfm.print_summary()
 

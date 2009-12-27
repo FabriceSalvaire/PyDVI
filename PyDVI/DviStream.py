@@ -163,7 +163,7 @@ class DviFileStream(DviStream):
     
     ###############################################
 
-    def __init__(self, filename):
+    def open(self, filename):
 
         self.file = open(filename, 'rb')
 
@@ -173,7 +173,7 @@ class DviFileStream(DviStream):
 
     ###############################################
 
-    def __del__(self):
+    def close(self):
 
         self.stream.close()
         self.file.close()
