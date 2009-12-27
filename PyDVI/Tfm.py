@@ -50,6 +50,8 @@ class TfmChar(object):
         self.lig_kern_program_index = lig_kern_program_index
         self.next_larger_char = next_larger_char
 
+        self.tfm.add_char(self)
+
     ###############################################
 
     def chr(self):
@@ -57,9 +59,9 @@ class TfmChar(object):
         char = chr(self.char_code)
         
         if char not in self.printable:
-            char = ''
-
-        return char
+            return self.char_code
+        else:
+            return char
 
     ###############################################
 
@@ -121,19 +123,22 @@ class TfmKern(object):
 
     ###############################################
 
-    def __init__(self, index, next_char, kern):
+    def __init__(self, tfm, index, next_char, kern):
 
+        self.tfm = tfm
         self.index = index
         self.next_char = next_char
         self.kern = kern
+
+        self.tfm.add_lig_kern(self)
 
     ###############################################
 
     def print_summary(self):
 
-        print 'Kern index %u char code %u %.3f' % (self.index,
-                                                   self.next_char,
-                                                   self.kern)
+        print 'Kern char code %u %s %.3f' % (self.next_char,
+                                             self.tfm[self.next_char].chr(),
+                                             self.kern)
 
 #####################################################################################################
 
@@ -142,6 +147,7 @@ class TfmLigature(object):
     ###############################################
 
     def __init__(self,
+                 tfm,
                  index,
                  next_char,
                  ligature_char_code,
@@ -149,6 +155,7 @@ class TfmLigature(object):
                  current_char_is_deleted,
                  next_char_is_deleted):
 
+        self.tfm = tfm
         self.index = index
         self.next_char = next_char
         self.ligature_char_code = ligature_char_code
@@ -156,13 +163,15 @@ class TfmLigature(object):
         self.current_char_is_deleted = current_char_is_deleted
         self.next_char_is_deleted = next_char_is_deleted
 
+        self.tfm.add_lig_kern(self)
+
     ###############################################
 
     def print_summary(self):
 
-        print 'Lig index %u char code %u ligature char code %u' % (self.index,
-                                                                   self.next_char,
-                                                                   self.ligature_char_code)
+        print 'Lig char code %u %s ligature char code %u' % (self.next_char,
+                                                             self.tfm[self.next_char].chr(),
+                                                             self.ligature_char_code)
 
 #####################################################################################################
 
@@ -188,6 +197,14 @@ class Tfm(object):
         self.family = family
 
         self.lig_kerns = []
+
+        self.chars = {}
+
+    ###############################################
+
+    def __getitem__(self, char_code):
+
+        return self.chars[char_code]
 
     ###############################################
 
@@ -230,7 +247,13 @@ class Tfm(object):
 
     ###############################################
 
-    def add_kern_ligature(self, obj):
+    def add_char(self, char):
+
+        self.chars[char.char_code] = char
+
+    ###############################################
+
+    def add_lig_kern(self, obj):
 
         self.lig_kerns.append(obj)
 
@@ -271,6 +294,9 @@ Font Parameters:
        self.x_height,
        self.quad,
        self.extra_space)
+
+        for char in self.chars.values():
+            char.print_summary()
 
 #####################################################################################################
 #

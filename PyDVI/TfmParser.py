@@ -213,7 +213,7 @@ class TfmParser(FileStream):
                 kern_index = 256*(op_byte - KERN_OPCODE) + remainder
                 kern = self.read_fix_word_in_table(tables.kern, kern_index)
         
-                obj = TfmKern(i, next_char, kern)
+                TfmKern(self.tfm, i, next_char, kern)
         
             else:
         
@@ -223,14 +223,13 @@ class TfmParser(FileStream):
         
                 ligature_char_code = remainder
         
-                obj = TfmLigature(i,
-                                  next_char,
-                                  ligature_char_code,
-                                  number_of_chars_to_pass_over,
-                                  current_char_is_deleted,
-                                  next_char_is_deleted)
-
-            self.tfm.add_kern_ligature(obj)
+                TfmLigature(self.tfm,
+                            i,
+                            next_char,
+                            ligature_char_code,
+                            number_of_chars_to_pass_over,
+                            current_char_is_deleted,
+                            next_char_is_deleted)
 
     ###############################################
 
@@ -272,27 +271,25 @@ class TfmParser(FileStream):
             extensible_recipe = self.read_extensible_recipe(remainder)
 
         if extensible_recipe is not None:
-            tfm_char = TfmExtensibleChar(self.tfm,
-                                         c,
-                                         width,
-                                         height,
-                                         depth,
-                                         italic_correction,
-                                         extensible_recipe,
-                                         lig_kern_program_index,
-                                         next_larger_char)
+            TfmExtensibleChar(self.tfm,
+                              c,
+                              width,
+                              height,
+                              depth,
+                              italic_correction,
+                              extensible_recipe,
+                              lig_kern_program_index,
+                              next_larger_char)
 
         else:
-            tfm_char = TfmChar(self.tfm,
-                               c,
-                               width,
-                               height,
-                               depth,
-                               italic_correction,
-                               lig_kern_program_index,
-                               next_larger_char)
-
-        tfm_char.print_summary()
+            TfmChar(self.tfm,
+                    c,
+                    width,
+                    height,
+                    depth,
+                    italic_correction,
+                    lig_kern_program_index,
+                    next_larger_char)
 
     ###############################################
 
