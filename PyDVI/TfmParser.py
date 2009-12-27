@@ -15,7 +15,12 @@
 
 #####################################################################################################
 
-from DviStream import *
+__all__ = ['TfmParser']
+
+#####################################################################################################
+
+from EnumFactory import *
+from Stream import *
 from Tfm import *
 
 #####################################################################################################
@@ -26,43 +31,53 @@ KERN_OPCODE = 128
 
 #####################################################################################################
 
-def word_ptr(base, index):
-    return base + 4*index
+tables = EnumFactory('TableEnums', 
+                     ('header',
+                      'character_info',
+                      'width',
+                      'height',
+                      'depth',
+                      'italic_correction',
+                      'lig_kern',
+                      'kern',
+                      'extensible_character',
+                      'font_parameter',
+                      ))
 
 #####################################################################################################
 
-class TfmParser(DviFileStream):
+class TfmParser(FileStream):
 
     ###############################################
 
-    def reset(self):
+    @staticmethod
+    def word_ptr(base, index):
 
-        self.tfm = None
+        return base + 4*index
 
-        self.entire_file_length = None
-        self.header_data_length = None
-        self.smallest_character_code = None
-        self.largest_character_code = None
-        self.width_table_length = None
-        self.height_table_length = None
-        self.depth_table_length = None
-        self.italic_correction_table_length = None
-        self.lig_kern_table_length = None
-        self.kern_table_length = None
-        self.extensible_character_table_length = None
-        self.font_parameter_length = None
+    ###############################################
 
-        self.number_of_chars = None
-        self.header_ptr = None
-        self.character_info_ptr = None
-        self.width_table_ptr = None
-        self.height_table_ptr = None
-        self.depth_table_ptr = None
-        self.italic_correction_table_ptr = None
-        self.lig_kern_table_ptr = None
-        self.kern_table_ptr = None
-        self.extensible_character_table_ptr = None
-        self.font_parameter_ptr = None
+    def seek_to_table(self, table):
+
+        self.seek(self.table_pointers[table])
+
+    ###############################################
+
+    def position_in_table(self, table, index):
+
+        return self.word_ptr(self.table_pointers[table], index)
+
+    ###############################################
+
+    def read_fix_word_in_table(self, table, index):
+
+        return self.read_fix_word(self.position_in_table(table, index))
+
+    ###############################################
+
+    def read_four_byte_numbers_in_table(self, table, index):
+
+        return self.read_four_byte_numbers(self.position_in_table(tables.character_info, index))
 
     ###############################################
 
@@ -75,34 +90,11 @@ class TfmParser(DviFileStream):
         self.read_lengths()
         self.read_header()
         self.read_font_parameters()
-
+        self.read_lig_kern_programs()
+        
         for c in xrange(self.smallest_character_code, self.largest_character_code +1):
             self.process_char(c)
          
-        for i in xrange(self.lig_kern_table_length):
-        
-            (skip_byte,
-             next_char,
-             op_byte,
-             remainder) = self.read_four_byte_numbers(word_ptr(self.lig_kern_table_ptr, i))
-        
-            if op_byte >= KERN_OPCODE:
-        
-                kern_index = 256*(op_byte - KERN_OPCODE) + remainder
-                kern = self.read_fix_word(word_ptr(self.kern_table_ptr, kern_index))
-        
-                print 'Kern index %u char code %u %.3f' % (i, next_char, kern)
-        
-            else:
-        
-                number_of_chars_to_pass_over = op_byte >> 2
-                current_char_is_deleted = (op_byte & 0x02) == 0
-                next_char_is_deleted = (op_byte & 0x01) == 0
-        
-                ligature_char_code = remainder
-
-                print 'Lig index %u char code %u ligature char code %u' % (i, next_char, ligature_char_code)
-
         self.close()
 
         return self.tfm
@@ -117,43 +109,38 @@ class TfmParser(DviFileStream):
 
         self.seek(0)
 
-        number_of_items = 12
+        self.table_lengths = [None]*len(tables)
 
         (self.entire_file_length,
-         self.header_data_length,
+         self.table_lengths[tables.header],
          self.smallest_character_code,
-         self.largest_character_code,
-         self.width_table_length,
-         self.height_table_length,
-         self.depth_table_length,
-         self.italic_correction_table_length,
-         self.lig_kern_table_length,
-         self.kern_table_length,
-         self.extensible_character_table_length,
-         self.font_parameter_length) = self.repeat(self.read_unsigned_byte2, number_of_items)
-
-        self.number_of_chars = self.largest_character_code - self.smallest_character_code +1
+         self.largest_character_code) = self.repeat(self.read_unsigned_byte2, 4)
 
         header_data_length_min = 18
-        self.header_data_length = max(header_data_length_min, self.header_data_length)
+        if self.table_lengths[tables.header] < header_data_length_min:
+            self.table_lengths[tables.header] = header_data_length_min
+        
+        self.number_of_chars = self.largest_character_code - self.smallest_character_code +1
+
+        self.table_lengths[tables.character_info] = self.number_of_chars
+
+        for i in xrange(tables.width, len(tables)):
+            self.table_lengths[i] = self.read_unsigned_byte2()
 
         self.print_summary()
 
         # Compute table pointers
 
-        self.header_ptr = number_of_items*2 # bytes
-        self.character_info_ptr = word_ptr(self.header_ptr, self.header_data_length)
-        self.width_table_ptr = word_ptr(self.character_info_ptr, self.number_of_chars)
-        self.height_table_ptr = word_ptr(self.width_table_ptr, self.width_table_length)
-        self.depth_table_ptr = word_ptr(self.height_table_ptr, self.height_table_length)
-        self.italic_correction_table_ptr = word_ptr(self.depth_table_ptr, self.depth_table_length)
-        self.lig_kern_table_ptr = word_ptr(self.italic_correction_table_ptr, self.italic_correction_table_length)
-        self.kern_table_ptr = word_ptr(self.lig_kern_table_ptr, self.lig_kern_table_length)
-        self.extensible_character_table_ptr = word_ptr(self.kern_table_ptr, self.kern_table_length)
-        self.font_parameter_ptr = word_ptr(self.extensible_character_table_ptr, self.extensible_character_table_length)
+        self.table_pointers = [None]*len(tables)
 
-        length = word_ptr(self.font_parameter_ptr, self.font_parameter_length)
-        if length != word_ptr(0, self.entire_file_length):
+        self.table_pointers[tables.header] = 24 # 12*2 bytes
+
+        for table in xrange(tables.header, tables.font_parameter):
+            print table, self.table_lengths[table]
+            self.table_pointers[table+1] = self.position_in_table(table, self.table_lengths[table])
+
+        length = self.position_in_table(tables.font_parameter, self.table_lengths[tables.font_parameter])
+        if length != self.word_ptr(0, self.entire_file_length):
             raise NameError('Bad TFM file')
 
     ###############################################
@@ -163,28 +150,30 @@ class TfmParser(DviFileStream):
         character_coding_scheme_length = 40
         family_length= 10
 
-        self.seek(self.header_ptr)
+        self.seek_to_table(tables.header)
 
         checksum = self.read_unsigned_byte4()
         design_font_size = self.read_fix_word()
         
+        character_info_table_position = self.table_pointers[tables.character_info]
+
         position = self.tell()
 
-        if position < self.character_info_ptr:
+        if position < character_info_table_position:
             character_coding_scheme = self.read_bcpl()
         else:
             character_coding_scheme = None
 
         position += character_coding_scheme_length
 
-        if position < self.character_info_ptr:
+        if position < character_info_table_position:
             family = self.read_bcpl(position)
         else:
             family = None
 
         position += family_length
 
-        if position < self.character_info_ptr:
+        if position < character_info_table_position:
             seven_bit_safe_flag = self.read_unsigned_byte4(position)
             # Fixme: complete
 
@@ -200,15 +189,43 @@ class TfmParser(DviFileStream):
 
     def read_font_parameters(self):
                  
-        self.seek(self.font_parameter_ptr)
+        self.seek_to_table(tables.font_parameter)
  
-        self.tfm.set_font_parameters(self.repeat(self.read_fix_word, self.font_parameter_length))
+        self.tfm.set_font_parameters(self.repeat(self.read_fix_word, self.table_lengths[tables.font_parameter]))
 
         if self.tfm.character_coding_scheme == 'TeX math symbols':
             self.tfm.set_math_symbols_parameters(self.repeat(self.read_fix_word, 15))
 
         elif self.tfm.character_coding_scheme == 'TeX math extension':
             self.tfm.set_math_extension_parameters(self.repeat(self.read_fix_word, 6))
+
+    ###############################################
+
+    def read_lig_kern_programs(self):
+
+        for i in xrange(self.table_lengths[tables.lig_kern]):
+        
+            (skip_byte,
+             next_char,
+             op_byte,
+             remainder) = self.read_four_byte_numbers_in_table(tables.lig_kern, i)
+        
+            if op_byte >= KERN_OPCODE:
+        
+                kern_index = 256*(op_byte - KERN_OPCODE) + remainder
+                kern = self.read_fix_word_in_table(tables.kern, kern_index)
+        
+                print 'Kern index %u char code %u %.3f' % (i, next_char, kern)
+        
+            else:
+        
+                number_of_chars_to_pass_over = op_byte >> 2
+                current_char_is_deleted = (op_byte & 0x02) == 0
+                next_char_is_deleted = (op_byte & 0x01) == 0
+        
+                ligature_char_code = remainder
+        
+                print 'Lig index %u char code %u ligature char code %u' % (i, next_char, ligature_char_code)
 
     ###############################################
 
@@ -219,46 +236,58 @@ class TfmParser(DviFileStream):
         if width_index == 0: # unvalid char
             return
 
-        width = self.read_fix_word(word_ptr(self.width_table_ptr, width_index))
+        width = self.read_fix_word_in_table(tables.width, width_index)
         
         if height_index == 0:
-            height = self.read_fix_word(word_ptr(self.height_table_ptr, height_index))
+            height = self.read_fix_word_in_table(tables.height, height_index)
         else:
             height = 0
 
         if depth_index == 0:
-            depth = self.read_fix_word(word_ptr(self.depth_table_ptr, depth_index))
+            depth = self.read_fix_word_in_table(tables.depth, depth_index)
         else:
             depth = 0
 
         if italic_index == 0:
-            italic_correction = self.read_fix_word(word_ptr(self.italic_correction_table_ptr, italic_index))
+            italic_correction = self.read_fix_word_in_table(tables.italic_correction, italic_index)
         else:
             italic_correction = 0
 
-        next_larger_character = None
+        lig_kern_program_index = None
+        next_larger_char = None
+        extensible_recipe = None
 
-        tfm_char = TfmChar(c,
-                           width,
-                           height,
-                           depth,
-                           italic_correction)
-
-        tfm_char.print_summary()
-
-        print 'tag', tag
-        
         if tag == LIG_TAG:
             lig_kern_program_index = remainder
-            print 'lig_kern_program_index', lig_kern_program_index
             
         elif tag == LIST_TAG:
-            next_larger_character = remainder
-            print 'next_larger_character', next_larger_character
+            next_larger_char = remainder
 
         elif tag == EXT_TAG:
-            top, mid, bot, rep = self.read_extensible_recipe(remainder)
-            print 'ext_tag', top, mid, bot, rep
+            extensible_recipe = self.read_extensible_recipe(remainder)
+
+        if extensible_recipe is not None:
+            tfm_char = TfmExtensibleChar(self.tfm,
+                                         c,
+                                         width,
+                                         height,
+                                         depth,
+                                         italic_correction,
+                                         extensible_recipe,
+                                         lig_kern_program_index,
+                                         next_larger_char)
+
+        else:
+            tfm_char = TfmChar(self.tfm,
+                               c,
+                               width,
+                               height,
+                               depth,
+                               italic_correction,
+                               lig_kern_program_index,
+                               next_larger_char)
+
+        tfm_char.print_summary()
 
     ###############################################
 
@@ -266,22 +295,22 @@ class TfmParser(DviFileStream):
  
         index = c - self.smallest_character_code
 
-        bytes = self.read_four_byte_numbers(word_ptr(self.character_info_ptr, index))
+        bytes = self.read_four_byte_numbers_in_table(tables.character_info, index)
 
-        width_ptr  = bytes[0]
-        height_ptr = bytes[1] >> 4
-        depth_ptr  = bytes[1] & 0xF
-        italic_ptr = bytes[2] >> 6
-        tag        = bytes[2] & 0x3
-        remainder  = bytes[3]
+        width_index  = bytes[0]
+        height_index = bytes[1] >> 4
+        depth_index  = bytes[1] & 0xF
+        italic_index = bytes[2] >> 6
+        tag          = bytes[2] & 0x3
+        remainder    = bytes[3]
 
-        return width_ptr, height_ptr, depth_ptr, italic_ptr, tag, remainder
+        return width_index, height_index, depth_index, italic_index, tag, remainder
 
     ###############################################
 
     def read_extensible_recipe(self, index):
  
-        return self.read_four_byte_numbers(word_ptr(self.extensible_character_table_ptr, index))
+        return self.read_four_byte_numbers_in_table(tables.extensible_character, index)
 
     ###############################################
 
@@ -304,17 +333,17 @@ TFM %s
  - Number of font parameter words: %u
 ''' % (self.font_name,
        self.entire_file_length,
-       self.header_data_length,
+       self.table_lengths[tables.header],
        self.smallest_character_code,
        self.largest_character_code,
-       self.width_table_length,
-       self.height_table_length,
-       self.depth_table_length,
-       self.italic_correction_table_length,
-       self.lig_kern_table_length,
-       self.kern_table_length,
-       self.extensible_character_table_length,
-       self.font_parameter_length,
+       self.table_lengths[tables.width],
+       self.table_lengths[tables.height],
+       self.table_lengths[tables.depth],
+       self.table_lengths[tables.italic_correction],
+       self.table_lengths[tables.lig_kern],
+       self.table_lengths[tables.kern],
+       self.table_lengths[tables.extensible_character],
+       self.table_lengths[tables.font_parameter],
        )
 
 #####################################################################################################

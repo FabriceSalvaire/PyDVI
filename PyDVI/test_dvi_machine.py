@@ -34,7 +34,7 @@ dvi_file = args[0]
 
 #####################################################################################################
 
-dvi_parser = DviParser(debug = False)
+dvi_parser = DviParser(debug = True)
 
 dvi_machine = DviMachine()
 

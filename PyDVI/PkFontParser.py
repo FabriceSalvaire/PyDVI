@@ -21,15 +21,10 @@ import string
 #####################################################################################################
 
 from EnumFactory import *
+from Stream import *
 from OpcodeParser import *
 from PkGlyph import PkGlyph
 from TeXUnit import *
-
-#####################################################################################################
-
-def read_fix_word(x):
-
-    return float(x) / 2**20
 
 #####################################################################################################
 
@@ -120,9 +115,9 @@ class OpcodeParser_char(OpcodeParser):
             dy = 0
 
 
-        tfm = read_fix_word(tfm)
+        tfm = pk_font_parser.to_fix_word(tfm)
 
-        nybbles = pk_font_parser.read_stream(packet_length - preambule_length)
+        nybbles = pk_font_parser.read(packet_length - preambule_length)
 
         PkGlyph(pk_font_parser.pk_font,
                 char_code,
@@ -173,11 +168,11 @@ class OpcodeParser_xxx(OpcodeParser):
 
     def read_parameters(self, pk_font_parser):
 
-        return pk_font_parser.read_stream(self.read_unsigned_byten(pk_font_parser))
+        return pk_font_parser.read(self.read_unsigned_byten(pk_font_parser))
 
 #####################################################################################################
 
-class PkFontParser(OpcodeStreamParser):
+class PkFontParser(OpcodeStreamParser, FileStream):
 
     opcode_definitions = (
         ( [pk_opcodes.CHAR_000,
@@ -204,22 +199,18 @@ class PkFontParser(OpcodeStreamParser):
 
         self.pk_font = pk_font
 
-        stream = open(pk_font.file_name)
-
-        self.set_stream(stream)
+        self.open(pk_font.file_name)
 
         self.process_preambule()
         self.process_characters()
 
-        self.set_stream(None)
-
-        stream.close()
+        self.close()
 
     ###############################################
 
     def process_preambule(self):
 
-        self.stream.seek(0)
+        self.seek(0)
 
         if self.read_unsigned_byte1() != pk_opcodes.PRE:
             raise NameError("PK file don't start by PRE")
@@ -229,8 +220,8 @@ class PkFontParser(OpcodeStreamParser):
             raise NameError("Unknown PK ID")
 
         self.pk_font.set_preambule_data(pk_id = pk_id,
-                                        comment = self.read_stream(self.read_unsigned_byte1()),
-                                        design_size = read_fix_word(self.read_signed_byte4()),
+                                        comment = self.read(self.read_unsigned_byte1()),
+                                        design_size = self.read_fix_word(),
                                         checksum = self.read_signed_byte4(),
                                         horizontal_dpi = sp2dpi(self.read_signed_byte4()),
                                         vertical_dpi = sp2dpi(self.read_signed_byte4()))

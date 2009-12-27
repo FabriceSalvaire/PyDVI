@@ -15,7 +15,7 @@
 
 #####################################################################################################
 
-__all__ = ['Tfm', 'TfmChar']
+__all__ = ['Tfm', 'TfmChar', 'TfmExtensibleChar']
 
 #####################################################################################################
 
@@ -32,17 +32,23 @@ class TfmChar(object):
     ###############################################
 
     def __init__(self,
+                 tfm,
                  char_code,
                  width,
                  height,
                  depth,
-                 italic_correction):
+                 italic_correction,
+                 lig_kern_program_index = None,
+                 next_larger_char = None):
 
+        self.tfm = tfm
         self.char_code = char_code
         self.width = width
         self.height = height
         self.depth = depth
         self.italic_correction = italic_correction
+        self.lig_kern_program_index = lig_kern_program_index
+        self.next_larger_char = next_larger_char
 
     ###############################################
 
@@ -65,12 +71,45 @@ Char %u %s
  - height            %.3f
  - depth             %.3f
  - italic correction %.3f
+ - lig kern program index %s
+ - next larger char       %s
 ''' % (self.char_code, self.chr(),
        self.width,
        self.height,
        self.depth,
        self.italic_correction,
+       self.lig_kern_program_index,
+       self.next_larger_char,
        )
+
+#####################################################################################################
+
+class TfmExtensibleChar(TfmChar):
+
+    ###############################################
+
+    def __init__(self,
+                 tfm,
+                 char_code,
+                 width,
+                 height,
+                 depth,
+                 italic_correction,
+                 extensible_characters,
+                 lig_kern_program_index = None,
+                 next_larger_char = None):
+
+        super(TfmExtensibleChar, self).__init__(tfm,
+                                                char_code,
+                                                width,
+                                                height,
+                                                depth,
+                                                italic_correction,
+                                                extensible_recipe,
+                                                lig_kern_program_index,
+                                                next_larger_char)
+
+        self.top, self.mid, self.bot, self.rep = extensible_recipe
 
 #####################################################################################################
 

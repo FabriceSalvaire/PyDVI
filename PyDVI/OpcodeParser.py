@@ -15,7 +15,11 @@
 
 #####################################################################################################
 
-class OpcodeStreamParser(object):
+from Stream import *
+
+#####################################################################################################
+
+class OpcodeStreamParser(AbstractStream):
     
     ###############################################
 
@@ -86,75 +90,6 @@ class OpcodeStreamParser(object):
 
         # for opcode_parser in self.opcode_parsers:
         #     print opcode_parser
-
-    ###############################################
-
-    def set_stream(self, stream):
-
-        self.stream = stream
-
-    ###############################################
-
-    def read_stream(self, n):
-
-        '''
-        Read the DVI input stream
-        '''
-
-        # Fixme: n > 0, exception ...
-
-        return self.stream.read(n)
-
-    ###############################################
-
-    def tell(self):
-
-        return self.stream.tell()
-
-    ###############################################
-
-    def read_big_endian_number(self, n, signed = False):
-
-        '''
-        Read a number coded in big endian format from the DVI input stream
-        '''
-
-        # This code can be unrolled
-
-        bytes = map(ord, self.read_stream(n))
-
-        number = bytes[0]
-
-        if signed is True and number >= 128:
-            number -= 256
-
-        for i in xrange(1, n):
-            number *= 256
-            number += bytes[i]
-
-        return number
-
-    ###############################################
-            
-    def read_signed_byte1(self):   return self.read_big_endian_number(1, signed = True)
-    def read_signed_byte2(self):   return self.read_big_endian_number(2, signed = True)
-    def read_signed_byte3(self):   return self.read_big_endian_number(3, signed = True) 
-    def read_signed_byte4(self):   return self.read_big_endian_number(4, signed = True)
-
-    def read_unsigned_byte1(self): return self.read_big_endian_number(1, signed = False)
-    def read_unsigned_byte2(self): return self.read_big_endian_number(2, signed = False)
-    def read_unsigned_byte3(self): return self.read_big_endian_number(3, signed = False)
-    def read_unsigned_byte4(self): return self.read_big_endian_number(4, signed = False) 
-
-    read_unsigned_byten = (read_unsigned_byte1, 
-                           read_unsigned_byte2,
-                           read_unsigned_byte3,
-                           read_unsigned_byte4)
-
-    read_signed_byten = (read_signed_byte1, 
-                         read_signed_byte2,
-                         read_signed_byte3,
-                         read_signed_byte4)
 
 #####################################################################################################
 

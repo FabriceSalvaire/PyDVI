@@ -72,10 +72,6 @@ dvi_formats = ExplicitEnumFactory('DviFormats',
                                    'XDVI': 5,
                                    })
 
-(SEEK_RELATIVE_TO_START,
- SEEK_RELATIVE_TO_CURRENT,
- SEEK_RELATIVE_TO_END) = range(3)
-
 set_char_description = 'typeset a character and move right'
 
 #####################################################################################################
@@ -134,7 +130,7 @@ class OpcodeParser_xxx(OpcodeParser):
 
     def read_parameters(self, dvi_parser):
 
-        return [dvi_parser.read_stream(self.read_unsigned_byten(dvi_parser))]
+        return [dvi_parser.read(self.read_unsigned_byten(dvi_parser))]
 
 #####################################################################################################
 
@@ -161,8 +157,8 @@ class OpcodeParser_fnt_def(OpcodeParser):
         font_scale_factor = dvi_parser.read_unsigned_byte4()
         font_design_size  = dvi_parser.read_unsigned_byte4()
         
-        font_name = dvi_parser.read_stream(dvi_parser.read_unsigned_byte1() +
-                                           dvi_parser.read_unsigned_byte1())
+        font_name = dvi_parser.read(dvi_parser.read_unsigned_byte1() +
+                                    dvi_parser.read_unsigned_byte1())
 
         dvi_parser.dvi_program.register_font(DviFont(font_id,
                                                      font_name,
@@ -174,7 +170,7 @@ class OpcodeParser_fnt_def(OpcodeParser):
 
 BadDviStream = NameError('Bad DVI stream')
 
-class DviParser(OpcodeStreamParser):
+class DviParser(OpcodeStreamParser, StandardStream):
 
     opcode_definitions = (
         ( [dvi_opcodes.SETC_000,
@@ -232,19 +228,33 @@ class DviParser(OpcodeStreamParser):
 
         self.dvi_program = DviProgam()
 
-        self.bop_pointer_stack = []
+        self.post_pointer = None
 
         self.page_number = None
-        
+
+        self.bop_pointer_stack = []
+
+    ###############################################
+
+    def open(self, stream):
+
+        self.stream = stream
+
+    ###############################################
+
+    def close(self):
+
+        self.stream = None
+       
     ###############################################
 
     def process_stream(self, stream):
 
         # Fixme: read pages before postamble
 
-        self.set_stream(stream)
-
         self.reset()
+
+        self.open(stream)
 
         self.process_preambule()
         self.process_postambule()
@@ -254,7 +264,7 @@ class DviParser(OpcodeStreamParser):
             for bop_pointer in self.bop_pointer_stack:
                 print 'BOP at', bop_pointer
 
-        self.set_stream(None)
+        self.close()
 
         return self.dvi_program
 
@@ -262,7 +272,7 @@ class DviParser(OpcodeStreamParser):
 
     def process_preambule(self):
 
-        self.stream.seek(0)
+        self.seek(0)
 
         if self.debug is True:
             print 'Preamble begin at', self.tell()
@@ -278,7 +288,7 @@ class DviParser(OpcodeStreamParser):
         denominator   = self.read_unsigned_byte4()
         magnification = self.read_unsigned_byte4()
 
-        comment = self.read_stream(self.read_unsigned_byte1())
+        comment = self.read(self.read_unsigned_byte1())
 
         self.dvi_program.set_preambule_data(comment,
                                             dvi_format,
@@ -297,7 +307,7 @@ class DviParser(OpcodeStreamParser):
 
         opcode = dvi_opcodes.NOP
 
-        self.stream.seek(-5, SEEK_RELATIVE_TO_END)
+        self.seek(-5, os.SEEK_END)
 
         while True:
 
@@ -308,15 +318,15 @@ class DviParser(OpcodeStreamParser):
             elif opcode != DVI_EOF_SIGNATURE:
                 break
 
-            self.stream.seek(-2, SEEK_RELATIVE_TO_CURRENT) # seek to previous byte
+            self.seek(-2, os.SEEK_CUR) # seek to previous byte
 
         dvi_format = opcode
 
-        self.stream.seek(-5, SEEK_RELATIVE_TO_CURRENT)
+        self.seek(-5, os.SEEK_CUR)
         self.post_pointer = self.read_unsigned_byte4()
 
         # Move to Postamble
-        self.stream.seek(self.post_pointer)
+        self.seek(self.post_pointer)
 
         if self.debug is True:
             print 'Postamble start at', self.tell()
@@ -374,7 +384,7 @@ class DviParser(OpcodeStreamParser):
 
             self.page_number -= 1
 
-            self.stream.seek(bop_pointer)
+            self.seek(bop_pointer)
 
             if self.debug is True:
                 print 'BOP at', self.tell()

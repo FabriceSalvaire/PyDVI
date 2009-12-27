@@ -15,11 +15,12 @@
 
 #####################################################################################################
 
-__all__ = ['DviFileStream']
+__all__ = ['AbstractStream', 'StandardStream', 'FileStream']
 
 #####################################################################################################
 
 import mmap
+import os
 
 #####################################################################################################
 
@@ -27,7 +28,46 @@ FIX_WORD_SCALE = 1./2**20
 
 #####################################################################################################
 
-class DviStream(object):
+class AbstractStream(object):
+
+    '''
+    Abstract class to read DVI, PK, TFM, VF stream.
+
+    Following methods are abstract:
+     - read
+     - seek
+     - tell
+    '''
+
+    ###############################################
+
+    def read(self, number_of_bytes):
+
+        '''
+        Read n bytes from the current position
+        '''
+
+        pass
+
+    ###############################################
+
+    def seek(self, postion, whence):
+
+        '''
+        Seek to position
+        '''
+
+        pass
+
+    ###############################################
+
+    def tell(self):
+
+        '''
+        Tell the current position
+        '''
+
+        pass
 
     ###############################################
 
@@ -42,7 +82,7 @@ class DviStream(object):
         else:
             self.seek(position)
 
-        return self.stream.read(number_of_bytes)
+        return self.read(number_of_bytes)
 
     ###############################################
 
@@ -124,17 +164,28 @@ class DviStream(object):
 
     ###############################################
 
-    def read_fix_word(self, position = None):
+    @staticmethod
+    def to_fix_word(x):
         
         '''
-        Read a fiw word from the optional position or the current position
+        Convert x to a fix word
         '''
 
         # A fix word is a signed quantity, with the two's complement of the entire word used to
         # represent negation.  Of the 32 bits in fix word, exactly 12 are to the left of the binary
         # point.
 
-        return FIX_WORD_SCALE*float(self.read_signed_byte4(position))
+        return FIX_WORD_SCALE*float(x)
+
+    ###############################################
+
+    def read_fix_word(self, position = None):
+        
+        '''
+        Read a fix word from the optional position or the current position
+        '''
+
+        return self.to_fix_word(self.read_signed_byte4(position))
 
     ###############################################
 
@@ -159,34 +210,59 @@ class DviStream(object):
 
 #####################################################################################################
 
-class DviFileStream(DviStream):
-    
+class StandardStream(AbstractStream):
+
+    '''
+    Abstract stream class
+
+    Following methods are abstract:
+     - open
+     - close
+    '''
+
     ###############################################
 
-    def open(self, filename):
+    def __init__(self):
 
-        self.file = open(filename, 'rb')
+        self.stream = None
 
-        self.stream = mmap.mmap(self.file.fileno(), length = 0, access = mmap.ACCESS_READ)
+    ###############################################
 
-        self.stream.seek(0)
+    def open(self):
+
+        pass
 
     ###############################################
 
     def close(self):
 
-        self.stream.close()
-        self.file.close()
+        pass
+    
+    ###############################################
+
+    def read(self, number_of_bytes):
+
+        '''
+        Read n bytes from the current position
+        '''
+
+        # print 'Stream.read %u bytes at %u' % (number_of_bytes, self.tell())
+
+        bytes = self.stream.read(number_of_bytes)
+
+        # print '  bytes:', map(ord, bytes)
+
+        return bytes
 
     ###############################################
 
-    def seek(self, postion):
+    def seek(self, postion, whence = os.SEEK_SET):
 
         '''
         Seek to position
         '''
 
-        self.stream.seek(postion)
+        self.stream.seek(postion, whence)
 
     ###############################################
 
@@ -197,6 +273,27 @@ class DviFileStream(DviStream):
         '''
 
         return self.stream.tell()
+
+#####################################################################################################
+
+class FileStream(StandardStream):
+    
+    ###############################################
+
+    def open(self, filename):
+
+        self.file = open(filename, 'rb')
+
+        self.stream = mmap.mmap(self.file.fileno(), length = 0, access = mmap.ACCESS_READ)
+
+        self.seek(0)
+
+    ###############################################
+
+    def close(self):
+
+        self.stream.close()
+        self.file.close()
 
 #####################################################################################################
 #
