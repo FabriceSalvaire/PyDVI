@@ -126,7 +126,7 @@ class TfmParser(FileStream):
         for i in xrange(tables.width, len(tables)):
             self.table_lengths[i] = self.read_unsigned_byte2()
 
-        self.print_summary()
+        # self.print_summary()
 
         # Compute table pointers
 
@@ -201,6 +201,34 @@ class TfmParser(FileStream):
 
     def read_lig_kern_programs(self):
 
+        # Fixme: complete special support
+
+        # Read very first instruction of the table
+
+        (first_skip_byte,
+         next_char,
+         op_byte,
+         remainder) = self.read_four_byte_numbers_in_table(tables.lig_kern, 0)
+        
+        if first_skip_byte == 255:
+            right_boundary_char = next_char
+            raise NameError('Font has right boundary char')
+
+        # Read very last instruction of the table
+
+        (last_skip_byte,
+         next_char,
+         op_byte,
+         remainder) = self.read_four_byte_numbers_in_table(tables.lig_kern, self.table_lengths[tables.lig_kern] -1)
+        
+        if last_skip_byte == 255:
+            left_boundary_char_program_index = 256*op_byte + remainder
+            raise NameError('Font has left boundary char program')
+
+        # Read the instructions
+
+        first_instruction = True
+
         for i in xrange(self.table_lengths[tables.lig_kern]):
         
             (skip_byte,
@@ -208,12 +236,25 @@ class TfmParser(FileStream):
              op_byte,
              remainder) = self.read_four_byte_numbers_in_table(tables.lig_kern, i)
         
+            if first_instruction is True and skip_byte > 128:
+
+                print 'Large lig kern table'
+
+                large_index = 256*op_byte + remainder
+
+                (skip_byte,
+                 next_char,
+                 op_byte,
+                 remainder) = self.read_four_byte_numbers_in_table(tables.lig_kern, large_index)
+
+            stop = skip_byte >= 128
+
             if op_byte >= KERN_OPCODE:
         
                 kern_index = 256*(op_byte - KERN_OPCODE) + remainder
                 kern = self.read_fix_word_in_table(tables.kern, kern_index)
         
-                TfmKern(self.tfm, i, next_char, kern)
+                TfmKern(self.tfm, i, stop, next_char, kern)
         
             else:
         
@@ -225,11 +266,14 @@ class TfmParser(FileStream):
         
                 TfmLigature(self.tfm,
                             i,
+                            stop,
                             next_char,
                             ligature_char_code,
                             number_of_chars_to_pass_over,
                             current_char_is_deleted,
                             next_char_is_deleted)
+
+            first_instruction = stop == True
 
     ###############################################
 

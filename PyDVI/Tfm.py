@@ -86,7 +86,10 @@ Char %u %s
 
         if self.lig_kern_program_index is not None:
 
-            self.tfm.lig_kerns[self.lig_kern_program_index].print_summary()
+            first_lig_kern = self.tfm.lig_kerns[self.lig_kern_program_index]
+
+            for lig_kern in first_lig_kern:
+                lig_kern.print_summary()
 
 #####################################################################################################
 
@@ -119,59 +122,86 @@ class TfmExtensibleChar(TfmChar):
 
 #####################################################################################################
 
-class TfmKern(object):
+class TfmLigKern(object):
 
     ###############################################
 
-    def __init__(self, tfm, index, next_char, kern):
+    def __init__(self, tfm, index, stop, next_char):
 
         self.tfm = tfm
+        self.stop = stop
         self.index = index
         self.next_char = next_char
-        self.kern = kern
 
         self.tfm.add_lig_kern(self)
 
     ###############################################
 
-    def print_summary(self):
+    def __iter__(self):
 
-        print 'Kern char code %u %s %.3f' % (self.next_char,
-                                             self.tfm[self.next_char].chr(),
-                                             self.kern)
+        i = self.index
+        
+        while True:
+            
+            lig_kern = self.tfm.lig_kerns[i]
+            
+            yield lig_kern
+            
+            if lig_kern.stop is True:
+                break
+            else:
+                i += 1
 
 #####################################################################################################
 
-class TfmLigature(object):
+class TfmKern(TfmLigKern):
+
+    ###############################################
+
+    def __init__(self, tfm, index, stop, next_char, kern):
+
+        super(TfmKern, self).__init__(tfm, index, stop, next_char)
+
+        self.kern = kern
+
+    ###############################################
+
+    def print_summary(self):
+
+        print 'Kern char code %3u %s %.3f' % (self.next_char,
+                                              self.tfm[self.next_char].chr(),
+                                              self.kern)
+
+#####################################################################################################
+
+class TfmLigature(TfmLigKern):
 
     ###############################################
 
     def __init__(self,
                  tfm,
                  index,
+                 stop,
                  next_char,
                  ligature_char_code,
                  number_of_chars_to_pass_over,
                  current_char_is_deleted,
                  next_char_is_deleted):
 
-        self.tfm = tfm
-        self.index = index
-        self.next_char = next_char
+        super(TfmLigature, self).__init__(tfm, index, stop, next_char)
+
         self.ligature_char_code = ligature_char_code
         self.number_of_chars_to_pass_over = number_of_chars_to_pass_over
         self.current_char_is_deleted = current_char_is_deleted
         self.next_char_is_deleted = next_char_is_deleted
 
-        self.tfm.add_lig_kern(self)
-
     ###############################################
 
     def print_summary(self):
 
-        print 'Lig char code %u %s ligature char code %u' % (self.next_char,
-                                                             self.tfm[self.next_char].chr(),
-                                                             self.ligature_char_code)
+        print 'Lig char code %3u %s ligature char code %3u' % (self.next_char,
+                                                               self.tfm[self.next_char].chr(),
+                                                               self.ligature_char_code)
 
 #####################################################################################################
 

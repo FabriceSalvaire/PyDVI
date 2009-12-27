@@ -95,6 +95,16 @@ class AbstractStream(object):
 
     ###############################################
 
+    def read_three_byte_numbers(self, position = None):
+
+        '''
+        Read three byte numbers from the optional position or the current position
+        '''
+
+        return self.read_byte_numbers(3, position)
+
+    ###############################################
+
     def read_four_byte_numbers(self, position = None):
 
         '''
