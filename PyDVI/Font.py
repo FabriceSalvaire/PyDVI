@@ -20,18 +20,25 @@ import string
 
 #####################################################################################################
 
+import Kpathsea
+
+#####################################################################################################
+
 class Font(object):
 
     ###############################################
 
-    def __init__(self, extension, name):
+    def __init__(self, font_manager, name):
 
-        self.extension = extension
+        self.font_manager = font_manager
+
         self.name = name
 
         self.glyphs = {}
 
-        self.file_name = self.find_font()
+        self.find_font()
+
+        self.load_tfm()
 
         # if self.file_name is None:
         #     self.make_pk()
@@ -50,7 +57,7 @@ class Font(object):
 
     ###############################################
 
-    def relative_file_name(self):
+    def relative_filename(self):
 
         return self.name + '.' + self.extension
 
@@ -58,18 +65,27 @@ class Font(object):
 
     def find_font(self):
 
-        process = subprocess.Popen(string.join(('kpsewhich', self.relative_file_name()), sep = ' '),
-                                   shell=True,
-                                   stdout=subprocess.PIPE)
-        
-        stdout, stderr = process.communicate()
-        
-        result = stdout[:-1]
+        relative_filename = self.relative_filename()
 
-        if len(result) > 0 :
-            return result
-        else:
-            raise NameError('Font not found')
+        self.filename = Kpathsea.which(relative_filename)
+
+        if self.filename is None:
+            raise NameError('Font not found' % (relative_filename))
+
+    ###############################################
+
+    def load_tfm(self):
+
+        # Fixme: cache in font manager?
+
+        tfm_file = Kpathsea.which(self.name, format = 'tfm')
+
+        if tfm_file is None:
+            raise NameError('TFM %s not found' % (self.name))
+
+        self.tfm = self.font_manager.tfm_parser.parse(self.name, tfm_file)
+        
+        # self.tfm.print_summary()
 
     ###############################################
 

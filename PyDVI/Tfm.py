@@ -56,6 +56,24 @@ class TfmChar(object):
 
     ###############################################
 
+    def get_scaled_width(self, scale_factor):
+
+        return int(self.width * scale_factor)
+
+    ###############################################
+
+    def get_scaled_height(self, scale_factor):
+
+        return int(self.height * scale_factor)
+
+    ###############################################
+
+    def get_scaled_depth(self, scale_factor):
+
+        return int(self.depth * scale_factor)
+
+    ###############################################
+
     def chr(self):
 
         char = chr(self.char_code)
@@ -106,7 +124,7 @@ class TfmExtensibleChar(TfmChar):
                  height,
                  depth,
                  italic_correction,
-                 extensible_characters,
+                 extensible_recipe,
                  lig_kern_program_index = None,
                  next_larger_char = None):
 
@@ -116,7 +134,6 @@ class TfmExtensibleChar(TfmChar):
                                                 height,
                                                 depth,
                                                 italic_correction,
-                                                extensible_recipe,
                                                 lig_kern_program_index,
                                                 next_larger_char)
 

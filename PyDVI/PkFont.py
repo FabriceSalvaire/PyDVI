@@ -30,11 +30,13 @@ pk_font_parser = PkFontParser()
 
 class PkFont(Font):
 
+    extension = 'pk'
+
     ###############################################
 
-    def __init__(self, name):
+    def __init__(self, font_manager, name):
 
-        super(PkFont, self).__init__('pk', name)
+        super(PkFont, self).__init__(font_manager, name)
 
         pk_font_parser.process_pk_font(self)
 
@@ -90,4 +92,3 @@ Preambule
 # End
 #
 #####################################################################################################
-

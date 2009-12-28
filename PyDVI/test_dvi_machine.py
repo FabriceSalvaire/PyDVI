@@ -34,9 +34,9 @@ dvi_file = args[0]
 
 #####################################################################################################
 
-dvi_parser = DviParser(debug = True)
+dvi_parser = DviParser(debug = False)
 
-dvi_machine = DviMachine()
+dvi_machine = DviMachine(font_map = 'pdftex')
 
 ###################################################
 
@@ -50,9 +50,17 @@ dvi_stream.close()
 
 dvi_program.print_summary()
 
+dvi_machine.load_dvi_program(dvi_program)
+
+print 'Compute bounding box of the last page:'
+if len(dvi_program.pages) > 0:
+    dvi_machine.compute_page_bounding_box(-1)
+
+print '\n', '-'*80, '\n'
+
 print 'Run last page:'
 if len(dvi_program.pages) > 0:
-    dvi_machine.run(dvi_program, -1)
+    dvi_machine.run_page(-1)
 
 #####################################################################################################
 #

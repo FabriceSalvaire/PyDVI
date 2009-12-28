@@ -14,41 +14,24 @@
 
 #####################################################################################################
 
-import pylab as pl
+#####################################################################################################
+
+from Font import Font
+from VfFontParser import VfFontParser
 
 #####################################################################################################
 
-from FontManager import *
+vf_font_parser = VfFontParser()
 
 #####################################################################################################
 
-font_manager = FontManager(font_map = 'pdftex')
+class VfFont(Font):
 
-# Pk Font
+    ###############################################
 
-cmr10_pk = font_manager.load_font(font_types.Pk, 'cmr10')
+    def __init__(self, name):
 
-cmr10_pk.print_summary()
-
-glyph = cmr10_pk[ord('x')]
-
-glyph.print_summary()
-glyph.print_glyph()
-
-glyph_bitmap = glyph.get_glyph_bitmap()
-
-# pl.imshow(glyph_bitmap)
-# pl.show()
-
-# Type1 Font
-
-print
-
-cmr10_type1 = font_manager.load_mapped_font('cmr10')
-
-cmr10_type1.print_summary()
-
-cmr10_type1.tfm[ord('A')].print_summary()
+        super(VfFont, self).__init__('vf', name)
 
 #####################################################################################################
 #

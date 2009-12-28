@@ -1,0 +1,69 @@
+#! /usr/bin/env python
+# -*- python -*-
+
+#####################################################################################################
+
+import string
+import sys
+
+from optparse import OptionParser
+
+from PyQt4 import QtGui, QtCore, uic
+
+#####################################################################################################
+#
+# Main
+#
+#####################################################################################################
+
+if __name__ == "__main__":
+
+    ###############################################
+
+    usage = 'usage: %prog [options]'
+
+    parser = OptionParser(usage)
+
+    opt, args = parser.parse_args()
+
+    if len(args) > 0:
+        font_filename = args[0]
+    else:
+        font_filename = None
+
+    ###############################################
+
+    application = QtGui.QApplication(sys.argv)
+
+    font_database = QtGui.QFontDatabase()
+
+    font_id = font_database.addApplicationFont(font_filename)
+
+    print 'Font File Name:', font_filename
+    print 'Font ID:', font_id
+
+    print 'Font Families/Styles/Point Sizes:'
+    for family in font_database.applicationFontFamilies(font_id):
+        print ' -', family
+        for style in font_database.styles(family):
+            print '  -', style, string.join(map(str, font_database.pointSizes(family, style)), sep = ' / ')
+            
+    font = QtGui.QFont('Computer Modern', 10, QtGui.QFont.StyleNormal)
+
+    print 'Font', font.toString()
+
+    font = font_database.font('Computer Modern', 'Normal', 10)
+
+    print 'Font', font.toString()
+
+    font_metrics = QtGui.QFontMetrics(font)
+
+    char = QtCore.QChar('p')
+
+    print 'Font Metrics', font_metrics.width(char), font_metrics.leftBearing(char), font_metrics.rightBearing(char) 
+
+#####################################################################################################
+#
+# End
+#
+#####################################################################################################

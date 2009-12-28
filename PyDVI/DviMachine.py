@@ -23,6 +23,7 @@ import string
 
 from FontManager import *
 from TeXUnit import *
+from Interval import *
 
 #####################################################################################################
 
@@ -103,27 +104,46 @@ class Opcode_set_char(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         registers = dvi_machine.get_registers()
 
         current_font = dvi_machine.get_current_font()
         dvi_font = dvi_machine.get_current_dvi_font()
 
+        bounding_box = None
+
         for char_code in self.characters:
+
+            tfm_char = current_font.tfm[char_code]
 
             glyph = current_font[char_code]
             
-            glyph.print_summary()
+            # glyph.print_summary()
+            # glyph.print_glyph()
 
-            glyph.print_glyph()
+            if compute_bounding_box is False:
+                dvi_machine.paint_char(registers.h - glyph.horizontal_offset,
+                                       registers.v - glyph.vertical_offset,
+                                       glyph,
+                                       dvi_font.magnification)
+                
+            char_width = dvi_font.get_char_scaled_width(tfm_char)
 
-            dvi_machine.paint_char(registers.h - glyph.horizontal_offset,
-                                   registers.v - glyph.vertical_offset,
-                                   glyph,
-                                   dvi_font.magnification)
+            if compute_bounding_box is True:
 
-            char_width = dvi_font.get_char_width(glyph)
+                char_depth  = dvi_font.get_char_scaled_depth(tfm_char)
+                char_height = dvi_font.get_char_scaled_height(tfm_char)
+
+                char_bounding_box = Interval2D([registers.h, registers.h + char_width],
+                                               [registers.v - char_depth, registers.v + char_height])
+
+                print 'Char bounding box', char_bounding_box
+
+                if bounding_box is None:
+                    bounding_box = char_bounding_box
+                else:
+                    bounding_box |= char_bounding_box
 
             if self.set is True:
                 registers.h += char_width
@@ -132,6 +152,9 @@ class Opcode_set_char(Opcode):
                                                          char_code, chr(char_code),
                                                          char_width, registers.h)
 
+        if compute_bounding_box is True:
+            return bounding_box
+            
 ###################################################
 
 class Opcode_put_char(Opcode):
@@ -165,14 +188,22 @@ class Opcode_set_rule(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         registers = dvi_machine.get_registers()
 
-        dvi_machine.paint_rule(registers.h, registers.v, self.width, self.height)
-        
+        if compute_bounding_box is False:
+            dvi_machine.paint_rule(registers.h, registers.v, self.width, self.height)
+
+        if compute_bounding_box is True:
+            bounding_box = Interval2D([registers.h, registers.h + self.width]
+                                      [registers.v, registers.v + self.height])
+
         if self.set is True:
             registers.h += self.width
+
+        if compute_bounding_box is True:
+            return bounding_box
 
 ###################################################
 
@@ -202,7 +233,7 @@ class Opcode_push(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         dvi_machine.push_registers()
 
@@ -224,7 +255,7 @@ class Opcode_pop(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         dvi_machine.pop_registers()
 
@@ -248,7 +279,7 @@ class Opcode_right(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         registers = dvi_machine.get_registers()
         registers.h += self.x
@@ -271,7 +302,7 @@ class Opcode_w0(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         registers = dvi_machine.get_registers()
         registers.h += registers.w
@@ -294,7 +325,7 @@ class Opcode_w(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         registers = dvi_machine.get_registers()
         registers.w  = self.x
@@ -318,7 +349,7 @@ class Opcode_x0(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         registers = dvi_machine.get_registers()
         registers.h += registers.x
@@ -341,7 +372,7 @@ class Opcode_x(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         registers = dvi_machine.get_registers()
         registers.x  = self.x
@@ -365,7 +396,7 @@ class Opcode_down(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         registers = dvi_machine.get_registers()
         registers.v += self.x
@@ -388,7 +419,7 @@ class Opcode_y0(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         registers = dvi_machine.get_registers()
         registers.v += registers.y
@@ -411,7 +442,7 @@ class Opcode_y(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         registers = dvi_machine.get_registers()
         registers.y  = self.x
@@ -435,7 +466,7 @@ class Opcode_z0(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         registers = dvi_machine.get_registers()
         registers.v += registers.z
@@ -458,7 +489,7 @@ class Opcode_z(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         registers = dvi_machine.get_registers()
         registers.z  = self.x
@@ -482,7 +513,7 @@ class Opcode_font(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         dvi_machine.current_font = self.font_id
 
@@ -504,7 +535,7 @@ class Opcode_xxx(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine):
+    def run(self, dvi_machine, compute_bounding_box = False):
 
         pass
 
@@ -543,9 +574,21 @@ class DviFont(object):
 
     ###############################################
 
-    def get_char_width(self, glyph):
+    def get_char_scaled_width(self, tfm_char):
 
-        return glyph.get_width(self.scale_factor)
+        return tfm_char.get_scaled_width(self.scale_factor)
+
+    ###############################################
+
+    def get_char_scaled_height(self, tfm_char):
+
+        return tfm_char.get_scaled_height(self.scale_factor)
+
+    ###############################################
+
+    def get_char_scaled_depth(self, tfm_char):
+
+        return tfm_char.get_scaled_depth(self.scale_factor)
 
 #####################################################################################################
 
@@ -558,6 +601,13 @@ class DviProgam(object):
         self.fonts = {} # dict of DviFont
 
         self.pages = []
+
+    ###############################################
+
+    def dvi_font_iterator(self):
+        
+        for font in self.fonts.values():
+            yield font
 
     ###############################################
 
@@ -642,7 +692,7 @@ Postamble
 
         print 'List of fonts:'
 
-        for font in self.fonts.values():
+        for font in self.dvi_font_iterator():
             print font
 
         # for i in xrange(self.number_of_pages):
@@ -687,9 +737,9 @@ class DviMachine(object):
     
     ###############################################
 
-    def __init__(self):
+    def __init__(self, font_map):
 
-        self.font_manager = FontManager()
+        self.font_manager = FontManager(font_map)
 
         self.fonts = {}
 
@@ -735,14 +785,25 @@ class DviMachine(object):
 
     ###############################################
 
-    def run(self, dvi_program, page):
+    def load_dvi_program(self, dvi_program):
 
         self.dvi_program = dvi_program
 
-        for font in dvi_program.fonts.values():
-            self.fonts[font.id] = self.font_manager.load_font(font_types.Pk, font.name) # Fixme
+        self.load_dvi_fonts()
 
-        opcode_program = dvi_program.get_page(page)
+    ###############################################
+
+    def load_dvi_fonts(self):
+
+        # Load the Fonts
+        for dvi_font in self.dvi_program.dvi_font_iterator():
+            self.fonts[dvi_font.id] = self.font_manager.load_font(font_types.Pk, dvi_font.name) # Fixme
+
+    ###############################################
+
+    def run_page(self, page):
+
+        opcode_program = self.dvi_program.get_page(page)
 
         print 'Program Length:', len(opcode_program)
 
@@ -750,6 +811,41 @@ class DviMachine(object):
             print opcode
             opcode.run(self)
             print 'level %u' % (len(self.registers_stack)), self.get_registers()
+
+    ###############################################
+
+    def compute_page_bounding_box(self, page):
+
+        opcode_program = self.dvi_program.get_page(page)
+
+        print 'Program Length:', len(opcode_program)
+
+        bounding_box = None
+
+        for opcode in opcode_program:
+            print opcode
+            opcode_bounding_box = opcode.run(self, compute_bounding_box = True)
+            print 'level %u' % (len(self.registers_stack)), self.get_registers()
+
+            if opcode_bounding_box is not None:
+
+                print 'Opcode bounding box', opcode_bounding_box
+
+                if bounding_box is None:
+                    bounding_box = opcode_bounding_box
+                else:
+                    bounding_box |= opcode_bounding_box
+                
+                print 'Current page bounding box', bounding_box
+
+        print 'Page bounding box', bounding_box, 'sp'
+
+        (x_min_mm, x_max_mm, y_min_mm, y_max_mm) = map(sp2mm, (bounding_box.x.inf, bounding_box.x.sup,
+                                                               bounding_box.y.inf, bounding_box.y.sup))
+
+        print '  [%.2f, %.2f]*[%.2f, %.2f] mm' % (x_min_mm, x_max_mm, y_min_mm, y_max_mm) 
+
+        return bounding_box
 
     ###############################################
 

@@ -189,7 +189,12 @@ class TfmParser(FileStream):
                  
         self.seek_to_table(tables.font_parameter)
  
-        self.tfm.set_font_parameters(self.repeat(self.read_fix_word, self.table_lengths[tables.font_parameter]))
+        # print 'read_font_parameters', self.tfm.character_coding_scheme, self.table_lengths[tables.font_parameter]
+
+        if self.tfm.character_coding_scheme == 'TeX math italic':
+            pass
+        else:
+            self.tfm.set_font_parameters(self.repeat(self.read_fix_word, 7))
 
         if self.tfm.character_coding_scheme == 'TeX math symbols':
             self.tfm.set_math_symbols_parameters(self.repeat(self.read_fix_word, 15))

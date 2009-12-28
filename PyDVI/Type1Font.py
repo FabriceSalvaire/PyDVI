@@ -14,41 +14,36 @@
 
 #####################################################################################################
 
-import pylab as pl
+import string
 
 #####################################################################################################
 
-from FontManager import *
+from Font import Font
 
 #####################################################################################################
 
-font_manager = FontManager(font_map = 'pdftex')
+class Type1Font(Font):
 
-# Pk Font
+    extension = 'pfb'
 
-cmr10_pk = font_manager.load_font(font_types.Pk, 'cmr10')
+    ###############################################
 
-cmr10_pk.print_summary()
+    def __init__(self, font_manager, name):
 
-glyph = cmr10_pk[ord('x')]
+        name = string.replace(name, '.' + self.extension, '')
 
-glyph.print_summary()
-glyph.print_glyph()
+        super(Type1Font, self).__init__(font_manager, name)
 
-glyph_bitmap = glyph.get_glyph_bitmap()
+    ###############################################
 
-# pl.imshow(glyph_bitmap)
-# pl.show()
+    def print_summary(self):
 
-# Type1 Font
+        print '''Type1 %s
 
-print
-
-cmr10_type1 = font_manager.load_mapped_font('cmr10')
-
-cmr10_type1.print_summary()
-
-cmr10_type1.tfm[ord('A')].print_summary()
+ - file name: %s
+  ''' % (self.name,
+         self.filename,
+         )
 
 #####################################################################################################
 #

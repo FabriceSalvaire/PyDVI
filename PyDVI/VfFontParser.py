@@ -14,41 +14,25 @@
 
 #####################################################################################################
 
-import pylab as pl
+#####################################################################################################
+
+from Stream import *
+from OpcodeParser import *
 
 #####################################################################################################
 
-from FontManager import *
+class VfFontParser(OpcodeStreamParser, FileStream):
 
-#####################################################################################################
+    opcode_definitions = (
+        )
+   
+    ###############################################
 
-font_manager = FontManager(font_map = 'pdftex')
+    def __init__(self):
 
-# Pk Font
+        super(VfFontParser, self).__init__(self.opcode_definitions)
 
-cmr10_pk = font_manager.load_font(font_types.Pk, 'cmr10')
-
-cmr10_pk.print_summary()
-
-glyph = cmr10_pk[ord('x')]
-
-glyph.print_summary()
-glyph.print_glyph()
-
-glyph_bitmap = glyph.get_glyph_bitmap()
-
-# pl.imshow(glyph_bitmap)
-# pl.show()
-
-# Type1 Font
-
-print
-
-cmr10_type1 = font_manager.load_mapped_font('cmr10')
-
-cmr10_type1.print_summary()
-
-cmr10_type1.tfm[ord('A')].print_summary()
+        self.vf_font = None
 
 #####################################################################################################
 #

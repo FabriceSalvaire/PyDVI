@@ -51,7 +51,7 @@ class PkGlyph(object):
 
     ###############################################
 
-    def get_width(self, scale_factor):
+    def get_scaled_width(self, scale_factor):
 
         return int(self.tfm * scale_factor)
 

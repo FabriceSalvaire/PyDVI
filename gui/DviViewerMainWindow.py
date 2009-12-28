@@ -14,13 +14,18 @@ from DviMachine import DviMachine
 
 #####################################################################################################
 
+page_width  = 210
+page_height = 297
+
+#####################################################################################################
+
 class QtDviMachine(DviMachine):
     
     ###############################################
 
     def __init__(self, scene):
 
-        super(QtDviMachine, self).__init__()
+        super(QtDviMachine, self).__init__(font_map = 'pdftex')
 
         self.scene = scene
 
@@ -48,21 +53,21 @@ class QtDviMachine(DviMachine):
 
         print 'paint_char', x, y, x_mm, y_mm
 
-        glyph_bitmap = glyph.get_glyph_bitmap()
+        ## glyph_bitmap = glyph.get_glyph_bitmap()
+        ## 
+        ## glyph_image = QtGui.QImage(glyph.width, glyph.height, QtGui.QImage.Format_ARGB32) # Format_Mono
+        ## 
+        ## for y in xrange(glyph.height):
+        ##     for x in xrange(glyph.width):
+        ##         if glyph_bitmap[y, x] == 1:
+        ##             glyph_image.setPixel(x, y, 0xFF000000)
+        ##         else:
+        ##             glyph_image.setPixel(x, y, 0x00FFFFFF)
+        ## 
+        ## glyph_bitmap = QtGui.QPixmap.fromImage(glyph_image)
 
-        glyph_image = QtGui.QImage(glyph.width, glyph.height, QtGui.QImage.Format_ARGB32) # Format_Mono
-
-        for y in xrange(glyph.height):
-            for x in xrange(glyph.width):
-                if glyph_bitmap[y, x] == 1:
-                    glyph_image.setPixel(x, y, 0xFF000000)
-                else:
-                    glyph_image.setPixel(x, y, 0x00FFFFFF)
-
-        glyph_bitmap = QtGui.QPixmap.fromImage(glyph_image)
-
-        char_pixmap_item = self.scene.addPixmap(glyph_bitmap)
-        char_pixmap_item.setOffset(-glyph.horizontal_offset, -glyph.vertical_offset)
+        ## char_pixmap_item = self.scene.addPixmap(glyph_bitmap)
+        ## char_pixmap_item.setOffset(-glyph.horizontal_offset, -glyph.vertical_offset)
 
         box_depth  = max(glyph.height - glyph.vertical_offset, glyph.vertical_offset)
         box_height = max(glyph.vertical_offset, box_depth)
@@ -81,8 +86,10 @@ class QtDviMachine(DviMachine):
         h_scale = dpi2mm(glyph.pk_font.horizontal_dpi*magnification)
         v_scale = dpi2mm(glyph.pk_font.vertical_dpi*magnification)
         print h_scale, v_scale
+        
+        # char_pixmap_item, 
 
-        for item in (char_pixmap_item, h_line_item, v_line_item, char_box_item):
+        for item in (h_line_item, v_line_item, char_box_item):
             item.translate(x_mm, y_mm)
             item.scale(h_scale, v_scale)
 
@@ -120,6 +127,10 @@ class MainWindow(QtGui.QMainWindow):
         dvi_graphics_view.setScene(scene)
         dvi_graphics_view.setRenderHint(QtGui.QPainter.Antialiasing)
 
+        page_rect = QtCore.QRectF(0, 0, page_width, page_height)
+
+        dvi_graphics_view.ensureVisible(page_rect, 50, 50)
+
         # DVI
 
         self.__init_dvi_machine()
@@ -147,13 +158,39 @@ class MainWindow(QtGui.QMainWindow):
         dvi_program.print_summary()
 
         self.scene.clear()
+
+        self.paint_page()
+
+        self.dvi_machine.load_dvi_program(dvi_program)
         
         print 'Run last page:'
         if len(dvi_program.pages) > 0:
-            self.dvi_machine.run(dvi_program, 0)
+            self.dvi_machine.run_page(-1)
 
         self.scene.update()
 
+    ###############################################
+
+    def paint_page(self):
+
+        pen = QtGui.QPen(QtCore.Qt.black)
+
+        page_rect = QtCore.QRectF(0, 0, page_width, page_height)
+
+        self.scene.addRect(page_rect, pen)
+        
+        grid_spacing = 5
+
+        x = grid_spacing
+        while x < page_width:
+            self.scene.addRect(QtCore.QRectF(x, 0, 0, page_height), pen)
+            x += grid_spacing
+
+        y = grid_spacing
+        while y < page_height:
+            self.scene.addRect(QtCore.QRectF(0, y, page_width, 0), pen)
+            y += grid_spacing
+        
     ###############################################
 
     def keyPressEvent(self, event):
