@@ -201,7 +201,7 @@ class TfmParser(FileStream):
 
     def read_lig_kern_programs(self):
 
-        # Fixme: complete special support
+        # Fixme: complete special cases
 
         # Read very first instruction of the table
 
@@ -238,7 +238,7 @@ class TfmParser(FileStream):
         
             if first_instruction is True and skip_byte > 128:
 
-                print 'Large lig kern table'
+                print 'Large lig/kern table'
 
                 large_index = 256*op_byte + remainder
 

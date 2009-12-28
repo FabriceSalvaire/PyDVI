@@ -9,7 +9,9 @@
 #
 # Audit
 #
-#  - 26/12/2009 fabrice
+#  - 27/12/2009 fabrice
+#  
+#   - Check and complete lig kern table and for special fonts
 #
 #####################################################################################################
 
