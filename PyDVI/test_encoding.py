@@ -9,52 +9,41 @@
 #
 # Audit
 #
-#  - 26/12/2009 fabrice
-#
 #####################################################################################################
 
 #####################################################################################################
 
-import string
-import subprocess
+import sys
 
 #####################################################################################################
 
-def which(filename, format = None):
+import Kpathsea 
 
-    '''
-    Wrapper around kpsewhich program
-    '''
-
-    command = ['kpsewhich']
-
-    if format is not None:
-        command.append("--format='%s'" % (format))
-
-    command.append(filename)
-
-    command_string = string.join(command, sep=' ')
-
-    pipe = subprocess.Popen(command_string, shell=True, stdout=subprocess.PIPE)
-        
-    stdout, stderr = pipe.communicate()
-
-    path = stdout.rstrip()
-
-    if len(path) > 0:
-        return path
-    else:
-        return None
+from Encoding import *
 
 #####################################################################################################
-#
-#                                               Test
-#
-#####################################################################################################
-        
-if __name__ == '__main__':
 
-    print 'kpsewhich cmr10.tfm', which('cmr10', format = 'tfm')
+from optparse import OptionParser
+
+usage = 'usage: %prog font_name'
+
+parser = OptionParser(usage)
+
+opt, args = parser.parse_args()
+
+if len(args) != 1:
+    parser.error("incorrect number of arguments")
+
+encoding = args[0]
+
+encoding_file = Kpathsea.which(encoding, format = 'enc files')
+
+if encoding_file is None:
+    sys.exit(1)
+
+encoding = Encoding(encoding_file)
+  
+encoding.print_summary()
 
 #####################################################################################################
 #

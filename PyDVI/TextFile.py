@@ -9,55 +9,43 @@
 #
 # Audit
 #
-#  - 26/12/2009 fabrice
 #
 #####################################################################################################
+
+#####################################################################################################
+
+__all__ = ['TextFile']
 
 #####################################################################################################
 
 import string
-import subprocess
 
 #####################################################################################################
 
-def which(filename, format = None):
+class TextFile(object):
 
-    '''
-    Wrapper around kpsewhich program
-    '''
+    ###############################################
 
-    command = ['kpsewhich']
+    def parse(self, filename):
 
-    if format is not None:
-        command.append("--format='%s'" % (format))
+        file = open(filename, 'r')
 
-    command.append(filename)
+        for line in file:
+           
+            comment_start_index = line.find('%')
+            if comment_start_index > -1:
+                line = line[:comment_start_index]
 
-    command_string = string.join(command, sep=' ')
+            line = line.strip()
 
-    pipe = subprocess.Popen(command_string, shell=True, stdout=subprocess.PIPE)
-        
-    stdout, stderr = pipe.communicate()
+            if len(line) > 0:
+                self.parse_line(line)
 
-    path = stdout.rstrip()
-
-    if len(path) > 0:
-        return path
-    else:
-        return None
-
-#####################################################################################################
-#
-#                                               Test
-#
-#####################################################################################################
-        
-if __name__ == '__main__':
-
-    print 'kpsewhich cmr10.tfm', which('cmr10', format = 'tfm')
+        file.close()
 
 #####################################################################################################
 #
 # End
 #
 #####################################################################################################
+

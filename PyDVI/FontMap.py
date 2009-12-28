@@ -22,6 +22,10 @@ import string
 
 #####################################################################################################
 
+from TextFile import *
+
+#####################################################################################################
+
 class FontMapEntry(object):
 
     ###############################################
@@ -54,7 +58,7 @@ Font Map Entry %s
 
 #####################################################################################################
 
-class FontMap(object):
+class FontMap(TextFile):
 
     ###############################################
 
@@ -81,36 +85,25 @@ class FontMap(object):
 
     ###############################################
 
-    def parse(self, filename):
+    def parse_line(self, line):
 
-        file = open(filename, 'r')
+        words = filter(len, line.split())
 
-        for line in file:
-        
-            line = line.strip()
-            
-            if len(line) == 0 or line.startswith('%'):
-                continue
+        i = 0
+        while i < len(words):
 
-            words = filter(len, line.split())
+            word = words[i]
 
-            i = 0
-            while i < len(words):
+            if word.startswith('"'):
 
-                word = words[i]
+                while word.endswith('"') is False:
+                    word += ' ' + words.pop(i + 1)
+                    
+                words[i] = word[1:-1]
 
-                if word.startswith('"'):
+            i += 1
 
-                    while word.endswith('"') is False:
-                        word += ' ' + words.pop(i + 1)
-                        
-                    words[i] = word[1:-1]
-
-                i += 1
-
-            self.parse_font_map_line(words)
-
-        file.close()
+        self.parse_font_map_line(words)
 
     ###############################################
 
