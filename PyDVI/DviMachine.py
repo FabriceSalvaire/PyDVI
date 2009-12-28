@@ -121,22 +121,24 @@ class Opcode_set_char(Opcode):
             
             # glyph.print_summary()
             # glyph.print_glyph()
+               
+            char_width  = dvi_font.get_char_scaled_width(tfm_char)
+            char_depth  = dvi_font.get_char_scaled_depth(tfm_char)
+            char_height = dvi_font.get_char_scaled_height(tfm_char)
+            
+            char_bounding_box = Interval2D([registers.h, registers.h + char_width],
+                                           [registers.v + char_depth, registers.v - char_height])
+
+            # registers.h - glyph.horizontal_offset,
+            # registers.v - glyph.vertical_offset,
 
             if compute_bounding_box is False:
-                dvi_machine.paint_char(registers.h - glyph.horizontal_offset,
-                                       registers.v - glyph.vertical_offset,
+                dvi_machine.paint_char(registers.h, registers.v,
+                                       char_bounding_box,
                                        glyph,
                                        dvi_font.magnification)
-                
-            char_width = dvi_font.get_char_scaled_width(tfm_char)
-
-            if compute_bounding_box is True:
-
-                char_depth  = dvi_font.get_char_scaled_depth(tfm_char)
-                char_height = dvi_font.get_char_scaled_height(tfm_char)
-
-                char_bounding_box = Interval2D([registers.h, registers.h + char_width],
-                                               [registers.v - char_depth, registers.v + char_height])
+ 
+            else:
 
                 print 'Char bounding box', char_bounding_box
 
@@ -701,11 +703,13 @@ Postamble
 
 #####################################################################################################
 
+one_in_in_sp = in2sp(1)
+
 class DviMachineRegisters(object):
 
     ###############################################
 
-    def __init__(self, h = 0, v = 0, w = 0, x = 0, y = 0, z = 0):
+    def __init__(self, h = one_in_in_sp, v = one_in_in_sp, w = 0, x = 0, y = 0, z = 0):
 
         self.h, self.v, self.w, self.x, self.y, self.z = h, v, w, x, y, z
 
@@ -855,7 +859,7 @@ class DviMachine(object):
 
     ###############################################
 
-    def paint_char(self, x, y, glyph, magnification):
+    def paint_char(self, x, y, char_bounding_box, glyph, magnification):
 
         pass
 

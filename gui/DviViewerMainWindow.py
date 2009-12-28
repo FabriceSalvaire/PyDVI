@@ -33,10 +33,9 @@ class QtDviMachine(DviMachine):
 
     def paint_rule(self, x, y, w, h):
 
-        x_mm, y_mm = sp2mm(x), sp2mm(y)
-        w_mm, h_mm = sp2mm(w), sp2mm(h)
+        x_mm, y_mm, w_mm, h_mm = map(sp2mm, (x, y, w, h))
 
-        print 'paint_rule', x, y, x_mm, y_mm, w_mm, h_mm
+        print 'paint_rule', x_mm, y_mm, w_mm, h_mm
 
         rule_rect = QtCore.QRectF(x_mm, y_mm, w_mm, h_mm)
 
@@ -47,54 +46,63 @@ class QtDviMachine(DviMachine):
 
     ###############################################
 
-    def paint_char(self, x, y, glyph, magnification):
+    def paint_char(self, xg, yg, char_bounding_box, glyph, magnification):
+
+        h_scale = dpi2mm(glyph.pk_font.horizontal_dpi/magnification)
+        v_scale = dpi2mm(glyph.pk_font.vertical_dpi/magnification)
+        print 'Magnification', float(magnification), h_scale, v_scale
+
+        x, y = char_bounding_box.x.inf, char_bounding_box.y.inf
 
         x_mm, y_mm = sp2mm(x), sp2mm(y)
 
+        xg_mm, yg_mm = sp2mm(xg), sp2mm(yg)
+
         print 'paint_char', x, y, x_mm, y_mm
 
-        ## glyph_bitmap = glyph.get_glyph_bitmap()
-        ## 
-        ## glyph_image = QtGui.QImage(glyph.width, glyph.height, QtGui.QImage.Format_ARGB32) # Format_Mono
-        ## 
-        ## for y in xrange(glyph.height):
-        ##     for x in xrange(glyph.width):
-        ##         if glyph_bitmap[y, x] == 1:
-        ##             glyph_image.setPixel(x, y, 0xFF000000)
-        ##         else:
-        ##             glyph_image.setPixel(x, y, 0x00FFFFFF)
-        ## 
-        ## glyph_bitmap = QtGui.QPixmap.fromImage(glyph_image)
+        glyph_bitmap = glyph.get_glyph_bitmap()
+        
+        glyph_image = QtGui.QImage(glyph.width, glyph.height, QtGui.QImage.Format_ARGB32) # Format_Mono
+        
+        for y in xrange(glyph.height):
+            for x in xrange(glyph.width):
+                if glyph_bitmap[y, x] == 1:
+                    glyph_image.setPixel(x, y, 0xFF000000)
+                else:
+                    glyph_image.setPixel(x, y, 0x00FFFFFF)
+        
+        glyph_bitmap = QtGui.QPixmap.fromImage(glyph_image)
 
-        ## char_pixmap_item = self.scene.addPixmap(glyph_bitmap)
-        ## char_pixmap_item.setOffset(-glyph.horizontal_offset, -glyph.vertical_offset)
+        char_pixmap_item = self.scene.addPixmap(glyph_bitmap)
+        char_pixmap_item.setOffset(-glyph.horizontal_offset, -glyph.vertical_offset)
+        char_pixmap_item.translate(xg_mm, yg_mm)
+        char_pixmap_item.scale(h_scale, v_scale)
 
-        box_depth  = max(glyph.height - glyph.vertical_offset, glyph.vertical_offset)
-        box_height = max(glyph.vertical_offset, box_depth)
+        #b# box_depth  = max(glyph.height - glyph.vertical_offset, glyph.vertical_offset)
+        #b# box_height = max(glyph.vertical_offset, box_depth)
+
+        box_width  = sp2mm(char_bounding_box.x.length_float())
+        box_height = sp2mm(char_bounding_box.y.length_float())
 
         red_pen = QtGui.QPen(QtCore.Qt.red)
+         
+        #l# box_scale = 1.5
+        #l# 
+        #l# h_line_item = self.scene.addLine(-box_scale*glyph.width, 0, (box_scale+1)*glyph.width, 0, red_pen)
+        #l# v_line_item = self.scene.addLine(0, box_scale*box_depth, 0, -box_scale*box_height, red_pen)
 
-        box_scale = 1.5
+        #b# char_box_rect = QtCore.QRectF(-glyph.horizontal_offset, -glyph.vertical_offset, glyph.width, glyph.height)
 
-        h_line_item = self.scene.addLine(-box_scale*glyph.width, 0, (box_scale+1)*glyph.width, 0, red_pen)
-        v_line_item = self.scene.addLine(0, box_scale*box_depth, 0, -box_scale*box_height, red_pen)
-
-        char_box_rect = QtCore.QRectF(-glyph.horizontal_offset, -glyph.vertical_offset, glyph.width, glyph.height)
+        char_box_rect = QtCore.QRectF(x_mm, y_mm, box_width, box_height)
 
         char_box_item = self.scene.addRect(char_box_rect, red_pen)
-
-        h_scale = dpi2mm(glyph.pk_font.horizontal_dpi*magnification)
-        v_scale = dpi2mm(glyph.pk_font.vertical_dpi*magnification)
-        print h_scale, v_scale
         
-        # char_pixmap_item, 
-
-        for item in (h_line_item, v_line_item, char_box_item):
-            item.translate(x_mm, y_mm)
-            item.scale(h_scale, v_scale)
-
-        for item in (h_line_item, v_line_item):
-            item.setVisible(False)
+        #!# for item in (char_pixmap_item, h_line_item, v_line_item, char_box_item):
+        #!#     item.translate(x_mm, y_mm)
+        #!#     item.scale(h_scale, v_scale)
+        #!# 
+        #!# for item in (h_line_item, v_line_item):
+        #!#     item.setVisible(False)
 
 #####################################################################################################
 
@@ -121,11 +129,17 @@ class MainWindow(QtGui.QMainWindow):
         # Graphics View
 
         self.scene = scene = QtGui.QGraphicsScene(self)
-        scene.setSceneRect(0, 0, 210, 50)
+
+        margin = 50
+        scene.setSceneRect(-margin, -margin, page_width + margin, page_height + margin)
 
         dvi_graphics_view = form.dvi_graphics_view
+
         dvi_graphics_view.setScene(scene)
+
         dvi_graphics_view.setRenderHint(QtGui.QPainter.Antialiasing)
+        dvi_graphics_view.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        dvi_graphics_view.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
 
         page_rect = QtCore.QRectF(0, 0, page_width, page_height)
 
@@ -165,7 +179,7 @@ class MainWindow(QtGui.QMainWindow):
         
         print 'Run last page:'
         if len(dvi_program.pages) > 0:
-            self.dvi_machine.run_page(-1)
+            self.dvi_machine.run_page(0)
 
         self.scene.update()
 

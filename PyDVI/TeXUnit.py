@@ -7,7 +7,8 @@
 
 #####################################################################################################
 
-__all__ = ['in2mm', 'in2pt', 'dpi2mm', 'mm2in', 'pt2in', 'pt2mm', 'sp2in', 'sp2mm', 'sp2pt', 'sp2dpi']
+__all__ = ['in2mm', 'in2pt', 'dpi2mm',
+           'mm2in', 'pt2in', 'pt2mm', 'sp2in', 'sp2mm', 'sp2pt', 'sp2dpi', 'in2sp', 'pt2sp']
 
 #####################################################################################################
 
@@ -53,6 +54,7 @@ mm_in_inch_f = float(mm_in_inch)
 mm_in_point_f = float(mm_in_point)
 point_in_inch_f = float(point_in_inch)
 pt_in_sp_f = float(pt_in_sp)
+sp_in_pt_f = float(scaled_point_in_point)
 
 #####################################################################################################
 
@@ -99,6 +101,14 @@ def sp2mm(x):
 def sp2dpi(x):
 
     return in2pt(sp2pt(x))
+
+def pt2sp(x):
+
+    return x * sp_in_pt_f
+
+def in2sp(x):
+
+    return pt2sp(in2pt(x))
 
 #####################################################################################################
 #
