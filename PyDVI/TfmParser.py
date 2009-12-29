@@ -81,11 +81,12 @@ class TfmParser(FileStream):
 
     ###############################################
 
-    def parse(self, font_name, tfm_filename):
+    def parse(self, font_name, filename):
 
         self.font_name = font_name
+        self.filename = filename
 
-        self.open(tfm_filename)
+        self.open(filename)
 
         self.read_lengths()
         self.read_header()
@@ -176,6 +177,7 @@ class TfmParser(FileStream):
             # Fixme: complete
 
         self.tfm = Tfm(self.font_name,
+                       self.filename,
                        self.smallest_character_code,
                        self.largest_character_code,
                        checksum,

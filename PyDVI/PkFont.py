@@ -15,30 +15,45 @@
 
 #####################################################################################################
 
+__ALL__ = ['PkFont']
+
+#####################################################################################################
+
 import subprocess
 
 #####################################################################################################
 
-from Font import Font
-from PkFontParser import PkFontParser
-
-#####################################################################################################
-
-pk_font_parser = PkFontParser()
+from Font import *
+from Logging import *
 
 #####################################################################################################
 
 class PkFont(Font):
 
+    font_type_string = 'TeX Packed Font'
     extension = 'pk'
 
     ###############################################
 
-    def __init__(self, font_manager, name):
+    def __init__(self, font_manager, id, name):
 
-        super(PkFont, self).__init__(font_manager, name)
+        super(PkFont, self).__init__(font_manager, id, name)
+        
+        self.glyphs = {}
 
-        pk_font_parser.process_pk_font(self)
+        self.font_manager.pk_font_parser.process_pk_font(self)
+
+    ###############################################
+ 
+    def __getitem__(self, char_code):
+ 
+        return self.glyphs[char_code]
+
+    ###############################################
+
+    def __len__(self):
+
+        return len(self.glyphs)
 
     ###############################################
 
@@ -67,10 +82,22 @@ class PkFont(Font):
 
     ###############################################
 
+    def register_glyph(self, glyph):
+
+        self.glyphs[glyph.char_code] = glyph
+
+    ###############################################
+
+    def get_glyph(self, glyph_index, size = None, resolution = None):
+
+        return self.glyphs[glyph_index]
+
+    ###############################################
+
     def print_summary(self):
 
-        print '''PK File %s
-
+        print_card (self.print_header() + 
+                    '''
 Preambule
   - PK ID        %u
   - Comment      '%s'
@@ -78,14 +105,14 @@ Preambule
   - Checksum     %u
   - Resolution
    - Horizontal  %.1f dpi
-   - Vertical    %.1f dpi
-  ''' % (self.name,
-         self.pk_id,
-         self.comment,
-         self.design_size,
-         self.checksum,
-         self.horizontal_dpi,
-         self.vertical_dpi)
+   - Vertical    %.1f dpi ''' % (
+                self.pk_id,
+                self.comment,
+                self.design_size,
+                self.checksum,
+                self.horizontal_dpi,
+                self.vertical_dpi,
+                ))
 
 #####################################################################################################
 #

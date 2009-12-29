@@ -21,7 +21,6 @@ import string
 
 #####################################################################################################
 
-from FontManager import *
 from TeXUnit import *
 from Interval import *
 
@@ -117,10 +116,9 @@ class Opcode_set_char(Opcode):
 
             tfm_char = current_font.tfm[char_code]
 
-            glyph = current_font[char_code]
-            
-            # glyph.print_summary()
-            # glyph.print_glyph()
+            #!# glyph = current_font[char_code]
+            #!# glyph.print_summary()
+            #!# glyph.print_glyph()
                
             char_width  = dvi_font.get_char_scaled_width(tfm_char)
             char_depth  = dvi_font.get_char_scaled_depth(tfm_char)
@@ -129,14 +127,17 @@ class Opcode_set_char(Opcode):
             char_bounding_box = Interval2D([registers.h, registers.h + char_width],
                                            [registers.v + char_depth, registers.v - char_height])
 
-            # registers.h - glyph.horizontal_offset,
-            # registers.v - glyph.vertical_offset,
+            #!# registers.h - glyph.horizontal_offset,
+            #!# registers.v - glyph.vertical_offset,
 
             if compute_bounding_box is False:
                 dvi_machine.paint_char(registers.h, registers.v,
                                        char_bounding_box,
-                                       glyph,
+                                       current_font,
+                                       char_code,
                                        dvi_font.magnification)
+
+                #!# glyph,
  
             else:
 
@@ -199,7 +200,7 @@ class Opcode_set_rule(Opcode):
 
         if compute_bounding_box is True:
             bounding_box = Interval2D([registers.h, registers.h + self.width]
-                                      [registers.v, registers.v + self.height])
+                                      [registers.v, registers.v - self.height])
 
         if self.set is True:
             registers.h += self.width
@@ -440,7 +441,7 @@ class Opcode_y(Opcode):
 
     def __str__(self):
 
-        return 'y = %+u sp %+.2f mm, y += x' % (self.x, sp2mm(self.x))
+        return 'y = %+u sp %+.2f mm, v += y' % (self.x, sp2mm(self.x))
 
     ###############################################
 
@@ -448,7 +449,7 @@ class Opcode_y(Opcode):
 
         registers = dvi_machine.get_registers()
         registers.y  = self.x
-        registers.h += self.x
+        registers.v += self.x
 
 #####################################################################################################
 
@@ -741,9 +742,9 @@ class DviMachine(object):
     
     ###############################################
 
-    def __init__(self, font_map):
+    def __init__(self, font_manager):
 
-        self.font_manager = FontManager(font_map)
+        self.font_manager = font_manager
 
         self.fonts = {}
 
@@ -801,7 +802,7 @@ class DviMachine(object):
 
         # Load the Fonts
         for dvi_font in self.dvi_program.dvi_font_iterator():
-            self.fonts[dvi_font.id] = self.font_manager.load_font(font_types.Pk, dvi_font.name) # Fixme
+            self.fonts[dvi_font.id] = self.font_manager[dvi_font.name]
 
     ###############################################
 
@@ -859,7 +860,7 @@ class DviMachine(object):
 
     ###############################################
 
-    def paint_char(self, x, y, char_bounding_box, glyph, magnification):
+    def paint_char(self, x, y, char_bounding_box, font, char_code, magnification): #!# , glyph
 
         pass
 

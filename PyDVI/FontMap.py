@@ -22,6 +22,7 @@ import string
 
 #####################################################################################################
 
+from Logging import *
 from TextFile import *
 
 #####################################################################################################
@@ -42,19 +43,18 @@ class FontMapEntry(object):
 
     def print_summary(self):
 
-        print '''
-Font Map Entry %s
+        print_card('''Font Map Entry %s
 
  - PS font name %s
  - effects      %s
  - encoding     %s
- - filename     %s
-''' % (self.tex_name,
-       self.ps_font_name,
-       self.effects,
-       self.encoding,
-       self.filename,
-       )
+ - filename     %s''' % (
+                self.tex_name,
+                self.ps_font_name,
+                self.effects,
+                self.encoding,
+                self.filename,
+                ))
 
 #####################################################################################################
 
@@ -176,9 +176,7 @@ class FontMap(TextFile):
 
     def print_summary(self):
 
-        print '''
-Font Map %s
-''' % (self.name)
+        print_card('Font Map %s' % (self.name))
 
         for font_map_entry in self.map.values():
             font_map_entry.print_summary()

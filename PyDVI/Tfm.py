@@ -25,6 +25,10 @@ import string
 
 #####################################################################################################
 
+from Logging import *
+
+#####################################################################################################
+
 #####################################################################################################
 
 class TfmChar(object):
@@ -87,29 +91,30 @@ class TfmChar(object):
 
     def print_summary(self):
 
-        print '''
-Char %u %s
+        message = '''TFM Char %u %s
  - width             %.3f
  - height            %.3f
  - depth             %.3f
  - italic correction %.3f
  - lig kern program index %s
- - next larger char       %s
-''' % (self.char_code, self.chr(),
-       self.width,
-       self.height,
-       self.depth,
-       self.italic_correction,
-       str(self.lig_kern_program_index),
-       str(self.next_larger_char),
-       )
+ - next larger char       %s''' % (
+            self.char_code, self.chr(),
+            self.width,
+            self.height,
+            self.depth,
+            self.italic_correction,
+            str(self.lig_kern_program_index),
+            str(self.next_larger_char),
+            )
 
         if self.lig_kern_program_index is not None:
 
             first_lig_kern = self.tfm.lig_kerns[self.lig_kern_program_index]
 
             for lig_kern in first_lig_kern:
-                lig_kern.print_summary()
+                message += '\n' + str(lig_kern)
+
+        print_card(message)
 
 #####################################################################################################
 
@@ -185,12 +190,14 @@ class TfmKern(TfmLigKern):
 
     ###############################################
 
-    def print_summary(self):
+    def __str__(self):
 
-        print 'Kern char code %3u %s %.3f' % (self.next_char,
-                                              self.tfm[self.next_char].chr(),
-                                              self.kern)
-
+        return 'Kern char code %3u %s %.3f' % (
+            self.next_char,
+            self.tfm[self.next_char].chr(),
+            self.kern,
+            )
+    
 #####################################################################################################
 
 class TfmLigature(TfmLigKern):
@@ -216,12 +223,14 @@ class TfmLigature(TfmLigKern):
 
     ###############################################
 
-    def print_summary(self):
+    def __str__(self):
 
-        print 'Lig char code %3u %s ligature char code %3u' % (self.next_char,
-                                                               self.tfm[self.next_char].chr(),
-                                                               self.ligature_char_code)
-
+        return 'Lig char code %3u %s ligature char code %3u' % (
+            self.next_char,
+            self.tfm[self.next_char].chr(),
+            self.ligature_char_code,
+            )
+    
 #####################################################################################################
 
 class Tfm(object):
@@ -230,6 +239,7 @@ class Tfm(object):
 
     def __init__(self,
                  font_name,
+                 filename,
                  smallest_character_code,
                  largest_character_code,
                  checksum,
@@ -238,6 +248,7 @@ class Tfm(object):
                  family):
 
         self.font_name = font_name
+        self.filename = filename
         self.smallest_character_code = smallest_character_code
         self.largest_character_code = largest_character_code
         self.checksum = checksum
@@ -310,8 +321,7 @@ class Tfm(object):
 
     def print_summary(self):
 
-        print '''
-TFM %s
+        print_card('''TFM %s
 
  - Smallest character code in the font: %u 
  - Largest character code in the font: %u 
@@ -328,21 +338,22 @@ Font Parameters:
  - Space Shrink: %f
  - X Height: %f
  - Quad: %f
- - Extra Space: %f
-''' % (self.font_name,
-       self.smallest_character_code,
-       self.largest_character_code,
-       self.checksum,
-       self.design_font_size,
-       self.character_coding_scheme,
-       self.family,
-       self.slant,
-       self.spacing,
-       self.space_stretch,
-       self.space_shrink,
-       self.x_height,
-       self.quad,
-       self.extra_space)
+ - Extra Space: %f''' % (
+                self.font_name,
+                self.smallest_character_code,
+                self.largest_character_code,
+                self.checksum,
+                self.design_font_size,
+                self.character_coding_scheme,
+                self.family,
+                self.slant,
+                self.spacing,
+                self.space_stretch,
+                self.space_shrink,
+                self.x_height,
+                self.quad,
+                self.extra_space,
+                ))
 
         for char in self.chars.values():
             char.print_summary()

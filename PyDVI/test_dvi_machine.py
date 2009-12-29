@@ -21,6 +21,7 @@ from optparse import OptionParser
 
 from DviParser import DviParser 
 from DviMachine import DviMachine
+from FontManager import *
 
 #####################################################################################################
 
@@ -36,7 +37,9 @@ dvi_file = args[0]
 
 dvi_parser = DviParser(debug = False)
 
-dvi_machine = DviMachine(font_map = 'pdftex')
+font_manager = FontManager(font_map = 'pdftex', use_pk = False)
+
+dvi_machine = DviMachine(font_manager)
 
 ###################################################
 

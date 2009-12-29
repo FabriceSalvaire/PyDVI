@@ -21,9 +21,10 @@ import string
 #####################################################################################################
 
 from EnumFactory import *
-from Stream import *
+from Logging import *
 from OpcodeParser import *
-from PkGlyph import PkGlyph
+from PkGlyph import *
+from Stream import *
 from TeXUnit import *
 
 #####################################################################################################
@@ -127,8 +128,7 @@ class OpcodeParser_char(OpcodeParser):
                 nybbles, dyn_f, first_pixel_is_black)
 
         if False:
-            print '''
-Char %u
+            print_card('''Char %u
  - Flag: %u
  - Dynamic Packing Variable: %u
  - First pixel is black: %s
@@ -143,11 +143,13 @@ Char %u
  - Width: %u
  - Horizontal Offset: %u
  - Vertical Offset: %u
-''' % (char_code,
-       flag, dyn_f, first_pixel_is_black, two_bytes, format, packet_length,
-       tfm, dm, dx, dy,
-       height, width,
-       horizontal_offset, vertical_offset)
+''' % (
+                    char_code,
+                    flag, dyn_f, first_pixel_is_black, two_bytes, format, packet_length,
+                    tfm, dm, dx, dy,
+                    height, width,
+                    horizontal_offset, vertical_offset,
+                    ))
         
 #####################################################################################################
 

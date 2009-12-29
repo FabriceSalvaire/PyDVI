@@ -6,11 +6,16 @@ import math
 
 from PyQt4 import QtGui, QtCore, uic
 
+import numpy as np
+
 #####################################################################################################
 
-from TeXUnit import *
-from DviParser import DviParser 
 from DviMachine import DviMachine
+from DviParser import DviParser 
+from FontManager import *
+from PkFont import *
+from TeXUnit import *
+from Type1Font import *
 
 #####################################################################################################
 
@@ -19,15 +24,118 @@ page_height = 297
 
 #####################################################################################################
 
+class QtFtGlyph(object):
+
+    ###############################################
+
+    def __init__(self, font, glyph_index, magnification):
+
+        print 'QtFtGlyph', font.name, glyph_index, magnification
+
+        glyph = font.get_glyph(glyph_index, size = 10, resolution = 100)
+
+        glyph_bitmap = glyph.glyph_bitmap
+
+        np_bitmap = np.fromstring(glyph_bitmap.bitmap, dtype=np.uint8)
+        np_bitmap.shape = glyph_bitmap.rows, glyph_bitmap.width
+
+        glyph_image = QtGui.QImage(glyph_bitmap.width, glyph_bitmap.rows, QtGui.QImage.Format_ARGB32)
+        
+        for y in xrange(glyph_bitmap.rows):
+            for x in xrange(glyph_bitmap.width):
+                gray_level = np_bitmap[y,x]
+                if gray_level == 0:
+                    argb = (gray_level << 16) + (gray_level << 8) + gray_level # 0 << 24 + 
+                    # argb = 0x00FFFFFF
+                else:
+                    argb = 0xFF000000
+                    # print x, y, gray_level, hex(argb)
+                glyph_image.setPixel(x, y, int(argb))
+        
+        glyph_pixmap = QtGui.QPixmap.fromImage(glyph_image)
+
+        glyph_pixmap.loadFromData(QtCore.QByteArray(glyph_bitmap.bitmap))
+
+        print 'Left:', glyph_bitmap.left
+        print 'Top:', glyph_bitmap.top
+
+        self.pixmap = glyph_pixmap
+
+        self.horizontal_offset = glyph_bitmap.left
+        self.vertical_offset = - glyph_bitmap.top
+
+#####################################################################################################
+
+class QtPkGlyph(object):
+
+    ###############################################
+
+    def __init__(self, font, glyph_index, magnification):
+
+        print 'QtPkGlyph', font.name, glyph_index, magnification
+
+        glyph = font[glyph_index]
+
+        glyph_bitmap = glyph.get_glyph_bitmap()
+        
+        glyph_image = QtGui.QImage(glyph.width, glyph.height, QtGui.QImage.Format_ARGB32) # Format_Mono
+        
+        for y in xrange(glyph.height):
+            for x in xrange(glyph.width):
+                if glyph_bitmap[y, x] == 1:
+                    glyph_image.setPixel(x, y, 0xFF000000)
+                else:
+                    glyph_image.setPixel(x, y, 0x00FFFFFF)
+        
+        glyph_pixmap = QtGui.QPixmap.fromImage(glyph_image)
+
+        self.pixmap = glyph_pixmap
+
+        self.horizontal_offset = -glyph.horizontal_offset
+        self.vertical_offset   = -glyph.vertical_offset
+
+        self.h_scale = dpi2mm(glyph.pk_font.horizontal_dpi/magnification)
+        self.v_scale = dpi2mm(glyph.pk_font.vertical_dpi/magnification)
+
+        print 'Magnification', float(magnification), self.h_scale, self.v_scale
+
+#####################################################################################################
+
 class QtDviMachine(DviMachine):
     
     ###############################################
 
-    def __init__(self, scene):
+    def __init__(self, font_manager, scene):
 
-        super(QtDviMachine, self).__init__(font_map = 'pdftex')
+        super(QtDviMachine, self).__init__(font_manager)
 
         self.scene = scene
+
+        self.glyphs = {}
+
+    ###############################################
+
+    def hash_glyph(self, font, glyph_index, magnification):
+
+        return hex(font.id)[2:] + hex(glyph_index)[1:] # + hex(magnification)[1:]
+
+    ###############################################
+
+    def get_glyph(self, font, glyph_index, magnification):
+
+        glyph_hash_key = self.hash_glyph(font, glyph_index, magnification)
+
+        if self.glyphs.has_key(glyph_hash_key) is True:
+            glyph = self.glyphs[glyph_hash_key]
+        else:
+            if isinstance(font, Type1Font):
+                glyph = QtFtGlyph(font, glyph_index, magnification)
+            elif isinstance(font, PkFont):
+                glyph = QtPkGlyph(font, glyph_index, magnification)
+
+            self.glyphs[glyph_hash_key] = glyph
+
+        return glyph
 
     ###############################################
 
@@ -46,63 +154,73 @@ class QtDviMachine(DviMachine):
 
     ###############################################
 
-    def paint_char(self, xg, yg, char_bounding_box, glyph, magnification):
+    def paint_char(self, xg, yg, char_bounding_box, font, glyph_index, magnification):
+        
+        # self.paint_char_box(char_bounding_box)
 
-        h_scale = dpi2mm(glyph.pk_font.horizontal_dpi/magnification)
-        v_scale = dpi2mm(glyph.pk_font.vertical_dpi/magnification)
-        print 'Magnification', float(magnification), h_scale, v_scale
+        if isinstance(font, Type1Font):
+            self.paint_type1_char(xg, yg, font, glyph_index, magnification)
+        elif isinstance(font, PkFont):
+            self.paint_pk_char(xg, yg, font, glyph_index, magnification)
+
+    ###############################################
+
+    def paint_char_box(self, char_bounding_box):
 
         x, y = char_bounding_box.x.inf, char_bounding_box.y.inf
 
-        x_mm, y_mm = sp2mm(x), sp2mm(y)
-
-        xg_mm, yg_mm = sp2mm(xg), sp2mm(yg)
-
-        print 'paint_char', x, y, x_mm, y_mm
-
-        glyph_bitmap = glyph.get_glyph_bitmap()
-        
-        glyph_image = QtGui.QImage(glyph.width, glyph.height, QtGui.QImage.Format_ARGB32) # Format_Mono
-        
-        for y in xrange(glyph.height):
-            for x in xrange(glyph.width):
-                if glyph_bitmap[y, x] == 1:
-                    glyph_image.setPixel(x, y, 0xFF000000)
-                else:
-                    glyph_image.setPixel(x, y, 0x00FFFFFF)
-        
-        glyph_bitmap = QtGui.QPixmap.fromImage(glyph_image)
-
-        char_pixmap_item = self.scene.addPixmap(glyph_bitmap)
-        char_pixmap_item.setOffset(-glyph.horizontal_offset, -glyph.vertical_offset)
-        char_pixmap_item.translate(xg_mm, yg_mm)
-        char_pixmap_item.scale(h_scale, v_scale)
-
-        #b# box_depth  = max(glyph.height - glyph.vertical_offset, glyph.vertical_offset)
-        #b# box_height = max(glyph.vertical_offset, box_depth)
+        x_mm, y_mm = map(sp2mm, (x, y))
 
         box_width  = sp2mm(char_bounding_box.x.length_float())
         box_height = sp2mm(char_bounding_box.y.length_float())
 
         red_pen = QtGui.QPen(QtCore.Qt.red)
-         
-        #l# box_scale = 1.5
-        #l# 
-        #l# h_line_item = self.scene.addLine(-box_scale*glyph.width, 0, (box_scale+1)*glyph.width, 0, red_pen)
-        #l# v_line_item = self.scene.addLine(0, box_scale*box_depth, 0, -box_scale*box_height, red_pen)
-
-        #b# char_box_rect = QtCore.QRectF(-glyph.horizontal_offset, -glyph.vertical_offset, glyph.width, glyph.height)
 
         char_box_rect = QtCore.QRectF(x_mm, y_mm, box_width, box_height)
 
         char_box_item = self.scene.addRect(char_box_rect, red_pen)
-        
-        #!# for item in (char_pixmap_item, h_line_item, v_line_item, char_box_item):
-        #!#     item.translate(x_mm, y_mm)
-        #!#     item.scale(h_scale, v_scale)
-        #!# 
-        #!# for item in (h_line_item, v_line_item):
-        #!#     item.setVisible(False)
+
+    ###############################################
+
+    def paint_type1_char(self, xg, yg, font, glyph_index, magnification):
+
+        xg_mm, yg_mm = map(sp2mm, (xg, yg))
+
+        qt_glyph = self.get_glyph(font, glyph_index, magnification)
+
+        char_pixmap_item = self.scene.addPixmap(qt_glyph.pixmap)
+        char_pixmap_item.setOffset(qt_glyph.horizontal_offset, qt_glyph.vertical_offset)
+        char_pixmap_item.translate(xg_mm, yg_mm)
+        char_pixmap_item.scale(.25, .25)
+        # char_pixmap_item.scale(h_scale, v_scale)
+
+    ###############################################
+
+    def paint_pk_char(self, xg, yg, font, glyph_index, magnification):
+
+        xg_mm, yg_mm = map(sp2mm, (xg, yg))
+
+        qt_glyph = self.get_glyph(font, glyph_index, magnification)
+
+        char_pixmap_item = self.scene.addPixmap(qt_glyph.pixmap)
+        char_pixmap_item.setOffset(qt_glyph.horizontal_offset, qt_glyph.vertical_offset)
+        char_pixmap_item.translate(xg_mm, yg_mm)
+        char_pixmap_item.scale(qt_glyph.h_scale, qt_glyph.v_scale)
+
+        ### box_depth  = max(glyph.height - glyph.vertical_offset, glyph.vertical_offset)
+        ### box_height = max(glyph.vertical_offset, box_depth)
+        ###
+        ### box_scale = 1.5
+        ### 
+        ### h_line_item = self.scene.addLine(-box_scale*glyph.width, 0, (box_scale+1)*glyph.width, 0, red_pen)
+        ### v_line_item = self.scene.addLine(0, box_scale*box_depth, 0, -box_scale*box_height, red_pen)
+        ###
+        ### for item in (char_pixmap_item, h_line_item, v_line_item, char_box_item):
+        ###     item.translate(x_mm, y_mm)
+        ###     item.scale(h_scale, v_scale)
+        ### 
+        ### for item in (h_line_item, v_line_item):
+        ###     item.setVisible(False)
 
 #####################################################################################################
 
@@ -157,7 +275,9 @@ class MainWindow(QtGui.QMainWindow):
 
         self.dvi_parser = DviParser(debug = False)
 
-        self.dvi_machine = QtDviMachine(self.scene)
+        self.font_manager = FontManager(font_map = 'pdftex', use_pk = True)
+
+        self.dvi_machine = QtDviMachine(self.font_manager, self.scene)
 
     ###############################################
 

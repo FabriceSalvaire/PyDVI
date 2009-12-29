@@ -15,12 +15,17 @@
 
 #####################################################################################################
 
+__ALL__ = ['PkGlyph']
+
+#####################################################################################################
+
 import math
 
 import numpy as np
 
 #####################################################################################################
 
+from Logging import *
 from TeXUnit import *
 
 #####################################################################################################
@@ -253,8 +258,7 @@ class PkGlyph(object):
 
         width = self.tfm * self.pk_font.design_size
 
-        print '''
-Char %u
+        print_card(''' Char %u
  - TFM width: %.3f * design size
               %.1f pt
               %.1f mm
@@ -265,11 +269,12 @@ Char %u
  - Width:             %3u px
  - Horizontal Offset: %3u px
  - Vertical Offset:   %3u px
-''' % (self.char_code,
-       self.tfm, width, pt2mm(width),
-       self.dm, self.dx, self.dy,
-       self.height, self.width,
-       self.horizontal_offset, self.vertical_offset)
+''' % (
+                self.char_code,
+                self.tfm, width, pt2mm(width),
+                self.dm, self.dx, self.dy,
+                self.height, self.width,
+                self.horizontal_offset, self.vertical_offset))
         
 #####################################################################################################
 #
