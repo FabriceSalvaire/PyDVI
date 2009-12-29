@@ -156,7 +156,7 @@ class QtDviMachine(DviMachine):
 
     def paint_char(self, xg, yg, char_bounding_box, font, glyph_index, magnification):
         
-        # self.paint_char_box(char_bounding_box)
+        self.paint_char_box(char_bounding_box)
 
         if isinstance(font, Type1Font):
             self.paint_type1_char(xg, yg, font, glyph_index, magnification)
@@ -293,19 +293,24 @@ class MainWindow(QtGui.QMainWindow):
 
         self.scene.clear()
 
-        self.paint_page()
-
         self.dvi_machine.load_dvi_program(dvi_program)
         
         print 'Run last page:'
         if len(dvi_program.pages) > 0:
-            self.dvi_machine.run_page(0)
+
+            page_index = 0
+
+            page_bounding_box = self.dvi_machine.compute_page_bounding_box(page_index)
+
+            self.paint_page(page_bounding_box)
+        
+            self.dvi_machine.run_page(page_index)
 
         self.scene.update()
 
     ###############################################
 
-    def paint_page(self):
+    def paint_page(self, page_bounding_box):
 
         pen = QtGui.QPen(QtCore.Qt.black)
 
@@ -325,6 +330,17 @@ class MainWindow(QtGui.QMainWindow):
             self.scene.addRect(QtCore.QRectF(0, y, page_width, 0), pen)
             y += grid_spacing
         
+        (page_x_min, page_y_min, text_width, text_height) = map(sp2mm,
+                                                                (page_bounding_box.x.inf,
+                                                                 page_bounding_box.y.inf,
+                                                                 page_bounding_box.x.length_float(),
+                                                                 page_bounding_box.y.length_float(),
+                                                                 ))
+
+        pen = QtGui.QPen(QtCore.Qt.blue)
+
+        self.scene.addRect(QtCore.QRectF(page_x_min, page_y_min, text_width, text_height), pen)
+
     ###############################################
 
     def keyPressEvent(self, event):

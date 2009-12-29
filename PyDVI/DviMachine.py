@@ -125,7 +125,7 @@ class Opcode_set_char(Opcode):
             char_height = dvi_font.get_char_scaled_height(tfm_char)
             
             char_bounding_box = Interval2D([registers.h, registers.h + char_width],
-                                           [registers.v + char_depth, registers.v - char_height])
+                                           [registers.v - char_height, registers.v + char_depth])
 
             #!# registers.h - glyph.horizontal_offset,
             #!# registers.v - glyph.vertical_offset,
@@ -199,7 +199,7 @@ class Opcode_set_rule(Opcode):
             dvi_machine.paint_rule(registers.h, registers.v, self.width, self.height)
 
         if compute_bounding_box is True:
-            bounding_box = Interval2D([registers.h, registers.h + self.width]
+            bounding_box = Interval2D([registers.h, registers.h + self.width],
                                       [registers.v, registers.v - self.height])
 
         if self.set is True:
@@ -808,6 +808,8 @@ class DviMachine(object):
 
     def run_page(self, page):
 
+        self.reset()
+
         opcode_program = self.dvi_program.get_page(page)
 
         print 'Program Length:', len(opcode_program)
@@ -820,6 +822,8 @@ class DviMachine(object):
     ###############################################
 
     def compute_page_bounding_box(self, page):
+
+        self.reset()
 
         opcode_program = self.dvi_program.get_page(page)
 
