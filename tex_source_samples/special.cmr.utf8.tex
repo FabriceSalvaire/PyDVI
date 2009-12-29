@@ -1,0 +1,45 @@
+\documentclass[10pt]{article}
+
+%**** Page settings *********************
+
+\usepackage[%
+paper=a4paper,%
+landscape,
+%includeheadfoot,%
+margin=2cm,%
+headsep=0cm, footskip=0cm,%
+dvips,%
+]{geometry}
+
+%**** Encoding **************************
+
+\usepackage[utf8]{inputenc}
+
+%****************************************
+
+\usepackage{color}
+
+%****************************************
+
+\pagestyle{empty}
+
+\begin{document}
+%
+\begin{itemize}
+\item \textcolor{red}{Text in red colour}
+\item \colorbox{blue}{Text with a red frame}
+\item \fcolorbox{red}{blue}{and with a red box}
+\definecolor{color1}{gray}{.5}
+\definecolor{color2}{rgb}{.1,.2,.3}
+\definecolor{color3}{cmyk}{.1,.2,.3,.4}
+\item \textcolor{color1}{Text in colour 1}
+\item \textcolor{color2}{Text in colour 2}
+\item \textcolor{color3}{Text in colour 3}
+\end{itemize}
+%
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

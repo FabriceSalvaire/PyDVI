@@ -145,7 +145,7 @@ class QtDviMachine(DviMachine):
 
         print 'paint_rule', x_mm, y_mm, w_mm, h_mm
 
-        rule_rect = QtCore.QRectF(x_mm, y_mm, w_mm, h_mm)
+        rule_rect = QtCore.QRectF(x_mm, y_mm - h_mm, w_mm, h_mm)
 
         pen = QtGui.QPen(QtCore.Qt.black)
         brush = QtGui.QBrush(QtCore.Qt.black, QtCore.Qt.SolidPattern)
@@ -294,11 +294,11 @@ class MainWindow(QtGui.QMainWindow):
         self.scene.clear()
 
         self.dvi_machine.load_dvi_program(dvi_program)
-        
-        print 'Run last page:'
-        if len(dvi_program.pages) > 0:
 
-            page_index = 0
+        page_index = 0
+        
+        print 'Run page:', page_index
+        if len(dvi_program.pages) > 0:
 
             page_bounding_box = self.dvi_machine.compute_page_bounding_box(page_index)
 
@@ -330,14 +330,15 @@ class MainWindow(QtGui.QMainWindow):
             self.scene.addRect(QtCore.QRectF(0, y, page_width, 0), pen)
             y += grid_spacing
         
-        (page_x_min, page_y_min, text_width, text_height) = map(sp2mm,
-                                                                (page_bounding_box.x.inf,
-                                                                 page_bounding_box.y.inf,
-                                                                 page_bounding_box.x.length_float(),
-                                                                 page_bounding_box.y.length_float(),
-                                                                 ))
+        (page_x_min, page_y_min,
+         text_width, text_height) = map(sp2mm,
+                                        (page_bounding_box.x.inf,
+                                         page_bounding_box.y.inf,
+                                         page_bounding_box.x.length_float(),
+                                         page_bounding_box.y.length_float(),
+                                         ))
 
-        pen = QtGui.QPen(QtCore.Qt.blue)
+        pen = QtGui.QPen(QtCore.Qt.red)
 
         self.scene.addRect(QtCore.QRectF(page_x_min, page_y_min, text_width, text_height), pen)
 

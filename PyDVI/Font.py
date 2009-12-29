@@ -45,9 +45,6 @@ class Font(object):
 
         self.load_tfm()
 
-        # if self.file_name is None:
-        #     self.make_pk()
-
     ###############################################
 
     def relative_filename(self):

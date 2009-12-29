@@ -19,6 +19,7 @@ __ALL__ = ['PkFont']
 
 #####################################################################################################
 
+import string
 import subprocess
 
 #####################################################################################################
@@ -57,11 +58,23 @@ class PkFont(Font):
 
     ###############################################
 
+    def find_font(self):
+
+        super_method = super(PkFont, self).find_font
+
+        try:
+            super_method()
+        except:
+            self.make_pk()
+            super_method()
+
+    ###############################################
+
     def make_pk(self):
 
         # --destdir
 
-        process = subprocess.Popen(string.join(('mktexpk', self.name), sep = ' '), shell=True)
+        subprocess.call(string.join(('mktexpk', self.name), sep=' '), shell=True)
 
     ###############################################
 
