@@ -23,10 +23,14 @@ from PyQt4 import QtGui, QtCore
 #####################################################################################################
 
 from PyDVI.FontManager import *
+from PyDVI.PkFont import *
+from PyDVI.TeXUnit import *
+from PyDVI.Type1Font import *
 
-from MainWindowBase import *
 from FontInfoTableModel import *
 from GlyphInfoTableModel import *
+from MainWindowBase import *
+from QtGlyph import *
 
 #####################################################################################################
 
@@ -158,48 +162,77 @@ class MainWindow(MainWindowBase):
 
         form = self.main_window_ui
 
-        self.glyph_information_table_model.set_tfm_char(self.font.tfm[i])
+        self.tfm_char = self.font.tfm[i]
+        self.glyph_information_table_model.set_tfm_char(self.tfm_char)
         form.glyph_information_table_view.resizeColumnsToContents()
 
-        glyph = self.font[i]
-        
         # glyph.print_summary()
         # glyph.print_glyph()
-        
-        glyph_bitmap = glyph.get_glyph_bitmap()
-
-        glyph_image = QtGui.QImage(glyph.width, glyph.height, QtGui.QImage.Format_ARGB32) # Format_Mono
-
-        for y in xrange(glyph.height):
-            for x in xrange(glyph.width):
-                if glyph_bitmap[y, x] == 1:
-                    glyph_image.setPixel(x, y, 0xFF000000)
-                else:
-                    glyph_image.setPixel(x, y, 0x00FFFFFF)
-
-        self.glyph_bitmap = QtGui.QPixmap.fromImage(glyph_image)
-
+      
         self.scene.clear()
 
-        char_pixmap = self.scene.addPixmap(self.glyph_bitmap)
-        char_pixmap.setOffset(-glyph.horizontal_offset, -glyph.vertical_offset)
+        if isinstance(self.font, Type1Font):
+            self.paint_type1_char(i)
+        elif isinstance(self.font, PkFont):
+            self.paint_pk_char(i)
 
-        box_depth  = max(glyph.height - glyph.vertical_offset, glyph.vertical_offset)
-        box_height = max(glyph.vertical_offset, box_depth)
+        self.paint_glyph_box()
 
-        red_pen = QtGui.QPen()
-        red_pen.setColor(QtCore.Qt.red)
+        self.scene.update()
 
-        box_scale = 1.5
+    ###############################################
 
-        self.scene.addLine(-box_scale*glyph.width, 0, (box_scale+1)*glyph.width, 0, red_pen)
-        self.scene.addLine(0, box_scale*box_depth, 0, -box_scale*box_height, red_pen)
+    def paint_glyph_box(self):
 
-        char_box = QtCore.QRectF(-glyph.horizontal_offset, -glyph.vertical_offset, glyph.width, glyph.height)
+        qt_glyph = self.qt_glyph
+
+        red_pen = QtGui.QPen(QtCore.Qt.red)
+
+        char_box = QtCore.QRectF(qt_glyph.horizontal_offset, qt_glyph.vertical_offset,
+                                 qt_glyph.width, qt_glyph.height)
 
         self.scene.addRect(char_box, red_pen)
 
-        self.scene.update()
+        width = qt_glyph.width - qt_glyph.horizontal_offset
+        depth = qt_glyph.height + qt_glyph.vertical_offset
+        height = qt_glyph.height
+
+        print width, depth, height
+
+        box_scale = 1.25
+
+        # Base line
+        self.scene.addLine(-(box_scale-1)*width, 0, box_scale*width, 0, red_pen)
+
+        # Vertical Line
+        self.scene.addLine(0, box_scale*(depth+.25*height), 0, -box_scale*height, red_pen)
+
+    ###############################################
+
+    def paint_type1_char(self, i):
+
+        self.qt_glyph = QtFtGlyph(font, i, magnification = 1)
+
+        pass
+
+        # xg_mm, yg_mm = map(sp2mm, (xg, yg))
+        # 
+        # qt_glyph = self.get_glyph(font, glyph_index, magnification)
+        # 
+        # char_pixmap_item = self.scene.addPixmap(qt_glyph.pixmap)
+        # char_pixmap_item.setOffset(qt_glyph.horizontal_offset, qt_glyph.vertical_offset)
+        # char_pixmap_item.translate(xg_mm, yg_mm)
+        # char_pixmap_item.scale(.25, .25)
+        # # char_pixmap_item.scale(h_scale, v_scale)
+
+    ###############################################
+
+    def paint_pk_char(self, i):
+
+        self.qt_glyph = qt_glyph = QtPkGlyph(self.font, i, magnification = 1)
+
+        char_pixmap_item = self.scene.addPixmap(qt_glyph.pixmap)
+        char_pixmap_item.setOffset(qt_glyph.horizontal_offset, qt_glyph.vertical_offset)
 
     ###############################################
 
