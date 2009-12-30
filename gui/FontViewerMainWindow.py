@@ -76,7 +76,7 @@ class MainWindow(MainWindowBase):
         if opt.font_name is not None:
             form.font_name_line_edit.setText(opt.font_name)
 
-        self.font_manager = FontManager(font_map = 'pdftex')
+        self.font_manager = FontManager(font_map = 'pdftex', use_pk = False)
 
         self.font_information_table_model = FontInfoTableModel()
         self.glyph_information_table_model = GlyphInfoTableModel()
@@ -137,7 +137,8 @@ class MainWindow(MainWindowBase):
         font_name = str(form.font_name_line_edit.text())
 
         #try:
-        self.font = self.font_manager.load_font(font_types.Pk, font_name)
+        # self.font = self.font_manager.load_font(font_types.Pk, font_name)
+        self.font = self.font_manager[font_name]
 
         self.font_information_table_model.set_font(self.font)
         form.font_information_table_view.resizeColumnsToContents()
@@ -207,23 +208,20 @@ class MainWindow(MainWindowBase):
         # Vertical Line
         self.scene.addLine(0, box_scale*(depth+.25*height), 0, -box_scale*height, red_pen)
 
+        ## box_depth  = max(glyph.height - glyph.vertical_offset, glyph.vertical_offset)
+        ## box_height = max(glyph.vertical_offset, box_depth)
+        ## 
+        ## self.scene.addLine(-box_scale*glyph.width, 0, (box_scale+1)*glyph.width, 0, red_pen)
+        ## self.scene.addLine(0, box_scale*box_depth, 0, -box_scale*box_height, red_pen)
+
     ###############################################
 
     def paint_type1_char(self, i):
 
-        self.qt_glyph = QtFtGlyph(font, i, magnification = 1)
+        self.qt_glyph = qt_glyph = QtFtGlyph(self.font, i, magnification = 1)
 
-        pass
-
-        # xg_mm, yg_mm = map(sp2mm, (xg, yg))
-        # 
-        # qt_glyph = self.get_glyph(font, glyph_index, magnification)
-        # 
-        # char_pixmap_item = self.scene.addPixmap(qt_glyph.pixmap)
-        # char_pixmap_item.setOffset(qt_glyph.horizontal_offset, qt_glyph.vertical_offset)
-        # char_pixmap_item.translate(xg_mm, yg_mm)
-        # char_pixmap_item.scale(.25, .25)
-        # # char_pixmap_item.scale(h_scale, v_scale)
+        char_pixmap_item = self.scene.addPixmap(qt_glyph.pixmap)
+        char_pixmap_item.setOffset(qt_glyph.horizontal_offset, qt_glyph.vertical_offset)
 
     ###############################################
 

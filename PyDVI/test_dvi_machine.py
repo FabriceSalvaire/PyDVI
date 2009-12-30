@@ -15,12 +15,14 @@
 
 #####################################################################################################
 
+import sys
+
 from optparse import OptionParser
 
 #####################################################################################################
 
 from DviParser import DviParser 
-from DviMachine import DviMachine
+from DviMachine import *
 from FontManager import *
 
 #####################################################################################################
@@ -54,6 +56,12 @@ dvi_stream.close()
 dvi_program.print_summary()
 
 dvi_machine.load_dvi_program(dvi_program)
+
+dvi_machine.simplify_dvi_program()
+
+dvi_program[0].print_program()
+
+sys.exit(0)
 
 print 'Compute bounding box of the last page:'
 if len(dvi_program.pages) > 0:

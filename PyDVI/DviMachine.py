@@ -16,13 +16,30 @@
 
 #####################################################################################################
 
+__ALL__ = ['DviMachine', 'DviSimplifyMachine']
+
+#####################################################################################################
+
 import fractions
 import string
 
 #####################################################################################################
 
-from TeXUnit import *
+from EnumFactory import *
 from Interval import *
+from Logging import *
+from TeXUnit import *
+
+#####################################################################################################
+
+xxx_papersize = 'papersize='
+xxx_landscape = '! /landplus90 true store'
+xxx_colour = 'color '
+
+#####################################################################################################
+
+paper_orientation_enum = EnumFactory('PaperOrientation',
+                                     ('portrait', 'landscape'))
 
 #####################################################################################################
 
@@ -30,9 +47,32 @@ class OpcodeProgram(object):
 
     ###############################################
 
-    def __init__(self):
+    def __init__(self,
+                 height = None, width = None,
+                 paper_orientation = paper_orientation_enum.portrait):
 
         self.program = []
+
+        self.set_paper_size(height, width)
+        self.set_paper_orientation(paper_orientation)
+
+    ###############################################
+
+    def __delitem__(self, i):
+
+        del self.program[i]
+
+    ###############################################
+
+    def __getitem__(self, i):
+
+        return self.program[i]
+
+    ###############################################
+
+    def __setitem__(self, i, opcode):
+
+        self.program[i] = opcode
 
     ###############################################
 
@@ -55,9 +95,32 @@ class OpcodeProgram(object):
 
     ###############################################
 
+    def set_paper_size(self, height, width):
+
+        self.height, self.width = height, width
+
+    ###############################################
+
+    def set_paper_orientation(self, orientation):
+
+        self.paper_orientation = orientation
+
+    ###############################################
+
     def print_program(self):
 
-        for opcode in self.program:
+        message = '''Opcode Program
+
+ - Paper Size: height = %.3f pt width = %.3f pt
+ - Paper Orientation: %u
+''' % (
+            self.height, self.width,
+            self.paper_orientation,
+            )
+
+        print_card(message)
+
+        for opcode in self:
             print opcode
 
 #####################################################################################################
@@ -246,21 +309,65 @@ class Opcode_pop(Opcode):
 
     ###############################################
 
-    def __init__(self):
+    def __init__(self, n = 1):
 
-        pass
+        self.n = n
 
     ###############################################
 
     def __str__(self):
 
-        return 'pop'
+        return 'pop %u' % (self.n)
 
     ###############################################
 
     def run(self, dvi_machine, compute_bounding_box = False):
 
-        dvi_machine.pop_registers()
+        dvi_machine.pop_registers(self.n)
+
+#####################################################################################################
+
+class Opcode_push_colour(Opcode):
+
+    ###############################################
+
+    def __init__(self, colour):
+
+        self.colour = colour
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'push ' + str(self.colour)
+
+    ###############################################
+
+    def run(self, dvi_machine, compute_bounding_box = False):
+
+        dvi_machine.push_colour(self.colour)
+
+#####################################################################################################
+
+class Opcode_pop_colour(Opcode):
+
+    ###############################################
+
+    def __init__(self, n = 1):
+
+        self.n = n
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'pop colour %u' % (self.n)
+
+    ###############################################
+
+    def run(self, dvi_machine, compute_bounding_box = False):
+
+        dvi_machine.pop_colour(self.n)
 
 #####################################################################################################
 
@@ -595,6 +702,70 @@ class DviFont(object):
 
 #####################################################################################################
 
+class DviColorBlack(object):
+
+    ###############################################
+
+    def __init__(self):
+
+        pass
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'Colour Black'
+
+#####################################################################################################
+
+class DviColorGray(object):
+
+    ###############################################
+
+    def __init__(self, gray_level):
+
+        self.gray_level = gray_level
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'Colour Gray %.1f' % (self.gray_level)
+
+#####################################################################################################
+
+class DviColorRGB(object):
+
+    ###############################################
+
+    def __init__(self, red, green, blue):
+
+        self.red, self.green, self.blue = red, green, blue
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'Colour RGB (%.1f, %.1f, %.1f)' % (self.red, self.green, self.blue)
+
+#####################################################################################################
+
+class DviColorCMYK(object):
+
+    ###############################################
+
+    def __init__(self, cyan, magenta, yellow, dark):
+
+        self.cyan, self.magenta, self.yellow, self.dark = cyan, magenta, yellow, dark
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'Colour CMYK (%.1f, %.1f, %.1f, %.1f)' % (self.cyan, self.magenta, self.yellow, self.dark)
+
+#####################################################################################################
+
 class DviProgam(object):
 
     ###############################################
@@ -604,6 +775,25 @@ class DviProgam(object):
         self.fonts = {} # dict of DviFont
 
         self.pages = []
+
+    ###############################################
+
+    def __getitem__(self, i):
+
+        return self.pages[i]
+
+    ###############################################
+
+    def __iter__(self):
+
+        for opcode_program in self.pages:
+            yield opcode_program
+
+    ###############################################
+
+    def __len__(self):
+
+        return len(self.pages)
 
     ###############################################
 
@@ -757,6 +947,7 @@ class DviMachine(object):
         self.current_font = None
 
         self.registers_stack = [DviMachineRegisters()]
+        self.colour_stack = [DviColorBlack()]
 
     ###############################################
 
@@ -772,9 +963,21 @@ class DviMachine(object):
 
     ###############################################
 
-    def pop_registers(self):
+    def pop_registers(self, n = 1):
 
-        del self.registers_stack[-1]
+        del self.registers_stack[n]
+
+    ###############################################
+
+    def push_colour(self, colour):
+
+        self.colour_stack.append(colour)
+
+    ###############################################
+
+    def pop_colour(self, n = 1):
+
+        del self.registers_stack[-n]
 
     ###############################################
 
@@ -790,11 +993,12 @@ class DviMachine(object):
 
     ###############################################
 
-    def load_dvi_program(self, dvi_program):
+    def load_dvi_program(self, dvi_program, load_fonts = True):
 
         self.dvi_program = dvi_program
 
-        self.load_dvi_fonts()
+        if load_fonts is True:
+            self.load_dvi_fonts()
 
     ###############################################
 
@@ -803,6 +1007,16 @@ class DviMachine(object):
         # Load the Fonts
         for dvi_font in self.dvi_program.dvi_font_iterator():
             self.fonts[dvi_font.id] = self.font_manager[dvi_font.name]
+
+    ###############################################
+
+    def simplify_dvi_program(self):
+
+        dvi_simpily_machine = DviSimplifyMachine(self.font_manager)
+
+        dvi_simpily_machine.load_dvi_program(self.dvi_program)
+
+        dvi_simpily_machine.process_xxx_opcodes()
 
     ###############################################
 
@@ -867,6 +1081,125 @@ class DviMachine(object):
     def paint_char(self, x, y, char_bounding_box, font, char_code, magnification): #!# , glyph
 
         pass
+
+#####################################################################################################
+
+class DviSimplifyMachine(DviMachine):
+    
+    ###############################################
+
+    def __init__(self, font_manager):
+
+        super(DviSimplifyMachine, self).__init__(font_manager)
+
+    ###############################################
+
+    def __init__(self, font_manager):
+
+        super(DviSimplifyMachine, self).__init__(font_manager)
+
+    ###############################################
+
+    def load_dvi_program(self, dvi_program):
+
+        super(DviSimplifyMachine, self).load_dvi_program(dvi_program, load_fonts = False)
+
+    ###############################################
+
+    def process_xxx_opcodes(self):
+
+        for opcode_program in self.dvi_program:
+            self.process_page_xxx_opcodes(opcode_program)
+
+    ###############################################
+
+    def process_page_xxx_opcodes(self, opcode_program):
+
+        self.reset()
+
+        i = 0
+        while i < len(opcode_program):
+
+            opcode = opcode_program[i]
+
+            if isinstance(opcode, Opcode_xxx):
+
+                del opcode_program[i]
+
+                xxx = opcode.code
+
+                print opcode
+
+                if xxx.find(xxx_papersize) == 0:
+                    self.transform_xxx_paper_size(opcode_program, i, xxx)
+
+                elif xxx == xxx_landscape:
+                    self.transform_xxx_paper_orientation(opcode_program, i, xxx)
+
+                elif xxx.find(xxx_colour) == 0:
+                    self.transform_xxx_colour(opcode_program, i, xxx)
+
+            else:
+                i += 1
+
+    ###############################################
+
+    def transform_xxx_colour(self, opcode_program, i, xxx):
+
+        print 'transform_xxx_colour'
+
+        words = string.split(xxx)
+
+        try:
+            print words
+
+            operation = words[1]
+
+            if operation == 'pop':
+
+                opcode_program[i] = Opcode_pop_colour()
+
+            elif operation == 'push':
+
+                colour_class = words[2]
+
+                if colour_class == 'Black':
+                    colour = DviColorBlack()
+
+                elif colour_class == 'gray':
+                    colour = DviColorGray(float(words[3]))
+
+                elif colour_class == 'rgb':
+                    colour = DviColorRGB(* map(float, words[3:6]))
+
+                elif colour_class == 'cmyk':
+                    colour = DviColorCMYK(* map(float, words[3:7]))
+
+                else:
+                    return
+                    
+                opcode_program[i] = Opcode_push_colour(colour)
+
+        except:
+            pass
+
+    ###############################################
+
+    def transform_xxx_paper_size(self, opcode_program, i, xxx):
+
+        start = string.rfind(xxx, "=") +1
+        dimensions = xxx[start:]
+
+        height, width = map(lambda x: float(x[:-2]),  string.split(dimensions, sep=','))
+
+        opcode_program.set_paper_size(height, width)
+
+    ###############################################
+
+    def transform_xxx_paper_orientation(self, opcode_program, i, xxx):
+
+        if xxx == xxx_landscape:
+            opcode_program.set_paper_orientation(paper_orientation_enum.landscape)
 
 #####################################################################################################
 #
