@@ -1,47 +1,63 @@
 # -*- coding: utf-8 -*-
 
 #####################################################################################################
+#
+# PyDVI - Python Library to Process DVI Stream
+# Copyright (C) 2009 Salvaire Fabrice
+#
+#####################################################################################################
+
+#####################################################################################################
+#
+# Audit
+#
+#
+#####################################################################################################
+
+#####################################################################################################
 
 import math
 
-from PyQt4 import QtGui, QtCore, uic
+from PyQt4 import QtGui, QtCore
 
 #####################################################################################################
 
 from PyDVI.FontManager import *
 
+from MainWindowBase import *
+from FontInfoTableModel import *
+from GlyphInfoTableModel import *
+
 #####################################################################################################
 
-from pkfont_viewer_ui import Ui_main_window
+from font_viewer_ui import Ui_main_window
 
 #####################################################################################################
 #
 # Main Window
 #
 
-class MainWindow(QtGui.QMainWindow):
+class MainWindow(MainWindowBase):
 
     ###############################################
 
-    def __init__(self, font_name = None):
+    def __init__(self, application, opt):
 
-        # Init GUI
+        super(MainWindow, self).__init__(application)
 
-        super(MainWindow, self).__init__()
+        self.opt = opt
 
-        self.form = form = Ui_main_window()
-        self.form.setupUi(self)
+        self.main_window_ui = Ui_main_window()
+        self.main_window_ui.setupUi(self)
 
-        # Graphics View
+        super(MainWindow, self).init_actions()
+        self.__init_actions()
+        self.__init_menu()
+        self.__init_glyph_view()
 
-        self.scene = scene = QtGui.QGraphicsScene(self)
-        scene.setSceneRect(-100, -100, 100, 100)
+        # Init Signals
 
-        glyph_graphics_view = form.glyph_graphics_view
-        glyph_graphics_view.setScene(scene)
-        glyph_graphics_view.setRenderHint(QtGui.QPainter.Antialiasing)
-
-        # Signals
+        form = self.main_window_ui
 
         signal = QtCore.SIGNAL('clicked()')
 
@@ -51,28 +67,80 @@ class MainWindow(QtGui.QMainWindow):
 
         QtCore.QObject.connect(form.char_code_spin_box, signal, self.show_glyph)
 
-        # 
+        # Init Form
 
-        if font_name is not None:
-            form.font_name_line_edit.setText(font_name)
-            # timer: self.load_font()
+        if opt.font_name is not None:
+            form.font_name_line_edit.setText(opt.font_name)
 
-        self.font_manager = FontManager()
+        self.font_manager = FontManager(font_map = 'pdftex')
+
+        self.font_information_table_model = FontInfoTableModel()
+        self.glyph_information_table_model = GlyphInfoTableModel()
+
+        form.font_information_table_view.setModel(self.font_information_table_model)
+        form.glyph_information_table_view.setModel(self.glyph_information_table_model)
+
+        for table_view in (form.font_information_table_view,
+                           form.glyph_information_table_view,
+                           ):
+            table_view.resizeColumnsToContents()
+
+    ###############################################
+    #
+    # Menu
+    #
+
+    def __init_menu(self):
+
+        form = self.main_window_ui
+
+    ###############################################
+    #
+    # Actions
+    #
+
+    def __init_actions(self):
+
+        form = self.main_window_ui
+
+    ###############################################
+    #
+    # Glyph View
+    #
+
+    def __init_glyph_view(self):
+
+        form = self.main_window_ui
+
+        self.scene = scene = QtGui.QGraphicsScene(self)
+
+        scene.setSceneRect(-100, -100, 100, 100)
+
+        glyph_graphics_view = form.glyph_graphics_view
+
+        glyph_graphics_view.setScene(scene)
+
+        glyph_graphics_view.setRenderHint(QtGui.QPainter.Antialiasing)
+        glyph_graphics_view.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
+        glyph_graphics_view.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
 
     ###############################################
 
     def load_font(self):
 
-        form = self.form
+        form = self.main_window_ui
 
         font_name = str(form.font_name_line_edit.text())
 
         #try:
         self.font = self.font_manager.load_font(font_types.Pk, font_name)
+
+        self.font_information_table_model.set_font(self.font)
+        form.font_information_table_view.resizeColumnsToContents()
         
         form.char_code_spin_box.setMaximum(len(self.font) -1)
         
-        self.font.print_summary()
+        # self.font.print_summary()
         
         self.show_glyph(0)
 
@@ -88,10 +156,15 @@ class MainWindow(QtGui.QMainWindow):
         if self.font is None:
             return
 
+        form = self.main_window_ui
+
+        self.glyph_information_table_model.set_tfm_char(self.font.tfm[i])
+        form.glyph_information_table_view.resizeColumnsToContents()
+
         glyph = self.font[i]
         
-        glyph.print_summary()
-        glyph.print_glyph()
+        # glyph.print_summary()
+        # glyph.print_glyph()
         
         glyph_bitmap = glyph.get_glyph_bitmap()
 
@@ -132,9 +205,11 @@ class MainWindow(QtGui.QMainWindow):
 
     def keyPressEvent(self, event):
 
+        form = self.main_window_ui
+
         key = event.key()
 
-        glyph_graphics_view = self.form.glyph_graphics_view
+        glyph_graphics_view = form.glyph_graphics_view
 
         dx = 10
 
@@ -176,7 +251,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def scale_view(self, scale_factor):
 
-        glyph_graphics_view = self.form.glyph_graphics_view
+        form = self.main_window_ui
+
+        glyph_graphics_view = form.glyph_graphics_view
 
         transformation = glyph_graphics_view.matrix().scale(scale_factor, scale_factor)
 

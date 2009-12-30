@@ -18,14 +18,15 @@
 #####################################################################################################
 
 import sys
+import time
 
 from optparse import OptionParser
 
-from PyQt4 import QtGui, QtCore, uic
+from PyQt4 import QtGui, QtCore
 
 #####################################################################################################
 
-from DviViewerMainWindow import MainWindow
+from FontViewerMainWindow import MainWindow
 
 #####################################################################################################
 #
@@ -36,13 +37,38 @@ class Application(QtGui.QApplication):
 
     ################################################
 
-    def __init__(self, dvi_file):
+    def __init__(self, opt):
 
         QtGui.QApplication.__init__(self, sys.argv)
 
-        self.main_window = MainWindow(dvi_file)
+        self.opt = opt
+
+        # pixmap = QtGui.QPixmap(':/splash screen/images/splash_screen.png')
+        # 
+        # splash = QtGui.QSplashScreen(pixmap)
+        # splash.show()
+        # 
+        # splash.showMessage('<h2>PyDvi v%(version)s</h2>' % {'version': Version.pydvi_version.to_string()})
+        # 
+        # self.processEvents()
+        # 
+        # time.sleep(.5)
+
+        self.main_window = MainWindow(self, opt)
+
+        # splash.finish(self.main_window)
 
         self.main_window.show()
+        self.processEvents()
+
+        QtCore.QTimer.singleShot(0, self.process_program_options)
+
+    ###############################################
+
+    def process_program_options(self):
+
+        if self.opt.font_name is not None:
+            self.main_window.load_font()
 
 #####################################################################################################
 #
@@ -52,18 +78,25 @@ class Application(QtGui.QApplication):
 
 if __name__ == "__main__":
 
+    ################################################
+    #
+    # Options
+    #
+
     usage = 'usage: %prog [options]'
 
     parser = OptionParser(usage)
 
+    parser.add_option('--font' ,
+                      dest = 'font_name',
+                      type = 'string', default = None,
+                      help = 'Font Name')
+
     opt, args = parser.parse_args()
 
-    if len(args) > 0:
-        dvi_file = args[0]
-    else:
-        dvi_file = None
+   ################################################
 
-    application = Application(dvi_file)
+    application = Application(opt)
 
     application.exec_()
 

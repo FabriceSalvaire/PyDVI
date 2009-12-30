@@ -17,7 +17,8 @@ dvips,%
 
 %****************************************
 
-\usepackage{color}
+\usepackage[dvipdf]{color}
+\usepackage[dvipdf]{graphics}
 
 %****************************************
 
@@ -25,6 +26,7 @@ dvips,%
 
 \begin{document}
 %
+\section{Colours}
 \begin{itemize}
 \item \textcolor{red}{Text in red colour}
 \item \colorbox{blue}{Text with a red frame}
@@ -36,6 +38,17 @@ dvips,%
 \item \textcolor{color2}{Text in colour 2}
 \item \textcolor{color3}{Text in colour 3}
 \end{itemize}
+%
+\section{Transformations}
+\begin{itemize}
+\item \scalebox{2}{Text scaled twice}
+\item \scalebox{2}[3]{Text distorded}
+\item \resizebox{2cm}{1cm}{Text resized}
+\item \rotatebox{45}{Text rotated by 45}
+\item \rotatebox{90}{Text rotated by 90}
+\item \reflectbox{Mirror}
+\end{itemize}
+
 %
 \end{document}
 

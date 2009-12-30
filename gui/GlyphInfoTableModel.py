@@ -1,5 +1,4 @@
-#! /usr/bin/env python
-# -*- python -*-
+# -*- coding: utf-8 -*-
 
 #####################################################################################################
 #
@@ -17,55 +16,43 @@
 
 #####################################################################################################
 
-import sys
-
-from optparse import OptionParser
-
-from PyQt4 import QtGui, QtCore, uic
+__ALL__ = ['GlyphInfoTableModel']
 
 #####################################################################################################
 
-from DviViewerMainWindow import MainWindow
+from InfoTableModel import *
 
 #####################################################################################################
-#
-# Application
-#
 
-class Application(QtGui.QApplication):
+class GlyphInfoTableModel(InfoTableModel):
 
-    ################################################
+    #############################################################################
 
-    def __init__(self, dvi_file):
+    def __init__(self):
 
-        QtGui.QApplication.__init__(self, sys.argv)
+        super(GlyphInfoTableModel, self).__init__()
 
-        self.main_window = MainWindow(dvi_file)
+        self.tfm_char = None
 
-        self.main_window.show()
+    #############################################################################
 
-#####################################################################################################
-#
-# Main
-#
-#####################################################################################################
+    def set_tfm_char(self, tfm_char):
 
-if __name__ == "__main__":
+        self.tfm_char = tfm_char
 
-    usage = 'usage: %prog [options]'
+        self.fields = [
+            'Width',
+            'Height',
+            'Depth',
+            'Italic Correction',
+            ]
 
-    parser = OptionParser(usage)
+        self.values['Width'] = tfm_char.width
+        self.values['Height'] = tfm_char.height
+        self.values['Depth'] = tfm_char.depth
+        self.values['Italic Correction'] = tfm_char.italic_correction
 
-    opt, args = parser.parse_args()
-
-    if len(args) > 0:
-        dvi_file = args[0]
-    else:
-        dvi_file = None
-
-    application = Application(dvi_file)
-
-    application.exec_()
+        self.reset()
 
 #####################################################################################################
 #

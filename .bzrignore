@@ -1,3 +1,6 @@
-gui/pkfont_viewer_ui.py
-gui/dvi_viewer.ui
-gui/dvi_viewer_ui.py
+gui/ui/*_ui.py
+tex_samples/*.aux
+tex_samples/*.dvi
+tex_samples/*.log
+tex_samples/*.pdf
+gui/profile.txt

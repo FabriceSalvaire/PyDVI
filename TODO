@@ -1,0 +1,27 @@
+#################################################################################
+
+				      TODO
+
+#################################################################################
+
+ - Test more math
+
+ - Handle special opcode
+  - colour
+  - transformations
+
+ - DVI opcode simplification
+  - suppress opcode after the last rule/char
+  - merge successive pop in one opcode
+  - Don't: suppress successive push
+  - merge move inside push/pop
+  - simplify font
+  - simplify color push/pop
+
+ - TeX Daemon
+
+ - Qt font
+
+ - vf font
+
+#################################################################################

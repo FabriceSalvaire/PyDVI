@@ -1,6 +1,3 @@
-#! /usr/bin/env python
-# -*- python -*-
-
 #####################################################################################################
 #
 # PyDVI - Python Library to Process DVI Stream
@@ -17,56 +14,49 @@
 
 #####################################################################################################
 
-import sys
-
-from optparse import OptionParser
-
-from PyQt4 import QtGui, QtCore, uic
+# cf. http://en.wikipedia.org/wiki/Software_versioning
 
 #####################################################################################################
 
-from DviViewerMainWindow import MainWindow
+import re
+import string
 
 #####################################################################################################
-#
-# Application
-#
 
-class Application(QtGui.QApplication):
+class PyDviVersion(object):
 
-    ################################################
+    major_version    = 0
+    minor_version    = 1
+    revision_version = 0
 
-    def __init__(self, dvi_file):
+    ###############################################
 
-        QtGui.QApplication.__init__(self, sys.argv)
+    def to_list(self):
 
-        self.main_window = MainWindow(dvi_file)
+        return [self.major_version, self.minor_version, self.revision_version]
 
-        self.main_window.show()
+    ###############################################
+
+    def to_string(self):
+
+        return string.join(map(str, self.to_list()), sep='.')
+
+    ###############################################
+
+    @staticmethod
+    def parse(self, version_string):
+
+        match = re.match('v([0-9]+)\.([0-9]+)\.([0-9]+)', version_string)
+
+        if match is not None:
+            return map(int, match.groups())
+        else:
+            return None
 
 #####################################################################################################
-#
-# Main
-#
-#####################################################################################################
 
-if __name__ == "__main__":
-
-    usage = 'usage: %prog [options]'
-
-    parser = OptionParser(usage)
-
-    opt, args = parser.parse_args()
-
-    if len(args) > 0:
-        dvi_file = args[0]
-    else:
-        dvi_file = None
-
-    application = Application(dvi_file)
-
-    application.exec_()
-
+pydvi_version = PyDviVersion()
+        
 #####################################################################################################
 #
 # End
