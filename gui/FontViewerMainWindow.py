@@ -76,7 +76,7 @@ class MainWindow(MainWindowBase):
         if opt.font_name is not None:
             form.font_name_line_edit.setText(opt.font_name)
 
-        self.font_manager = FontManager(font_map = 'pdftex', use_pk = False)
+        self.font_manager = FontManager(font_map = 'pdftex', use_pk = True)
 
         self.font_information_table_model = FontInfoTableModel()
         self.glyph_information_table_model = GlyphInfoTableModel()

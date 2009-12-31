@@ -9,6 +9,7 @@
 #
 # Audit
 #
+#  - 21/12/2009 char code 0 -> 127 + 1 = 128
 #
 #####################################################################################################
 
@@ -92,11 +93,15 @@ class Type1Font(Font):
         super(Type1Font, self).__init__(font_manager, id, name)
 
         self.__load_font()
-
-        if self.set_unicode_char_map() is False:
-            raise NameError("Font %s doesn't have an Unicode char map" % (self.name))
+        self.__init_char_map()
 
         self.glyphs = {}
+
+    ###############################################
+
+    def __len__(self):
+
+        return self.face.num_glyphs
 
     ###############################################
 
@@ -107,6 +112,23 @@ class Type1Font(Font):
         except:
             raise NameError("Freetype can't open file %s" % (self.filename))
 
+    ###############################################
+
+    def __init_char_map(self):
+
+        if self.set_unicode_char_map() is False:
+            raise NameError("Font %s doesn't have an Unicode char map" % (self.name))
+
+        self.glyph_index_to_unicode = [None]*len(self)
+
+        for unicode_index, glyph_index in self.encoding_vector.iteritems():
+            if self.glyph_index_to_unicode[glyph_index] is None:
+                self.glyph_index_to_unicode[glyph_index] = [unicode_index]
+            else:
+                self.glyph_index_to_unicode[glyph_index].append(unicode_index)
+
+            # print '%5u -> %5u %s' % (unicode_index, glyph_index, self.get_glyph_name(glyph_index))
+            
     ###############################################
 
     def get_char_map(self, i):
@@ -123,9 +145,48 @@ class Type1Font(Font):
             
             if charmap.encoding_as_string == 'unic':
                 self.face.setCharMap(charmap)
+                self.encoding_vector = self.face.encodingVector()
                 return True
 
         return False
+
+    ###############################################
+
+    def glyph_index_to_unicode(self, glyph_index):
+
+        return self.face.getCharCode[glyph_index]
+
+    ###############################################
+
+    def get_char_index(self, char_code):
+
+        '''
+        Return the glyph index of a given character code. This function uses a charmap object to do
+        the mapping.
+        '''
+
+        return self.face.getCharIndex[char_code]
+
+    ###############################################
+
+    def get_glyph_name(self, glyph_index):
+
+        '''
+        Retrieve the ASCII name of a given glyph in a face.
+        '''
+
+        return self.face.getGlyphName(glyph_index)
+
+    ###############################################
+
+    def get_glyph_index(self, glyph_name):
+
+        '''
+        Return the glyph index of a given glyph name. This function uses driver specific objects to
+        do the translation.
+        '''
+
+        return self.face.getNameIndex(glyph_name)
 
     ###############################################
 
@@ -167,7 +228,7 @@ Char Maps: %s''' % (
                 face.getPostscriptName(),
                 face.family_name,
                 face.style_name,
-                face.num_glyphs,
+                len(self),
                 hex(face.style_flags),
                 face.units_per_EM,
                 test_bit(face.style_flags, ft2.FT_STYLE_FLAG_BOLD),
@@ -175,6 +236,21 @@ Char Maps: %s''' % (
                 test_bit(face.style_flags, ft2.FT_FACE_FLAG_SCALABLE),
                 map(lambda i: self.get_char_map(i).encoding_as_string, xrange(face.num_charmaps)),
                 ))
+
+    ###############################################
+
+    def print_glyph_table(self):
+
+        message = 'Glyph Table\n'
+
+        for glyph_index in xrange(1, len(self)):
+            message += '\n%6u %s -> %s' % (
+                glyph_index,
+                self.get_glyph_name(glyph_index),
+                self.glyph_index_to_unicode[glyph_index],
+                )
+
+        print_card(message)
 
 #####################################################################################################
 #

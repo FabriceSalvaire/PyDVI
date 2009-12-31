@@ -50,6 +50,7 @@ font_manager.set_use_pk(False)
 cmr10_type1 = font_manager['cmr10']
 
 cmr10_type1.print_summary()
+cmr10_type1.print_glyph_table()
 
 cmr10_type1.tfm[ord('A')].print_summary()
 

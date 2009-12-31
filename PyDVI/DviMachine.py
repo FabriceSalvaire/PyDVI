@@ -1124,20 +1124,26 @@ class DviSimplifyMachine(DviMachine):
 
             if isinstance(opcode, Opcode_xxx):
 
-                del opcode_program[i]
-
                 xxx = opcode.code
 
                 print opcode
 
                 if xxx.find(xxx_papersize) == 0:
-                    self.transform_xxx_paper_size(opcode_program, i, xxx)
+                    new_opcode = self.transform_xxx_paper_size(opcode_program, i, xxx)
 
                 elif xxx == xxx_landscape:
-                    self.transform_xxx_paper_orientation(opcode_program, i, xxx)
+                    new_opcode = self.transform_xxx_paper_orientation(opcode_program, i, xxx)
 
                 elif xxx.find(xxx_colour) == 0:
-                    self.transform_xxx_colour(opcode_program, i, xxx)
+                    new_opcode = self.transform_xxx_colour(opcode_program, i, xxx)
+
+                else:
+                    new_opcode = None
+
+                if new_opcode is not None:
+                    opcode_program[i] = new_opcode
+                else:
+                    del opcode_program[i]
 
             else:
                 i += 1
@@ -1157,7 +1163,7 @@ class DviSimplifyMachine(DviMachine):
 
             if operation == 'pop':
 
-                opcode_program[i] = Opcode_pop_colour()
+                return Opcode_pop_colour()
 
             elif operation == 'push':
 
@@ -1176,12 +1182,12 @@ class DviSimplifyMachine(DviMachine):
                     colour = DviColorCMYK(* map(float, words[3:7]))
 
                 else:
-                    return
+                    return None
                     
-                opcode_program[i] = Opcode_push_colour(colour)
+                return Opcode_push_colour(colour)
 
         except:
-            pass
+            return None
 
     ###############################################
 
@@ -1194,12 +1200,16 @@ class DviSimplifyMachine(DviMachine):
 
         opcode_program.set_paper_size(height, width)
 
+        return None
+
     ###############################################
 
     def transform_xxx_paper_orientation(self, opcode_program, i, xxx):
 
         if xxx == xxx_landscape:
             opcode_program.set_paper_orientation(paper_orientation_enum.landscape)
+
+        return None
 
 #####################################################################################################
 #
