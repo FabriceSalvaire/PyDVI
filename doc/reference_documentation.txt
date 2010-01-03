@@ -22,5 +22,12 @@ The source code of these softwares was also useful:
 
  - Hacking DVI files: Birth of DVIasm
    (http://www.tug.org/pracjourn/2007-1/cho/cho.pdf)
+
+And ...
+
+ - mathtran
+ - okular
+ - evince
+ - xdvi
    
 *********************************************************************************

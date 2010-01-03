@@ -33,6 +33,16 @@ from Logging import *
 
 class TfmChar(object):
 
+    '''TeX Font Metric for a Glyph
+
+    Public:
+      - char_code
+      - width
+      - height
+      - depth
+      - italic_correction
+    '''
+
     printable = string.digits + string.letters + string.punctuation
 
     ###############################################
@@ -48,11 +58,13 @@ class TfmChar(object):
                  next_larger_char = None):
 
         self.tfm = tfm
+
         self.char_code = char_code
         self.width = width
         self.height = height
         self.depth = depth
         self.italic_correction = italic_correction
+
         self.lig_kern_program_index = lig_kern_program_index
         self.next_larger_char = next_larger_char
 
@@ -75,6 +87,31 @@ class TfmChar(object):
     def get_scaled_depth(self, scale_factor):
 
         return int(self.depth * scale_factor)
+
+    ###############################################
+
+    def get_scaled_dimensions(self, scale_factor):
+
+        return map(lambda x: int(x * scale_factor),
+                   (self.width, self.height, self.depth))
+
+    ###############################################
+
+    def get_next_larger_char(self):
+
+        if self.next_larger_char is not None:
+            return self.tfm[self.next_larger_char]
+        else:
+            return None
+
+    ###############################################
+
+    def get_lig_kern_program(self):
+
+        if self.lig_kern_program_index is not None:
+            return self.tfm.get_lig_kern_program(self.lig_kern_program_index)
+        else:
+            return None
 
     ###############################################
 
@@ -107,10 +144,8 @@ class TfmChar(object):
             str(self.next_larger_char),
             )
 
-        if self.lig_kern_program_index is not None:
-
-            first_lig_kern = self.tfm.lig_kerns[self.lig_kern_program_index]
-
+        first_lig_kern = self.get_lig_kern_program()
+        if first_lig_kern is not None:
             for lig_kern in first_lig_kern:
                 message += '\n' + str(lig_kern)
 
@@ -119,6 +154,15 @@ class TfmChar(object):
 #####################################################################################################
 
 class TfmExtensibleChar(TfmChar):
+
+    '''TeX Font Metric for an extensible Glyph
+
+    Public:
+     - top
+     - mid
+     - bot
+     - rep
+    '''
 
     ###############################################
 
@@ -171,7 +215,7 @@ class TfmLigKern(object):
             
             yield lig_kern
             
-            if lig_kern.stop is True:
+            if lig_kern.stop:
                 break
             else:
                 i += 1
@@ -179,6 +223,12 @@ class TfmLigKern(object):
 #####################################################################################################
 
 class TfmKern(TfmLigKern):
+
+    '''Kerning
+
+    Public:
+      - kern
+    '''
 
     ###############################################
 
@@ -201,6 +251,9 @@ class TfmKern(TfmLigKern):
 #####################################################################################################
 
 class TfmLigature(TfmLigKern):
+
+    '''Ligature
+    '''
 
     ###############################################
 
@@ -268,6 +321,14 @@ class Tfm(object):
 
     ###############################################
 
+    def __len__(self):
+
+        # return self.largest_character_code - self.smallest_character_code +1
+
+        return len(self.chars)
+
+    ###############################################
+
     def set_font_parameters(self, parameters):
 
         (self.slant,
@@ -309,6 +370,8 @@ class Tfm(object):
 
     def add_char(self, char):
 
+        # __setitem__
+
         self.chars[char.char_code] = char
 
     ###############################################
@@ -316,6 +379,12 @@ class Tfm(object):
     def add_lig_kern(self, obj):
 
         self.lig_kerns.append(obj)
+
+    ###############################################
+
+    def get_lig_kern_program(self, i):
+
+        self.lig_kerns[i]
 
     ###############################################
 

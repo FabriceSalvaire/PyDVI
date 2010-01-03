@@ -223,7 +223,7 @@ class PkFontParser(OpcodeStreamParser, FileStream):
 
         self.pk_font.set_preambule_data(pk_id = pk_id,
                                         comment = self.read(self.read_unsigned_byte1()),
-                                        design_size = self.read_fix_word(),
+                                        design_font_size = self.read_fix_word(),
                                         checksum = self.read_signed_byte4(),
                                         horizontal_dpi = sp2dpi(self.read_signed_byte4()),
                                         vertical_dpi = sp2dpi(self.read_signed_byte4()))

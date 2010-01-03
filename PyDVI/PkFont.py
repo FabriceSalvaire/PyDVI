@@ -81,14 +81,14 @@ class PkFont(Font):
     def set_preambule_data(self,
                            pk_id,
                            comment,
-                           design_size,
+                           design_font_size,
                            checksum,
                            horizontal_dpi,
                            vertical_dpi):
 
         self.pk_id = pk_id
         self.comment = comment
-        self.design_size = design_size
+        self.design_font_size = design_font_size
         self.checksum = checksum
         self.horizontal_dpi = horizontal_dpi
         self.vertical_dpi = vertical_dpi
@@ -121,7 +121,7 @@ Preambule
    - Vertical    %.1f dpi ''' % (
                 self.pk_id,
                 self.comment,
-                self.design_size,
+                self.design_font_size,
                 self.checksum,
                 self.horizontal_dpi,
                 self.vertical_dpi,

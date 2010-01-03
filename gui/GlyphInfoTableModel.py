@@ -21,6 +21,7 @@ __ALL__ = ['GlyphInfoTableModel']
 #####################################################################################################
 
 from InfoTableModel import *
+from TeXUnit import *
 
 #####################################################################################################
 
@@ -36,6 +37,11 @@ class GlyphInfoTableModel(InfoTableModel):
 
     #############################################################################
 
+    def format_dimension(self, x):
+        return '%.2f ds %.2f mm' % (x, pt2mm(int(x*self.design_font_size)))
+
+    #############################################################################
+
     def set_tfm_char(self, tfm_char):
 
         self.tfm_char = tfm_char
@@ -47,10 +53,12 @@ class GlyphInfoTableModel(InfoTableModel):
             'Italic Correction',
             ]
 
-        self.values['Width'] = tfm_char.width
-        self.values['Height'] = tfm_char.height
-        self.values['Depth'] = tfm_char.depth
-        self.values['Italic Correction'] = tfm_char.italic_correction
+        self.design_font_size = tfm_char.tfm.design_font_size
+
+        self.values['Width'] = self.format_dimension(tfm_char.width)
+        self.values['Height'] = self.format_dimension(tfm_char.height)
+        self.values['Depth'] = self.format_dimension(tfm_char.depth)
+        self.values['Italic Correction'] = self.format_dimension(tfm_char.italic_correction)
 
         self.reset()
 
