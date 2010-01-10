@@ -9,47 +9,48 @@
 #
 # Audit
 #
-#  - 9/1/2010 fabrice
+#  - 10/1/2010 fabrice
 #
 #####################################################################################################
 
 #####################################################################################################
 
-__all__ = ['TextFile']
+import sys
+
+from optparse import OptionParser
 
 #####################################################################################################
 
-class TextFile(object):
+import Kpathsea 
 
-    ###############################################
+from Encoding import *
 
-    def parse(self, filename):
+#####################################################################################################
 
-        with open(filename, 'r') as f:
-            for line in f:
-           
-                comment_start_index = line.find('%')
-                if comment_start_index != -1:
-                    line = line[:comment_start_index]
+usage = 'usage: %prog encoding'
 
-                line = line.strip()
-                    
-                if line:
-                    if self.parse_line(line):
-                        break
+parser = OptionParser(usage)
 
-    ###############################################
+opt, args = parser.parse_args()
 
-    def parse_line(self, line):
+if len(args) != 1:
+    parser.error("incorrect number of arguments")
 
-        '''parse the line return True to stop
-        '''
+encoding = args[0]
 
-        raise NotImplementedError
+encoding_file = Kpathsea.which(encoding, format = 'enc files')
+
+if encoding_file is None:
+    sys.exit(1)
+
+print 'Read %s encoding file' % (encoding_file)
+
+encoding = Encoding(encoding_file)
+  
+encoding.print_summary()
 
 #####################################################################################################
 #
 # End
 #
 #####################################################################################################
-

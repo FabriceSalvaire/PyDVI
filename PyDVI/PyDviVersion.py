@@ -9,54 +9,25 @@
 #
 # Audit
 #
+#  - 10/1/2010 fabrice
 #
 #####################################################################################################
 
 #####################################################################################################
 
-# cf. http://en.wikipedia.org/wiki/Software_versioning
+__ALL__ = ['pydvi_version']
 
 #####################################################################################################
 
-import re
-import string
+from RevisionVersion import *
 
 #####################################################################################################
-
-class PyDviVersion(object):
-
-    major_version    = 0
-    minor_version    = 1
-    revision_version = 0
-
-    ###############################################
-
-    def to_list(self):
-
-        return [self.major_version, self.minor_version, self.revision_version]
-
-    ###############################################
-
-    def to_string(self):
-
-        return string.join(map(str, self.to_list()), sep='.')
-
-    ###############################################
-
-    @staticmethod
-    def parse(self, version_string):
-
-        match = re.match('v([0-9]+)\.([0-9]+)\.([0-9]+)', version_string)
-
-        if match is not None:
-            return map(int, match.groups())
-        else:
-            return None
-
-#####################################################################################################
-
-pydvi_version = PyDviVersion()
         
+pydvi_version = RevisionVersion((0, # major version
+                                 1, # minor version
+                                 0, # revision version
+                                 ))
+
 #####################################################################################################
 #
 # End

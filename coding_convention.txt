@@ -26,6 +26,17 @@ Use UTF-8 encoding.
 
 #################################################################################
 
+ - tools to check audit date
+
+ - list comprehension
+
+ - with
+
+ - raise NotImplementedError
+
+ - for i in a, b, c:
+
+ - (a,)
 
  - Put any relevant __all__ specification after the imports
 
@@ -41,7 +52,12 @@ Use UTF-8 encoding.
 
  - documentation strings
 
- - Always use 'cls' for the first argument to class methods.
+ """Title
+
+    foobar foobar 
+ """
+
+ - Always use 'cls' for the first argument to class methods @classmethod.
 
  - Use string methods instead of the string module.
 

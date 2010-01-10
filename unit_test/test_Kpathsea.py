@@ -6,44 +6,30 @@
 #####################################################################################################
 
 #####################################################################################################
-#
-# Audit
-#
-#####################################################################################################
+
+import unittest
 
 #####################################################################################################
 
-import sys
+import Kpathsea
 
 #####################################################################################################
 
-import Kpathsea 
+class TestTeXUnit(unittest.TestCase):
 
-from Encoding import *
+    def test(self):
+
+        filename = Kpathsea.which('cmr10', format = 'tfm')
+
+        print 'kpsewhich cmr10.tfm', filename
+
+        self.assertNotEqual(filename, None)
 
 #####################################################################################################
 
-from optparse import OptionParser
+if __name__ == '__main__':
 
-usage = 'usage: %prog font_name'
-
-parser = OptionParser(usage)
-
-opt, args = parser.parse_args()
-
-if len(args) != 1:
-    parser.error("incorrect number of arguments")
-
-encoding = args[0]
-
-encoding_file = Kpathsea.which(encoding, format = 'enc files')
-
-if encoding_file is None:
-    sys.exit(1)
-
-encoding = Encoding(encoding_file)
-  
-encoding.print_summary()
+    unittest.main()
 
 #####################################################################################################
 #

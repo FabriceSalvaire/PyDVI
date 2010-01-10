@@ -9,13 +9,12 @@
 #
 # Audit
 #
-#  - 26/12/2009 fabrice
+#  - 10/01/2009 fabrice
 #
 #####################################################################################################
 
 #####################################################################################################
 
-import string
 import subprocess
 
 #####################################################################################################
@@ -33,7 +32,7 @@ def which(filename, format = None):
 
     command.append(filename)
 
-    command_string = string.join(command, sep=' ')
+    command_string = ' '.join(command)
 
     pipe = subprocess.Popen(command_string, shell=True, stdout=subprocess.PIPE)
         
@@ -41,20 +40,10 @@ def which(filename, format = None):
 
     path = stdout.rstrip()
 
-    if len(path) > 0:
+    if path:
         return path
     else:
         return None
-
-#####################################################################################################
-#
-#                                               Test
-#
-#####################################################################################################
-        
-if __name__ == '__main__':
-
-    print 'kpsewhich cmr10.tfm', which('cmr10', format = 'tfm')
 
 #####################################################################################################
 #

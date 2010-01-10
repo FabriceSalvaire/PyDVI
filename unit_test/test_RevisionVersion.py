@@ -9,47 +9,45 @@
 #
 # Audit
 #
-#  - 9/1/2010 fabrice
+#  - 10/1/2010 fabrice
 #
 #####################################################################################################
 
 #####################################################################################################
 
-__all__ = ['TextFile']
+import unittest
 
 #####################################################################################################
 
-class TextFile(object):
+from RevisionVersion import *
 
-    ###############################################
+#####################################################################################################
 
-    def parse(self, filename):
+class TestTeXUnit(unittest.TestCase):
 
-        with open(filename, 'r') as f:
-            for line in f:
-           
-                comment_start_index = line.find('%')
-                if comment_start_index != -1:
-                    line = line[:comment_start_index]
+    def test(self):
 
-                line = line.strip()
-                    
-                if line:
-                    if self.parse_line(line):
-                        break
+        version_tuple = RevisionVersion((1,2,3))
 
-    ###############################################
+        version_string = RevisionVersion('v1.2.3')
 
-    def parse_line(self, line):
+        self.assertEqual(version_tuple, version_string)
 
-        '''parse the line return True to stop
-        '''
+        version_tuple_2 = RevisionVersion((0,1,2))
 
-        raise NotImplementedError
+        self.assertTrue(version_tuple_2 < version_tuple)
+        self.assertTrue(version_tuple_2 <= version_tuple)
+        self.assertFalse(version_tuple_2 > version_tuple)
+        self.assertFalse(version_tuple_2 >= version_tuple)
+
+#####################################################################################################
+
+if __name__ == '__main__':
+
+    unittest.main()
 
 #####################################################################################################
 #
 # End
 #
 #####################################################################################################
-
