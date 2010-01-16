@@ -1,3 +1,6 @@
+#! /usr/bin/env python
+# -*- python -*-
+
 #####################################################################################################
 #
 # PyDVI - Python Library to Process DVI Stream
@@ -9,24 +12,60 @@
 #
 # Audit
 #
-#  - 10/01/2010 fabrice
+#  - 16/01/2010 fabrice
 #
 #####################################################################################################
 
 #####################################################################################################
 
-__ALL__ = ['pydvi_version']
+import os
+import re
+import sys
+
+from optparse import OptionParser
 
 #####################################################################################################
 
-from RevisionVersion import *
+from Logging import *
+from CopyrightConfig import *
 
 #####################################################################################################
-        
-pydvi_version = RevisionVersion((0, # major version
-                                 1, # minor version
-                                 0, # revision version
-                                 ))
+
+def log_and_exit(message, exit_value):
+
+    print message
+    sys.exit(exit_value)
+
+#####################################################################################################
+#
+# Options
+#
+
+usage = 'usage: %prog [options]'
+
+parser = OptionParser(usage)
+
+opt, args = parser.parse_args()
+
+if len(args) != 1:
+    log_and_exit(message='Specify a file',
+                 exit_value=1)
+
+filename = args[0]
+
+#####################################################################################################
+
+if not os.path.exists(filename):
+    log_and_exit(message="File don't exists",
+                 exit_value=1)
+
+copyrighted = False
+with open(filename, 'r') as f:
+    for line in f:
+        if re.search('\d+/\d+/\d+', line):
+            print line[4:15], filename
+
+sys.exit(0)
 
 #####################################################################################################
 #
