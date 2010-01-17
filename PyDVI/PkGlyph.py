@@ -256,7 +256,7 @@ class PkGlyph(object):
 
     def print_summary(self):
 
-        width = self.tfm * self.pk_font.design_size
+        width = self.tfm * self.pk_font.design_font_size
 
         print_card(''' Char %u
  - TFM width: %.3f * design size

@@ -52,7 +52,7 @@ def repeat(func, count):
 
 #####################################################################################################
 
-class TfmParser(FileStream):
+class TfmParser(object):
 
     ###############################################
 
@@ -65,7 +65,7 @@ class TfmParser(FileStream):
 
     def seek_to_table(self, table):
 
-        self.seek(self.table_pointers[table])
+        self.stream.seek(self.table_pointers[table])
 
     ###############################################
 
@@ -77,13 +77,13 @@ class TfmParser(FileStream):
 
     def read_fix_word_in_table(self, table, index):
 
-        return self.read_fix_word(self.position_in_table(table, index))
+        return self.stream.read_fix_word(self.position_in_table(table, index))
 
     ###############################################
 
     def read_four_byte_numbers_in_table(self, table, index):
 
-        return self.read_four_byte_numbers(self.position_in_table(table, index))
+        return self.stream.read_four_byte_numbers(self.position_in_table(table, index))
 
     ###############################################
 
@@ -92,7 +92,7 @@ class TfmParser(FileStream):
         self.font_name = font_name
         self.filename = filename
 
-        self.open(filename)
+        self.stream = FileStream(filename)
 
         self.read_lengths()
         self.read_header()
@@ -102,7 +102,7 @@ class TfmParser(FileStream):
         for c in xrange(self.smallest_character_code, self.largest_character_code +1):
             self.process_char(c)
          
-        self.close()
+        self.stream = None
 
         return self.tfm
 
@@ -114,14 +114,16 @@ class TfmParser(FileStream):
         #   sc - 1 <= lc <= 255
         # extensible_character_table_length <= 256
 
-        self.seek(0)
+        stream = self.stream
+
+        stream.seek(0)
 
         self.table_lengths = [None]*len(tables)
 
         (self.entire_file_length,
          header_length,
          self.smallest_character_code,
-         self.largest_character_code) = repeat(self.read_unsigned_byte2, 4)
+         self.largest_character_code) = repeat(stream.read_unsigned_byte2, 4)
 
         header_data_length_min = 18
         self.table_lengths[tables.header] = max(header_data_length_min, header_length)
@@ -131,7 +133,7 @@ class TfmParser(FileStream):
         self.table_lengths[tables.character_info] = self.number_of_chars
 
         for i in xrange(tables.width, len(tables)):
-            self.table_lengths[i] = self.read_unsigned_byte2()
+            self.table_lengths[i] = stream.read_unsigned_byte2()
 
         # self.print_summary()
 
@@ -151,35 +153,37 @@ class TfmParser(FileStream):
     ###############################################
 
     def read_header(self):
+        
+        stream = self.stream
 
         character_coding_scheme_length = 40
         family_length = 10
 
         self.seek_to_table(tables.header)
 
-        checksum = self.read_unsigned_byte4()
-        design_font_size = self.read_fix_word()
+        checksum = stream.read_unsigned_byte4()
+        design_font_size = stream.read_fix_word()
         
         character_info_table_position = self.table_pointers[tables.character_info]
 
-        position = self.tell()
+        position = stream.tell()
 
         if position < character_info_table_position:
-            character_coding_scheme = self.read_bcpl()
+            character_coding_scheme = stream.read_bcpl()
         else:
             character_coding_scheme = None
 
         position += character_coding_scheme_length
 
         if position < character_info_table_position:
-            family = self.read_bcpl(position)
+            family = stream.read_bcpl(position)
         else:
             family = None
 
         position += family_length
 
         if position < character_info_table_position:
-            seven_bit_safe_flag = self.read_unsigned_byte4(position)
+            seven_bit_safe_flag = stream.read_unsigned_byte4(position)
             # Fixme: complete
 
         self.tfm = Tfm(self.font_name,
@@ -195,6 +199,8 @@ class TfmParser(FileStream):
 
     def read_font_parameters(self):
                  
+        stream = self.stream
+
         self.seek_to_table(tables.font_parameter)
  
         # print 'read_font_parameters', self.tfm.character_coding_scheme, self.table_lengths[tables.font_parameter]
@@ -202,13 +208,13 @@ class TfmParser(FileStream):
         if self.tfm.character_coding_scheme == 'TeX math italic':
             pass
         else:
-            self.tfm.set_font_parameters(repeat(self.read_fix_word, 7))
+            self.tfm.set_font_parameters(repeat(stream.read_fix_word, 7))
 
         if self.tfm.character_coding_scheme == 'TeX math symbols':
-            self.tfm.set_math_symbols_parameters(repeat(self.read_fix_word, 15))
+            self.tfm.set_math_symbols_parameters(repeat(stream.read_fix_word, 15))
 
         elif self.tfm.character_coding_scheme == 'TeX math extension':
-            self.tfm.set_math_extension_parameters(repeat(self.read_fix_word, 6))
+            self.tfm.set_math_extension_parameters(repeat(stream.read_fix_word, 6))
 
     ###############################################
 

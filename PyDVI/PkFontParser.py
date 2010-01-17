@@ -61,6 +61,8 @@ class OpcodeParser_char(OpcodeParser):
 
     def read_parameters(self, pk_font_parser):
 
+        stream = pk_font_parser.stream
+
         flag = self.opcode
 
         dyn_f = flag >> 4
@@ -79,13 +81,13 @@ class OpcodeParser_char(OpcodeParser):
 
         if format == 1:
             # (flag mod 4)*256 + pl
-            packet_length = (two_least_significant << 8) + pk_font_parser.read_unsigned_byte1()
+            packet_length = (two_least_significant << 8) + stream.read_unsigned_byte1()
             preambule_length = 3 + 5
         elif format == 2:
-            packet_length = (two_least_significant << 16) + pk_font_parser.read_unsigned_byte2()
+            packet_length = (two_least_significant << 16) + stream.read_unsigned_byte2()
             preambule_length = 3 + 2*5
         else:
-            packet_length = pk_font_parser.read_unsigned_byte4()
+            packet_length = stream.read_unsigned_byte4()
             preambule_length = 4*7
 
         if format == 3:
@@ -93,21 +95,21 @@ class OpcodeParser_char(OpcodeParser):
             (char_code, tfm,
              dx, dy,
              width, height,
-             horizontal_offset, vertical_offset) = [pk_font_parser.read_unsigned_byte4() for i in xrange(8)]
+             horizontal_offset, vertical_offset) = [stream.read_unsigned_byte4() for i in xrange(8)]
 
             dm = None
  
         else:
 
-            char_code = pk_font_parser.read_unsigned_byte1()
-            tfm = pk_font_parser.read_unsigned_byte3()
+            char_code = stream.read_unsigned_byte1()
+            tfm = stream.read_unsigned_byte3()
 
             if format == 1:
-                read_unsigned_byte = pk_font_parser.read_unsigned_byte1
-                read_signed_byte = pk_font_parser.read_signed_byte1
+                read_unsigned_byte = stream.read_unsigned_byte1
+                read_signed_byte = stream.read_signed_byte1
             else:
-                read_unsigned_byte = pk_font_parser.read_unsigned_byte2
-                read_signed_byte = pk_font_parser.read_signed_byte2
+                read_unsigned_byte = stream.read_unsigned_byte2
+                read_signed_byte = stream.read_signed_byte2
 
             (dm, width, height) = [read_unsigned_byte() for i in xrange(3)]
             (horizontal_offset, vertical_offset) = [read_signed_byte() for i in xrange(2)]
@@ -116,9 +118,9 @@ class OpcodeParser_char(OpcodeParser):
             dy = 0
 
 
-        tfm = pk_font_parser.to_fix_word(tfm)
+        tfm = stream.to_fix_word(tfm)
 
-        nybbles = pk_font_parser.read(packet_length - preambule_length)
+        nybbles = stream.read(packet_length - preambule_length)
 
         PkGlyph(pk_font_parser.pk_font,
                 char_code,
@@ -164,17 +166,17 @@ class OpcodeParser_xxx(OpcodeParser):
         super(OpcodeParser_xxx, self).__init__(opcode,
                                                'xxx', 'special')
 
-        self.read_unsigned_byten = OpcodeStreamParser.read_unsigned_byten[opcode - self.base_opcode]
+        self.read_unsigned_byten = AbstractStream.read_unsigned_byten[opcode - self.base_opcode]
 
     ###############################################
 
     def read_parameters(self, pk_font_parser):
 
-        return pk_font_parser.read(self.read_unsigned_byten(pk_font_parser))
+        return pk_font_parser.stream.read(self.read_unsigned_byten(pk_font_parser.stream))
 
 #####################################################################################################
 
-class PkFontParser(OpcodeStreamParser, FileStream):
+class PkFontParser(OpcodeStreamParser):
 
     opcode_definitions = (
         ( [pk_opcodes.CHAR_000,
@@ -201,40 +203,44 @@ class PkFontParser(OpcodeStreamParser, FileStream):
 
         self.pk_font = pk_font
 
-        self.open(pk_font.filename)
+        self.stream = FileStream(pk_font.filename)
 
         self.process_preambule()
         self.process_characters()
 
-        self.close()
+        self.stream = None
 
     ###############################################
 
     def process_preambule(self):
 
-        self.seek(0)
+        stream = self.stream
 
-        if self.read_unsigned_byte1() != pk_opcodes.PRE:
+        stream.seek(0)
+
+        if stream.read_unsigned_byte1() != pk_opcodes.PRE:
             raise NameError("PK file don't start by PRE")
 
-        pk_id = self.read_unsigned_byte1()
+        pk_id = stream.read_unsigned_byte1()
         if pk_id != PK_ID:
             raise NameError("Unknown PK ID")
 
         self.pk_font.set_preambule_data(pk_id=pk_id,
-                                        comment=self.read(self.read_unsigned_byte1()),
-                                        design_font_size=self.read_fix_word(),
-                                        checksum=self.read_signed_byte4(),
-                                        horizontal_dpi=sp2dpi(self.read_signed_byte4()),
-                                        vertical_dpi = sp2dpi(self.read_signed_byte4()))
+                                        comment=stream.read(stream.read_unsigned_byte1()),
+                                        design_font_size=stream.read_fix_word(),
+                                        checksum=stream.read_signed_byte4(),
+                                        horizontal_dpi=sp2dpi(stream.read_signed_byte4()),
+                                        vertical_dpi = sp2dpi(stream.read_signed_byte4()))
 
     ###############################################
 
     def process_characters(self):
         
+        stream = self.stream
+
         while True:
 
-            opcode = self.read_unsigned_byte1()
+            opcode = stream.read_unsigned_byte1()
 
             if opcode == pk_opcodes.POST:
                 break

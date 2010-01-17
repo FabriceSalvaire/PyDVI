@@ -1195,7 +1195,7 @@ class DviSimplifyMachine(DviMachine):
         start = xxx.rfind('=') +1
         dimensions = xxx[start:]
 
-        height, width = [float(x[:-2]) for x in  ','.split(dimensions)]
+        height, width = [float(x[:-2]) for x in dimensions.split(',')]
 
         opcode_program.set_paper_size(height, width)
 

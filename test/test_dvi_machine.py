@@ -24,6 +24,7 @@ from optparse import OptionParser
 from DviParser import DviParser 
 from DviMachine import *
 from FontManager import *
+from Stream import *
 
 #####################################################################################################
 
@@ -45,11 +46,11 @@ dvi_machine = DviMachine(font_manager)
 
 ###################################################
 
-dvi_stream = open(dvi_file)
+dvi_stream = FileStream(dvi_file)
 
 dvi_program = dvi_parser.process_stream(dvi_stream)
 
-dvi_stream.close()
+del dvi_stream
 
 ###################################################
 

@@ -19,7 +19,7 @@ from Stream import *
 
 #####################################################################################################
 
-class OpcodeStreamParser(AbstractStream):
+class OpcodeStreamParser(object):
     
     ###############################################
 
@@ -124,14 +124,14 @@ class OpcodeParser(object):
     def __init_parameter_readers__(self, parameters):
 
         for parameter in parameters:
-            if   parameter ==  1: parameter_reader = OpcodeStreamParser.read_unsigned_byte1
-            elif parameter ==  2: parameter_reader = OpcodeStreamParser.read_unsigned_byte2
-            elif parameter ==  3: parameter_reader = OpcodeStreamParser.read_unsigned_byte3
-            elif parameter ==  4: parameter_reader = OpcodeStreamParser.read_unsigned_byte4
-            elif parameter == -1: parameter_reader = OpcodeStreamParser.read_signed_byte1
-            elif parameter == -2: parameter_reader = OpcodeStreamParser.read_signed_byte2
-            elif parameter == -3: parameter_reader = OpcodeStreamParser.read_signed_byte3
-            elif parameter == -4: parameter_reader = OpcodeStreamParser.read_signed_byte4
+            if   parameter ==  1: parameter_reader = AbstractStream.read_unsigned_byte1
+            elif parameter ==  2: parameter_reader = AbstractStream.read_unsigned_byte2
+            elif parameter ==  3: parameter_reader = AbstractStream.read_unsigned_byte3
+            elif parameter ==  4: parameter_reader = AbstractStream.read_unsigned_byte4
+            elif parameter == -1: parameter_reader = AbstractStream.read_signed_byte1
+            elif parameter == -2: parameter_reader = AbstractStream.read_signed_byte2
+            elif parameter == -3: parameter_reader = AbstractStream.read_signed_byte3
+            elif parameter == -4: parameter_reader = AbstractStream.read_signed_byte4
                 
             self.parameter_readers.append(parameter_reader)
 
@@ -139,7 +139,7 @@ class OpcodeParser(object):
 
     def read_parameters(self, opcode_parser):
 
-        return [parameter_reader(opcode_parser) for parameter_reader in self.parameter_readers]
+        return [parameter_reader(opcode_parser.stream) for parameter_reader in self.parameter_readers]
 
     ###############################################
 

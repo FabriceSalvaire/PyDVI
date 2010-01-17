@@ -212,29 +212,9 @@ class StandardStream(AbstractStream):
     '''
     Abstract stream class
 
-    Following methods are abstract:
-     - open
-     - close
+    self.stream must be defined in __init__
     '''
 
-    ###############################################
-
-    def __init__(self):
-
-        self.stream = None
-
-    ###############################################
-
-    def open(self):
-
-        raise NotImplementedError
-
-    ###############################################
-
-    def close(self):
-
-        raise NotImplementedError
-    
     ###############################################
 
     def read(self, number_of_bytes):
@@ -277,7 +257,7 @@ class FileStream(StandardStream):
     
     ###############################################
 
-    def open(self, filename):
+    def __init__(self, filename):
 
         self.file = open(filename, 'rb')
 
@@ -287,7 +267,7 @@ class FileStream(StandardStream):
 
     ###############################################
 
-    def close(self):
+    def __del__(self):
 
         self.stream.close()
         self.file.close()

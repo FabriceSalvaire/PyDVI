@@ -24,21 +24,21 @@ from FontManager import *
 
 font_manager = FontManager(font_map='pdftex')
 
-#!# # Pk Font
-#!# 
-#!# cmr10_pk = font_manager.load_font(font_types.Pk, 'cmr10')
-#!# 
-#!# cmr10_pk.print_summary()
-#!# 
-#!# glyph = cmr10_pk[ord('x')]
-#!# 
-#!# glyph.print_summary()
-#!# glyph.print_glyph()
-#!# 
-#!# glyph_bitmap = glyph.get_glyph_bitmap()
-#!# 
-#!# # pl.imshow(glyph_bitmap)
-#!# # pl.show()
+# Pk Font
+
+cmr10_pk = font_manager.load_font(font_types.Pk, 'cmr10')
+
+cmr10_pk.print_summary()
+
+glyph = cmr10_pk[ord('x')]
+
+glyph.print_summary()
+glyph.print_glyph()
+
+glyph_bitmap = glyph.get_glyph_bitmap()
+
+# pl.imshow(glyph_bitmap)
+# pl.show()
 
 # Type1 Font
 
