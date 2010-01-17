@@ -9,14 +9,14 @@
 #
 # Audit
 #
-#  - 19/12/2009 fabrice
+#  - 17/01/2010 fabrice
+#    repeat?
 #
 #####################################################################################################
 
 #####################################################################################################
 
 import sys
-import string
 
 #####################################################################################################
 
@@ -221,11 +221,11 @@ class PkFontParser(OpcodeStreamParser, FileStream):
         if pk_id != PK_ID:
             raise NameError("Unknown PK ID")
 
-        self.pk_font.set_preambule_data(pk_id = pk_id,
-                                        comment = self.read(self.read_unsigned_byte1()),
-                                        design_font_size = self.read_fix_word(),
-                                        checksum = self.read_signed_byte4(),
-                                        horizontal_dpi = sp2dpi(self.read_signed_byte4()),
+        self.pk_font.set_preambule_data(pk_id=pk_id,
+                                        comment=self.read(self.read_unsigned_byte1()),
+                                        design_font_size=self.read_fix_word(),
+                                        checksum=self.read_signed_byte4(),
+                                        horizontal_dpi=sp2dpi(self.read_signed_byte4()),
                                         vertical_dpi = sp2dpi(self.read_signed_byte4()))
 
     ###############################################

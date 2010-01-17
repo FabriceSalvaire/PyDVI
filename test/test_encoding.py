@@ -21,9 +21,8 @@ from optparse import OptionParser
 
 #####################################################################################################
 
-import Kpathsea 
-
 from Encoding import *
+from Kpathsea import kpsewhich
 
 #####################################################################################################
 
@@ -38,9 +37,10 @@ if len(args) != 1:
 
 encoding = args[0]
 
-encoding_file = Kpathsea.which(encoding, format = 'enc files')
+encoding_file = kpsewhich(encoding, file_format='enc files')
 
 if encoding_file is None:
+    print 'Encoding %s not found' % (encoding)
     sys.exit(1)
 
 print 'Read %s encoding file' % (encoding_file)

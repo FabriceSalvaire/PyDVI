@@ -83,7 +83,7 @@ else:
 for root, dirs, filenames in os.walk(root_tree_path):
     for filename in filenames:
         
-        absolut_filename = os.path.join(root, filenames)
+        absolut_filename = os.path.join(root, filename)
 
         if exclude_re is None or exclude_re.search(absolut_filename) is None:
 

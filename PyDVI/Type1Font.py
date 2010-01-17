@@ -9,7 +9,8 @@
 #
 # Audit
 #
-#  - 21/12/2009 char code 0 -> 127 + 1 = 128
+#  - 17/01/2010 fabrice
+#    char code 0 -> 127 + 1 = 128
 #
 #####################################################################################################
 
@@ -19,14 +20,12 @@ __ALL__ = ['Type1Font']
 
 #####################################################################################################
 
-import string
-
 import ft2
 
 #####################################################################################################
 
 from Font import *
-from Logging import *
+from Logging import print_card
 
 #####################################################################################################
 
@@ -88,9 +87,9 @@ class Type1Font(Font):
 
     ###############################################
 
-    def __init__(self, font_manager, id, name):
+    def __init__(self, font_manager, font_id, name):
 
-        super(Type1Font, self).__init__(font_manager, id, name)
+        super(Type1Font, self).__init__(font_manager, font_id, name)
 
         self.__load_font()
         self.__init_char_map()
@@ -116,16 +115,16 @@ class Type1Font(Font):
 
     def __init_char_map(self):
 
-        if self.set_unicode_char_map() is False:
+        if not self.set_unicode_char_map():
             raise NameError("Font %s doesn't have an Unicode char map" % (self.name))
 
-        self.glyph_index_to_unicode = [None]*len(self)
+        self.glyph_index_to_unicodes = [None]*len(self)
 
         for unicode_index, glyph_index in self.encoding_vector.iteritems():
-            if self.glyph_index_to_unicode[glyph_index] is None:
-                self.glyph_index_to_unicode[glyph_index] = [unicode_index]
+            if self.glyph_index_to_unicodes[glyph_index] is None:
+                self.glyph_index_to_unicodes[glyph_index] = [unicode_index]
             else:
-                self.glyph_index_to_unicode[glyph_index].append(unicode_index)
+                self.glyph_index_to_unicodes[glyph_index].append(unicode_index)
 
             # print '%5u -> %5u %s' % (unicode_index, glyph_index, self.get_glyph_name(glyph_index))
             
@@ -190,7 +189,8 @@ class Type1Font(Font):
 
     ###############################################
 
-    def hash_glyph(self, glyph_index, size, resolution):
+    @staticmethod
+    def hash_glyph(glyph_index, size, resolution):
 
         return hex(glyph_index)[2:] + hex(size)[1:] + hex(resolution)[1:]
 
@@ -200,7 +200,7 @@ class Type1Font(Font):
 
         glyph_hash_key = self.hash_glyph(glyph_index, size, resolution)
 
-        if self.glyphs.has_key(glyph_hash_key) is True:
+        if self.glyphs.has_key(glyph_hash_key):
             glyph = self.glyphs[glyph_hash_key]
         else:
             glyph = self.glyphs[glyph_hash_key] = FtGlyph(self, glyph_index, size, resolution)
@@ -234,7 +234,7 @@ Char Maps: %s''' % (
                 test_bit(face.style_flags, ft2.FT_STYLE_FLAG_BOLD),
                 test_bit(face.style_flags, ft2.FT_STYLE_FLAG_ITALIC),
                 test_bit(face.style_flags, ft2.FT_FACE_FLAG_SCALABLE),
-                map(lambda i: self.get_char_map(i).encoding_as_string, xrange(face.num_charmaps)),
+                [self.get_char_map(i).encoding_as_string for i in xrange(face.num_charmaps)],
                 ))
 
     ###############################################
@@ -247,7 +247,7 @@ Char Maps: %s''' % (
             message += '\n%6u %s -> %s' % (
                 glyph_index,
                 self.get_glyph_name(glyph_index),
-                self.glyph_index_to_unicode[glyph_index],
+                self.glyph_index_to_unicodes[glyph_index],
                 )
 
         print_card(message)

@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 19/12/2009 fabrice
+#  - 16/01/2010 fabrice
 #
 #####################################################################################################
 
@@ -72,21 +72,6 @@ def ExplicitEnumFactory(enum_name, enum_dict):
         dict[name] = value
 
     return ExplicitEnumMetaClass(enum_name, (), dict)
-
-#####################################################################################################
-
-if __name__ == "__main__":
-
-    enum1 = EnumFactory('Enum1', ('cst1', 'cst2'))
-
-    print 'Enum1:', enum1.cst1, enum1.cst2
-    print '  len:', len(enum1)
-
-    enum2 = ExplicitEnumFactory('Enum2', {'cst1':1, 'cst2':3})
-
-    print 'Enum2', enum2.cst1, enum2.cst2
-
-    print 'Enum2 has', enum2.cst2, enum2.cst2 in enum2
 
 #####################################################################################################
 #

@@ -23,52 +23,52 @@ Copyright (C) 2009 Salvaire Fabrice
 ''')
 
 print_card(text,
-           centered = False,
-           width = 80,
-           rule_char = '#',
-           newline = False,
-           border = False,
-           bottom_rule = True)
+           centered=False,
+           width=80,
+           rule_char='#',
+           newline=False,
+           border=False,
+           bottom_rule=True)
 print '>'
 print_card(text,
-           centered = True,
-           width = 80,
-           rule_char = '#',
-           newline = False,
-           border = False,
-           bottom_rule = True)
+           centered=True,
+           width=80,
+           rule_char='#',
+           newline=False,
+           border=False,
+           bottom_rule=True)
 print '>'
 print_card(text,
-           centered = False,
-           width = 80,
-           rule_char = '#',
-           newline = True,
-           border = False,
-           bottom_rule = True)
+           centered=False,
+           width=80,
+           rule_char='#',
+           newline=True,
+           border=False,
+           bottom_rule=True)
 print '>'
 print_card(text,
-           centered = False,
-           width = 80,
-           rule_char = '#',
-           newline = False,
-           border = True,
-           bottom_rule = True)
+           centered=False,
+           width=80,
+           rule_char='#',
+           newline=False,
+           border=True,
+           bottom_rule=True)
 print '>'
 print_card(text,
-           centered = False,
-           width = 80,
-           rule_char = '#',
-           newline = False,
-           border = False,
-           bottom_rule = False)
+           centered=False,
+           width=80,
+           rule_char='#',
+           newline=False,
+           border=False,
+           bottom_rule=False)
 print '>'
 print_card(text,
-           centered = False,
-           width = 80,
-           rule_char = '*',
-           newline = False,
-           border = True,
-           bottom_rule = True)
+           centered=False,
+           width=80,
+           rule_char='*',
+           newline=False,
+           border=True,
+           bottom_rule=True)
 
 #####################################################################################################
 #

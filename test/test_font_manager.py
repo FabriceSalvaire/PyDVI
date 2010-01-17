@@ -22,7 +22,7 @@ from FontManager import *
 
 #####################################################################################################
 
-font_manager = FontManager(font_map = 'pdftex')
+font_manager = FontManager(font_map='pdftex')
 
 #!# # Pk Font
 #!# 

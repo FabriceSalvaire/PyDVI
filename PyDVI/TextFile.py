@@ -19,7 +19,13 @@ __all__ = ['TextFile']
 
 #####################################################################################################
 
-class TextFile(object):
+from abc import ABCMeta, abstractmethod
+
+#####################################################################################################
+
+class TextFile():
+
+    __metaclass__ = ABCMeta
 
     ###############################################
 
@@ -40,12 +46,14 @@ class TextFile(object):
 
     ###############################################
 
+    @abstractmethod
     def parse_line(self, line):
 
-        '''parse the line return True to stop
+        '''Parse the line
+        return True to stop
         '''
 
-        raise NotImplementedError
+        pass
 
 #####################################################################################################
 #

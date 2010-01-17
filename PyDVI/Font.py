@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 19/12/2009 fabrice
+#  - 10/01/2010 fabrice
 #
 #####################################################################################################
 
@@ -19,63 +19,55 @@ __all__ = ['Font']
 
 #####################################################################################################
 
-import subprocess
-import string
-
-#####################################################################################################
-
-import Kpathsea
-
-from Logging import *
+from Kpathsea import kpsewhich
+from Logging import print_card
 
 #####################################################################################################
 
 class Font(object):
 
+    font_type_string = None
+    extension = None
+
     ###############################################
 
-    def __init__(self, font_manager, id, name):
+    def __init__(self, font_manager, font_id, name):
 
         self.font_manager = font_manager
-        self.id = id
+        self.id = font_id
+        self.name = name.replace('.' + self.extension, '')
 
-        self.name = string.replace(name, '.' + self.extension, '')
+        ##################
+        #
+        # Find Font
+        #
 
-        self.find_font()
+        relative_filename = self.relative_filename()
 
-        self.load_tfm()
+        self.filename = kpsewhich(relative_filename)
+
+        if self.filename is None:
+            raise NameError("Font file %s not found" % (relative_filename))
+
+        ##################
+        #
+        # Load TFM
+        #
+
+        # Fixme: cache in font manager?
+
+        tfm_file = kpsewhich(self.name, file_format = 'tfm')
+
+        if tfm_file is None:
+            raise NameError("TFM file %s not found" % (self.name))
+
+        self.tfm = self.font_manager.tfm_parser.parse(self.name, tfm_file)
 
     ###############################################
 
     def relative_filename(self):
 
         return self.name + '.' + self.extension
-
-    ###############################################
-
-    def find_font(self):
-
-        relative_filename = self.relative_filename()
-
-        self.filename = Kpathsea.which(relative_filename)
-
-        if self.filename is None:
-            raise NameError("Font file %s not found" % (relative_filename))
-
-    ###############################################
-
-    def load_tfm(self):
-
-        # Fixme: cache in font manager?
-
-        tfm_file = Kpathsea.which(self.name, format = 'tfm')
-
-        if tfm_file is None:
-            raise NameError("TFM file %s not found" % (self.name))
-
-        self.tfm = self.font_manager.tfm_parser.parse(self.name, tfm_file)
-        
-        # self.tfm.print_summary()
 
     ###############################################
 

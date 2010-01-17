@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 19/12/2009 fabrice
+#  - 17/01/2010 fabrice
 #   - __init__
 #
 #####################################################################################################
@@ -21,7 +21,6 @@ __ALL__ = ['DviMachine', 'DviSimplifyMachine']
 #####################################################################################################
 
 import fractions
-import string
 
 #####################################################################################################
 
@@ -48,8 +47,8 @@ class OpcodeProgram(object):
     ###############################################
 
     def __init__(self,
-                 height = None, width = None,
-                 paper_orientation = paper_orientation_enum.portrait):
+                 height=None, width=None,
+                 paper_orientation=paper_orientation_enum.portrait):
 
         self.program = []
 
@@ -139,13 +138,13 @@ class Opcode_set_char(Opcode):
 
     ###############################################
 
-    def __init__(self, char, set = True):
+    def __init__(self, char, set=True):
 
         self.characters = [char]
 
         self.set = set
 
-        if self.set is True:
+        if self.set:
             self.opcode_name = 'set'
         else:
             self.opcode_name = 'put'
@@ -154,7 +153,7 @@ class Opcode_set_char(Opcode):
 
     def __str__(self):
 
-        return '%s char "%s"' % (self.opcode_name, string.join(map(chr, self.characters), sep = ''))
+        return '%s char "%s"' % (self.opcode_name, ''.join([chr(x) for x in self.characters]))
 
         # return 'set char "%s"' % str(self.characters)
 
@@ -166,7 +165,7 @@ class Opcode_set_char(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.get_registers()
 
@@ -193,7 +192,7 @@ class Opcode_set_char(Opcode):
             #!# registers.h - glyph.horizontal_offset,
             #!# registers.v - glyph.vertical_offset,
 
-            if compute_bounding_box is False:
+            if not compute_bounding_box:
                 dvi_machine.paint_char(registers.h, registers.v,
                                        char_bounding_box,
                                        current_font,
@@ -211,14 +210,14 @@ class Opcode_set_char(Opcode):
                 else:
                     bounding_box |= char_bounding_box
 
-            if self.set is True:
+            if self.set:
                 registers.h += char_width
 
             print '%s char %3u "%s" width %8u h %10u' % (self.opcode_name,
                                                          char_code, chr(char_code),
                                                          char_width, registers.h)
 
-        if compute_bounding_box is True:
+        if compute_bounding_box:
             return bounding_box
             
 ###################################################
@@ -229,7 +228,7 @@ class Opcode_put_char(Opcode):
 
     def __init__(self, char):
 
-        super(Opcode_put_char, self).__init__(char, set = False)
+        super(Opcode_put_char, self).__init__(char, set=False)
 
 #####################################################################################################
 
@@ -237,7 +236,7 @@ class Opcode_set_rule(Opcode):
 
     ###############################################
 
-    def __init__(self, height, width, set = True):
+    def __init__(self, height, width, set=True):
 
         self.height = height
         self.width = width
@@ -247,28 +246,28 @@ class Opcode_set_rule(Opcode):
 
     def __str__(self):
 
-        if self.set is True:
+        if self.set:
             return 'set rule height %u width %u, h += width' % (self.height, self.width)
         else:
             return 'put rule height %u width %u' % (self.height, self.width)
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.get_registers()
 
-        if compute_bounding_box is False:
+        if not compute_bounding_box:
             dvi_machine.paint_rule(registers.h, registers.v, self.width, self.height)
 
-        if compute_bounding_box is True:
+        if compute_bounding_box:
             bounding_box = Interval2D([registers.h, registers.h + self.width],
                                       [registers.v, registers.v - self.height])
 
-        if self.set is True:
+        if self.set:
             registers.h += self.width
 
-        if compute_bounding_box is True:
+        if compute_bounding_box:
             return bounding_box
 
 ###################################################
@@ -279,7 +278,7 @@ class Opcode_put_rule(Opcode_set_rule):
 
     def __init__(self, height, width):
 
-        super(Opcode_put_rule, self).__init__(height, width, set = False)
+        super(Opcode_put_rule, self).__init__(height, width, set=False)
 
 #####################################################################################################
 
@@ -299,7 +298,7 @@ class Opcode_push(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         dvi_machine.push_registers()
 
@@ -321,7 +320,7 @@ class Opcode_pop(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         dvi_machine.pop_registers(self.n)
 
@@ -343,7 +342,7 @@ class Opcode_push_colour(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         dvi_machine.push_colour(self.colour)
 
@@ -365,7 +364,7 @@ class Opcode_pop_colour(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         dvi_machine.pop_colour(self.n)
 
@@ -389,7 +388,7 @@ class Opcode_right(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.get_registers()
         registers.h += self.x
@@ -412,7 +411,7 @@ class Opcode_w0(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.get_registers()
         registers.h += registers.w
@@ -435,7 +434,7 @@ class Opcode_w(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.get_registers()
         registers.w  = self.x
@@ -459,7 +458,7 @@ class Opcode_x0(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.get_registers()
         registers.h += registers.x
@@ -482,7 +481,7 @@ class Opcode_x(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.get_registers()
         registers.x  = self.x
@@ -506,7 +505,7 @@ class Opcode_down(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.get_registers()
         registers.v += self.x
@@ -529,7 +528,7 @@ class Opcode_y0(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.get_registers()
         registers.v += registers.y
@@ -552,7 +551,7 @@ class Opcode_y(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.get_registers()
         registers.y  = self.x
@@ -576,7 +575,7 @@ class Opcode_z0(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.get_registers()
         registers.v += registers.z
@@ -599,7 +598,7 @@ class Opcode_z(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.get_registers()
         registers.z  = self.x
@@ -623,7 +622,7 @@ class Opcode_font(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         dvi_machine.current_font = self.font_id
 
@@ -645,7 +644,7 @@ class Opcode_xxx(Opcode):
 
     ###############################################
 
-    def run(self, dvi_machine, compute_bounding_box = False):
+    def run(self, dvi_machine, compute_bounding_box=False):
 
         pass
 
@@ -997,7 +996,7 @@ class DviMachine(object):
 
         self.dvi_program = dvi_program
 
-        if load_fonts is True:
+        if load_fonts:
             self.load_dvi_fonts()
 
     ###############################################
@@ -1063,8 +1062,8 @@ class DviMachine(object):
 
         print 'Page bounding box', bounding_box, 'sp'
 
-        (x_min_mm, x_max_mm, y_min_mm, y_max_mm) = map(sp2mm, (bounding_box.x.inf, bounding_box.x.sup,
-                                                               bounding_box.y.inf, bounding_box.y.sup))
+        (x_min_mm, x_max_mm, y_min_mm, y_max_mm) = [sp2mm(x) for x in (bounding_box.x.inf, bounding_box.x.sup,
+                                                                       bounding_box.y.inf, bounding_box.y.sup)]
 
         print '  [%.2f, %.2f]*[%.2f, %.2f] mm' % (x_min_mm, x_max_mm, y_min_mm, y_max_mm) 
 
@@ -1102,7 +1101,7 @@ class DviSimplifyMachine(DviMachine):
 
     def load_dvi_program(self, dvi_program):
 
-        super(DviSimplifyMachine, self).load_dvi_program(dvi_program, load_fonts = False)
+        super(DviSimplifyMachine, self).load_dvi_program(dvi_program, load_fonts=False)
 
     ###############################################
 
@@ -1154,7 +1153,7 @@ class DviSimplifyMachine(DviMachine):
 
         print 'transform_xxx_colour'
 
-        words = string.split(xxx)
+        words = xxx.split()
 
         try:
             print words
@@ -1176,10 +1175,10 @@ class DviSimplifyMachine(DviMachine):
                     colour = DviColorGray(float(words[3]))
 
                 elif colour_class == 'rgb':
-                    colour = DviColorRGB(* map(float, words[3:6]))
+                    colour = DviColorRGB(* [float(x) for x in words[3:6]])
 
                 elif colour_class == 'cmyk':
-                    colour = DviColorCMYK(* map(float, words[3:7]))
+                    colour = DviColorCMYK(* [float(x) for x in words[3:7]])
 
                 else:
                     return None
@@ -1193,10 +1192,10 @@ class DviSimplifyMachine(DviMachine):
 
     def transform_xxx_paper_size(self, opcode_program, i, xxx):
 
-        start = string.rfind(xxx, "=") +1
+        start = xxx.rfind('=') +1
         dimensions = xxx[start:]
 
-        height, width = map(lambda x: float(x[:-2]),  string.split(dimensions, sep=','))
+        height, width = [float(x[:-2]) for x in  ','.split(dimensions)]
 
         opcode_program.set_paper_size(height, width)
 

@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 19/12/2009 fabrice
+#  - 16/01/2010 fabrice
 #
 #####################################################################################################
 
@@ -28,6 +28,9 @@ class OpcodeStreamParser(AbstractStream):
         '''
         Opcode Stream Parser
         '''
+
+        # Allocate 256 opcode
+        self.opcode_parsers = [None]*255
 
         self.__init_opcode_parsers(opcode_definitions)
 
@@ -51,9 +54,6 @@ class OpcodeStreamParser(AbstractStream):
           ([lower_n, upper_n]) # opcode at [index + i] has parameter p[i]
         '''
 
-        # Allocate 256 opcode
-        self.opcode_parsers = [None]*255
-
         for opcode_definition in opcode_definitions:
         
             # opcode index
@@ -70,7 +70,7 @@ class OpcodeStreamParser(AbstractStream):
         
                 name, description, parameters, opcode_class = opcode_definition[1:]
         
-                if parameters is not None and isinstance(parameters, list):
+                if isinstance(parameters, list):
                     lower_n, upper_n = parameters
                     if lower_n < 0:
                         signe = -1
@@ -110,7 +110,7 @@ class OpcodeParser(object):
 
         self.parameter_readers = []
 
-        if parameters is not None and len(parameters) > 0:
+        if parameters:
             self.__init_parameter_readers__(parameters)
 
     ###############################################
@@ -139,9 +139,7 @@ class OpcodeParser(object):
 
     def read_parameters(self, opcode_parser):
 
-        return map(lambda parameter_reader:
-                       parameter_reader(opcode_parser),
-                   self.parameter_readers)
+        return [parameter_reader(opcode_parser) for parameter_reader in self.parameter_readers]
 
     ###############################################
 

@@ -15,11 +15,15 @@
 
 #####################################################################################################
 
+__ALL__ = ['kpsewhich']
+
+#####################################################################################################
+
 import subprocess
 
 #####################################################################################################
 
-def which(filename, format = None):
+def kpsewhich(filename, file_format = None):
 
     '''
     Wrapper around kpsewhich program
@@ -27,8 +31,8 @@ def which(filename, format = None):
 
     command = ['kpsewhich']
 
-    if format is not None:
-        command.append("--format='%s'" % (format))
+    if file_format is not None:
+        command.append("--format='%s'" % (file_format))
 
     command.append(filename)
 
@@ -36,7 +40,7 @@ def which(filename, format = None):
 
     pipe = subprocess.Popen(command_string, shell=True, stdout=subprocess.PIPE)
         
-    stdout, stderr = pipe.communicate()
+    stdout = pipe.communicate()[0]
 
     path = stdout.rstrip()
 

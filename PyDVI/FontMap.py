@@ -9,6 +9,7 @@
 #
 # Audit
 #
+#  - 17/01/2010 fabrice
 #
 #####################################################################################################
 
@@ -18,12 +19,8 @@ __all__ = ['FontMap']
 
 #####################################################################################################
 
-import string
-
-#####################################################################################################
-
-from Logging import *
-from TextFile import *
+from Logging import print_card
+from TextFile import TextFile
 
 #####################################################################################################
 
@@ -79,7 +76,7 @@ class FontMap(TextFile):
 
     ###############################################
 
-    def register_font_map_entry(self, font_map_entry):
+    def register_entry(self, font_map_entry):
 
         self.map[font_map_entry.tex_name] = font_map_entry
 
@@ -87,8 +84,9 @@ class FontMap(TextFile):
 
     def parse_line(self, line):
 
-        words = filter(len, line.split())
+        words = [x for x in line.split() if x]
 
+        # Merge words enclosed by '"'
         i = 0
         while i < len(words):
 
@@ -96,7 +94,7 @@ class FontMap(TextFile):
 
             if word.startswith('"'):
 
-                while word.endswith('"') is False:
+                while not word.endswith('"'):
                     word += ' ' + words.pop(i + 1)
                     
                 words[i] = word[1:-1]
@@ -109,65 +107,64 @@ class FontMap(TextFile):
 
     def parse_font_map_line(self, words):
 
-         '''
-         Parse a font map line
+        '''
+        Parse a font map line
  
-         The format is:
+        The format is:
 
-           tex_name ps_font_name [effects] [filenames]
+          tex_name ps_font_name [effects] [filenames]
 
-           - effects are PostScript snippets like ".177 SlantFont",
+          - effects are PostScript snippets like ".177 SlantFont",
 
-           - filenames begin with one or two '<'.  A filename with the extension '.enc' is an
-             encoding file, other filenames are font files. This can be overridden with a left
-             bracket: '<[encfile' indicates an encoding file named encfile.
+          - filenames begin with one or two '<'.  A filename with the extension '.enc' is an
+            encoding file, other filenames are font files. This can be overridden with a left
+            bracket: '<[encfile' indicates an encoding file named encfile.
  
-         '''
+        '''
 
-         tex_name, ps_font_name = words[:2]
+        tex_name, ps_font_name = words[:2]
 
-         effects, encoding, filename = None, None, None
+        effects, encoding, filename = None, None, None
+        for word in words[2:]:
 
-         for word in words[2:]:
+            if not word.startswith('<'):
+                effects = self.parse_effects(word)
 
-             if word.startswith('<') is False:
-                 effects = self.parse_effects(word)
+            else:
 
-             else:
+                word = word.lstrip('<')
 
-                 word = word.lstrip('<')
+                if word.startswith('['):
+                    assert encoding is None
+                    encoding = word[1:]
 
-                 if word.startswith('['):
-                     assert encoding is None
-                     encoding = word[1:]
+                elif word.endswith('.enc'):
+                    assert encoding is None
+                    encoding = word
 
-                 elif word.endswith('.enc'):
-                     assert encoding is None
-                     encoding = word
+                else:
+                    assert filename is None
+                    filename = word
 
-                 else:
-                     assert filename is None
-                     filename = word
-
-         self.register_font_map_entry(FontMapEntry(tex_name,
-                                                   ps_font_name, effects, encoding, filename))
+        font_map_entry = FontMapEntry(tex_name, ps_font_name, effects, encoding, filename)
+        self.register_entry(font_map_entry)
 
     ###############################################
 
-    def parse_effects(self, word):
+    @staticmethod
+    def parse_effects(word):
 
         effects_list = word.split()
-     
+   
         effects = {}
-        
-        for key_word in ('SlantFont', 'ExtendFont'):
+        for key_word in 'SlantFont', 'ExtendFont':
             
             try:
+                # parameter is followed by the command
                 parameter_index = effects_list.index(key_word) -1
-                
                 effects[key_word] = float(effects_list[parameter_index])
                 
-            except ValueError:
+            except ValueError: # key word was not found
                 pass
             
         return effects

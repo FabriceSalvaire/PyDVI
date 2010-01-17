@@ -19,11 +19,11 @@ from TexDaemon import *
 
 #####################################################################################################
 
-tex_daemon = TexDaemon(working_directory = '/tmp/tex_daemon',
-                       format = 'plain',
-                       start_code = r'\shipout\hbox{}' '\n',
-                       done_code = '\n' r'\immediate\write16{DONE}\read-1to\temp ' '\n',
-                       done_string = 'DONE\n',
+tex_daemon = TexDaemon(working_directory='/tmp/tex_daemon',
+                       format='plain',
+                       start_code=r'\shipout\hbox{}' '\n',
+                       done_code='\n' r'\immediate\write16{DONE}\read-1to\temp ' '\n',
+                       done_string='DONE\n',
                        )
 tex_daemon.start()
 

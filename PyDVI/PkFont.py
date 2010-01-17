@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 19/12/2009 fabrice
+#  - 17/01/2010 fabrice
 #
 #####################################################################################################
 
@@ -19,13 +19,12 @@ __ALL__ = ['PkFont']
 
 #####################################################################################################
 
-import string
 import subprocess
 
 #####################################################################################################
 
 from Font import *
-from Logging import *
+from Logging import print_card
 
 #####################################################################################################
 
@@ -36,9 +35,9 @@ class PkFont(Font):
 
     ###############################################
 
-    def __init__(self, font_manager, id, name):
+    def __init__(self, font_manager, font_id, name):
 
-        super(PkFont, self).__init__(font_manager, id, name)
+        super(PkFont, self).__init__(font_manager, font_id, name)
         
         self.glyphs = {}
 
@@ -74,7 +73,7 @@ class PkFont(Font):
 
         # --destdir
 
-        subprocess.call(string.join(('mktexpk', self.name), sep=' '), shell=True)
+        subprocess.call(' '.join(('mktexpk', self.name)), shell=True)
 
     ###############################################
 
@@ -101,7 +100,7 @@ class PkFont(Font):
 
     ###############################################
 
-    def get_glyph(self, glyph_index, size = None, resolution = None):
+    def get_glyph(self, glyph_index, size=None, resolution=None):
 
         return self.glyphs[glyph_index]
 

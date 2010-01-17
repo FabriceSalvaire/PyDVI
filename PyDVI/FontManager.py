@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 19/12/2009 fabrice
+#  - 17/01/2010 fabrice
 #   - singleton ?
 #   - font plugin ?
 #   - font cache
@@ -23,16 +23,14 @@ __all__ = ['FontManager', 'font_types']
 #####################################################################################################
 
 import subprocess
-import string
 
 import ft2
 
 #####################################################################################################
 
-import Kpathsea 
-
-from EnumFactory import *
+from EnumFactory import EnumFactory
 from FontMap import *
+from Kpathsea import kpsewhich
 from PkFont import PkFont
 from PkFontParser import PkFontParser
 from TfmParser import *
@@ -42,7 +40,7 @@ from Type1Font import *
 
 def get_filename_extension(filename):
 
-    index = string.rfind(filename, '.')
+    index = filename.rfind('.')
         
     if index >= 0:
         index += 1
@@ -61,7 +59,7 @@ class FontManager(object):
 
     ###############################################
 
-    def __init__(self, font_map, use_pk = False):
+    def __init__(self, font_map, use_pk=False):
 
         self.use_pk = use_pk
 
@@ -84,10 +82,10 @@ class FontManager(object):
         Load the font map
         '''
 
-        font_map_file = Kpathsea.which(font_map, format = 'map')
+        font_map_file = kpsewhich(font_map, file_format='map')
 
         if font_map_file is not None:
-            self.font_map = FontMap(font_map, filename = font_map_file)
+            self.font_map = FontMap(font_map, filename=font_map_file)
         else:
             raise NameError("Font Map %s not found" % (font_map)) 
 
@@ -120,12 +118,12 @@ class FontManager(object):
 
     def __getitem__(self, tex_font_name):
 
-        if self.is_font_loaded(tex_font_name) is True:
+        if self.is_font_loaded(tex_font_name):
             font = self.fonts[tex_font_name]
 
         else:
             
-            if self.use_pk is True:
+            if self.use_pk:
                 font = self.load_font(font_types.Pk, tex_font_name)
             else:
                 font = self.fonts[tex_font_name] = self.load_mapped_font(tex_font_name)

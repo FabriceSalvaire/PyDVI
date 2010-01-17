@@ -26,7 +26,13 @@ Use UTF-8 encoding.
 
 #################################################################################
 
- - tools to check audit date
+ - Comparisons to singletons like None should always be done with 'is' or 'is
+   not', never the equality operators.
+
+   Also, beware of writing "if x" when you really mean "if x is not None" --
+   e.g. when testing whether a variable or argument that defaults to None was
+   set to some other value.  The other value might have a type (such as a
+   container) that could be false in a boolean context!
 
  - list comprehension
 

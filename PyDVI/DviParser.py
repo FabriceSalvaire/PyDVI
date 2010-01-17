@@ -9,14 +9,13 @@
 #
 # Audit
 #
-#  - 19/12/2009 fabrice
+#  - 17/10/2010 fabrice
 #
 #####################################################################################################
 
 #####################################################################################################
 
 import os
-import string
 
 #####################################################################################################
 
@@ -85,7 +84,7 @@ class OpcodeParser_set_char(OpcodeParser):
 
         super(OpcodeParser_set_char, self).__init__(opcode,
                                                     'set', set_char_description,
-                                                    opcode_class = Opcode_set_char)
+                                                    opcode_class=Opcode_set_char)
 
     ###############################################
 
@@ -261,7 +260,7 @@ class DviParser(OpcodeStreamParser, StandardStream):
         self.process_postambule()
         self.process_pages_backward()
 
-        if self.debug is True:
+        if self.debug:
             for bop_pointer in self.bop_pointer_stack:
                 print 'BOP at', bop_pointer
 
@@ -275,7 +274,7 @@ class DviParser(OpcodeStreamParser, StandardStream):
 
         self.seek(0)
 
-        if self.debug is True:
+        if self.debug:
             print 'Preamble begin at', self.tell()
 
         if self.read_unsigned_byte1() != dvi_opcodes.PRE:
@@ -295,7 +294,7 @@ class DviParser(OpcodeStreamParser, StandardStream):
                                             dvi_format,
                                             numerator, denominator, magnification)
 
-        if self.debug is True:
+        if self.debug:
             print 'Preamble end at', self.tell() -1
 
     ###############################################
@@ -329,7 +328,7 @@ class DviParser(OpcodeStreamParser, StandardStream):
         # Move to Postamble
         self.seek(self.post_pointer)
 
-        if self.debug is True:
+        if self.debug:
             print 'Postamble start at', self.tell()
 
         if self.read_unsigned_byte1() != dvi_opcodes.POST:
@@ -387,7 +386,7 @@ class DviParser(OpcodeStreamParser, StandardStream):
 
             self.seek(bop_pointer)
 
-            if self.debug is True:
+            if self.debug:
                 print 'BOP at', self.tell()
 
             opcode = self.read_unsigned_byte1()
@@ -423,7 +422,7 @@ class DviParser(OpcodeStreamParser, StandardStream):
 
                 parameters = opcode_parser.read_parameters(self)
 
-                if self.debug is True:
+                if self.debug:
                     print 'Opcode', opcode, opcode_parser.name, parameters
 
                 # If the current and the previous opcode correspond to set char
@@ -431,7 +430,7 @@ class DviParser(OpcodeStreamParser, StandardStream):
 
                 is_set_char = opcode <= dvi_opcodes.SET4
 
-                if is_set_char is True and previous_opcode_obj is not None:
+                if is_set_char and previous_opcode_obj is not None:
                     previous_opcode_obj.append(parameters[0])
                 else:
                     opcode_obj = opcode_parser.to_opcode(parameters) 
@@ -439,7 +438,7 @@ class DviParser(OpcodeStreamParser, StandardStream):
                     if opcode_obj is not None:
                         opcode_program.append(opcode_obj)
 
-                    if is_set_char is True:
+                    if is_set_char:
                         previous_opcode_obj = opcode_obj
                     else:
                         previous_opcode_obj = None

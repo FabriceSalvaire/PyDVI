@@ -17,8 +17,7 @@ import sys
 
 #####################################################################################################
 
-import Kpathsea 
-
+from Kpathsea import kpsewhich
 from TfmParser import *
 
 #####################################################################################################
@@ -36,7 +35,7 @@ if len(args) != 1:
 
 font_name = args[0]
 
-tfm_file = Kpathsea.which(font_name, format = 'tfm')
+tfm_file = kpsewhich(font_name, file_format='tfm')
 
 if tfm_file is None:
     sys.exit(1)

@@ -37,9 +37,9 @@ dvi_file = args[0]
 
 #####################################################################################################
 
-dvi_parser = DviParser(debug = False)
+dvi_parser = DviParser(debug=False)
 
-font_manager = FontManager(font_map = 'pdftex', use_pk = False)
+font_manager = FontManager(font_map='pdftex', use_pk=False)
 
 dvi_machine = DviMachine(font_manager)
 

@@ -9,8 +9,8 @@
 #
 # Audit
 #
-#  - 27/12/2009 fabrice
-#  
+#  - 17/01/2010 fabrice
+#   - TfmChar -> Char
 #   - Check and complete lig kern table and for special fonts
 #
 #####################################################################################################
@@ -26,8 +26,6 @@ import string
 #####################################################################################################
 
 from Logging import *
-
-#####################################################################################################
 
 #####################################################################################################
 
@@ -54,8 +52,8 @@ class TfmChar(object):
                  height,
                  depth,
                  italic_correction,
-                 lig_kern_program_index = None,
-                 next_larger_char = None):
+                 lig_kern_program_index=None,
+                 next_larger_char=None):
 
         self.tfm = tfm
 
@@ -174,8 +172,8 @@ class TfmExtensibleChar(TfmChar):
                  depth,
                  italic_correction,
                  extensible_recipe,
-                 lig_kern_program_index = None,
-                 next_larger_char = None):
+                 lig_kern_program_index=None,
+                 next_larger_char=None):
 
         super(TfmExtensibleChar, self).__init__(tfm,
                                                 char_code,

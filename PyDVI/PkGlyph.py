@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 19/12/2009 fabrice
+#  - 17/01/2010 fabrice
 #
 #####################################################################################################
 
@@ -25,7 +25,7 @@ import numpy as np
 
 #####################################################################################################
 
-from Logging import *
+from Logging import print_card
 from TeXUnit import *
 
 #####################################################################################################
@@ -70,7 +70,7 @@ class PkGlyph(object):
 
         byte = ord(self.nybbles[self.nybble_index])
 
-        if self.upper_nybble is True:
+        if self.upper_nybble:
             nybble = byte >> 4
         else:
             nybble = byte & 0xF
@@ -112,13 +112,13 @@ class PkGlyph(object):
             if i == 14:
                 self.repeat_count = self.pk_packed_num()
             else :
-                self.repeat_count = 1;
+                self.repeat_count = 1
 
             return self.pk_packed_num()
 
     ###############################################
 
-    def raster_glyph(self, count_list = False):
+    def raster_glyph(self, count_list=False):
 
         '''
         Unpack the glyph
@@ -162,12 +162,12 @@ class PkGlyph(object):
 
                 count = self.pk_packed_num()
 
-                if count_list is True:
+                if count_list:
 
-                    if transition is True:
+                    if transition:
                         packed_string += '[%u]' % (self.repeat_count)
 
-                    if black_pixel is True:
+                    if black_pixel:
                         packed_string += '%u' % (count)
                     else:
                         packed_string += '(%u)' % (count)
@@ -178,7 +178,7 @@ class PkGlyph(object):
 
                     if upper_x < self.width: # fill
 
-                        if black_pixel is True:
+                        if black_pixel:
                             glyph_bitmap[y,x:upper_x] = 1
 
                         count = 0
@@ -186,7 +186,7 @@ class PkGlyph(object):
 
                     else: # split count and repeat row if necessary
 
-                        if black_pixel is True:
+                        if black_pixel:
                             glyph_bitmap[y,x:] = 1
 
                         y_src = y
@@ -202,7 +202,7 @@ class PkGlyph(object):
                 black_pixel = not black_pixel
                 transition = not transition
 
-        if count_list is True:
+        if count_list:
             print packed_string
 
     ###############################################

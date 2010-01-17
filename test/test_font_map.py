@@ -17,9 +17,8 @@ import sys
 
 #####################################################################################################
 
-import Kpathsea 
-
 from FontMap import *
+from Kpathsea import kpsewhich
 
 #####################################################################################################
 
@@ -36,12 +35,12 @@ if len(args) != 1:
 
 font_map = args[0]
 
-font_map_file = Kpathsea.which(font_map, format = 'map')
+font_map_file = kpsewhich(font_map, file_format='map')
 
 if font_map_file is None:
     sys.exit(1)
 
-font_map = FontMap(font_map, filename = font_map_file)
+font_map = FontMap(font_map, filename=font_map_file)
   
 # font_map.print_summary()
 

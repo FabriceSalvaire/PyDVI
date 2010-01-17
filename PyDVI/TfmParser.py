@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 26/12/2009 fabrice
+#  - 17/01/2010 fabrice
 #
 #####################################################################################################
 
@@ -19,7 +19,7 @@ __all__ = ['TfmParser']
 
 #####################################################################################################
 
-from EnumFactory import *
+from EnumFactory import EnumFactory
 from Stream import *
 from Tfm import *
 
@@ -43,6 +43,12 @@ tables = EnumFactory('TableEnums',
                       'extensible_character',
                       'font_parameter',
                       ))
+
+#####################################################################################################
+
+def repeat(func, count):
+        
+    return [func() for i in xrange(count)]
 
 #####################################################################################################
 
@@ -115,7 +121,7 @@ class TfmParser(FileStream):
         (self.entire_file_length,
          header_length,
          self.smallest_character_code,
-         self.largest_character_code) = self.repeat(self.read_unsigned_byte2, 4)
+         self.largest_character_code) = repeat(self.read_unsigned_byte2, 4)
 
         header_data_length_min = 18
         self.table_lengths[tables.header] = max(header_data_length_min, header_length)
@@ -147,7 +153,7 @@ class TfmParser(FileStream):
     def read_header(self):
 
         character_coding_scheme_length = 40
-        family_length= 10
+        family_length = 10
 
         self.seek_to_table(tables.header)
 
@@ -196,13 +202,13 @@ class TfmParser(FileStream):
         if self.tfm.character_coding_scheme == 'TeX math italic':
             pass
         else:
-            self.tfm.set_font_parameters(self.repeat(self.read_fix_word, 7))
+            self.tfm.set_font_parameters(repeat(self.read_fix_word, 7))
 
         if self.tfm.character_coding_scheme == 'TeX math symbols':
-            self.tfm.set_math_symbols_parameters(self.repeat(self.read_fix_word, 15))
+            self.tfm.set_math_symbols_parameters(repeat(self.read_fix_word, 15))
 
         elif self.tfm.character_coding_scheme == 'TeX math extension':
-            self.tfm.set_math_extension_parameters(self.repeat(self.read_fix_word, 6))
+            self.tfm.set_math_extension_parameters(repeat(self.read_fix_word, 6))
 
     ###############################################
 
@@ -226,7 +232,8 @@ class TfmParser(FileStream):
         (last_skip_byte,
          next_char,
          op_byte,
-         remainder) = self.read_four_byte_numbers_in_table(tables.lig_kern, self.table_lengths[tables.lig_kern] -1)
+         remainder) = self.read_four_byte_numbers_in_table(tables.lig_kern,
+                                                           self.table_lengths[tables.lig_kern] -1)
         
         if last_skip_byte == 255:
             left_boundary_char_program_index = 256*op_byte + remainder
@@ -243,7 +250,7 @@ class TfmParser(FileStream):
              op_byte,
              remainder) = self.read_four_byte_numbers_in_table(tables.lig_kern, i)
         
-            if first_instruction is True and skip_byte > 128:
+            if first_instruction and skip_byte > 128:
 
                 print 'Large lig/kern table'
 

@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 26/12/2009 fabrice
+#  - 17/10/2009 fabrice
 #
 #####################################################################################################
 
@@ -47,7 +47,7 @@ class AbstractStream(object):
         Read n bytes from the current position
         '''
 
-        pass
+        raise NotImplementedError
 
     ###############################################
 
@@ -57,7 +57,7 @@ class AbstractStream(object):
         Seek to position
         '''
 
-        pass
+        raise NotImplementedError
 
     ###############################################
 
@@ -67,35 +67,33 @@ class AbstractStream(object):
         Tell the current position
         '''
 
-        pass
+        raise NotImplementedError
 
     ###############################################
 
-    def read_bytes(self, number_of_bytes, position = None):
+    def read_bytes(self, number_of_bytes, position=None):
 
         '''
         Read n number of bytes from the optional position or the current position
         '''
 
-        if position is None:
-            start_position = self.tell()
-        else:
+        if position is not None:
             self.seek(position)
 
         return self.read(number_of_bytes)
 
     ###############################################
 
-    def read_byte_numbers(self, number_of_bytes, position = None):
+    def read_byte_numbers(self, number_of_bytes, position=None):
         '''
         Read n byte numbers from the optional position or the current position
         '''
 
-        return map(ord, self.read_bytes(number_of_bytes, position))
+        return [ord(byte) for byte in self.read_bytes(number_of_bytes, position)]
 
     ###############################################
 
-    def read_three_byte_numbers(self, position = None):
+    def read_three_byte_numbers(self, position=None):
 
         '''
         Read three byte numbers from the optional position or the current position
@@ -105,7 +103,7 @@ class AbstractStream(object):
 
     ###############################################
 
-    def read_four_byte_numbers(self, position = None):
+    def read_four_byte_numbers(self, position=None):
 
         '''
         Read four byte numbers from the optional position or the current position
@@ -115,7 +113,7 @@ class AbstractStream(object):
 
     ###############################################
 
-    def read_big_endian_number(self, number_of_bytes, signed = False, position = None):
+    def read_big_endian_number(self, number_of_bytes, signed=False, position=None):
 
         '''
         Read a number coded in big endian format from the DVI input stream
@@ -127,7 +125,7 @@ class AbstractStream(object):
 
         number = bytes[0]
 
-        if signed is True and number >= 128:
+        if signed and number >= 128:
             number -= 256
 
         for i in xrange(1, number_of_bytes):
@@ -138,29 +136,29 @@ class AbstractStream(object):
 
     ###############################################
             
-    def read_signed_byte1(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 1, signed = True, position = position)
+    def read_signed_byte1(self, position=None):
+        return self.read_big_endian_number(number_of_bytes=1, signed=True, position=position)
 
-    def read_signed_byte2(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 2, signed = True, position = position)
+    def read_signed_byte2(self, position=None):
+        return self.read_big_endian_number(number_of_bytes=2, signed=True, position=position)
 
-    def read_signed_byte3(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 3, signed = True, position = position) 
+    def read_signed_byte3(self, position=None):
+        return self.read_big_endian_number(number_of_bytes=3, signed=True, position=position) 
 
-    def read_signed_byte4(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 4, signed = True, position = position)
+    def read_signed_byte4(self, position=None):
+        return self.read_big_endian_number(number_of_bytes=4, signed=True, position=position)
 
-    def read_unsigned_byte1(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 1, signed = False, position = position)
+    def read_unsigned_byte1(self, position=None):
+        return self.read_big_endian_number(number_of_bytes=1, signed=False, position=position)
 
-    def read_unsigned_byte2(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 2, signed = False, position = position)
+    def read_unsigned_byte2(self, position=None):
+        return self.read_big_endian_number(number_of_bytes=2, signed=False, position=position)
 
-    def read_unsigned_byte3(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 3, signed = False, position = position)
+    def read_unsigned_byte3(self, position=None):
+        return self.read_big_endian_number(number_of_bytes=3, signed=False, position=position)
 
-    def read_unsigned_byte4(self, position = None):
-        return self.read_big_endian_number(number_of_bytes = 4, signed = False, position = position)
+    def read_unsigned_byte4(self, position=None):
+        return self.read_big_endian_number(number_of_bytes=4, signed=False, position=position)
 
     read_unsigned_byten = (read_unsigned_byte1, 
                            read_unsigned_byte2,
@@ -189,7 +187,7 @@ class AbstractStream(object):
 
     ###############################################
 
-    def read_fix_word(self, position = None):
+    def read_fix_word(self, position=None):
         
         '''
         Read a fix word from the optional position or the current position
@@ -199,24 +197,13 @@ class AbstractStream(object):
 
     ###############################################
 
-    def read_bcpl(self, position = None):
+    def read_bcpl(self, position=None):
         
         '''
         Read a BCPL string from the optional position or the current position
         '''
 
         return self.read_bytes(self.read_unsigned_byte1(position))
-
-    ###############################################
-
-    def repeat(self, method, count):
-        
-        sequence = []
-        
-        for i in xrange(count):
-            sequence.append(method())
-            
-        return sequence
 
 #####################################################################################################
 
@@ -240,13 +227,13 @@ class StandardStream(AbstractStream):
 
     def open(self):
 
-        pass
+        raise NotImplementedError
 
     ###############################################
 
     def close(self):
 
-        pass
+        raise NotImplementedError
     
     ###############################################
 
