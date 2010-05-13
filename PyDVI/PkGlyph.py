@@ -127,7 +127,7 @@ class PkGlyph(object):
         self.nybble_index = 0
         self.upper_nybble = True
 
-        glyph_bitmap = self.glyph_bitmap = np.zeros((self.height, self.width))
+        glyph_bitmap = self.glyph_bitmap = np.zeros((self.height, self.width), dtype = np.uint8)
 
         if self.dyn_f == 14: # get raster by bits
 

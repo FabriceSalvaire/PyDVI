@@ -89,7 +89,7 @@ class AbstractStream(object):
         Read n byte numbers from the optional position or the current position
         '''
 
-        return [ord(byte) for byte in self.read_bytes(number_of_bytes, position)]
+        return [ord(x) for x in self.read_bytes(number_of_bytes, position)]
 
     ###############################################
 

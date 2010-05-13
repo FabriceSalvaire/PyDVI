@@ -1,10 +1,17 @@
 -*- text-mode -*-
 
+ - font-viewer ft?, qt, ps
+ - dvi-viewer broken
+ - mktexpk auto
+ - test example: arg missing ...
+
 #################################################################################
 
 				      TODO
 
 #################################################################################
+
+ - Unicode (Python/Qt)
 
  - Test more math
 

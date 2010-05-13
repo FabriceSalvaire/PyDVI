@@ -2,8 +2,24 @@
 # -*- python -*-
 
 #####################################################################################################
+#
+# PyDVI - Python Library to Process DVI Stream
+# Copyright (C) 2009 Salvaire Fabrice
+#
+#####################################################################################################
 
-import string
+#####################################################################################################
+#
+# Audit
+# 
+#  - 23/01/2010 fabrice
+#    move to test?
+#    warn if no arg
+#
+#####################################################################################################
+
+#####################################################################################################
+
 import sys
 
 from optparse import OptionParser
@@ -46,7 +62,7 @@ if __name__ == "__main__":
     for family in font_database.applicationFontFamilies(font_id):
         print ' -', family
         for style in font_database.styles(family):
-            print '  -', style, string.join(map(str, font_database.pointSizes(family, style)), sep = ' / ')
+            print '  -', style, ' / '.join(map(str, font_database.pointSizes(family, style)))
             
     font = QtGui.QFont('Computer Modern', 10, QtGui.QFont.StyleNormal)
 

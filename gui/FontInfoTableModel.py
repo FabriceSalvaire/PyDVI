@@ -20,8 +20,11 @@ __ALL__ = ['FontInfoTableModel']
 
 #####################################################################################################
 
-from InfoTableModel import *
-from TeXUnit import *
+from PyDVI.PkFont import PkFont
+from PyDVI.TeXUnit import *
+from PyDVI.Type1Font import Type1Font
+
+from InfoTableModel import InfoTableModel
 
 #####################################################################################################
 
@@ -50,6 +53,14 @@ class FontInfoTableModel(InfoTableModel):
         self.fields = [
             'Font Name',
             'Font Type',
+            ]
+
+        self.values['Font Name'] = font.name
+        self.values['Font Type'] = font.font_type_string
+
+        if isinstance(font, PkFont):
+
+            self.fields += [
             'Comment',
             'Checksum',
             'Design Size',
@@ -61,18 +72,16 @@ class FontInfoTableModel(InfoTableModel):
             'Largest Character Code',
             ]
 
-        self.values['Font Name'] = font.name
-        self.values['Font Type'] = font.font_type_string
-        self.values['Comment'] = font.comment
-        self.values['Horizontal Resolution'] = format_dpi(font.horizontal_dpi)
-        self.values['Vertical Resolution'] = format_dpi(font.vertical_dpi)
-
-        self.values['Checksum'] = tfm.checksum
-        self.values['Design Size'] = '%.1f pt %.1f mm' % (tfm.design_font_size, pt2mm(tfm.design_font_size))
-        self.values['Character Coding Scheme'] = tfm.character_coding_scheme
-        self.values['Family'] = tfm.family
-        self.values['Smallest Character Code'] = tfm.smallest_character_code
-        self.values['Largest Character Code'] = tfm.largest_character_code
+            self.values['Comment'] = font.comment
+            self.values['Horizontal Resolution'] = format_dpi(font.horizontal_dpi)
+            self.values['Vertical Resolution'] = format_dpi(font.vertical_dpi)
+            
+            self.values['Checksum'] = tfm.checksum
+            self.values['Design Size'] = '%.1f pt %.1f mm' % (tfm.design_font_size, pt2mm(tfm.design_font_size))
+            self.values['Character Coding Scheme'] = tfm.character_coding_scheme
+            self.values['Family'] = tfm.family
+            self.values['Smallest Character Code'] = tfm.smallest_character_code
+            self.values['Largest Character Code'] = tfm.largest_character_code
 
         self.reset()
 

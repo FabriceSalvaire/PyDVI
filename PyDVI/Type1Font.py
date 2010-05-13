@@ -57,6 +57,9 @@ class FtGlyph(object):
 
         face = self.font.face
 
+        # The character widths and heights are specified in 1/64th of points. A point is a physical
+        # distance, equaling 1/72th of an inch.
+
         size *= 64
         face.setCharSize(size, size, resolution, resolution)
 
@@ -192,7 +195,7 @@ class Type1Font(Font):
     @staticmethod
     def hash_glyph(glyph_index, size, resolution):
 
-        return hex(glyph_index)[2:] + hex(size)[1:] + hex(resolution)[1:]
+        return hex(glyph_index)[2:] + hex(int(640*size))[1:] + hex(resolution)[1:]
 
     ###############################################
 

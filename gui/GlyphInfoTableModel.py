@@ -20,7 +20,8 @@ __ALL__ = ['GlyphInfoTableModel']
 
 #####################################################################################################
 
-from InfoTableModel import *
+from InfoTableModel import InfoTableModel
+
 from TeXUnit import *
 
 #####################################################################################################

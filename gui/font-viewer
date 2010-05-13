@@ -12,6 +12,7 @@
 #
 # Audit
 #
+#  - 23/01/2010 fabrice
 #
 #####################################################################################################
 
@@ -67,8 +68,7 @@ class Application(QtGui.QApplication):
 
     def process_program_options(self):
 
-        if self.opt.font_name is not None:
-            self.main_window.load_font()
+        pass
 
 #####################################################################################################
 #

@@ -30,6 +30,7 @@ from PyDVI.FontManager import *
 from PyDVI.PkFont import *
 from PyDVI.TeXUnit import *
 from PyDVI.Type1Font import *
+from PyDVI.Stream import FileStream
 
 from QtGlyph import *
 
@@ -222,11 +223,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def process_dvi_stream(self, dvi_file):
 
-        dvi_stream = open(dvi_file)
+        dvi_stream = FileStream(dvi_file)
 
         dvi_program = self.dvi_parser.process_stream(dvi_stream)
-
-        dvi_stream.close()
 
         dvi_program.print_summary()
 
