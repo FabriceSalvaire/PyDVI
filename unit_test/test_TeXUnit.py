@@ -6,6 +6,14 @@
 #####################################################################################################
 
 #####################################################################################################
+#
+# Audit
+#
+#  - 13/05/2010 fabrice
+#
+#####################################################################################################
+
+#####################################################################################################
 
 import unittest
 
@@ -23,14 +31,12 @@ class TestTeXUnit(unittest.TestCase):
         self.assertAlmostEqual(mm2in(in2mm(1)), 1)
 
         point_in_inch = 72.27
-
         self.assertAlmostEqual(pt2in(point_in_inch), 1)
         self.assertAlmostEqual(pt2mm(point_in_inch), in2mm(1))
 
         self.assertAlmostEqual(in2pt(pt2in(1)), 1)
 
         scaled_point_in_point = 2**16
-
         self.assertAlmostEqual(sp2pt(scaled_point_in_point), 1)
         self.assertAlmostEqual(sp2in(scaled_point_in_point), pt2in(1))
         self.assertAlmostEqual(sp2mm(scaled_point_in_point), pt2mm(1))

@@ -10,6 +10,7 @@
 # Audit
 #
 #  - 10/01/2010 fabrice
+#  - 13/05/2010 fabrice
 #
 #####################################################################################################
 
@@ -23,31 +24,24 @@ import subprocess
 
 #####################################################################################################
 
-def kpsewhich(filename, file_format = None):
+def kpsewhich(filename, file_format=None, options=None):
 
-    '''
-    Wrapper around kpsewhich program
-    '''
+    """Wrapper around kpsewhich program
+    """
 
     command = ['kpsewhich']
-
     if file_format is not None:
         command.append("--format='%s'" % (file_format))
-
+    if options is not None:
+        command.append(options)
     command.append(filename)
 
-    command_string = ' '.join(command)
-
-    pipe = subprocess.Popen(command_string, shell=True, stdout=subprocess.PIPE)
-        
+    shell_command = ' '.join(command)
+    pipe = subprocess.Popen(shell_command, shell=True, stdout=subprocess.PIPE)
     stdout = pipe.communicate()[0]
-
     path = stdout.rstrip()
 
-    if path:
-        return path
-    else:
-        return None
+    return path if path else None
 
 #####################################################################################################
 #

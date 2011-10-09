@@ -10,6 +10,7 @@
 # Audit
 #
 #  - 10/01/2010 fabrice
+#  - 13/05/2010 fabrice
 #
 #####################################################################################################
 
@@ -23,7 +24,7 @@ from Logging import print_card
 from TextFile import TextFile
 
 #####################################################################################################
-
+#
 # Example from /usr/share/texmf-texlive/fonts/enc/dvips/base/cork.enc
 #
 # /CorkEncoding [          % now 256 chars follow
@@ -32,12 +33,21 @@ from TextFile import TextFile
 #   ...
 #   /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /germandbls
 # ] def
+#
+#####################################################################################################
 
-class Encoding(TextFile):
+class Encoding(object):
+
+    """The Encoding class parse an encoding file and store the association between the index and the
+    glyph's name.
+    """
 
     ###############################################
 
     def __init__(self, filename):
+
+        """Create an Encoding instance.
+        """
 
         self.name = None
 
@@ -45,7 +55,10 @@ class Encoding(TextFile):
         self.glyph_names   = {} # Map glyph name  to glyph index
 
         try:
-            self.parse(filename)
+            text_file = TextFile(filename)
+            for line in text_file:
+                if self.__parse_line(line):
+                    break
         except:
             raise NameError('Bad encoding file')
 
@@ -61,36 +74,42 @@ class Encoding(TextFile):
         
     ###############################################
 
-    def parse_line(self, line):
+    def __parse_line(self, line):
 
         stop = False
 
         if self.name is None:
             # try
             braket_index = line.index('[')
-            self.parse_name(line[:braket_index])    
+            self.__parse_name(line[:braket_index])    
             line = line[braket_index +1:]
-
+            
         braket_index = line.find(']')
         if braket_index != -1: # mathch '] def'
             stop = True
             line = line[:braket_index]
 
-        self.parse_glyph_names(line)
-
+        self.__parse_glyph_names(line)
+        
         return stop
 
     ###############################################
 
-    def parse_name(self, left_line):
+    def __parse_name(self, line):
+
+        """Find '\CorkEncoding' at the left of the line
+        """
 
         # try
-        name_start_index = left_line.index('/')
-        self.name = left_line[name_start_index +1:].strip()
+        name_start_index = line.index('/')
+        self.name = line[name_start_index +1:].strip()
 
     ###############################################
 
-    def parse_glyph_names(self, line):
+    def __parse_glyph_names(self, line):
+
+        """Find glyph names in '/grave /acute /circumflex ...'
+        """
 
         for word in line.split('/'):
             word = word.strip()
@@ -101,12 +120,11 @@ class Encoding(TextFile):
 
     def print_summary(self):
 
-        message = '''
-Encoding %s
+        message = '''Encoding %s
 ''' % (self.name)
 
         for i in xrange(len(self.glyph_indexes)):
-            message += '%3i %s\n' % (i, self.glyph_indexes[i])
+            message += '%3i | %s\n' % (i, self.glyph_indexes[i])
 
         print_card(message)
 

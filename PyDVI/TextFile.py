@@ -10,6 +10,7 @@
 # Audit
 #
 #  - 09/01/2010 fabrice
+#  - 13/05/2010 fabrice
 #
 #####################################################################################################
 
@@ -19,41 +20,37 @@ __all__ = ['TextFile']
 
 #####################################################################################################
 
-from abc import ABCMeta, abstractmethod
-
-#####################################################################################################
-
 class TextFile():
 
-    __metaclass__ = ABCMeta
+    """The TextFile class permits to iterate over a file and to skip commented line using '%'
+    """
 
     ###############################################
 
-    def parse(self, filename):
+    def __init__(self, filename):
 
-        with open(filename, 'r') as f:
-            for line in f:
+        self.file = open(filename, 'r')
+
+    ###############################################
+
+    def __del__(self):
+
+        self.file.close()
+
+    ###############################################
+
+    def __iter__(self):
+
+        for line in self.file:
            
-                comment_start_index = line.find('%')
-                if comment_start_index != -1:
-                    line = line[:comment_start_index]
+            comment_start_index = line.find('%')
+            if comment_start_index != -1:
+                line = line[:comment_start_index]
 
-                line = line.strip()
+            line = line.strip()
                     
-                if line:
-                    if self.parse_line(line):
-                        break
-
-    ###############################################
-
-    @abstractmethod
-    def parse_line(self, line):
-
-        '''Parse the line
-        return True to stop
-        '''
-
-        pass
+            if line:
+                yield line
 
 #####################################################################################################
 #

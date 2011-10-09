@@ -18,6 +18,7 @@
 # Audit
 #
 #  - 00/01/2010 fabrice
+#  - 13/05/2010 fabrice License !
 #
 #####################################################################################################
 
@@ -124,13 +125,10 @@ class TexDaemon(DaemonSubprocess):
     def make_args(self):
 
         args = ('tex', '--ipc')
-
         args += ('--output-comment=""',) # Don't record time of run.
- 
         if self.format not in ('plain', 'tex'):
             fmt = '--fmt=' + self.format
             args += (fmt,)
-
         args += ('texput.tex',)
 
         return args
@@ -141,9 +139,9 @@ class TexDaemon(DaemonSubprocess):
  
         super(TexDaemon, self).start()
  
-        # We will now initialise TeX, and connect to file descriptors.  We need to do some
-        # low-level input/output, in order to manage long input strings.  Therefore, we use file
-        # descriptors rather than file objects.
+        # We will now initialise TeX, and connect to file descriptors.  We need to do some low-level
+        # input/output, in order to manage long input strings.  Therefore, we use file descriptors
+        # rather than file objects.
 
         working_directory = self.working_directory
         child = self.child 
@@ -182,8 +180,8 @@ class TexDaemon(DaemonSubprocess):
         "Return dictionary with dvi, log, logfile and err entries."
         
         # TeX will read the data, following by the 'done' command.  The 'done' command will cause
-        # TeX to write the 'done_str', which signals the end of the process.  It will also pause
-        # TeX for input.
+        # TeX to write the 'done_str', which signals the end of the process.  It will also pause TeX
+        # for input.
         
         result = self._process(input_string + self.done_code, self.done_string)
         
@@ -197,9 +195,9 @@ class TexDaemon(DaemonSubprocess):
  
     def _process(self, input_string, done_string):
  
-        # Write input_string, and read output, until we are done.  Then gather up the accumulated output,
-        # and return as a dictionary.  The input string might be long.  Later, we might allow
-        # writing to stdin, in response to errors.
+        # Write input_string, and read output, until we are done.  Then gather up the accumulated
+        # output, and return as a dictionary.  The input string might be long.  Later, we might
+        # allow writing to stdin, in response to errors.
  
         # Initialisation
         output_fds = self.output_fd_dict.values()

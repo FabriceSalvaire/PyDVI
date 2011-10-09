@@ -45,7 +45,8 @@ if __name__ == "__main__":
     if len(args) > 0:
         font_filename = args[0]
     else:
-        font_filename = None
+        print "Give a font name"
+        sys.exit(1)
 
     ###############################################
 

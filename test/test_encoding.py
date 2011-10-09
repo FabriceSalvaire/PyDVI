@@ -9,7 +9,8 @@
 #
 # Audit
 #
-#  - 10/1/2010 fabrice
+#  - 10/01/2010 fabrice
+#  - 13/05/2010 fabrice
 #
 #####################################################################################################
 
@@ -33,7 +34,7 @@ parser = OptionParser(usage)
 opt, args = parser.parse_args()
 
 if len(args) != 1:
-    parser.error("incorrect number of arguments")
+    parser.error("Give a TeX encoding, e.g. cork")
 
 encoding = args[0]
 
@@ -46,7 +47,6 @@ if encoding_file is None:
 print 'Read %s encoding file' % (encoding_file)
 
 encoding = Encoding(encoding_file)
-  
 encoding.print_summary()
 
 #####################################################################################################

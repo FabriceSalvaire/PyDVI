@@ -44,7 +44,11 @@ class Font(object):
 
         relative_filename = self.relative_filename()
 
-        self.filename = kpsewhich(relative_filename)
+        if self.extension == 'pk':
+            kpsewhich_options='-mktex=pk'
+        else:
+            kpsewhich_options = None
+        self.filename = kpsewhich(relative_filename, options=kpsewhich_options)
 
         if self.filename is None:
             raise NameError("Font file %s not found" % (relative_filename))

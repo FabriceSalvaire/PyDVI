@@ -10,6 +10,7 @@
 # Audit
 #
 #  - 10/01/2010 fabrice
+#  - 13/05/2010 fabrice
 #
 #####################################################################################################
 
@@ -31,6 +32,18 @@ def format_card(text,
                newline=False,
                border=False,
                bottom_rule=True):
+
+    """Format a card with some text.
+
+    Parameters
+    ----------
+    centered : center the text
+    width : width of the card
+    rule_char : character used to draw the rule
+    newline : insert a new line
+    border : draw a left vertical rule
+    bottom_rule : draw a bottom horizontal rule
+    """
 
     formated_text = ''
 

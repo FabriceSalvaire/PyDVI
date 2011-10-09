@@ -10,6 +10,7 @@
 # Audit
 #
 #  - 16/01/2010 fabrice
+#  - 13/05/2010 fabrice
 #
 #####################################################################################################
 
@@ -52,9 +53,7 @@ class ExplicitEnumMetaClass(ReadOnlyMetaClass):
 def EnumFactory(enum_name, enum_tuple):
 
     dict = {}
-
     dict['_size'] = len(enum_tuple)
-
     for value, name in enumerate(enum_tuple):
         dict[name] = value
 
@@ -65,9 +64,7 @@ def EnumFactory(enum_name, enum_tuple):
 def ExplicitEnumFactory(enum_name, enum_dict):
 
     dict = {}
-
     dict['constants'] = enum_dict.values()
-
     for name, value in enum_dict.items():
         dict[name] = value
 

@@ -111,8 +111,8 @@ class QtDviMachine(DviMachine):
 
         x_mm, y_mm = map(sp2mm, (x, y))
 
-        box_width  = sp2mm(char_bounding_box.x.length_float())
-        box_height = sp2mm(char_bounding_box.y.length_float())
+        box_width  = sp2mm(char_bounding_box.x.length())
+        box_height = sp2mm(char_bounding_box.y.length())
 
         red_pen = QtGui.QPen(QtCore.Qt.red)
 
@@ -272,8 +272,8 @@ class MainWindow(QtGui.QMainWindow):
          text_width, text_height) = map(sp2mm,
                                         (page_bounding_box.x.inf,
                                          page_bounding_box.y.inf,
-                                         page_bounding_box.x.length_float(),
-                                         page_bounding_box.y.length_float(),
+                                         page_bounding_box.x.length(),
+                                         page_bounding_box.y.length(),
                                          ))
 
         pen = QtGui.QPen(QtCore.Qt.red)

@@ -10,6 +10,7 @@
 # Audit
 #
 #  - 16/01/2010 fabrice
+#  - 13/05/2010 fabrice
 #
 #####################################################################################################
 
@@ -71,55 +72,43 @@ sp_in_pt_f = float(scaled_point_in_point)
 #####################################################################################################
 
 def mm2in(x):
-
     return x * inch_in_mm_f
 
 def in2mm(x):
-
     return x * mm_in_inch_f
 
 def dpi2mm(x):
-
     return mm_in_inch_f / x
 
 #####################################################################################################
 
 def in2pt(x):
-
     return x * point_in_inch_f
 
 def pt2in(x):
-
     return x * inch_in_point_f
 
 def pt2mm(x):
-
     return x * mm_in_point_f
 
 #####################################################################################################
 
 def sp2pt(x):
-
     return x * pt_in_sp_f
 
 def sp2in(x):
-
     return pt2in(sp2pt(x))
 
 def sp2mm(x):
-
     return pt2mm(sp2pt(x))
 
 def sp2dpi(x):
-
     return in2pt(sp2pt(x))
 
 def pt2sp(x):
-
     return x * sp_in_pt_f
 
 def in2sp(x):
-
     return pt2sp(in2pt(x))
 
 #####################################################################################################

@@ -18,6 +18,7 @@
 # Audit
 # 
 #  - 09/01/2010 fabrice
+#  - 13/05/2010 fabrice license !
 #
 #####################################################################################################
 
@@ -37,13 +38,13 @@ from subprocess import Popen, PIPE
 
 def make_nonblocking(fd):
 
-    '''Makes a file descriptor non-blocking.
+    """Makes a file descriptor non-blocking.
 
     When a non-blocking file is read, the read does not wait for end-of-file.  Instead, the read can
     return just as soon as there is nothing left to read.  This might be because a buffer is empty.
 
     See Python Cookbook, Recipe 6.6
-    '''
+    """
 
     flags = fcntl.fcntl(fd, fcntl.F_GETFL)
     flags |= os.O_NONBLOCK
@@ -83,9 +84,7 @@ class DaemonSubprocess(object):
             self.stop()
 
         finally:
-
             if self.working_directory is not None:
-
                 for filename in os.listdir(self.working_directory):
                     os.remove(os.path.join(self.working_directory, filename))
 

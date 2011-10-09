@@ -9,7 +9,8 @@
 #
 # Audit
 #
-#  - 10/1/2010 fabrice
+#  - 10/01/2010 fabrice
+#  - 13/05/2010 fabrice
 #
 #####################################################################################################
 
@@ -23,22 +24,22 @@ from RevisionVersion import *
 
 #####################################################################################################
 
-class TestTeXUnit(unittest.TestCase):
+class TestRevisionVersion(unittest.TestCase):
 
     def test(self):
 
-        version_tuple = RevisionVersion((1,2,3))
+        version_tuple = (1,2,3)
+        version_string = 'v' + '.'.join([str(x) for x in version_tuple])
 
-        version_string = RevisionVersion('v1.2.3')
+        version = RevisionVersion(version_tuple)
+        self.assertEqual(version, RevisionVersion(version_string))
+        self.assertEqual(str(version), version_string)
 
-        self.assertEqual(version_tuple, version_string)
-
-        version_tuple_2 = RevisionVersion((0,1,2))
-
-        self.assertTrue(version_tuple_2 < version_tuple)
-        self.assertTrue(version_tuple_2 <= version_tuple)
-        self.assertFalse(version_tuple_2 > version_tuple)
-        self.assertFalse(version_tuple_2 >= version_tuple)
+        # Only test >=
+        self.assertTrue(RevisionVersion((1,2,3)) >= version)
+        self.assertTrue(RevisionVersion((1,2,4)) >= version)
+        self.assertTrue(RevisionVersion((1,3,4)) >= version)
+        self.assertTrue(RevisionVersion((2,3,4)) >= version)
 
 #####################################################################################################
 

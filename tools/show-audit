@@ -59,11 +59,18 @@ if not os.path.exists(filename):
     log_and_exit(message="File don't exists",
                  exit_value=1)
 
-copyrighted = False
+copyrighted = False # not used
+audit_line = None
 with open(filename, 'r') as f:
     for line in f:
-        if re.search('\d+/\d+/\d+', line):
-            print line[4:15], filename
+        match = re.match('.* (\d+)/(\d+)/(\d+) ', line)
+        if match is not None:
+            d, m, y = [int(x) for x in match.groups()]
+            date = '%4u/%02u/%02u' % (y, m, d)
+            audit_line = ' '.join((date, filename))
+
+if audit_line:
+    print audit_line
 
 sys.exit(0)
 

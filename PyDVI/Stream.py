@@ -9,7 +9,8 @@
 #
 # Audit
 #
-#  - 17/10/2009 fabrice
+#  - 17/01/2010 fabrice
+#  - 13/05/2010 fabrice
 #
 #####################################################################################################
 
@@ -30,22 +31,20 @@ FIX_WORD_SCALE = 1./2**20
 
 class AbstractStream(object):
 
-    '''
-    Abstract class to read DVI, PK, TFM, VF stream.
+    """ Abstract class to read DVI, PK, TFM, VF stream.
 
-    Following methods are abstract:
+    These methods are abstract:
      - read
      - seek
      - tell
-    '''
+    """
 
     ###############################################
 
     def read(self, number_of_bytes):
 
-        '''
-        Read n bytes from the current position
-        '''
+        """Read n bytes from the current position
+        """
 
         raise NotImplementedError
 
@@ -53,9 +52,8 @@ class AbstractStream(object):
 
     def seek(self, postion, whence):
 
-        '''
-        Seek to position
-        '''
+        """Seek to position
+        """
 
         raise NotImplementedError
 
@@ -63,9 +61,8 @@ class AbstractStream(object):
 
     def tell(self):
 
-        '''
-        Tell the current position
-        '''
+        """Tell the current position
+        """
 
         raise NotImplementedError
 
@@ -73,9 +70,8 @@ class AbstractStream(object):
 
     def read_bytes(self, number_of_bytes, position=None):
 
-        '''
-        Read n number of bytes from the optional position or the current position
-        '''
+        """Read n number of bytes from the optional position or the current position
+        """
 
         if position is not None:
             self.seek(position)
@@ -85,9 +81,9 @@ class AbstractStream(object):
     ###############################################
 
     def read_byte_numbers(self, number_of_bytes, position=None):
-        '''
-        Read n byte numbers from the optional position or the current position
-        '''
+
+        """Read n byte numbers from the optional position or the current position
+        """
 
         return [ord(x) for x in self.read_bytes(number_of_bytes, position)]
 
@@ -95,9 +91,8 @@ class AbstractStream(object):
 
     def read_three_byte_numbers(self, position=None):
 
-        '''
-        Read three byte numbers from the optional position or the current position
-        '''
+        """Read three byte numbers from the optional position or the current position
+        """
 
         return self.read_byte_numbers(3, position)
 
@@ -105,9 +100,8 @@ class AbstractStream(object):
 
     def read_four_byte_numbers(self, position=None):
 
-        '''
-        Read four byte numbers from the optional position or the current position
-        '''
+        """Read four byte numbers from the optional position or the current position
+        """
 
         return self.read_byte_numbers(4, position)
 
@@ -115,9 +109,8 @@ class AbstractStream(object):
 
     def read_big_endian_number(self, number_of_bytes, signed=False, position=None):
 
-        '''
-        Read a number coded in big endian format from the DVI input stream
-        '''
+        """Read a number coded in big endian format from the DVI input stream
+        """
 
         # This code can be unrolled
 
@@ -175,9 +168,8 @@ class AbstractStream(object):
     @staticmethod
     def to_fix_word(x):
         
-        '''
-        Convert x to a fix word
-        '''
+        """Convert x to a fix word
+        """
 
         # A fix word is a signed quantity, with the two's complement of the entire word used to
         # represent negation.  Of the 32 bits in fix word, exactly 12 are to the left of the binary
@@ -189,9 +181,8 @@ class AbstractStream(object):
 
     def read_fix_word(self, position=None):
         
-        '''
-        Read a fix word from the optional position or the current position
-        '''
+        """Read a fix word from the optional position or the current position
+        """
 
         return self.to_fix_word(self.read_signed_byte4(position))
 
@@ -199,9 +190,8 @@ class AbstractStream(object):
 
     def read_bcpl(self, position=None):
         
-        '''
-        Read a BCPL string from the optional position or the current position
-        '''
+        """Read a BCPL string from the optional position or the current position
+        """
 
         return self.read_bytes(self.read_unsigned_byte1(position))
 
@@ -209,19 +199,17 @@ class AbstractStream(object):
 
 class StandardStream(AbstractStream):
 
-    '''
-    Abstract stream class
+    """Abstract stream class
 
     self.stream must be defined in __init__
-    '''
+    """
 
     ###############################################
 
     def read(self, number_of_bytes):
 
-        '''
-        Read n bytes from the current position
-        '''
+        """Read n bytes from the current position
+        """
 
         # print 'Stream.read %u bytes at %u' % (number_of_bytes, self.tell())
 
@@ -233,11 +221,10 @@ class StandardStream(AbstractStream):
 
     ###############################################
 
-    def seek(self, postion, whence = os.SEEK_SET):
+    def seek(self, postion, whence=os.SEEK_SET):
 
-        '''
-        Seek to position
-        '''
+        """Seek to position
+        """
 
         self.stream.seek(postion, whence)
 
@@ -245,9 +232,8 @@ class StandardStream(AbstractStream):
 
     def tell(self):
 
-        '''
-        Tell the current position
-        '''
+        """Tell the current position
+        """
 
         return self.stream.tell()
 
@@ -260,9 +246,7 @@ class FileStream(StandardStream):
     def __init__(self, filename):
 
         self.file = open(filename, 'rb')
-
-        self.stream = mmap.mmap(self.file.fileno(), length = 0, access = mmap.ACCESS_READ)
-
+        self.stream = mmap.mmap(self.file.fileno(), length=0, access=mmap.ACCESS_READ)
         self.seek(0)
 
     ###############################################
