@@ -1,6 +1,8 @@
-gui/ui/*_ui.py
-tex_samples/*.aux
-tex_samples/*.dvi
-tex_samples/*.log
-tex_samples/*.pdf
+auto
 gui/profile.txt
+gui/ui/*_ui.py
+tex-samples/*.aux
+tex-samples/*.dvi
+tex-samples/*.log
+tex-samples/*.pdf
+doc/sphinx/build

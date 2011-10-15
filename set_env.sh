@@ -4,7 +4,7 @@
 #
 #####################################################################################################
 
-export PYTHONPATH=$PWD/gui:$PWD/gui/ui:$PWD/etc:$PWD/PyDVI:$PWD:$PYTHONPATH
+export PYTHONPATH=$PWD/gui:$PWD/gui/ui:$PWD/etc:$PWD/PyDVI:$PWD:$PWD/../local:$PYTHONPATH
 
 #####################################################################################################
 #

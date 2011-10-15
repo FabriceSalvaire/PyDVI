@@ -10,13 +10,39 @@
 
 #####################################################################################################
 #
-# Audit
+#                                              Audit
 #
-#  - 16/01/2010 fabrice
+# - 11/05/2011 Fabrice
+#    x
 #
 #####################################################################################################
 
 #####################################################################################################
+#
+# ./replace --root-tree-path=~/dev/gvlab
+#
+#####################################################################################################
+
+#####################################################################################################
+#
+# Fixme:
+#
+# Traceback (most recent call last):
+#   File "/home/gv/sys/sl52/fabrice/dev/gvlab/v0.5.x/tools/replace", line 96, in <module>
+#     retcode = subprocess.call(['./tools/perl-grep', opt.pattern, absolut_file])
+#   File "/opt/gv/stow/python-2.6/lib/python2.6/subprocess.py", line 480, in call
+#     return Popen(*popenargs, **kwargs).wait()
+#   File "/opt/gv/stow/python-2.6/lib/python2.6/subprocess.py", line 633, in __init__
+#     errread, errwrite)
+#   File "/opt/gv/stow/python-2.6/lib/python2.6/subprocess.py", line 1139, in _execute_child
+#     raise child_exception
+# OSError: [Errno 2] No such file or directory
+# 
+#####################################################################################################
+
+#####################################################################################################
+
+from __future__ import with_statement
 
 import os
 import re
@@ -27,9 +53,18 @@ from optparse import OptionParser
 
 #####################################################################################################
 
-default_exclude = '\.bzr|\.pyc$|~$'
+default_excluded_extension = ','.join(('~',
+                                       '#',
+                                       '.diff',
+                                       '.pdf',
+                                       '.pyc',
+                                       '.tex',
+                                       '.xml',
+                                       ))
 
-#####################################################################################################
+default_exclusion_pattern = '\.bzr'
+
+#####################################################################################################x
 #
 # Options
 #
@@ -39,61 +74,90 @@ usage = 'usage: %prog [options]'
 parser = OptionParser(usage)
 
 parser.add_option('--root-tree-path',
-                   dest = 'root_tree_path',
-                   type = 'string', default = '.',
-                   help = 'Root Path')
+                   dest='root_tree_path',
+                   type='string', default='.',
+                   help='root path')
 
 parser.add_option('--exclude',
-                   dest = 'exclude',
-                   type = 'string', default = default_exclude,
-                   help = 'Exclude regexp [%s]' % (default_exclude))
+                   dest='exclusion_pattern',
+                   type='string', default=default_exclusion_pattern,
+                   help='exclusion regexp [%s]' % (default_exclusion_pattern))
+
+parser.add_option('--exclude-extension',
+                   dest='excluded_extension',
+                   type='string', default=default_excluded_extension,
+                   help='exclude extension [%s]' % (default_excluded_extension))
 
 parser.add_option('--pattern',
-                   dest = 'pattern',
-                   type = 'string', default = None,
-                   help = 'pattern')
+                   dest='pattern',
+                   type='string', default=None,
+                   help='pattern')
 
 parser.add_option('--new-pattern',
-                   dest = 'new_pattern',
-                   type = 'string', default = None,
-                   help = 'New pattern')
+                   dest='new_pattern',
+                   type='string', default=None,
+                   help='new pattern')
 
 opt, args = parser.parse_args()
 
 #####################################################################################################
 
-root_tree_path = os.path.expanduser(opt.root_tree_path)
-root_tree_path = os.path.abspath(root_tree_path)
+def to_absolute_path(path):
+
+    return os.path.abspath(os.path.expanduser(path))
+
+#####################################################################################################
+
+program_path = os.path.dirname(os.path.abspath(__file__))
+perl_grep = os.path.join(program_path, 'perl-grep')
+
+root_tree_path = to_absolute_path(opt.root_tree_path)
 
 if opt.pattern is None:
     sys.exit(1)
-else:
-    pattern_re = re.compile(opt.pattern)
 
-if opt.exclude is not None:
-    exclude_re = re.compile(opt.exclude)
+excluded_extension = opt.excluded_extension.split(',')
+
+if opt.exclusion_pattern is not None:
+    exclude_re = re.compile(opt.exclusion_pattern)
 else:
     exclude_re = None
 
-if opt.new_pattern is not None:
-    new_pattern_re = re.compile(opt.new_pattern)
-else:
-    new_pattern_re = None
+#####################################################################################################
 
-for root, dirs, filenames in os.walk(root_tree_path):
-    for filename in filenames:
+def process_file(absolut_file_name):
+
+    return_code = subprocess.call([perl_grep, opt.pattern, absolut_file_name])
+    if return_code == 0:
+        print absolut_file_name
         
-        absolut_filename = os.path.join(root, filename)
+        if opt.new_pattern is not None:
+            subprocess.call(['sed',
+                             '--in-place=~',
+                             's/%s/%s/g' % (opt.pattern, opt.new_pattern),
+                             absolut_file_name,
+                             ])
 
-        if exclude_re is None or exclude_re.search(absolut_filename) is None:
+#####################################################################################################
 
-            retcode = subprocess.call(['grep', '--quiet', opt.pattern, absolut_filename])
-            if retcode == 0:
-                print absolut_filename
+for root, dirs, files in os.walk(root_tree_path):
+    for file_name in files:
 
-                if opt.new_pattern is not None:
-                    script = 's/%s/%s/g' % (opt.pattern, opt.new_pattern)
-                    subprocess.call(['sed', '--in-place=~', script, absolut_filename])
+        absolut_file_name = os.path.join(root, file_name)
+        
+        skipped = False
+        for extension in excluded_extension:
+            if file_name.endswith(extension):
+                # print 'Exclude for extension', extension, file_name
+                skipped = True
+                break
+
+        if not skipped and exclude_re.search(absolut_file_name) is not None:
+            # print 'Exclude for regexp', file_name
+            skipped = True
+
+        if not skipped:
+            process_file(absolut_file_name)
 
 sys.exit(0)
 
