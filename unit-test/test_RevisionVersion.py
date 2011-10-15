@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 13/05/2010 fabrice
+#  - 09/10/2011 fabrice
 #
 #####################################################################################################
 
@@ -19,27 +19,26 @@ import unittest
 
 #####################################################################################################
 
-from PyDVI.TeXUnit import *
+from PyDVI.Tools.RevisionVersion import *
 
 #####################################################################################################
 
-class TestTeXUnit(unittest.TestCase):
+class TestRevisionVersion(unittest.TestCase):
 
     def test(self):
 
-        self.assertAlmostEqual(in2mm(10), 254)
-        self.assertAlmostEqual(mm2in(in2mm(1)), 1)
+        version_tuple = (1,2,3)
+        version_string = 'v' + '.'.join([str(x) for x in version_tuple])
 
-        point_in_inch = 72.27
-        self.assertAlmostEqual(pt2in(point_in_inch), 1)
-        self.assertAlmostEqual(pt2mm(point_in_inch), in2mm(1))
+        version = RevisionVersion(version_tuple)
+        self.assertEqual(version, RevisionVersion(version_string))
+        self.assertEqual(str(version), version_string)
 
-        self.assertAlmostEqual(in2pt(pt2in(1)), 1)
-
-        scaled_point_in_point = 2**16
-        self.assertAlmostEqual(sp2pt(scaled_point_in_point), 1)
-        self.assertAlmostEqual(sp2in(scaled_point_in_point), pt2in(1))
-        self.assertAlmostEqual(sp2mm(scaled_point_in_point), pt2mm(1))
+        # Only test >=
+        self.assertTrue(RevisionVersion((1,2,3)) >= version)
+        self.assertTrue(RevisionVersion((1,2,4)) >= version)
+        self.assertTrue(RevisionVersion((1,3,4)) >= version)
+        self.assertTrue(RevisionVersion((2,3,4)) >= version)
 
 #####################################################################################################
 

@@ -9,10 +9,29 @@
 #
 # Audit
 #
-#  - 10/01/2010 fabrice
-#  - 13/05/2010 fabrice
+#  - 10/10/2011 Fabrice
 #
 #####################################################################################################
+
+"""
+This module handles TeX encoding file.
+
+An encoding file map the glyph index with its symbolic name. It uses the ".enc" extension. For
+example, the content of :file:"cork.enc" is::
+
+  /CorkEncoding [ % now 256 chars follow
+  % 0x00
+    /grave /acute /circumflex /tilde /dieresis /hungarumlaut /ring /caron
+    /breve /macron /dotaccent /cedilla
+    /ogonek /quotesinglbase /guilsinglleft /guilsinglright
+  ...
+  % 0xF0
+    /eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /oe
+    /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /germandbls
+  ] def
+
+The percent character is used for comment as for TeX.
+"""
 
 #####################################################################################################
 
@@ -20,34 +39,19 @@ __all__ = ['Encoding']
 
 #####################################################################################################
 
-from Logging import print_card
-from TextFile import TextFile
+from Tools.Logging import print_card
+from Tools.TexCommentedFile import TexCommentedFile
 
-#####################################################################################################
-#
-# Example from /usr/share/texmf-texlive/fonts/enc/dvips/base/cork.enc
-#
-# /CorkEncoding [          % now 256 chars follow
-# % 0x00
-#   /grave /acute /circumflex /tilde /dieresis /hungarumlaut /ring /caron
-#   ...
-#   /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /germandbls
-# ] def
-#
 #####################################################################################################
 
 class Encoding(object):
 
-    """The Encoding class parse an encoding file and store the association between the index and the
-    glyph's name.
+    """Parse an encoding file and store the association between the index and the glyph's name.
     """
 
     ###############################################
 
     def __init__(self, filename):
-
-        """Create an Encoding instance.
-        """
 
         self.name = None
 
@@ -55,10 +59,12 @@ class Encoding(object):
         self.glyph_names   = {} # Map glyph name  to glyph index
 
         try:
-            text_file = TextFile(filename)
-            for line in text_file:
-                if self.__parse_line(line):
-                    break
+            with TexCommentedFile(filename) as encoding_file:
+                content = encoding_file.concatenate_lines()
+                open_braket_index = content.index('[')
+                close_braket_index = content.index(']')
+                self.__parse_name(content[:open_braket_index])
+                self.__parse_glyph_names(content[open_braket_index+1:close_braket_index])
         except:
             raise NameError('Bad encoding file')
 
@@ -71,33 +77,12 @@ class Encoding(object):
     def __len__(self):
 
         return len(self.glyph_indexes)        
-        
-    ###############################################
-
-    def __parse_line(self, line):
-
-        stop = False
-
-        if self.name is None:
-            # try
-            braket_index = line.index('[')
-            self.__parse_name(line[:braket_index])    
-            line = line[braket_index +1:]
-            
-        braket_index = line.find(']')
-        if braket_index != -1: # mathch '] def'
-            stop = True
-            line = line[:braket_index]
-
-        self.__parse_glyph_names(line)
-        
-        return stop
 
     ###############################################
 
     def __parse_name(self, line):
 
-        """Find '\CorkEncoding' at the left of the line
+        """Find '/CorkEncoding' at the left of the line
         """
 
         # try
@@ -120,9 +105,7 @@ class Encoding(object):
 
     def print_summary(self):
 
-        message = '''Encoding %s
-''' % (self.name)
-
+        message = 'Encoding %s\n' % (self.name)
         for i in xrange(len(self.glyph_indexes)):
             message += '%3i | %s\n' % (i, self.glyph_indexes[i])
 

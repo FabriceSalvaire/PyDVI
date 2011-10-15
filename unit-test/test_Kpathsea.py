@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 13/05/2010 fabrice
+#  - 09/10/2011 fabrice
 #
 #####################################################################################################
 
@@ -28,7 +28,7 @@ class TestKpathsea(unittest.TestCase):
     def test(self):
 
         filename = Kpathsea.kpsewhich('cmr10', file_format='tfm')
-        print 'kpsewhich cmr10.tfm found', filename
+        print 'kpsewhich found', filename
         self.assertNotEqual(filename, None)
 
 #####################################################################################################

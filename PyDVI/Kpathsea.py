@@ -9,10 +9,13 @@
 #
 # Audit
 #
-#  - 10/01/2010 fabrice
-#  - 13/05/2010 fabrice
+#  - 09/10/2011 Fabrice
 #
 #####################################################################################################
+
+"""
+This modules provides wrappers for the **Kpathsea** library.
+"""
 
 #####################################################################################################
 
@@ -26,7 +29,17 @@ import subprocess
 
 def kpsewhich(filename, file_format=None, options=None):
 
-    """Wrapper around kpsewhich program
+    """Wrapper around *kpsewhich* program
+
+    *file_format*
+      used to specify the file format, see *kpsewhich* help for the file format list
+
+    *options*
+      use it to give additional option to *kpsewhich*
+
+    Examples::
+
+       filename = kpsewhich('cmr10', file_format='tfm')
     """
 
     command = ['kpsewhich']

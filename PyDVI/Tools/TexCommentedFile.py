@@ -9,48 +9,49 @@
 #
 # Audit
 #
-#  - 09/01/2010 fabrice
-#  - 13/05/2010 fabrice
+#  - 10/10/2011 fabrice
 #
 #####################################################################################################
 
 #####################################################################################################
 
-__all__ = ['TextFile']
+__all__ = ['TexCommentedFile']
 
 #####################################################################################################
 
-class TextFile():
+class TexCommentedFile(file):
 
-    """The TextFile class permits to iterate over a file and to skip commented line using '%'
+    """The TexCommentedFile class permits to iterate over a text file and to skip commented line by '%'
     """
 
     ###############################################
 
     def __init__(self, filename):
 
-        self.file = open(filename, 'r')
-
-    ###############################################
-
-    def __del__(self):
-
-        self.file.close()
+        super(TexCommentedFile, self).__init__(filename, mode='r')
 
     ###############################################
 
     def __iter__(self):
 
-        for line in self.file:
-           
+        while True:
+            line = self.readline()
+            if not line:
+                raise StopIteration()
             comment_start_index = line.find('%')
             if comment_start_index != -1:
                 line = line[:comment_start_index]
-
             line = line.strip()
-                    
             if line:
                 yield line
+
+    ###############################################
+
+    def concatenate_lines(self):
+
+        """Concatenate the lines and return the corresponding string"""
+
+        return ''.join(self)
 
 #####################################################################################################
 #

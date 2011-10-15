@@ -31,19 +31,20 @@ FIX_WORD_SCALE = 1./2**20
 
 class AbstractStream(object):
 
-    """ Abstract class to read DVI, PK, TFM, VF stream.
+    """ Abstract class to read DVI, PK, TFM and VF streams.
 
     These methods are abstract:
-     - read
-     - seek
-     - tell
+
+     * read
+     * seek
+     * tell
     """
 
     ###############################################
 
     def read(self, number_of_bytes):
 
-        """Read n bytes from the current position
+        """Read n bytes from the current position.
         """
 
         raise NotImplementedError
@@ -52,7 +53,7 @@ class AbstractStream(object):
 
     def seek(self, postion, whence):
 
-        """Seek to position
+        """Seek to position.
         """
 
         raise NotImplementedError
@@ -61,7 +62,7 @@ class AbstractStream(object):
 
     def tell(self):
 
-        """Tell the current position
+        """Tell the current position.
         """
 
         raise NotImplementedError
@@ -70,7 +71,7 @@ class AbstractStream(object):
 
     def read_bytes(self, number_of_bytes, position=None):
 
-        """Read n number of bytes from the optional position or the current position
+        """Read n bytes from the optional position or the current position.
         """
 
         if position is not None:
@@ -82,7 +83,7 @@ class AbstractStream(object):
 
     def read_byte_numbers(self, number_of_bytes, position=None):
 
-        """Read n byte numbers from the optional position or the current position
+        """Read n byte numbers from the optional position or the current position.
         """
 
         return [ord(x) for x in self.read_bytes(number_of_bytes, position)]
@@ -91,7 +92,7 @@ class AbstractStream(object):
 
     def read_three_byte_numbers(self, position=None):
 
-        """Read three byte numbers from the optional position or the current position
+        """Read three byte numbers from the optional position or the current position.
         """
 
         return self.read_byte_numbers(3, position)
@@ -100,7 +101,7 @@ class AbstractStream(object):
 
     def read_four_byte_numbers(self, position=None):
 
-        """Read four byte numbers from the optional position or the current position
+        """Read four byte numbers from the optional position or the current position.
         """
 
         return self.read_byte_numbers(4, position)
@@ -109,7 +110,7 @@ class AbstractStream(object):
 
     def read_big_endian_number(self, number_of_bytes, signed=False, position=None):
 
-        """Read a number coded in big endian format from the DVI input stream
+        """Read a number encoded in big endian format.
         """
 
         # This code can be unrolled

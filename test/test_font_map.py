@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 13/05/2010 fabrice
+#  - 11/10/2011 fabrice
 #
 #####################################################################################################
 
@@ -19,14 +19,14 @@ import sys
 
 #####################################################################################################
 
-from FontMap import *
-from Kpathsea import kpsewhich
+from PyDVI.FontMap import *
+from PyDVI.Kpathsea import kpsewhich
 
 #####################################################################################################
 
 from optparse import OptionParser
 
-usage = 'usage: %prog font_name'
+usage = 'usage: %prog font_map'
 
 parser = OptionParser(usage)
 
@@ -45,7 +45,7 @@ if font_map_file is None:
 
 font_map = FontMap(font_map, filename=font_map_file)
   
-# font_map.print_summary()
+font_map.print_summary()
 
 print 'Look-up cmr10'
 cmr10_font_map = font_map['cmr10']

@@ -9,8 +9,7 @@
 #
 # Audit
 #
-#  - 10/01/2010 fabrice
-#  - 13/05/2010 fabrice
+#  - 09/10/2011 Fabrice
 #
 #####################################################################################################
 
@@ -26,54 +25,54 @@ import re
 
 class RevisionVersion(object):
 
-    """The RevisionVersion class permits to manage revision version of the form
-    v(major).(minor).(revision).
+    """The RevisionVersion class is used to manage revision version of the form
+    v<MAJOR>.<MINOR>.<REVISION>.
     """
 
-    # To compare version, we assume version < scale
-    scale = 10**3
+    # To compare version, we assume the number are less than scale
+    scale = 10**6
 
     ###############################################
 
     def __init__(self, version):
 
-        """Create new RevisionVersion instance.
-        
-        Parameters
-        ----------
-        version : string or tuple of integers
+        """        
+        *version*
+          could be a version string or a sequence of three integers 
 
-        Examples
-        --------
-        >>> RevisionVersion('v0.1.2')
-        >>> RevisionVersion((0,1,2))
+        Examples::
+
+          RevisionVersion('v0.1.2')
+          RevisionVersion((0,1,2))
+          RevisionVersion([0,1,2])
+          
+        Instances can be compared using operator: ``==``, ``<``, ``>``, ``<=``, ``>=``
+
+        A RevisionVersion can be formated using ``str`` function.
         """
 
         if isinstance(version, str):
             version_string_pattern = 'v' + '\.'.join(['([0-9]+)']*3)
             match = re.match(version_string_pattern, version)
             if match is not None:
-                (self.major, self.minor, self.revision) = [int(x) for x in match.groups()]
+                self.major, self.minor, self.revision = [int(x) for x in match.groups()]
             else:
                 raise ValueError('Bad version string %s' % (version))
         
-        elif isinstance(version, tuple):
-            for x in version:
-                if ((not isinstance(x, int)) or x < 0):
-                    raise ValueError('parameter must be positive integer')
-            (self.major, self.minor, self.revision) = version
-
         else:
-            raise ValueError('parameter must be a string or a tuple of integers')
+            self.major, self.minor, self.revision = [int(x) for x in version[:3]]
 
-        # Check the scale
+        # Check the values
         for x in self.major, self.minor, self.revision:
-            if x >= self.scale:
-                raise ValueError('Version %s must be less than %u' % (str(self), self.scale))
-
+            if x < 0 or x >= self.scale:
+                raise ValueError('For version %s, %u must be in the range [0,%u[' %
+                                 (str(self), x, self.scale))
+            
     ###############################################
 
     def __int__(self):
+
+        """Compute an integer from the revision numbering"""
 
         return (self.major * self.scale + self.minor) * self.scale + self.revision
 
@@ -81,11 +80,15 @@ class RevisionVersion(object):
 
     def __eq__(a, b):
 
+        """Test if Va == Vb"""
+
         return a.major == b.major and a.minor == b.minor and a.revision == b.revision 
 
     ###############################################
 
     def __ge__(a, b):
+
+        """Test if Va >= Vb"""
 
         return int(a) >= int(b)
 
@@ -93,11 +96,15 @@ class RevisionVersion(object):
 
     def __gt__(a, b):
 
+        """Test if Va > Vb"""
+
         return int(a) > int(b)
 
     ###############################################
 
     def __le__(a, b):
+
+        """Test if Va <= Vb"""
 
         return int(a) <= int(b)
 
@@ -105,21 +112,17 @@ class RevisionVersion(object):
 
     def __lt__(a, b):
 
+        """Test if Va < Vb"""
+
         return int(a) < int(b)
             
     ###############################################
 
     def __str__(self):
 
+        """Format the version as vx.y.z"""
+
         return 'v%u.%u.%u' % (self.major, self.minor, self.revision)
-
-   ###############################################
-
-    # Fixme: useful?
-
-    def to_list(self):
-
-        return [self.major, self.minor, self.revision]
 
 #####################################################################################################
 #
