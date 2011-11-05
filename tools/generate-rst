@@ -1,0 +1,131 @@
+#! /usr/bin/env python
+# -*- python -*-
+
+#####################################################################################################
+#
+# PyDVI - Python Library to Process DVI Stream
+# Copyright (C) 2009 Salvaire Fabrice
+#
+#####################################################################################################
+
+#####################################################################################################
+#
+#                                              Audit
+#
+# - 18/10/2011 Fabrice
+#    x
+#
+#####################################################################################################
+
+#####################################################################################################
+#
+# ./generate-rst --root-path=...
+#
+#####################################################################################################
+
+#####################################################################################################
+
+import os
+import sys
+
+from fnmatch import fnmatch
+from optparse import OptionParser
+
+#####################################################################################################
+
+def to_absolute_path(path):
+    return os.path.abspath(os.path.expanduser(path))
+
+def store_path_value(option, opt_str, value, parser):
+    setattr(parser.values, option.dest, to_absolute_path(value))
+
+#####################################################################################################x
+#
+# Options
+#
+
+usage = 'usage: %prog [options]'
+
+parser = OptionParser(usage)
+
+parser.add_option('--root-path',
+                  dest='root_path',
+                  action='callback', callback=store_path_value,
+                  type='string', default='.',
+                  help='root path')
+
+parser.add_option('--module-path',
+                  dest='module_path',
+                  action='callback', callback=store_path_value,
+                  type='string', default='.',
+                  help='root path')
+
+opt, args = parser.parse_args()
+
+#####################################################################################################
+
+def prolog(module_path):
+
+    title = os.path.basename(module_path)
+
+    template = """
+%(header_line)s
+ %(title)s
+%(header_line)s
+"""
+    template = template[1:-1]
+    
+    rst = template % dict(
+        title=title,
+        header_line='='*(len(title) +2),
+        )
+
+    print rst
+
+#####################################################################################################
+
+def process_module(module_path, module_name):
+
+    mod_rst = ' :mod:`'
+
+    template = """
+%(header_line)s
+%(mod)s%(module_name)s`
+%(header_line)s
+
+.. automodule:: PyDVI.%(module_path)s.%(module_name)s
+   :members:
+   :show-inheritance:
+"""
+    template = template[:-1]
+    
+    rst = template % dict(
+        module_name=module_name,
+        mod=mod_rst,
+        header_line='*'*(len(module_name) + len(mod_rst) +2),
+        module_path=module_path,
+        )
+
+    print rst
+
+#####################################################################################################
+
+module_path_python = opt.module_path.replace(opt.root_path + '/', '').replace('/', '.')
+
+prolog(opt.module_path)
+    
+for filename in sorted(os.listdir(opt.module_path)):
+    if fnmatch(filename, '*.py') and filename != '__init__.py':
+        module_name = filename.replace('.py', '')
+        process_module(module_path_python, module_name)
+
+print """
+.. End"""
+
+sys.exit(0)
+
+#####################################################################################################
+#
+# End
+#
+#####################################################################################################

@@ -22,7 +22,8 @@ __ALL__ = ['pydvi_version']
 from Tools.RevisionVersion import RevisionVersion
 
 #####################################################################################################
-        
+
+#: defines the PyDvi revision version.
 pydvi_version = RevisionVersion((0, # major version
                                  1, # minor version
                                  0, # revision version

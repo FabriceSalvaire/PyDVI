@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 09/10/2011 Fabrice
+# - 31/10/2011 Fabrice
 #
 #####################################################################################################
 
@@ -25,12 +25,15 @@ import re
 
 class RevisionVersion(object):
 
-    """The RevisionVersion class is used to manage revision version of the form
-    v<MAJOR>.<MINOR>.<REVISION>.
+    """ This class implements a revision version of the form vx.y.z where x, y and z are the major,
+    minor and revision number respectively.
+
+    To compare two versions, it computes the integer: (x * scale + y) * scale + z. Thus x, y and z
+    must be less than the scale.
     """
 
-    # To compare version, we assume the number are less than scale
-    scale = 10**6
+    #: default scale value
+    scale = 10**6 
 
     ###############################################
 
@@ -38,7 +41,7 @@ class RevisionVersion(object):
 
         """        
         *version*
-          could be a version string or a sequence of three integers 
+          could be a version string or a sequence of three integers.
 
         Examples::
 
@@ -46,9 +49,9 @@ class RevisionVersion(object):
           RevisionVersion((0,1,2))
           RevisionVersion([0,1,2])
           
-        Instances can be compared using operator: ``==``, ``<``, ``>``, ``<=``, ``>=``
+        Two Instances can be compared using operator: ``==``, ``<``, ``>``, ``<=``, ``>=``.
 
-        A RevisionVersion can be formated using ``str`` function.
+        An instance can be formated using :meth:`str` function.
         """
 
         if isinstance(version, str):
@@ -72,7 +75,7 @@ class RevisionVersion(object):
 
     def __int__(self):
 
-        """Compute an integer from the revision numbering"""
+        """ Compute an integer from the revision numbering """
 
         return (self.major * self.scale + self.minor) * self.scale + self.revision
 
@@ -80,7 +83,7 @@ class RevisionVersion(object):
 
     def __eq__(a, b):
 
-        """Test if Va == Vb"""
+        """ Test if Va == Vb """
 
         return a.major == b.major and a.minor == b.minor and a.revision == b.revision 
 
@@ -88,7 +91,7 @@ class RevisionVersion(object):
 
     def __ge__(a, b):
 
-        """Test if Va >= Vb"""
+        """ Test if Va >= Vb """
 
         return int(a) >= int(b)
 
@@ -96,7 +99,7 @@ class RevisionVersion(object):
 
     def __gt__(a, b):
 
-        """Test if Va > Vb"""
+        """ Test if Va > Vb """
 
         return int(a) > int(b)
 
@@ -104,7 +107,7 @@ class RevisionVersion(object):
 
     def __le__(a, b):
 
-        """Test if Va <= Vb"""
+        """ Test if Va <= Vb """
 
         return int(a) <= int(b)
 
@@ -112,7 +115,7 @@ class RevisionVersion(object):
 
     def __lt__(a, b):
 
-        """Test if Va < Vb"""
+        """ Test if Va < Vb """
 
         return int(a) < int(b)
             
@@ -120,7 +123,7 @@ class RevisionVersion(object):
 
     def __str__(self):
 
-        """Format the version as vx.y.z"""
+        """ Format the version as vx.y.z """
 
         return 'v%u.%u.%u' % (self.major, self.minor, self.revision)
 

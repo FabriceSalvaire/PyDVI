@@ -14,7 +14,7 @@
 #####################################################################################################
 
 """
-This modules provides wrappers for the **Kpathsea** library.
+This module provides a wrapper for the **Kpathsea** library.
 """
 
 #####################################################################################################
@@ -29,13 +29,13 @@ import subprocess
 
 def kpsewhich(filename, file_format=None, options=None):
 
-    """Wrapper around *kpsewhich* program
+    """Wrapper around the *kpsewhich* program.
 
     *file_format*
-      used to specify the file format, see *kpsewhich* help for the file format list
+      used to specify the file format, see *kpsewhich* help for the file format list.
 
     *options*
-      use it to give additional option to *kpsewhich*
+      additional option for *kpsewhich*.
 
     Examples::
 

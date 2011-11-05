@@ -4,7 +4,16 @@
 #
 #####################################################################################################
 
-export PYTHONPATH=$PWD/gui:$PWD/gui/ui:$PWD/etc:$PWD/PyDVI:$PWD:$PWD/../local:$PYTHONPATH
+append_to_python_path_if_not \
+  $PWD/gui \
+  $PWD/gui/ui \
+  $PWD/etc \
+  $PWD \
+  $PWD/../local
+
+# $PWD/PyDVI \
+
+view_python 
 
 #####################################################################################################
 #

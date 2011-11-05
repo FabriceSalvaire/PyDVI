@@ -6,6 +6,7 @@
 
 .. toctree::
 
+   intro.rst
    TeX.rst
    Tools.rst
    Font.rst

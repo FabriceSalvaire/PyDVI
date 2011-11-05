@@ -17,7 +17,7 @@
 This module handles TeX encoding file.
 
 An encoding file map the glyph index with its symbolic name. It uses the ".enc" extension. For
-example, the content of :file:"cork.enc" is::
+example, the content of :file:`cork.enc` is::
 
   /CorkEncoding [ % now 256 chars follow
   % 0x00
@@ -46,7 +46,10 @@ from Tools.TexCommentedFile import TexCommentedFile
 
 class Encoding(object):
 
-    """Parse an encoding file and store the association between the index and the glyph's name.
+    """
+    Parse an encoding file and store the association between the index and the glyph's name.
+
+    The number of glyphes can be obtained using the function :func:`len`.
     """
 
     ###############################################
@@ -55,34 +58,34 @@ class Encoding(object):
 
         self.name = None
 
-        self.glyph_indexes = [] # Map glyph index to glyph name
-        self.glyph_names   = {} # Map glyph name  to glyph index
+        self._glyph_indexes = [] # Map glyph index to glyph name
+        self._glyph_names   = {} # Map glyph name  to glyph index
 
         try:
             with TexCommentedFile(filename) as encoding_file:
                 content = encoding_file.concatenate_lines()
                 open_braket_index = content.index('[')
                 close_braket_index = content.index(']')
-                self.__parse_name(content[:open_braket_index])
-                self.__parse_glyph_names(content[open_braket_index+1:close_braket_index])
+                self._parse_name(content[:open_braket_index])
+                self._parse_glyph_names(content[open_braket_index+1:close_braket_index])
         except:
             raise NameError('Bad encoding file')
 
         # Init glyph_names dict
-        for i in xrange(len(self.glyph_indexes)):
-            self.glyph_names[self.glyph_indexes[i]] = i
+        for i in xrange(len(self._glyph_indexes)):
+            self._glyph_names[self._glyph_indexes[i]] = i
 
     ###############################################
 
     def __len__(self):
 
-        return len(self.glyph_indexes)        
+        return len(self._glyph_indexes)        
 
     ###############################################
 
-    def __parse_name(self, line):
+    def _parse_name(self, line):
 
-        """Find '/CorkEncoding' at the left of the line
+        """ Find '/CorkEncoding' at the left of the line.
         """
 
         # try
@@ -91,23 +94,41 @@ class Encoding(object):
 
     ###############################################
 
-    def __parse_glyph_names(self, line):
+    def _parse_glyph_names(self, line):
 
-        """Find glyph names in '/grave /acute /circumflex ...'
+        """ Find glyph names in '/grave /acute /circumflex ...'.
         """
 
         for word in line.split('/'):
             word = word.strip()
             if word:
-                self.glyph_indexes.append(word)
+                self._glyph_indexes.append(word)
+
+    ###############################################
+
+    def to_name(self, i):
+
+        """ Return the symbolic name corresponding to the glyph index *i*.
+        """
+
+        return self._glyph_indexes[i]
+
+    ###############################################
+
+    def to_index(self, name):
+
+        """ Return the glyph index corresponding to the symbolic name.
+        """
+
+        return self._glyph_names[i]
 
     ###############################################
 
     def print_summary(self):
 
         message = 'Encoding %s\n' % (self.name)
-        for i in xrange(len(self.glyph_indexes)):
-            message += '%3i | %s\n' % (i, self.glyph_indexes[i])
+        for i in xrange(len(self._glyph_indexes)):
+            message += '%3i | %s\n' % (i, self._glyph_indexes[i])
 
         print_card(message)
 

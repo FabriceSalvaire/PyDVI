@@ -16,12 +16,19 @@
 
 #####################################################################################################
 
-__all__= ['remove_enclosing_new_line', 'format_card', 'print_card']
+__ALL__ = ['remove_enclosing_new_line', 'format_card', 'print_card']
 
 #####################################################################################################
 
 def remove_enclosing_new_line(text):
-    return text[1:-1]
+
+    """ Return a copy of the string *text* with leading and trailing newline removed.
+    """
+    
+    i_min =  1 if text[1]  == '\n' else 0
+    i_max = -1 if text[-1] == '\n' else None
+
+    return text[i_min:i_max]
 
 #####################################################################################################
 
@@ -33,16 +40,25 @@ def format_card(text,
                border=False,
                bottom_rule=True):
 
-    """Format a card with some text.
+    """ Format the string *text* as a card.
 
-    Parameters
-    ----------
-    centered : center the text
-    width : width of the card
-    rule_char : character used to draw the rule
-    newline : insert a new line
-    border : draw a left vertical rule
-    bottom_rule : draw a bottom horizontal rule
+    *centered*
+      center the text
+
+    *width*
+      character width of the card
+
+    *rule_char*
+      character used to draw the rule
+
+    *newline*
+      insert a new line
+
+    *border*
+      draw a left vertical rule
+
+    *bottom_rule*
+      draw a bottom horizontal rule
     """
 
     formated_text = ''
@@ -93,6 +109,10 @@ def format_card(text,
 #####################################################################################################
 
 def print_card(text, **kwargs):
+
+    """ Print the string *text* formated by the :meth:`format_card`.  The remaining keyword
+    arguments *kwargs* are passed to :meth:`format_card`.
+    """
     
     print format_card(text, **kwargs)
     

@@ -21,7 +21,7 @@ __all__ = ['TexCommentedFile']
 
 class TexCommentedFile(file):
 
-    """The TexCommentedFile class permits to iterate over a text file and to skip commented line by '%'
+    """ This class permits to iterate over lines of a text file and to skip commented line by '%'.
     """
 
     ###############################################
@@ -49,7 +49,7 @@ class TexCommentedFile(file):
 
     def concatenate_lines(self):
 
-        """Concatenate the lines and return the corresponding string"""
+        """ Concatenate the lines and return the corresponding string. """
 
         return ''.join(self)
 

@@ -9,7 +9,8 @@
 #
 # Audit
 #
-#  - 11/10/2011 Fabrice
+# - 01/11/2011 Fabrice
+#   - check init definition
 #
 #####################################################################################################
 
@@ -26,7 +27,7 @@ Each line describes a PK font using the following format::
   PK_FONT_NAME PS_FONT_NAME "PostScript snippet" <FILE_NAME1 <FILE_NAME2
 
 The first word is the TeX font name and the second word is the PostScript font name. The PostScript
-font name can be omitted if it the same than the TeX font name. The word starting by '<' are
+font name can be omitted if it is the same than the TeX font name. The word starting by '<' are
 filenames to be included in the PostScript file. A filename with the extension '.enc' is an encoding
 file and a filename with the extension '.pfb' is a Printer Font Binary file. The text enclosed by
 double quotes is optional and gives a PostScript snippet to be inserted in the PostScript file. It
@@ -60,7 +61,7 @@ from Tools.TexCommentedFile import TexCommentedFile
 
 class FontMapEntry(object):
 
-    """This class encapsulates a font map entry.
+    """ This class encapsulates a font map entry.
     
     Public attributes are:
 
@@ -110,7 +111,7 @@ class FontMapEntry(object):
 
 class FontMap(object):
 
-    """The FontMap class parse a fontmap file.
+    """ This class parses a fontmap file.
     """
 
     ###############################################
@@ -125,7 +126,7 @@ class FontMap(object):
             #try:
             with TexCommentedFile(filename) as font_map_file:
                 for line in font_map_file:
-                    self.__parse_line(line)
+                    self._parse_line(line)
             #except:
             #    raise NameError('Bad fontmap file')
 
@@ -143,14 +144,14 @@ class FontMap(object):
 
     ###############################################
  
-    def __parse_line(self, line):
+    def _parse_line(self, line):
 
         # 1) Extract PostScript Snippet if there
         first_double_quote_index = line.find('"')
         if first_double_quote_index != -1:
             last_double_quote_index = line.find('"', first_double_quote_index+1)
             ps_snippet = line[first_double_quote_index+1:last_double_quote_index]
-            effects = FontMap.__parse_effects(ps_snippet)
+            effects = FontMap._parse_effects(ps_snippet)
             line = line[:first_double_quote_index] + line[last_double_quote_index+1:]
         else:
             ps_snippet = ''
@@ -189,7 +190,7 @@ class FontMap(object):
     ###############################################
     
     @staticmethod
-    def __parse_effects(word):
+    def _parse_effects(word):
  
         effects_list = word.split()
         effects = {}

@@ -9,9 +9,16 @@
 #
 # Audit
 #
-#  - 17/01/2010 fabrice
+# - 01/11/2011 Fabrice
+#   - check parse definition
 #
 #####################################################################################################
+
+"""
+This module handles TFM files.
+
+TFM file format in descriped in :file:`tftopl` web file.
+"""
 
 #####################################################################################################
 
@@ -31,6 +38,7 @@ KERN_OPCODE = 128
 
 #####################################################################################################
 
+#: Defines the tables present in a TFM file.
 tables = EnumFactory('TableEnums', 
                      ('header',
                       'character_info',
@@ -47,12 +55,19 @@ tables = EnumFactory('TableEnums',
 #####################################################################################################
 
 def repeat(func, count):
-        
+
+    """ Call *func* *count* times. """
+
     return [func() for i in xrange(count)]
 
 #####################################################################################################
 
 class TfmParser(object):
+
+    """
+    This class parse a TFM_file.
+
+    """
 
     ###############################################
 
@@ -89,12 +104,17 @@ class TfmParser(object):
 
     def parse(self, font_name, filename):
 
+        """ Parse the :file:`filename`.
+        """
+
+        # Fixme: API ok?
+
         self.font_name = font_name
         self.filename = filename
 
         self.stream = FileStream(filename)
 
-        self.read_lengths()
+        self._read_lengths()
         self.read_header()
         self.read_font_parameters()
         self.read_lig_kern_programs()
@@ -108,15 +128,39 @@ class TfmParser(object):
 
     ###############################################
 
-    def read_lengths(self):
+    def _read_lengths(self):
+        
+        """
+        The fist 24 bytes (6 words) of a TFM file contain twelve 16-bit integers that give the
+        lengths of the various subsequent portions of the file. These twelve integers are, in order:
 
-        # A font may contain as many as 256 characters.
-        #   sc - 1 <= lc <= 255
-        # extensible_character_table_length <= 256
+          * lf = length of the entire file, in words;
+          * lh = length of the header data, in words;
+          * bc = smallest character code in the font;
+          * ec = largest character code in the font;
+          * nw = number of words in the width table;
+          * nh = number of words in the height table;
+          * nd = number of words in the depth table;
+          * ni = number of words in the italic correction table;
+          * nl = number of words in the lig/kern table;
+          * nk = number of words in the kern table;
+          * ne = number of words in the extensible character table;
+          * np = number of font parameter words.
+
+        They are all nonnegative and less than 2**15. We must have bc - 1 <= ec <= 255, ne <= 256,
+        and lf = 6 + lh + (ec - bc + 1) + nw + nh + nd + ni + nl + nk + ne + np.
+
+        Note that a font may contain as many as 256 characters (if bc = 0 and ec = 255), and as few
+        as 0 characters (if bc = ec + 1).
+
+        The header must contain at least two words, and for TFM files to be used with Xerox printing
+        software it must contain at least 18 words.
+        """
 
         stream = self.stream
-
         stream.seek(0)
+
+        # Read and set table lengths
 
         self.table_lengths = [None]*len(tables)
 
@@ -125,23 +169,22 @@ class TfmParser(object):
          self.smallest_character_code,
          self.largest_character_code) = repeat(stream.read_unsigned_byte2, 4)
 
-        header_data_length_min = 18
+        header_data_length_min = 18 # words
         self.table_lengths[tables.header] = max(header_data_length_min, header_length)
         
         self.number_of_chars = self.largest_character_code - self.smallest_character_code +1
-
         self.table_lengths[tables.character_info] = self.number_of_chars
 
+        # read the last lengths
         for i in xrange(tables.width, len(tables)):
             self.table_lengths[i] = stream.read_unsigned_byte2()
-
-        # self.print_summary()
 
         # Compute table pointers
 
         self.table_pointers = [None]*len(tables)
 
-        self.table_pointers[tables.header] = 24 # 12*2 bytes
+        # The header starts at 24 bytes
+        self.table_pointers[tables.header] = 24
 
         for table in xrange(tables.header, tables.font_parameter):
             self.table_pointers[table+1] = self.position_in_table(table, self.table_lengths[table])

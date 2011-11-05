@@ -24,8 +24,8 @@ import sys, os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-for directory in '../../python', '../../etc':
-    sys.path.insert(0, os.path.abspath(directory))
+# for directory in ,:
+#    sys.path.insert(0, os.path.abspath(directory))
 
 #####################################################################################################
 #
@@ -113,7 +113,14 @@ pygments_style = 'sphinx'
 
 # Show both class-level docstring and __init__ docstring in class documentation
 autoclass_content = 'both'
-autodoc_default_flags = ['members', 'undoc-members']
+autodoc_default_flags = [
+    'members',
+    'undoc-members',
+    'private-members',
+    # 'special-members',
+    # 'inherited-members',
+    # 'show-inheritance',
+    ]
 
 #####################################################################################################
 #
