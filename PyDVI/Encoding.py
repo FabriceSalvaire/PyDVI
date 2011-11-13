@@ -16,8 +16,9 @@
 """
 This module handles TeX encoding file.
 
-An encoding file map the glyph index with its symbolic name. It uses the ".enc" extension. For
-example, the content of :file:`cork.enc` is::
+An encoding file map the glyph index with its symbolic name. It uses the ".enc" extension.
+
+For example, the content of :file:`cork.enc` is::
 
   /CorkEncoding [ % now 256 chars follow
   % 0x00
@@ -85,7 +86,7 @@ class Encoding(object):
 
     def _parse_name(self, line):
 
-        """ Find '/CorkEncoding' at the left of the line.
+        """ Find the encoding name at the left of the line, as '/CorkEncoding'.
         """
 
         # try
@@ -96,7 +97,7 @@ class Encoding(object):
 
     def _parse_glyph_names(self, line):
 
-        """ Find glyph names in '/grave /acute /circumflex ...'.
+        """ Find glyph names in *line*, as '/grave /acute /circumflex ...'.
         """
 
         for word in line.split('/'):

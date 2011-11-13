@@ -27,4 +27,18 @@ LaTeX uses the following types of font files:
 .. automodule:: PyDVI.FontMap
    :members:
 
+******************
+ :mod:`TfmParser`
+******************
+
+.. automodule:: PyDVI.TfmParser
+   :members:
+
+************
+ :mod:`Tfm`
+************
+
+.. automodule:: PyDVI.Tfm
+   :members:
+
 .. End

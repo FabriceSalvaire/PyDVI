@@ -26,10 +26,10 @@ import re
 class RevisionVersion(object):
 
     """ This class implements a revision version of the form vx.y.z where x, y and z are the major,
-    minor and revision number respectively.
+    minor and revision number, respectively.
 
-    To compare two versions, it computes the integer: (x * scale + y) * scale + z. Thus x, y and z
-    must be less than the scale.
+    To compare two version, the version x.y.z is converted to an integer using the following
+    formulae: (x * scale + y) * scale + z. Thus x, y and z must be less than the :attr:`scale`.
     """
 
     #: default scale value

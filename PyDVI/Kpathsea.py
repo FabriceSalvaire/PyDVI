@@ -14,7 +14,7 @@
 #####################################################################################################
 
 """
-This module provides a wrapper for the **Kpathsea** library.
+This module provides a wrapper for the **Kpathsea** library, cf. http://www.tug.org/kpathsea.
 """
 
 #####################################################################################################

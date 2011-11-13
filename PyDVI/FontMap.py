@@ -18,7 +18,9 @@
 This module handles font map file.
 
 A font map gives the correspondance between the TeX PK fonts and their PostScript equivalents. It
-uses the ".map" extension. For example, the file :file:`pdftex.map` contains lines like::
+uses the ".map" extension.
+
+For example, the file :file:`pdftex.map` contains lines like::
 
   futbo8r Utopia-Bold ".167 SlantFont TeXBase1Encoding ReEncodeFont" <8r.enc <putb8a.pfb
 
@@ -112,6 +114,10 @@ class FontMapEntry(object):
 class FontMap(object):
 
     """ This class parses a fontmap file.
+
+    A font map entry :class:`FontMapEntry` can be retrivied using the TeX name as key::
+
+      font_map_instance[tex_name]
     """
 
     ###############################################
@@ -140,11 +146,17 @@ class FontMap(object):
  
     def register_entry(self, font_map_entry):
  
+        """ Register a font map entry.
+        """
+
         self.map[font_map_entry.tex_name] = font_map_entry
 
     ###############################################
  
     def _parse_line(self, line):
+
+        """ Parse a line:
+        """
 
         # 1) Extract PostScript Snippet if there
         first_double_quote_index = line.find('"')
@@ -190,9 +202,12 @@ class FontMap(object):
     ###############################################
     
     @staticmethod
-    def _parse_effects(word):
+    def _parse_effects(ps_snippet):
+
+        """ Parse the PostScript snippet.
+        """
  
-        effects_list = word.split()
+        effects_list = ps_snippet.split()
         effects = {}
         for key_word in 'SlantFont', 'ExtendFont':
             try:

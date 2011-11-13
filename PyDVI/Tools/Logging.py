@@ -40,19 +40,30 @@ def format_card(text,
                border=False,
                bottom_rule=True):
 
-    """ Format the string *text* as a card.
+    """ Format the string *text* as a card::
+
+***************************************************
+*
+*                      Title
+*
+* xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx
+* xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx
+* xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx
+* xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx
+*
+***************************************************
 
     *centered*
-      center the text
+      center the text in the card
 
     *width*
-      character width of the card
+      width of the card
 
     *rule_char*
       character used to draw the rule
 
     *newline*
-      insert a new line
+      insert a new line before the card
 
     *border*
       draw a left vertical rule
@@ -110,8 +121,8 @@ def format_card(text,
 
 def print_card(text, **kwargs):
 
-    """ Print the string *text* formated by the :meth:`format_card`.  The remaining keyword
-    arguments *kwargs* are passed to :meth:`format_card`.
+    """ Print the string *text* formated by :meth:`format_card`.  The remaining keyword arguments
+    *kwargs* are passed to :meth:`format_card`.
     """
     
     print format_card(text, **kwargs)
