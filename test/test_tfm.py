@@ -15,14 +15,14 @@
 
 import sys
 
-#####################################################################################################
-
-from Kpathsea import kpsewhich
-from TfmParser import *
-
-#####################################################################################################
-
 from optparse import OptionParser
+
+#####################################################################################################
+
+from PyDVI.Kpathsea import kpsewhich
+from PyDVI.TfmParser import TfmParser
+
+#####################################################################################################
 
 usage = 'usage: %prog font_name'
 
@@ -31,19 +31,19 @@ parser = OptionParser(usage)
 opt, args = parser.parse_args()
 
 if len(args) != 1:
-    parser.error("incorrect number of arguments")
+    parser.error("Give a a font name, e.g. cmr10")
 
 font_name = args[0]
 
-tfm_file = kpsewhich(font_name, file_format='tfm')
+#####################################################################################################
 
+tfm_file = kpsewhich(font_name, file_format='tfm')
 if tfm_file is None:
+    print 'TFM file %s not found' % (tfm_file)
     sys.exit(1)
 
 tfm_parser = TfmParser()
-
 tfm = tfm_parser.parse(font_name, tfm_file)
-    
 tfm.print_summary()
 
 #####################################################################################################

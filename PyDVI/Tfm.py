@@ -286,6 +286,9 @@ class TfmLigature(TfmLigKern):
 
 class Tfm(object):
 
+    """ This class encapsulates a TeX Font Metric.
+    """
+
     ###############################################
 
     def __init__(self,
@@ -388,10 +391,10 @@ class Tfm(object):
 
     def print_summary(self):
 
-        print_card('''TFM %s
+        string_template = '''TFM %s
 
  - Smallest character code in the font: %u 
- - Largest character code in the font: %u 
+ - Largest character code in the font:  %u 
 
  - Checksum: %u
  - Design Font Size: %f
@@ -405,23 +408,25 @@ Font Parameters:
  - Space Shrink: %f
  - X Height: %f
  - Quad: %f
- - Extra Space: %f''' % (
-                self.font_name,
-                self.smallest_character_code,
-                self.largest_character_code,
-                self.checksum,
-                self.design_font_size,
-                self.character_coding_scheme,
-                self.family,
-                self.slant,
-                self.spacing,
-                self.space_stretch,
-                self.space_shrink,
-                self.x_height,
-                self.quad,
-                self.extra_space,
-                ))
+ - Extra Space: %f'''
 
+        message = string_template % (self.font_name,
+                                     self.smallest_character_code,
+                                     self.largest_character_code,
+                                     self.checksum,
+                                     self.design_font_size,
+                                     self.character_coding_scheme,
+                                     self.family,
+                                     self.slant,
+                                     self.spacing,
+                                     self.space_stretch,
+                                     self.space_shrink,
+                                     self.x_height,
+                                     self.quad,
+                                     self.extra_space,
+                                     )
+
+        print_card(message)
         for char in self.chars.values():
             char.print_summary()
 

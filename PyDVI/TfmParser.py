@@ -9,8 +9,7 @@
 #
 # Audit
 #
-# - 01/11/2011 Fabrice
-#   - check parse definition
+# - 14/11/2011 Fabrice
 #
 #####################################################################################################
 
@@ -32,9 +31,9 @@ __all__ = ['TfmParser']
 
 #####################################################################################################
 
-from PyDVI.Tfm import *
+from PyDVI.Tfm import Tfm, TfmChar, TfmKern, TfmLigature
 from PyDVI.Tools.EnumFactory import EnumFactory
-from PyDVI.Tools.Stream import *
+from PyDVI.Tools.Stream import FileStream
 
 #####################################################################################################
 
@@ -76,6 +75,32 @@ class TfmParser(object):
 
     ###############################################
 
+    # Fixme: API ok?
+
+    def parse(self, font_name, filename):
+
+        """ Parse the TFM :file:`filename` for the font *font_name* and return a :class:`Tfm`
+        instance.
+        """
+
+        self.font_name = font_name
+        self.filename = filename
+        self.stream = FileStream(filename)
+
+        self._read_lengths()
+        self._read_header()
+        self._read_font_parameters()
+        self._read_lig_kern_programs()
+        self._read_characters()
+
+        # Keep a reference to Tfm instance and delete all the attributes
+        tfm = self.tfm
+        self.__dict__.clear()
+
+        return tfm
+
+    ###############################################
+
     @staticmethod
     def word_ptr(base, index):
 
@@ -107,49 +132,42 @@ class TfmParser(object):
 
     ###############################################
 
-    def read_fix_word_in_table(self, table, index):
+    def _read_fix_word_in_table(self, table, index):
+
+        """ Return the fix word in table *table* at index *index*.
+        """
 
         return self.stream.read_fix_word(self._position_in_table(table, index))
 
     ###############################################
 
-    def read_four_byte_numbers_in_table(self, table, index):
+    def _read_four_byte_numbers_in_table(self, table, index):
+
+        """ Return the four numbers in table *table* at index *index*. 
+        """
 
         return self.stream.read_four_byte_numbers(self._position_in_table(table, index))
 
     ###############################################
 
-    # Fixme: API ok?
+    def _read_extensible_recipe(self, index):
 
-    def parse(self, font_name, filename):
+        """ Return the extensible recipe, four numbers, at index *index*.
 
-        """ Parse the TFM :file:`filename` for the font *font_name*.
+        Extensible characters are specified by an extensible recipe, which consists of four bytes
+        called top, mid, bot, and rep (in this order). These bytes are the character codes of
+        individual pieces used to build up a large symbol. If top, mid, or bot are zero, they are
+        not present in the built-up result. For example, an extensible vertical line is like an
+        extensible bracket, except that the top and bottom pieces are missing.
         """
-
-        self.font_name = font_name
-        self.filename = filename
-
-        self.stream = FileStream(filename)
-
-        self._read_lengths()
-        self._read_header()
-        self._read_font_parameters()
-        self._read_lig_kern_programs()
-   
-        # Read the character information table
-        for c in xrange(self.smallest_character_code, self.largest_character_code +1):
-            self.process_char(c)
-         
-        self.stream = None
-
-        return self.tfm
+ 
+        return self._read_four_byte_numbers_in_table(tables.extensible_character, index)
 
     ###############################################
 
     def _read_lengths(self):
         
-        """
-        The fist 24 bytes (6 words) of a TFM file contain twelve 16-bit integers that give the
+        """ The fist 24 bytes (6 words) of a TFM file contain twelve 16-bit integers that give the
         lengths of the various subsequent portions of the file. These twelve integers are, in order:
 
           * lf = length of the entire file, in words;
@@ -237,7 +255,7 @@ class TfmParser(object):
         with Xerox printing software it must contain at least 18 words, allocated as described
         below.
 
-        header [0] is a 32-bit check sum that TEX will copy into the DVI output file whenever it
+        ``header[0]`` is a 32-bit check sum that TEX will copy into the DVI output file whenever it
         uses the font.  Later on when the DVI file is printed, possibly on another computer, the
         actual font that gets used is supposed to have a check sum that agrees with the one in the
         TFM file used by TEX.  In this way, users will be warned about potential incompatibilities.
@@ -246,41 +264,41 @@ class TfmParser(object):
         important; the check sum is simply an identification number with the property that
         incompatible fonts almost always have distinct check sums.
 
-        header [1] is a fix word containing the design size of the font, in units of TEX points
+        ``header[1]`` is a fix word containing the design size of the font, in units of TEX points
         (7227 TEX points = 254 cm).  This number must be at least 1.0; it is fairly arbitrary, but
         usually the design size is 10.0 for a "10 point" font, i.e., a font that was designed to
         look best at a 10-point size, whatever that really means.  When a TEX user asks for a font
-        `at delta pt', the effect is to override the design size and replace it by delta, and to
+        "at delta pt", the effect is to override the design size and replace it by delta, and to
         multiply the x and y coordinates of the points in the font image by a factor of delta
         divided by the design size.  All other dimensions in the TFM file are fix word numbers in
-        design-size units.  Thus, for example, the value of param[6], one em or \quad, is often the
-        fix word value 2**20 = 1.0, since many fonts have a design size equal to one em.  The other
-        dimensions must be less than 16 design-size units in absolute value; thus, header[1] and
-        param[1] are the only fix word entries in the whole TFM file whose first byte might be
-        something besides 0 or 255.
+        design-size units.  Thus, for example, the value of ``param[6]``, one em or ``\quad``, is
+        often the fix word value ``2**20 = 1.0``, since many fonts have a design size equal to one
+        em.  The other dimensions must be less than 16 design-size units in absolute value; thus,
+        ``header[1]`` and ``param[1]`` are the only fix word entries in the whole TFM file whose
+        first byte might be something besides 0 or 255.
         
-        header [2 ... 11], if present, contains 40 bytes that identify the character coding scheme.
-        The first byte, which must be between 0 and 39, is the number of subsequent ASCII bytes
-        actually relevant in this string, which is intended to specify what character-code-to-symbol
-        convention is present in the font.  Examples are ASCII for standard ASCII, TeX text for
-        fonts like cmr10 and cmti9, TeX math extension for cmex10, XEROX text for Xerox fonts,
-        GRAPHIC for special-purpose non- alphabetic fonts, UNSPECIFIED for the default case when
-        there is no information.  Parentheses should not appear in this name.  (Such a string is
-        said to be in BCPL format.)
+        ``header[2 ... 11]``, if present, contains 40 bytes that identify the character coding
+        scheme.  The first byte, which must be between 0 and 39, is the number of subsequent ASCII
+        bytes actually relevant in this string, which is intended to specify what
+        character-code-to-symbol convention is present in the font.  Examples are ASCII for standard
+        ASCII, TeX text for fonts like cmr10 and cmti9, TeX math extension for cmex10, XEROX text
+        for Xerox fonts, GRAPHIC for special-purpose non- alphabetic fonts, UNSPECIFIED for the
+        default case when there is no information.  Parentheses should not appear in this name.
+        (Such a string is said to be in BCPL format.)
 
-        header [12 ... 16], if present, contains 20 bytes that name the font family (e.g., CMR or
+        ``header[12 ... 16]``, if present, contains 20 bytes that name the font family (e.g., CMR or
         HELVETICA), in BCPL format.  This field is also known as the "font identifier."
 
-        header [17], if present, contains a first byte called the *seven_bit_safe_flag*, then two
-        bytes that are ignored, and a fourth byte called the *face*.  If the value of the fourth
+        ``header[17]``, if present, contains a first byte called the ``seven_bit_safe_flag``, then
+        two bytes that are ignored, and a fourth byte called the *face*.  If the value of the fourth
         byte is less than 18, it has the following interpretation as a "weight, slope, and
         expansion": Add 0 or 2 or 4 (for medium or bold or light) to 0 or 1 (for roman or italic) to
-        0 or 6 or 12 (for regular or condensed or extended).  For example, 13 is 0+1+12, so it
+        0 or 6 or 12 (for regular or condensed or extended).  For example, 13 is ``0+1+12``, so it
         represents medium italic extended.  A three-letter code (e.g., MIE) can be used for such
         face data.
 
-        header [18 ... whatever] might also be present; the individual words are simply called
-        header [18], header [19], etc., at the moment.
+        ``header[18 ... whatever]`` might also be present; the individual words are simply called
+        ``header[18]``, ``header[19]``, etc., at the moment.
         """
         
         stream = self.stream
@@ -311,9 +329,9 @@ class TfmParser(object):
         family_length = 20 # bytes (16 - 12 +1) * 4 = 5 * 4 
         position += family_length
         if position < character_info_table_position:
-            seven_bit_safe_flag = stream.read_unsigned_byte(position)
+            seven_bit_safe_flag = stream.read_unsigned_byte1(position)
             stream.read_unsigned_byte2()
-            face = stream.read_unsigned_byte()
+            face = stream.read_unsigned_byte1()
             # Fixme: complete
 
         # don't read header [18 ... whatever]
@@ -334,25 +352,25 @@ class TfmParser(object):
         """ The final portion of a TFM fie is the param array, which is another sequence of fix word
         values.
 
-          * param[1] = *slant* is the amount of italic slant, which is used to help position accents.
-            For example, slant = .25 means that when you go up one unit, you also go .25 units to
-            the right.  The slant is a pure number; it's the only fix word other than the design
-            size itself that is not scaled by the design size.
-          * param[2] = *space* is the normal spacing between words in text. Note that character " " in
-            the font need not have anything to do with blank spaces.
-          * param[3] = *space_stretch* is the amount of glue stretching between words.
-          * param[4] = *space_shrink* is the amount of glue shrinking between words.
-          * param[5] = *x_height* is the height of letters for which accents don't have to be raised
-            or lowered.
-          * param[6] = *quad* is the size of one em in the font.
-          * param[7] = *extra_space* is the amount added to param[2] at the ends of sentences.
+          * param[1] = ``slant`` is the amount of italic slant, which is used to help position
+            accents.  For example, slant = .25 means that when you go up one unit, you also go .25
+            units to the right.  The slant is a pure number; it's the only fix word other than the
+            design size itself that is not scaled by the design size.
+          * param[2] = ``space`` is the normal spacing between words in text. Note that character " "
+            in the font need not have anything to do with blank spaces.
+          * param[3] = ``space_stretch`` is the amount of glue stretching between words.
+          * param[4] = ``space_shrink`` is the amount of glue shrinking between words.
+          * param[5] = ``x_height`` is the height of letters for which accents don't have to be
+            raised or lowered.
+          * param[6] = ``quad`` is the size of one em in the font.
+          * param[7] = ``extra_space`` is the amount added to param[2] at the ends of sentences.
 
-        When the character coding scheme is *TeX math symbols*, the font is supposed to have 15
-        additional parameters called *num1*, *num2*, *num3*, *denom1*, *denom2*, *sup1*, *sup2*,
-        *sup3*, *sub1*, *sub2*, *supdrop*, *subdrop*, *delim1*, *delim2*, and *axis_height*,
-        respectively.  When the character coding scheme is *TeX math extension*, the font is
-        supposed to have six additional parameters called *defaul_rule_thickness* and
-        *big_op_spacing1* through *big_op_spacing5*.
+        When the character coding scheme is ``TeX math symbols``, the font is supposed to have 15
+        additional parameters called ``num1``, ``num2``, ``num3``, ``denom1``, ``denom2``, ``sup1``,
+        ``sup2``, ``sup3``, ``sub1``, ``sub2``, ``supdrop``, ``subdrop``, ``delim1``, ``delim2``,
+        and ``axis_height``, respectively.  When the character coding scheme is ``TeX math
+        extension``, the font is supposed to have six additional parameters called
+        ``defaul_rule_thickness`` and ``big_op_spacing1`` through ``big_op_spacing5``.
         """
         
         stream = self.stream
@@ -377,70 +395,102 @@ class TfmParser(object):
 
     def _read_lig_kern_programs(self):
 
+        """ The lig kern array contains instructions in a simple programming language that explains
+        what to do for special letter pairs. Each word is a lig kern command of four bytes.
+
+         * first byte: ``skip_byte``, indicates that this is the final program step if the byte is
+           128 or more, otherwise the next step is obtained by skipping this number of intervening
+           steps.
+         * second byte: ``next_char``, "if ``next_char`` follows the current character, then perform
+           the operation and stop, otherwise continue."
+         * third byte: ``op_byte``, indicates a ligature step if less than 128, a kern step otherwise.
+         * fourth byte: ``remainder``.
+
+        In a kern step, an additional space equal to ``kern[256 * (op_byte + 128) + remainder]`` is
+        inserted between the current character and next char.  This amount is often negative, so
+        that the characters are brought closer together by kerning; but it might be positive.
+
+        There are eight kinds of ligature steps, having ``op_byte`` codes ``4a+2b+c`` where ``0 <= a
+        <= b+c`` and ``0 <= b; c <= 1``.  The character whose code is remainder is inserted between
+        the current character and next char; then the current character is deleted if ``b = 0``, and
+        next char is deleted if ``c = 0``; then we pass over a characters to reach the next current
+        character (which may have a ligature/kerning program of its own).
+        
+        Notice that if ``a = 0`` and ``b = 1``, the current character is unchanged; if ``a = b`` and
+        ``c = 1``, the current character is changed but the next character is unchanged.
+
+        If the very first instruction of the lig kern array has ``skip_byte = 255``, the
+        ``next_char`` byte is the so-called right boundary character of this font; the value of
+        ``next_char`` need not lie between ``bc`` and ``ec``. If the very last instruction of the
+        lig kern array has ``skip_byte = 255``, there is a special ligature/kerning program for a
+        left boundary character, beginning at location ``256 * op_byte + remainder``.  The
+        interpretation is that TEX puts implicit boundary characters before and after each
+        consecutive string of characters from the same font.  These implicit characters do not
+        appear in the output, but they can affect ligatures and kerning.
+
+        If the very first instruction of a character's ``lig_kern`` program has ``skip_byte > 128``,
+        the program actually begins in location ``256 * op_byte + remainder``.  This feature allows
+        access to large lig kern arrays, because the first instruction must otherwise appear in a
+        location ``<= 255``.
+
+        Any instruction with ``skip_byte > 128`` in the lig kern array must have ``256 * op_byte +
+        remainder < nl``.  If such an instruction is encountered during normal program execution, it
+        denotes an unconditional halt; no ligature command is performed.
+        """
+
         # Fixme: complete special cases
 
         # Read very first instruction of the table
-
         (first_skip_byte,
          next_char,
          op_byte,
-         remainder) = self.read_four_byte_numbers_in_table(tables.lig_kern, 0)
-        
+         remainder) = self._read_four_byte_numbers_in_table(tables.lig_kern, 0)
         if first_skip_byte == 255:
             right_boundary_char = next_char
             raise NameError('Font has right boundary char')
 
         # Read very last instruction of the table
-
         (last_skip_byte,
          next_char,
          op_byte,
-         remainder) = self.read_four_byte_numbers_in_table(tables.lig_kern,
-                                                           self.table_lengths[tables.lig_kern] -1)
-        
+         remainder) = self._read_four_byte_numbers_in_table(tables.lig_kern,
+                                                            self.table_lengths[tables.lig_kern] -1)
         if last_skip_byte == 255:
             left_boundary_char_program_index = 256*op_byte + remainder
             raise NameError('Font has left boundary char program')
 
         # Read the instructions
-
         first_instruction = True
-
         for i in xrange(self.table_lengths[tables.lig_kern]):
         
             (skip_byte,
              next_char,
              op_byte,
-             remainder) = self.read_four_byte_numbers_in_table(tables.lig_kern, i)
-        
+             remainder) = self._read_four_byte_numbers_in_table(tables.lig_kern, i)
+
+            # Large lig/kern table ?
             if first_instruction and skip_byte > 128:
-
-                print 'Large lig/kern table'
-
                 large_index = 256*op_byte + remainder
-
                 (skip_byte,
                  next_char,
                  op_byte,
-                 remainder) = self.read_four_byte_numbers_in_table(tables.lig_kern, large_index)
+                 remainder) = self._read_four_byte_numbers_in_table(tables.lig_kern, large_index)
 
+            # Last step ?
             stop = skip_byte >= 128
 
             if op_byte >= KERN_OPCODE:
-        
+                # Kern step
                 kern_index = 256*(op_byte - KERN_OPCODE) + remainder
-                kern = self.read_fix_word_in_table(tables.kern, kern_index)
-        
+                kern = self._read_fix_word_in_table(tables.kern, kern_index)
                 TfmKern(self.tfm, i, stop, next_char, kern)
         
             else:
-        
+                # Ligature step
                 number_of_chars_to_pass_over = op_byte >> 2
                 current_char_is_deleted = (op_byte & 0x02) == 0
                 next_char_is_deleted    = (op_byte & 0x01) == 0
-        
                 ligature_char_code = remainder
-        
                 TfmLigature(self.tfm,
                             i,
                             stop,
@@ -454,15 +504,15 @@ class TfmParser(object):
 
     ###############################################
 
-    def process_char(self, c):
-        
+    def _read_characters(self):
+
         """ Next comes the char info array, which contains one char info word per character.  Each
         char info word contains six fields packed into four bytes as follows.
 
-          * first byte: *width_index* (8 bits)
-          * second byte: *height_index* (4 bits) times 16, plus depth index (4 bits)
-          * third byte: *italic_index* (6 bits) times 4, plus tag (2 bits)
-          * fourth byte: *remainder* (8 bits)
+          * first byte: ``width_index`` (8 bits)
+          * second byte: ``height_index`` (4 bits) times 16, plus depth index (4 bits)
+          * third byte: ``italic_index`` (6 bits) times 4, plus tag (2 bits)
+          * fourth byte: ``remainder`` (8 bits)
 
         The actual width of a character is ``width[width_index]``, in design-size units; this is a
         device for compressing information, since many characters have the same width.  Since it is
@@ -470,66 +520,71 @@ class TfmParser(object):
         TFM format imposes a limit of 16 different heights, 16 different depths, and 64 different
         italic corrections.
 
-        Incidentally, the relation ``width [0] = height [0] = depth [0] = italic [0] = 0`` should
+        Incidentally, the relation ``width[0] = height[0] = depth[0] = italic[0] = 0`` should
         always hold, so that an index of zero implies a value of zero.  The width index should never
         be zero unless the character does not exist in the font, since a character is valid if and
         only if it lies between ``bc`` and ``ec`` and has a nonzero width index.
 
         The tag field in a char info word has four values that explain how to interpret the remainder field.
 
-          * ``tag = 0`` (*no_tag*) means that remainder is unused.
-
-          * ``tag = 1`` (*lig_tag*) means that this character has a ligature/kerning program
+          * ``tag = 0`` (``no_tag``) means that remainder is unused.
+          * ``tag = 1`` (``lig_tag``) means that this character has a ligature/kerning program
             starting at ``lig_kern[remainder]``.
-
-          * ``tag = 2`` (*list_tag*) means that this character is part of a chain of characters of
+          * ``tag = 2`` (``list_tag``) means that this character is part of a chain of characters of
             ascending sizes, and not the largest in the chain.  The remainder field gives the
             character code of the next larger character.
-
-          * ``tag = 3`` (*ext_tag*) means that this character code represents an extensible
+          * ``tag = 3`` (``ext_tag``) means that this character code represents an extensible
             character, i.e., a character that is built up of smaller pieces so that it can be made
             arbitrarily large.  The pieces are specified in ``exten[remainder]``.
-
           * ``no_tag = 0`` vanilla character
           * ``lig_tag = 1`` character has a ligature/kerning program
           * ``list_tag = 2`` character has a successor in a charlist
           * ``ext_tag = 3`` character is extensible
         """
 
-        width_index, height_index, depth_index, italic_index, tag, remainder = self.read_char_info(c)
+        # Read the character information table
+        for c in xrange(self.smallest_character_code, self.largest_character_code +1):
+            self._process_char(c)
 
-        if width_index == 0: # unvalid char
-            return
+    ###############################################
 
-        width = self.read_fix_word_in_table(tables.width, width_index)
+    def _process_char(self, c):
+
+        """ Process the character code *c* in the character information table.
+        """
+      
+        width_index, height_index, depth_index, italic_index, tag, remainder = self._read_char_info(c)
+
+        # Get the parameters in the corresponding tables
+        if width_index == 0:
+            raise ValueError("Zero width character for character code %u" % (c))
+        width = self._read_fix_word_in_table(tables.width, width_index)
         
         if height_index != 0:
-            height = self.read_fix_word_in_table(tables.height, height_index)
+            height = self._read_fix_word_in_table(tables.height, height_index)
         else:
             height = 0
 
         if depth_index != 0:
-            depth = self.read_fix_word_in_table(tables.depth, depth_index)
+            depth = self._read_fix_word_in_table(tables.depth, depth_index)
         else:
             depth = 0
 
         if italic_index != 0:
-            italic_correction = self.read_fix_word_in_table(tables.italic_correction, italic_index)
+            italic_correction = self._read_fix_word_in_table(tables.italic_correction, italic_index)
         else:
             italic_correction = 0
 
+        # Interpret the tag field
         lig_kern_program_index = None
         next_larger_char = None
         extensible_recipe = None
-
         if tag == LIG_TAG:
             lig_kern_program_index = remainder
-            
         elif tag == LIST_TAG:
             next_larger_char = remainder
-
         elif tag == EXT_TAG:
-            extensible_recipe = self.read_extensible_recipe(remainder)
+            extensible_recipe = self._read_extensible_recipe(remainder)
 
         if extensible_recipe is not None:
             TfmExtensibleChar(self.tfm,
@@ -554,11 +609,13 @@ class TfmParser(object):
 
     ###############################################
 
-    def read_char_info(self, c):
+    def _read_char_info(self, c):
  
+        """ Read the character code *c* data in the character information table.
+        """
+        
         index = c - self.smallest_character_code
-
-        bytes = self.read_four_byte_numbers_in_table(tables.character_info, index)
+        bytes = self._read_four_byte_numbers_in_table(tables.character_info, index)
 
         width_index  = bytes[0]
         height_index = bytes[1] >> 4
@@ -571,15 +628,9 @@ class TfmParser(object):
 
     ###############################################
 
-    def read_extensible_recipe(self, index):
- 
-        return self.read_four_byte_numbers_in_table(tables.extensible_character, index)
-
-    ###############################################
-
     def print_summary(self):
 
-        print '''
+        string_format = '''
 TFM %s
 
  - Length of the entire file, in words: %u
@@ -594,20 +645,22 @@ TFM %s
  - Number of words in the kern table: %u
  - Number of words in the extensible character table: %u
  - Number of font parameter words: %u
-''' % (self.font_name,
-       self.entire_file_length,
-       self.table_lengths[tables.header],
-       self.smallest_character_code,
-       self.largest_character_code,
-       self.table_lengths[tables.width],
-       self.table_lengths[tables.height],
-       self.table_lengths[tables.depth],
-       self.table_lengths[tables.italic_correction],
-       self.table_lengths[tables.lig_kern],
-       self.table_lengths[tables.kern],
-       self.table_lengths[tables.extensible_character],
-       self.table_lengths[tables.font_parameter],
-       )
+'''
+        
+        print string_format  % (self.font_name,
+                                self.entire_file_length,
+                                self.table_lengths[tables.header],
+                                self.smallest_character_code,
+                                self.largest_character_code,
+                                self.table_lengths[tables.width],
+                                self.table_lengths[tables.height],
+                                self.table_lengths[tables.depth],
+                                self.table_lengths[tables.italic_correction],
+                                self.table_lengths[tables.lig_kern],
+                                self.table_lengths[tables.kern],
+                                self.table_lengths[tables.extensible_character],
+                                self.table_lengths[tables.font_parameter],
+                                )
 
 #####################################################################################################
 #

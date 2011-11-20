@@ -7,10 +7,10 @@
 
 #####################################################################################################
 #
-# Audit
+#                                              Audit
 #
-#  - 10/01/2010 fabrice
-#  - 13/05/2010 fabrice
+# - 13/11/2011 Fabrice
+#   x
 #
 #####################################################################################################
 
@@ -22,8 +22,8 @@ from optparse import OptionParser
 
 #####################################################################################################
 
-from Encoding import *
-from Kpathsea import kpsewhich
+from PyDVI.Encoding import Encoding
+from PyDVI.Kpathsea import kpsewhich
 
 #####################################################################################################
 
@@ -37,6 +37,8 @@ if len(args) != 1:
     parser.error("Give a TeX encoding, e.g. cork")
 
 encoding = args[0]
+
+#####################################################################################################
 
 encoding_file = kpsewhich(encoding, file_format='enc files')
 

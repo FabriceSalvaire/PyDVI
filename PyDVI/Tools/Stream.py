@@ -206,7 +206,7 @@ class AbstractStream(object):
         """ Read a fix word.
         """
 
-        return self.to_fix_word(self.read_signed_byte4(position))
+        return to_fix_word(self.read_signed_byte4(position))
 
     ###############################################
 

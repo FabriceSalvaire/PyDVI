@@ -127,9 +127,9 @@ class Encoding(object):
 
     def print_summary(self):
 
-        message = 'Encoding %s\n' % (self.name)
+        message = 'Encoding %s:\n\n' % (self.name)
         for i in xrange(len(self._glyph_indexes)):
-            message += '%3i | %s\n' % (i, self._glyph_indexes[i])
+            message += '| %3i | %s\n' % (i, self._glyph_indexes[i])
 
         print_card(message)
 
