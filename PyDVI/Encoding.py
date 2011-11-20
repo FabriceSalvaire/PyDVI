@@ -80,14 +80,15 @@ class Encoding(object):
 
     def __len__(self):
 
+        """ Return the number of glyphes. """
+
         return len(self._glyph_indexes)        
 
     ###############################################
 
     def _parse_name(self, line):
 
-        """ Find the encoding name at the left of the line, as '/CorkEncoding'.
-        """
+        """ Find the encoding name at the left of the line, as '/CorkEncoding'. """
 
         # try
         name_start_index = line.index('/')
@@ -97,8 +98,7 @@ class Encoding(object):
 
     def _parse_glyph_names(self, line):
 
-        """ Find glyph names in *line*, as '/grave /acute /circumflex ...'.
-        """
+        """ Find glyph names in *line*, as '/grave /acute /circumflex ...'. """
 
         for word in line.split('/'):
             word = word.strip()
@@ -109,8 +109,7 @@ class Encoding(object):
 
     def to_name(self, i):
 
-        """ Return the symbolic name corresponding to the glyph index *i*.
-        """
+        """ Return the symbolic name corresponding to the glyph index *i*. """
 
         return self._glyph_indexes[i]
 
@@ -118,18 +117,17 @@ class Encoding(object):
 
     def to_index(self, name):
 
-        """ Return the glyph index corresponding to the symbolic name.
-        """
+        """ Return the glyph index corresponding to the symbolic name. """
 
-        return self._glyph_names[i]
+        return self._glyph_names[name]
 
     ###############################################
 
     def print_summary(self):
 
         message = 'Encoding %s:\n\n' % (self.name)
-        for i in xrange(len(self._glyph_indexes)):
-            message += '| %3i | %s\n' % (i, self._glyph_indexes[i])
+        for i in xrange(len(self)):
+            message += '| %3i | %s\n' % (i, self.to_name(i))
 
         print_card(message)
 

@@ -9,11 +9,15 @@
 #
 # Audit
 #
-#  - 17/01/2010 fabrice
+# - 20/11/2011 fabrice
+#   - why int is scaled_...
 #   - TfmChar -> Char
 #   - Check and complete lig kern table and for special fonts
 #
 #####################################################################################################
+
+""" This module handles TeX Font Metric.
+"""
 
 #####################################################################################################
 
@@ -31,16 +35,22 @@ from PyDVI.Tools.Logging import *
 
 class TfmChar(object):
 
-    '''TeX Font Metric for a Glyph
+    """ This class encapsulates a TeX Font Metric for a Glyph.
 
-    Public:
-      - char_code
-      - width
-      - height
-      - depth
-      - italic_correction
-    '''
+    Public attributes:
 
+       :attr:`char_code`
+
+       :attr:`width`
+
+       :attr:`height`
+
+       :attr:`depth`
+
+       :attr:`italic_correction`
+    """
+
+    #: List of the printable characters.
     printable = string.digits + string.letters + string.punctuation
 
     ###############################################
@@ -56,6 +66,7 @@ class TfmChar(object):
                  next_larger_char=None):
 
         self.tfm = tfm
+        tfm[char_code] = self
 
         self.char_code = char_code
         self.width = width
@@ -66,11 +77,11 @@ class TfmChar(object):
         self.lig_kern_program_index = lig_kern_program_index
         self.next_larger_char = next_larger_char
 
-        self.tfm.add_char(self)
-
     ###############################################
 
-    def get_scaled_width(self, scale_factor):
+    def scaled_width(self, scale_factor):
+
+        """ Return the scaled width by *scale_factor*. """
 
         return int(self.width * scale_factor)
 
@@ -78,24 +89,32 @@ class TfmChar(object):
 
     def get_scaled_height(self, scale_factor):
 
+        """ Return the scaled height by *scale_factor*. """
+
         return int(self.height * scale_factor)
 
     ###############################################
 
     def get_scaled_depth(self, scale_factor):
 
+        """ Return the scaled depth by *scale_factor*. """
+
         return int(self.depth * scale_factor)
 
     ###############################################
 
-    def get_scaled_dimensions(self, scale_factor):
+    def scaled_dimensions(self, scale_factor):
 
-        return map(lambda x: int(x * scale_factor),
-                   (self.width, self.height, self.depth))
+        """ Return the 3-tuple made of the scaled width, height and depth by *scale_factor*. """
+
+        return [int(x * scale_factor) for x in self.width, self.height, self.depth]
 
     ###############################################
 
-    def get_next_larger_char(self):
+    def next_larger_tfm_char(self):
+
+        """ Return the :class:`TfmChar` instance for the next larger char if it exists else return
+        :obj:`None`."""
 
         if self.next_larger_char is not None:
             return self.tfm[self.next_larger_char]
@@ -115,32 +134,34 @@ class TfmChar(object):
 
     def chr(self):
 
+        # Fixme: useful for what ?
+
         char = chr(self.char_code)
-        
-        if char not in self.printable:
-            return self.char_code
-        else:
+        if char in self.printable:
             return char
+        else:
+            return self.char_code
 
     ###############################################
 
     def print_summary(self):
 
-        message = '''TFM Char %u %s
+        string_format = '''TFM Char %u %s
  - width             %.3f
  - height            %.3f
  - depth             %.3f
  - italic correction %.3f
  - lig kern program index %s
- - next larger char       %s''' % (
-            self.char_code, self.chr(),
-            self.width,
-            self.height,
-            self.depth,
-            self.italic_correction,
-            str(self.lig_kern_program_index),
-            str(self.next_larger_char),
-            )
+ - next larger char       %s'''
+
+        message = string_format % (self.char_code, self.chr(),
+                                   self.width,
+                                   self.height,
+                                   self.depth,
+                                   self.italic_correction,
+                                   str(self.lig_kern_program_index),
+                                   str(self.next_larger_char),
+                                   )
 
         first_lig_kern = self.get_lig_kern_program()
         if first_lig_kern is not None:
@@ -153,14 +174,18 @@ class TfmChar(object):
 
 class TfmExtensibleChar(TfmChar):
 
-    '''TeX Font Metric for an extensible Glyph
+    """ This class encapsulates a TeX Font Metric for an extensible Glyph.
 
-    Public:
-     - top
-     - mid
-     - bot
-     - rep
-    '''
+    Public attributes:
+
+      :attr:`top`
+
+      :attr:`mid`
+
+      :attr:`bot`
+
+      :attr:`rep`
+     """
 
     ###############################################
 
@@ -286,7 +311,86 @@ class TfmLigature(TfmLigKern):
 
 class Tfm(object):
 
-    """ This class encapsulates a TeX Font Metric.
+    """ This class encapsulates a TeX Font Metric for a font.
+
+    Public attributes:
+
+      :attr:`font_name`
+        font's name
+
+      :attr:`filename`
+        ".tfm" filename
+
+      :attr:`smallest_character_code`
+        smallest character code of the font
+
+      :attr:`largest_character_code`
+        largest character code of the font
+
+      :attr:`checksum`
+        checksum of the tfm file
+
+      :attr:`design_font_size`
+        design font size
+
+      :attr:`character_coding_scheme`
+        character coding scheme
+
+      :attr:`family`
+        font's family
+
+      :attr:`slant`
+
+      :attr:`spacing`
+
+      :attr:`space_stretch`
+
+      :attr:`space_shrink`
+
+      :attr:`x_height`
+
+      :attr:`quad`
+
+      :attr:`extra`_space
+
+    In addition for Math font, the following public attributes are available:
+
+      :attr:`um1`
+
+      :attr:`num2`
+
+      :attr:`num3`
+
+      :attr:`denom1`
+
+      :attr:`denom2`
+
+      :attr:`sup1`
+
+      :attr:`sup2`
+
+      :attr:`sup3`
+
+      :attr:`sub1`
+
+      :attr:`sub2`
+
+      :attr:`supdrop`
+
+      :attr:`subdrop`
+
+      :attr:`delim1`
+
+      :attr:`delim2`
+
+      :attr:`axis_height`
+
+      :attr:`default_rule_thickness`
+
+      :attr:`big_op_spacing`
+
+    The number of characters can be queried using :func:`len`. The :class:`TfmChar` instance for a
+    character code *char_code* can be set or get using the operator [].
     """
 
     ###############################################
@@ -310,27 +414,40 @@ class Tfm(object):
         self.character_coding_scheme = character_coding_scheme
         self.family = family
 
-        self.lig_kerns = []
+        self._lig_kerns = []
+        self._chars = {}
 
-        self.chars = {}
+    ###############################################
+
+    def __setitem__(self, char_code, value):
+
+        """ Set the :class:`TfmChar` instance for the character code *char_code*. """
+
+        self._chars[char_code] = value
 
     ###############################################
 
     def __getitem__(self, char_code):
 
-        return self.chars[char_code]
+        """ Return the :class:`TfmChar` instance for the character code *char_code*. """
+
+        return self._chars[char_code]
 
     ###############################################
 
     def __len__(self):
 
+        """ Return the number of characters. """ 
+
         # return self.largest_character_code - self.smallest_character_code +1
 
-        return len(self.chars)
+        return len(self._chars)
 
     ###############################################
 
     def set_font_parameters(self, parameters):
+
+        """ Set the font parameters. """
 
         (self.slant,
          self.spacing,
@@ -344,6 +461,8 @@ class Tfm(object):
 
     def set_math_symbols_parameters(self, parameters):
           
+        """ Set the math symbols parameters. """
+
         (self.num1,
          self.num2,
          self.num3,
@@ -364,34 +483,28 @@ class Tfm(object):
 
     def set_math_extension_parameters(self, parameters):
 
+        """ Set the math extension parameters. """
+
         self.default_rule_thickness = parameters[0]
         self.big_op_spacing = parameters[1:]
 
     ###############################################
 
-    def add_char(self, char):
-
-        # __setitem__
-
-        self.chars[char.char_code] = char
-
-    ###############################################
-
     def add_lig_kern(self, obj):
 
-        self.lig_kerns.append(obj)
+        self._lig_kerns.append(obj)
 
     ###############################################
 
     def get_lig_kern_program(self, i):
 
-        self.lig_kerns[i]
+        self._lig_kerns[i]
 
     ###############################################
 
     def print_summary(self):
 
-        string_template = '''TFM %s
+        string_format = '''TFM %s
 
  - Smallest character code in the font: %u 
  - Largest character code in the font:  %u 
@@ -410,24 +523,24 @@ Font Parameters:
  - Quad: %f
  - Extra Space: %f'''
 
-        message = string_template % (self.font_name,
-                                     self.smallest_character_code,
-                                     self.largest_character_code,
-                                     self.checksum,
-                                     self.design_font_size,
-                                     self.character_coding_scheme,
-                                     self.family,
-                                     self.slant,
-                                     self.spacing,
-                                     self.space_stretch,
-                                     self.space_shrink,
-                                     self.x_height,
-                                     self.quad,
-                                     self.extra_space,
-                                     )
+        message = string_format % (self.font_name,
+                                   self.smallest_character_code,
+                                   self.largest_character_code,
+                                   self.checksum,
+                                   self.design_font_size,
+                                   self.character_coding_scheme,
+                                   self.family,
+                                   self.slant,
+                                   self.spacing,
+                                   self.space_stretch,
+                                   self.space_shrink,
+                                   self.x_height,
+                                   self.quad,
+                                   self.extra_space,
+                                   )
 
         print_card(message)
-        for char in self.chars.values():
+        for char in self._chars.values():
             char.print_summary()
 
 #####################################################################################################

@@ -125,7 +125,7 @@ class FontMap(object):
     def __init__(self, name, filename=None):
 
         self.name = name
-        self.map = {}
+        self._map = {}
 
         # Fixme: why?
         if filename is not None:
@@ -140,7 +140,7 @@ class FontMap(object):
  
     def __getitem__(self, tex_name):
  
-        return self.map[tex_name]
+        return self._map[tex_name]
  
     ###############################################
  
@@ -149,7 +149,7 @@ class FontMap(object):
         """ Register a font map entry.
         """
 
-        self.map[font_map_entry.tex_name] = font_map_entry
+        self._map[font_map_entry.tex_name] = font_map_entry
 
     ###############################################
  
@@ -225,7 +225,7 @@ class FontMap(object):
  
         print_card('Font Map %s' % (self.name))
  
-        for font_map_entry in self.map.values():
+        for font_map_entry in self._map.values():
             font_map_entry.print_summary()
 
 #####################################################################################################

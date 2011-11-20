@@ -1,7 +1,7 @@
 #####################################################################################################
 #
 # PyDVI - Python Library to Process DVI Stream
-# Copyright (C) 2009 Salvaire Fabrice
+# Copyright (C) 2011 Salvaire Fabrice
 #
 #####################################################################################################
 
@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 09/10/2011 fabrice
+# - 20/11/2011 fabrice
 #
 #####################################################################################################
 
@@ -20,16 +20,27 @@ import unittest
 #####################################################################################################
 
 from PyDVI.Kpathsea import *
+from PyDVI.FontMap import *
 
 #####################################################################################################
 
-class TestKpathsea(unittest.TestCase):
+class TestFontMap(unittest.TestCase):
 
     def test(self):
 
-        filename = kpsewhich('cmr10', file_format='tfm')
-        print 'kpsewhich found', filename
-        self.assertIsNotNone(filename)
+        fontmap_name = 'pdftex'
+        fontmap_file = kpsewhich(fontmap_name, file_format='map')
+        self.assertIsNotNone(fontmap_file)
+        print 'Fontmap file:', fontmap_file
+
+        fontmap = FontMap(fontmap_name, filename=fontmap_file)
+        fontmap_entry = fontmap['cmmi10o']
+        self.assertEqual(fontmap_entry.tex_name, 'cmmi10o')
+        self.assertEqual(fontmap_entry.ps_font_name, 'CMMI10')
+        self.assertEqual(fontmap_entry.ps_snippet, '.167 SlantFont')
+        # self.assertEqual(fontmap_entry.effects, )
+        # self.assertEqual(fontmap_entry.encoding, )
+        self.assertEqual(fontmap_entry.filename, 'cmmi10.pfb')
 
 #####################################################################################################
 

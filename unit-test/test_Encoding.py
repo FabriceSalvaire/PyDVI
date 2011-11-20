@@ -1,7 +1,7 @@
 #####################################################################################################
 #
 # PyDVI - Python Library to Process DVI Stream
-# Copyright (C) 2009 Salvaire Fabrice
+# Copyright (C) 2011 Salvaire Fabrice
 #
 #####################################################################################################
 
@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 09/10/2011 fabrice
+# - 20/11/2011 fabrice
 #
 #####################################################################################################
 
@@ -20,16 +20,22 @@ import unittest
 #####################################################################################################
 
 from PyDVI.Kpathsea import *
+from PyDVI.Encoding import *
 
 #####################################################################################################
 
-class TestKpathsea(unittest.TestCase):
+class TestEncoding(unittest.TestCase):
 
     def test(self):
 
-        filename = kpsewhich('cmr10', file_format='tfm')
-        print 'kpsewhich found', filename
-        self.assertIsNotNone(filename)
+        encoding_file = kpsewhich('cork', file_format='enc files')
+        self.assertIsNotNone(encoding_file)
+        print 'Encoding file:', encoding_file
+
+        encoding = Encoding(encoding_file)
+        self.assertEqual(len(encoding), 256)
+        self.assertEqual(encoding.to_name(0xA0), 'abreve')
+        self.assertEqual(encoding.to_index('abreve'), 0xA0)
 
 #####################################################################################################
 
