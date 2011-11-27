@@ -9,7 +9,8 @@
 #
 # Audit
 #
-# - 14/11/2011 Fabrice
+# - 22/11/2011 Fabrice
+#  - read kern table fix word before kern/lig table ?
 #
 #####################################################################################################
 
@@ -31,7 +32,7 @@ __all__ = ['TfmParser']
 
 #####################################################################################################
 
-from PyDVI.Tfm import Tfm, TfmChar, TfmKern, TfmLigature
+from PyDVI.Tfm import Tfm, TfmChar, TfmKern, TfmLigature, TfmExtensibleChar
 from PyDVI.Tools.EnumFactory import EnumFactory
 from PyDVI.Tools.Stream import FileStream
 
@@ -387,7 +388,9 @@ class TfmParser(object):
         if self.tfm.character_coding_scheme == 'TeX math symbols':
             # Read the additional 15 fix word parameters
             self.tfm.set_math_symbols_parameters(repeat(stream.read_fix_word, 15))
-        elif self.tfm.character_coding_scheme == 'TeX math extension':
+        elif self.tfm.character_coding_scheme in ('TeX math extension',
+                                                  'euler substitutions only',
+                                                  ):
             # Read the additional 6 fix word parameters
             self.tfm.set_math_extension_parameters(repeat(stream.read_fix_word, 6))
 
@@ -438,6 +441,8 @@ class TfmParser(object):
         denotes an unconditional halt; no ligature command is performed.
         """
 
+        print 'Lig/Kern Table'
+
         # Fixme: complete special cases
 
         # Read very first instruction of the table
@@ -447,7 +452,7 @@ class TfmParser(object):
          remainder) = self._read_four_byte_numbers_in_table(tables.lig_kern, 0)
         if first_skip_byte == 255:
             right_boundary_char = next_char
-            raise NameError('Font has right boundary char')
+            raise NotImplementedError('Font has right boundary char')
 
         # Read very last instruction of the table
         (last_skip_byte,
@@ -457,7 +462,7 @@ class TfmParser(object):
                                                             self.table_lengths[tables.lig_kern] -1)
         if last_skip_byte == 255:
             left_boundary_char_program_index = 256*op_byte + remainder
-            raise NameError('Font has left boundary char program')
+            raise NotImplementedError('Font has left boundary char program')
 
         # Read the instructions
         first_instruction = True
@@ -484,7 +489,8 @@ class TfmParser(object):
                 kern_index = 256*(op_byte - KERN_OPCODE) + remainder
                 kern = self._read_fix_word_in_table(tables.kern, kern_index)
                 TfmKern(self.tfm, i, stop, next_char, kern)
-        
+                print "[%u] Kern O %s R %0.6f" % (i, oct(next_char), kern)
+
             else:
                 # Ligature step
                 number_of_chars_to_pass_over = op_byte >> 2
@@ -499,8 +505,19 @@ class TfmParser(object):
                             number_of_chars_to_pass_over,
                             current_char_is_deleted,
                             next_char_is_deleted)
+                print "[%u] Lig C %s O %s N %u %s %s" % (i,
+                                                         oct(next_char),
+                                                         oct(ligature_char_code),
+                                                         number_of_chars_to_pass_over,
+                                                         current_char_is_deleted,
+                                                         next_char_is_deleted)
 
             first_instruction = stop == True
+
+            if stop:
+                print 'Stop'
+
+        print 'Lig/Kern Table End'
 
     ###############################################
 
@@ -556,9 +573,12 @@ class TfmParser(object):
         width_index, height_index, depth_index, italic_index, tag, remainder = self._read_char_info(c)
 
         # Get the parameters in the corresponding tables
-        if width_index == 0:
-            raise ValueError("Zero width character for character code %u" % (c))
-        width = self._read_fix_word_in_table(tables.width, width_index)
+        if width_index != 0:
+            width = self._read_fix_word_in_table(tables.width, width_index)
+        else:
+            width = 0
+            # euex10 has this case
+            # raise ValueError("Zero width character for character code %u" % (c))
         
         if height_index != 0:
             height = self._read_fix_word_in_table(tables.height, height_index)

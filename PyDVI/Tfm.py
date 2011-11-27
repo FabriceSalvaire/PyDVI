@@ -13,6 +13,7 @@
 #   - why int is scaled_...
 #   - TfmChar -> Char
 #   - Check and complete lig kern table and for special fonts
+#   - add_lig_kern
 #
 #####################################################################################################
 
@@ -134,7 +135,7 @@ class TfmChar(object):
 
     def chr(self):
 
-        # Fixme: useful for what ?
+        """ Return the character from its index if it printable. """
 
         char = chr(self.char_code)
         if char in self.printable:
@@ -231,13 +232,9 @@ class TfmLigKern(object):
     def __iter__(self):
 
         i = self.index
-        
         while True:
-            
-            lig_kern = self.tfm.lig_kerns[i]
-            
+            lig_kern = self.tfm.get_lig_kern_program(i)
             yield lig_kern
-            
             if lig_kern.stop:
                 break
             else:
@@ -265,7 +262,7 @@ class TfmKern(TfmLigKern):
 
     def __str__(self):
 
-        return 'Kern char code %3u %s %.3f' % (
+        return 'Kern char code %3u %s %0.6f' % (
             self.next_char,
             self.tfm[self.next_char].chr(),
             self.kern,
@@ -498,7 +495,7 @@ class Tfm(object):
 
     def get_lig_kern_program(self, i):
 
-        self._lig_kerns[i]
+        return self._lig_kerns[i]
 
     ###############################################
 
