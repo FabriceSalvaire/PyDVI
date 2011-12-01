@@ -26,8 +26,8 @@ import subprocess
 
 #####################################################################################################
 
-from Font import *
-from Logging import print_card
+from PyDVI.Font import *
+from PyDVI.Tools.Logging import print_card
 
 #####################################################################################################
 
@@ -44,7 +44,7 @@ class PkFont(Font):
         
         self.glyphs = {}
 
-        self.font_manager.pk_font_parser.process_pk_font(self)
+        #disabled# self.font_manager.pk_font_parser.process_pk_font(self)
 
     ###############################################
  

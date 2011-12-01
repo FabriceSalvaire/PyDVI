@@ -19,10 +19,10 @@ import os
 
 #####################################################################################################
 
-from EnumFactory import *
-from DviMachine import *
-from OpcodeParser import *
-from Stream import *
+from PyDVI.DviMachine import *
+from PyDVI.OpcodeParser import *
+from PyDVI.Tools.EnumFactory import *
+from PyDVI.Tools.Stream import *
 
 #####################################################################################################
 

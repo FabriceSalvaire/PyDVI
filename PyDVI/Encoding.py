@@ -40,8 +40,8 @@ __all__ = ['Encoding']
 
 #####################################################################################################
 
-from Tools.Logging import print_card
-from Tools.TexCommentedFile import TexCommentedFile
+from PyDVI.Tools.Logging import print_card
+from PyDVI.Tools.TexCommentedFile import TexCommentedFile
 
 #####################################################################################################
 

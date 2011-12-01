@@ -24,10 +24,10 @@ import fractions
 
 #####################################################################################################
 
-from EnumFactory import *
-from Interval import *
-from Logging import *
-from TeXUnit import *
+from PyDVI.TeXUnit import *
+from PyDVI.Tools.EnumFactory import *
+from PyDVI.Tools.Interval import *
+from PyDVI.Tools.Logging import *
 
 #####################################################################################################
 

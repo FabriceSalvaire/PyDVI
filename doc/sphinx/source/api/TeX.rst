@@ -2,18 +2,9 @@
  TeX World Modules
 ===================
 
-*****************
- :mod:`Kpathsea`
-*****************
+.. toctree::
 
-.. automodule:: PyDVI.Kpathsea
-   :members:
-
-****************
- :mod:`TeXUnit`
-****************
-
-.. automodule:: PyDVI.TeXUnit
-   :members:
+  modules/Kpathsea.rst
+  modules/TeXUnit.rst
 
 .. End

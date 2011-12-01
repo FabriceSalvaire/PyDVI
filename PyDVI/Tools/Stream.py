@@ -189,14 +189,14 @@ class AbstractStream(object):
                            read_unsigned_byte2,
                            read_unsigned_byte3,
                            read_unsigned_byte4)
-    """This tuple permits to get the read_unsigned_byte method with the number of bytes as index.
+    """ This tuple permits to get the read_unsigned_byte method with the number of bytes as index.
     """
 
     read_signed_byten = (read_signed_byte1, 
                          read_signed_byte2,
                          read_signed_byte3,
                          read_signed_byte4)
-    """This tuple permits to get the *read_signed_byte* method with the number of bytes as index.
+    """ This tuple permits to get the *read_signed_byte* method with the number of bytes as index.
     """
 
     ###############################################

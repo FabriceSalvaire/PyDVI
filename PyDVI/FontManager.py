@@ -24,17 +24,17 @@ __all__ = ['FontManager', 'font_types']
 
 import subprocess
 
-import ft2
+#!# import ft2
 
 #####################################################################################################
 
-from EnumFactory import EnumFactory
-from FontMap import *
-from Kpathsea import kpsewhich
-from PkFont import PkFont
-from PkFontParser import PkFontParser
-from TfmParser import *
-from Type1Font import *
+from PyDVI.FontMap import *
+from PyDVI.Kpathsea import kpsewhich
+from PyDVI.PkFont import PkFont
+from PyDVI.PkFontParser import PkFontParser
+from PyDVI.TfmParser import *
+from PyDVI.Tools.EnumFactory import EnumFactory
+from PyDVI.Type1Font import *
 
 #####################################################################################################
 

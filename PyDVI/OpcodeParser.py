@@ -15,81 +15,16 @@
 
 #####################################################################################################
 
-from Stream import *
+from PyDVI.Tools.Stream import *
 
 #####################################################################################################
 
-class OpcodeStreamParser(object):
+def sign_of(x):
     
-    ###############################################
-
-    def __init__(self, opcode_definitions):
-
-        '''
-        Opcode Stream Parser
-        '''
-
-        # Allocate 256 opcode
-        self.opcode_parsers = [None]*255
-
-        self.__init_opcode_parsers(opcode_definitions)
-
-    ###############################################
-
-    def __init_opcode_parsers(self, opcode_definitions):
-
-        '''
-        opcode_definitions : (opcode_definition, ...)
-
-        opcode_definition : 
-          (opcode_indexes, opcode_name, opcode_description, opcode_parameters = (), opcode_class = None) |
-          (opcode_indexes, opcode_parser_class),
-
-        opcode_indexes :
-          index |
-          [lower_index, upper_index] # duplicate the opcode in the range
-
-        opcode_parameters :
-          (p0, p1, ...) |
-          ([lower_n, upper_n]) # opcode at [index + i] has parameter p[i]
-        '''
-
-        for opcode_definition in opcode_definitions:
-        
-            # opcode index
-
-            index = opcode_definition[0]
-            
-            if isinstance(index, list):
-                lower_index = index[0]
-                upper_index = index[1]
-            else:
-                lower_index = upper_index = index
-        
-            if isinstance(opcode_definition[1], str): # opcode description string
-        
-                name, description, parameters, opcode_class = opcode_definition[1:]
-        
-                if isinstance(parameters, list):
-                    lower_n, upper_n = parameters
-                    if lower_n < 0:
-                        signe = -1
-                    else:
-                        signe = 1
-                    for n in xrange(abs(lower_n), abs(upper_n) +1):
-                        i = index + n -1
-                        self.opcode_parsers[i] = OpcodeParser(i, name, description, tuple([signe*n]), opcode_class)
-
-                else:
-                    for i in xrange(lower_index, upper_index +1):
-                        self.opcode_parsers[i] = OpcodeParser(i, name, description, parameters, opcode_class)
-        
-            else: # OpcodeParser Class
-                for i in xrange(lower_index, upper_index +1):
-                    self.opcode_parsers[i] = opcode_definition[1](i)
-
-        # for opcode_parser in self.opcode_parsers:
-        #     print opcode_parser
+    if x < 0:
+        return -1
+    else:
+        return 1
 
 #####################################################################################################
 
@@ -97,11 +32,11 @@ class OpcodeParser(object):
 
     ###############################################
 
-    def __init__(self, opcode, name, description, parameters = (), opcode_class = None):
+    def __init__(self, opcode, name, description, parameters=(), opcode_class=None):
 
-        '''
+        """
         Opcode Parser
-        '''
+        """
 
         self.opcode = opcode
         self.name = name
@@ -109,9 +44,19 @@ class OpcodeParser(object):
         self.opcode_class = opcode_class
 
         self.parameter_readers = []
-
         if parameters:
-            self.__init_parameter_readers__(parameters)
+            self._init_parameter_readers(parameters)
+
+    ###############################################
+
+    def _init_parameter_readers(self, parameters):
+
+        for number_of_bytes in parameters:
+            if parameters > 0:
+                read_byten = AbstractStream.read_unsigned_byten
+            else:
+                read_byten = AbstractStream.read_signed_byten
+            self.parameter_readers.append(read_byten[abs(number_of_bytes) -1])
 
     ###############################################
 
@@ -121,34 +66,85 @@ class OpcodeParser(object):
 
     ###############################################
 
-    def __init_parameter_readers__(self, parameters):
-
-        for parameter in parameters:
-            if   parameter ==  1: parameter_reader = AbstractStream.read_unsigned_byte1
-            elif parameter ==  2: parameter_reader = AbstractStream.read_unsigned_byte2
-            elif parameter ==  3: parameter_reader = AbstractStream.read_unsigned_byte3
-            elif parameter ==  4: parameter_reader = AbstractStream.read_unsigned_byte4
-            elif parameter == -1: parameter_reader = AbstractStream.read_signed_byte1
-            elif parameter == -2: parameter_reader = AbstractStream.read_signed_byte2
-            elif parameter == -3: parameter_reader = AbstractStream.read_signed_byte3
-            elif parameter == -4: parameter_reader = AbstractStream.read_signed_byte4
-                
-            self.parameter_readers.append(parameter_reader)
-
-    ###############################################
-
     def read_parameters(self, opcode_parser):
 
         return [parameter_reader(opcode_parser.stream) for parameter_reader in self.parameter_readers]
 
     ###############################################
 
-    def to_opcode(self, parameters):
+    def to_opcode(self, args):
 
         if self.opcode_class is not None:
-            return self.opcode_class(* parameters)
+            return self.opcode_class(* args)
         else:
             return None
+
+#####################################################################################################
+
+class OpcodeStreamParser(object):
+    
+    ###############################################
+
+    def __init__(self, opcode_definitions):
+
+        """
+        Opcode Stream Parser
+
+        opcode_definitions : (opcode_definition, ...)
+
+        opcode_definition : 
+          (opcode_indexes, opcode_name, opcode_description, opcode_parameters=(), opcode_class=None) |
+          (opcode_indexes, opcode_parser_class),
+
+        opcode_indexes :
+          index |
+          [lower_index, upper_index] # duplicate the opcode in the range
+
+        opcode_parameters :
+          (p0, p1, ...) |
+          ([lower_n, upper_n]) # opcode at [index + i] has parameter p[i]
+
+        """
+
+        # Allocate 256 opcode
+        self.opcode_parsers = [None]*256
+        for opcode_definition in opcode_definitions:
+            self._init_opcode_parser(opcode_definition)
+
+    ###############################################
+
+    def _init_opcode_parser(self, opcode_definition):
+
+        # opcode index
+
+        index = opcode_definition[0]
+        if isinstance(index, list):
+            indexes = range(index[0], index[1] +1)
+        else:
+            indexes = [index]
+
+        # Fixme:
+        # if isinstance(opcode_definition[1], OpcodeParser):
+        if not isinstance(opcode_definition[1], str):
+            for i in indexes:
+                self.opcode_parsers[i] = opcode_definition[1](i)
+
+        else: # opcode description string
+            name, description, parameters, opcode_class = opcode_definition[1:]
+        
+            if isinstance(parameters, list):
+                lower_n, upper_n = parameters
+                signe = sign_of(lower_n)
+                for n in xrange(abs(lower_n), abs(upper_n) +1):
+                    i = index + n -1 # Fixme: bad: index vs indexes
+                    self.opcode_parsers[i] = OpcodeParser(i, name, description, tuple([signe*n]), opcode_class)
+
+            else:
+                for i in indexes:
+                    self.opcode_parsers[i] = OpcodeParser(i, name, description, parameters, opcode_class)
+
+        # for opcode_parser in self.opcode_parsers:
+        #    print opcode_parser
 
 #####################################################################################################
 #

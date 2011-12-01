@@ -23,19 +23,24 @@ __ALL__ = ['kpsewhich']
 
 #####################################################################################################
 
+import logging
 import subprocess
+
+#####################################################################################################
+
+logger = logging.getLogger(__name__)
 
 #####################################################################################################
 
 def kpsewhich(filename, file_format=None, options=None):
 
-    """Wrapper around the *kpsewhich* program.
+    """Wrapper around the :command:`kpsewhich` command, cf. kpsewhich(1).
 
     *file_format*
-      used to specify the file format, see *kpsewhich* help for the file format list.
+      used to specify the file format, see :command:`kpsewhich` help for the file format list.
 
     *options*
-      additional option for *kpsewhich*.
+      additional option for :command:`kpsewhich`.
 
     Examples::
 
@@ -50,8 +55,10 @@ def kpsewhich(filename, file_format=None, options=None):
     command.append(filename)
 
     shell_command = ' '.join(command)
+    logger.info('Run shell command: ' + shell_command)
     pipe = subprocess.Popen(shell_command, shell=True, stdout=subprocess.PIPE)
     stdout = pipe.communicate()[0]
+    logger.info('stdout:\n' + stdout)
     path = stdout.rstrip()
 
     return path if path else None

@@ -43,10 +43,10 @@ The percent character is used for comment as for TeX.
 
 References:
 
- * The Font Installation Guide Using Postscript fonts to their full potential with Latex. Originally
-   written by Philipp Lehman. December 2004. Revision 2.14. cf. Creating map files Part.
- * updmap(1) - Update font map files for TeX output drivers.
- * updmap.cfg(5) - configuration of font mapping/inclusion for dvips and friends
+* The Font Installation Guide Using Postscript fonts to their full potential with Latex. Originally
+  written by Philipp Lehman. December 2004. Revision 2.14. cf. Creating map files Part.
+* updmap(1) - Update font map files for TeX output drivers.
+* updmap.cfg(5) - configuration of font mapping/inclusion for dvips and friends
 
 """
 
@@ -56,8 +56,8 @@ __all__ = ['FontMap', 'FontMapEntry']
 
 #####################################################################################################
 
-from Tools.Logging import print_card
-from Tools.TexCommentedFile import TexCommentedFile
+from PyDVI.Tools.Logging import print_card
+from PyDVI.Tools.TexCommentedFile import TexCommentedFile
 
 #####################################################################################################
 
@@ -67,12 +67,17 @@ class FontMapEntry(object):
     
     Public attributes are:
 
-      * :attr:`tex_name`
-      * :attr:`ps_font_name`
-      * :attr:`ps_snippet`
-      * :attr:`effects`
-      * :attr:`encoding`
-      * :attr:`filename`
+      :attr:`tex_name`
+
+      :attr:`ps_font_name`
+
+      :attr:`ps_snippet`
+
+      :attr:`effects`
+
+      :attr:`encoding`
+
+      :attr:`filename`
     """
 
     ###############################################

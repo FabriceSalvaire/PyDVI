@@ -15,17 +15,17 @@
 
 """This module provides functions to convert units used in the TeX world:
 
- * **mm** stands for milimetre,
- * **in** stands for inch which corresponds to 25.4 mm,
- * **pt** stands for TeX point, there is 72.27 pt in one inch,
- * **sp** stands for scale point, there is 2**16 sp in one pt,
- * **dpi** stands for dot per inch.
+* **mm** stands for milimetre,
+* **in** stands for inch which corresponds to 25.4 mm,
+* **pt** stands for TeX point, there is 72.27 pt in one inch,
+* **sp** stands for scale point, there is 2**16 sp in one pt,
+* **dpi** stands for dot per inch.
 
 The DVI format uses the measure 100 nm as base unit. A scaled point is defined as a fraction:
 
- * num = 2.54 * 1e7 = 25400000
- * den = 7227 * 2**16 = 473628672
- * 1 sp = num/den = 5.4 nm
+* num = 2.54 * 1e7 = 25400000
+* den = 7227 * 2**16 = 473628672
+* 1 sp = num/den = 5.4 nm
 
 For a resolution of 1200 dpi, a pixel measures 21 um.
 """

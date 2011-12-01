@@ -10,5 +10,6 @@
    TeX.rst
    Tools.rst
    Font.rst
+   todo.rst
 
 .. End

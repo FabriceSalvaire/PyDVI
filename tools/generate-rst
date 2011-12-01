@@ -21,6 +21,8 @@
 #
 # ./generate-rst --root-path=...
 #
+# ./tools/generate-rst --root-path=$PWD --module-path=$PWD/PyDVI/Tools --file-per-module --dst-path=./doc/sphinx/source/api/modules
+#
 #####################################################################################################
 
 #####################################################################################################
@@ -60,6 +62,17 @@ parser.add_option('--module-path',
                   type='string', default='.',
                   help='root path')
 
+parser.add_option('--file-per-module',
+                  dest='file_per_module',
+                  action="store_true", default=False,
+                  help='File per module')
+
+parser.add_option('--dst-path',
+                  dest='dst_path',
+                  action='callback', callback=store_path_value,
+                  type='string', default='.',
+                  help='dst path')
+
 opt, args = parser.parse_args()
 
 #####################################################################################################
@@ -93,11 +106,11 @@ def process_module(module_path, module_name):
 %(mod)s%(module_name)s`
 %(header_line)s
 
-.. automodule:: PyDVI.%(module_path)s.%(module_name)s
+.. automodule:: %(module_path)s.%(module_name)s
    :members:
    :show-inheritance:
 """
-    template = template[:-1]
+    template = template[1:-1]
     
     rst = template % dict(
         module_name=module_name,
@@ -106,21 +119,33 @@ def process_module(module_path, module_name):
         module_path=module_path,
         )
 
-    print rst
+    return rst
 
 #####################################################################################################
 
 module_path_python = opt.module_path.replace(opt.root_path + '/', '').replace('/', '.')
 
-prolog(opt.module_path)
+end_marker = """
+.. End
+"""
+
+if not opt.file_per_module:
+    prolog(opt.module_path)
     
 for filename in sorted(os.listdir(opt.module_path)):
     if fnmatch(filename, '*.py') and filename != '__init__.py':
         module_name = filename.replace('.py', '')
-        process_module(module_path_python, module_name)
+        rst = process_module(module_path_python, module_name)
+        if opt.file_per_module:
+            rst += '\n' + end_marker
+            print rst
+            with open(os.path.join(opt.dst_path, module_name + '.rst'), 'w') as f:
+                f.write(rst)
+        else:
+            print '\n', rst
 
-print """
-.. End"""
+if not opt.file_per_module:
+    print end_marker
 
 sys.exit(0)
 

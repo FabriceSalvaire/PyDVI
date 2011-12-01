@@ -19,8 +19,8 @@ __all__ = ['Font']
 
 #####################################################################################################
 
-from Kpathsea import kpsewhich
-from Logging import print_card
+from PyDVI.Kpathsea import kpsewhich
+from PyDVI.Tools.Logging import print_card
 
 #####################################################################################################
 
@@ -65,7 +65,7 @@ class Font(object):
         if tfm_file is None:
             raise NameError("TFM file %s not found" % (self.name))
 
-        self.tfm = self.font_manager.tfm_parser.parse(self.name, tfm_file)
+        #disabled# self.tfm = self.font_manager.tfm_parser.parse(self.name, tfm_file)
 
     ###############################################
 

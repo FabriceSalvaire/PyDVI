@@ -19,7 +19,7 @@ __ALL__ = ['pydvi_version']
 
 #####################################################################################################
 
-from Tools.RevisionVersion import RevisionVersion
+from PyDVI.Tools.RevisionVersion import RevisionVersion
 
 #####################################################################################################
 

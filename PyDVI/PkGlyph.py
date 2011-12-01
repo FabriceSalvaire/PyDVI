@@ -25,8 +25,8 @@ import numpy as np
 
 #####################################################################################################
 
-from Logging import print_card
-from TeXUnit import *
+from PyDVI.TeXUnit import *
+from PyDVI.Tools.Logging import print_card
 
 #####################################################################################################
 

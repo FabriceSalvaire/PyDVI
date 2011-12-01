@@ -348,7 +348,7 @@ class Tfm(object):
 
       :attr:`quad`
 
-      :attr:`extra`_space
+      :attr:`extra_space`
 
     In addition for Math font, the following public attributes are available:
 

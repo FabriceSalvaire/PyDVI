@@ -1,5 +1,5 @@
 DaemonSubprocess.py | to doc
-EnumFactory.py	    | to doc
+EnumFactory.py	    | done
 Interval.py	    | to doc
 Logging.py	    | done
 RevisionVersion.py  | done

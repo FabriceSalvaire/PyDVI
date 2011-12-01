@@ -15,11 +15,11 @@
 #####################################################################################################
 
 """
-This module handles TeX Font Metric files.
+The :mod:`TfmParser` module provides a tool to parse TeX Font Metric file.  TFM files contain the
+metrics for TeX fonts.  They have the ".tfm" extension.
 
-A TFM file gives the metrics for a TeX font. It uses the ".tfm" extension.
-
-The TFM file format in descriped in the :file:`tftopl` web file.
+The TFM file format in descriped in the :file:`tftopl.web` file from Web2C.  Part of this
+documentation comes from this file.
 
 The information in a TFM file appears in a sequence of 8-bit bytes. Since the number of bytes is
 always a multiple of 4, we could also regard the file as a sequence of 32-bit words. Note that the
@@ -171,18 +171,18 @@ class TfmParser(object):
         """ The fist 24 bytes (6 words) of a TFM file contain twelve 16-bit integers that give the
         lengths of the various subsequent portions of the file. These twelve integers are, in order:
 
-          * lf = length of the entire file, in words;
-          * lh = length of the header data, in words;
-          * bc = smallest character code in the font;
-          * ec = largest character code in the font;
-          * nw = number of words in the width table;
-          * nh = number of words in the height table;
-          * nd = number of words in the depth table;
-          * ni = number of words in the italic correction table;
-          * nl = number of words in the lig/kern table;
-          * nk = number of words in the kern table;
-          * ne = number of words in the extensible character table;
-          * np = number of font parameter words.
+        * lf = length of the entire file, in words;
+        * lh = length of the header data, in words;
+        * bc = smallest character code in the font;
+        * ec = largest character code in the font;
+        * nw = number of words in the width table;
+        * nh = number of words in the height table;
+        * nd = number of words in the depth table;
+        * ni = number of words in the italic correction table;
+        * nl = number of words in the lig/kern table;
+        * nk = number of words in the kern table;
+        * ne = number of words in the extensible character table;
+        * np = number of font parameter words.
 
         They are all nonnegative and less than 2**15. We must have ``bc - 1 <= ec <= 255``, ``ne <=
         256``, and
@@ -353,18 +353,18 @@ class TfmParser(object):
         """ The final portion of a TFM fie is the param array, which is another sequence of fix word
         values.
 
-          * param[1] = ``slant`` is the amount of italic slant, which is used to help position
-            accents.  For example, slant = .25 means that when you go up one unit, you also go .25
-            units to the right.  The slant is a pure number; it's the only fix word other than the
-            design size itself that is not scaled by the design size.
-          * param[2] = ``space`` is the normal spacing between words in text. Note that character " "
-            in the font need not have anything to do with blank spaces.
-          * param[3] = ``space_stretch`` is the amount of glue stretching between words.
-          * param[4] = ``space_shrink`` is the amount of glue shrinking between words.
-          * param[5] = ``x_height`` is the height of letters for which accents don't have to be
-            raised or lowered.
-          * param[6] = ``quad`` is the size of one em in the font.
-          * param[7] = ``extra_space`` is the amount added to param[2] at the ends of sentences.
+        * param[1] = ``slant`` is the amount of italic slant, which is used to help position
+          accents.  For example, slant = .25 means that when you go up one unit, you also go .25
+          units to the right.  The slant is a pure number; it's the only fix word other than the
+          design size itself that is not scaled by the design size.
+        * param[2] = ``space`` is the normal spacing between words in text. Note that character " "
+          in the font need not have anything to do with blank spaces.
+        * param[3] = ``space_stretch`` is the amount of glue stretching between words.
+        * param[4] = ``space_shrink`` is the amount of glue shrinking between words.
+        * param[5] = ``x_height`` is the height of letters for which accents don't have to be
+          raised or lowered.
+        * param[6] = ``quad`` is the size of one em in the font.
+        * param[7] = ``extra_space`` is the amount added to param[2] at the ends of sentences.
 
         When the character coding scheme is ``TeX math symbols``, the font is supposed to have 15
         additional parameters called ``num1``, ``num2``, ``num3``, ``denom1``, ``denom2``, ``sup1``,
@@ -401,13 +401,13 @@ class TfmParser(object):
         """ The lig kern array contains instructions in a simple programming language that explains
         what to do for special letter pairs. Each word is a lig kern command of four bytes.
 
-         * first byte: ``skip_byte``, indicates that this is the final program step if the byte is
-           128 or more, otherwise the next step is obtained by skipping this number of intervening
-           steps.
-         * second byte: ``next_char``, "if ``next_char`` follows the current character, then perform
-           the operation and stop, otherwise continue."
-         * third byte: ``op_byte``, indicates a ligature step if less than 128, a kern step otherwise.
-         * fourth byte: ``remainder``.
+        * first byte: ``skip_byte``, indicates that this is the final program step if the byte is
+          128 or more, otherwise the next step is obtained by skipping this number of intervening
+          steps.
+        * second byte: ``next_char``, "if ``next_char`` follows the current character, then perform
+          the operation and stop, otherwise continue."
+        * third byte: ``op_byte``, indicates a ligature step if less than 128, a kern step otherwise.
+        * fourth byte: ``remainder``.
 
         In a kern step, an additional space equal to ``kern[256 * (op_byte + 128) + remainder]`` is
         inserted between the current character and next char.  This amount is often negative, so
@@ -526,10 +526,10 @@ class TfmParser(object):
         """ Next comes the char info array, which contains one char info word per character.  Each
         char info word contains six fields packed into four bytes as follows.
 
-          * first byte: ``width_index`` (8 bits)
-          * second byte: ``height_index`` (4 bits) times 16, plus depth index (4 bits)
-          * third byte: ``italic_index`` (6 bits) times 4, plus tag (2 bits)
-          * fourth byte: ``remainder`` (8 bits)
+        * first byte: ``width_index`` (8 bits)
+        * second byte: ``height_index`` (4 bits) times 16, plus depth index (4 bits)
+        * third byte: ``italic_index`` (6 bits) times 4, plus tag (2 bits)
+        * fourth byte: ``remainder`` (8 bits)
 
         The actual width of a character is ``width[width_index]``, in design-size units; this is a
         device for compressing information, since many characters have the same width.  Since it is
@@ -544,19 +544,19 @@ class TfmParser(object):
 
         The tag field in a char info word has four values that explain how to interpret the remainder field.
 
-          * ``tag = 0`` (``no_tag``) means that remainder is unused.
-          * ``tag = 1`` (``lig_tag``) means that this character has a ligature/kerning program
-            starting at ``lig_kern[remainder]``.
-          * ``tag = 2`` (``list_tag``) means that this character is part of a chain of characters of
-            ascending sizes, and not the largest in the chain.  The remainder field gives the
-            character code of the next larger character.
-          * ``tag = 3`` (``ext_tag``) means that this character code represents an extensible
-            character, i.e., a character that is built up of smaller pieces so that it can be made
-            arbitrarily large.  The pieces are specified in ``exten[remainder]``.
-          * ``no_tag = 0`` vanilla character
-          * ``lig_tag = 1`` character has a ligature/kerning program
-          * ``list_tag = 2`` character has a successor in a charlist
-          * ``ext_tag = 3`` character is extensible
+        * ``tag = 0`` (``no_tag``) means that remainder is unused.
+        * ``tag = 1`` (``lig_tag``) means that this character has a ligature/kerning program
+          starting at ``lig_kern[remainder]``.
+        * ``tag = 2`` (``list_tag``) means that this character is part of a chain of characters of
+          ascending sizes, and not the largest in the chain.  The remainder field gives the
+          character code of the next larger character.
+        * ``tag = 3`` (``ext_tag``) means that this character code represents an extensible
+          character, i.e., a character that is built up of smaller pieces so that it can be made
+          arbitrarily large.  The pieces are specified in ``exten[remainder]``.
+        * ``no_tag = 0`` vanilla character
+        * ``lig_tag = 1`` character has a ligature/kerning program
+        * ``list_tag = 2`` character has a successor in a charlist
+        * ``ext_tag = 3`` character is extensible
         """
 
         # Read the character information table
