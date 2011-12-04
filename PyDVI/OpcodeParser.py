@@ -15,7 +15,11 @@
 
 #####################################################################################################
 
-from PyDVI.Tools.Stream import *
+__all__ = ['OpcodeStreamParser', 'OpcodeParser']
+
+#####################################################################################################
+
+from PyDVI.Tools.Stream import AbstractStream
 
 #####################################################################################################
 
@@ -123,9 +127,7 @@ class OpcodeStreamParser(object):
         else:
             indexes = [index]
 
-        # Fixme:
-        # if isinstance(opcode_definition[1], OpcodeParser):
-        if not isinstance(opcode_definition[1], str):
+        if isinstance(opcode_definition[1], OpcodeParser.__class__):
             for i in indexes:
                 self.opcode_parsers[i] = opcode_definition[1](i)
 

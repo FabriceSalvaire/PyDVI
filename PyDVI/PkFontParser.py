@@ -10,7 +10,6 @@
 # Audit
 #
 #  - 17/01/2010 fabrice
-#    repeat?
 #
 #####################################################################################################
 
@@ -288,130 +287,41 @@ lower left hand corner of this pixel. (See the example below.)
 
 #####################################################################################################
 
+__all__ = ['PkFontParser', 'OpcodeParser_xxx']
+
+#####################################################################################################
+
 import sys
 
 #####################################################################################################
 
-from PyDVI.OpcodeParser import *
-from PyDVI.PkGlyph import *
+from PyDVI.OpcodeParser import OpcodeStreamParser, OpcodeParser
+from PyDVI.PkGlyph import PkGlyph
 from PyDVI.TeXUnit import *
-from PyDVI.Tools.EnumFactory import *
-from PyDVI.Tools.Logging import *
-from PyDVI.Tools.Stream import to_fix_word
+from PyDVI.Tools.EnumFactory import ExplicitEnumFactory
+from PyDVI.Tools.Logging import print_card
+from PyDVI.Tools.Stream import to_fix_word, AbstractStream, FileStream
 
 #####################################################################################################
 
-char_opcodes = ['CHAR_%03u' % i for i in xrange(240)]
-pk_opcodes_tuple = char_opcodes +  ['XXX1', 'XXX2', 'XXX3', 'XXX4', 'YYY', 'POST', 'NOP', 'PRE']
-pk_opcodes = EnumFactory('PkOpcodes', pk_opcodes_tuple)
+def repeat(func, number_of_times):
+    return [func() for i in xrange(number_of_times)]
+
+#####################################################################################################
+
+pk_opcodes = ExplicitEnumFactory('PkOpcodes', {
+        'XXX1':240,
+        'XXX2':241,
+        'XXX3':242,
+        'XXX4':243,
+        'YYY':244,
+        'POST':245,
+        'NOP':246,
+        'PRE':247
+        })
 
 PK_ID = 89
-
-#####################################################################################################
-
-class OpcodeParser_char(OpcodeParser):
-
-    ###############################################
-
-    def __init__(self, opcode):
-
-        super(OpcodeParser_char, self).__init__(opcode, 'char', '')
-
-    ###############################################
-
-    def read_parameters(self, pk_font_parser):
-
-        stream = pk_font_parser.stream
-
-        # flag = stream.read_unsigned_byte1()
-        flag = self.opcode
-
-        dyn_f = flag >> 4
-        first_pixel_is_black = (flag & 8) != 0
-        two_bytes = (flag & 4) != 0
-
-        three_least_significant = flag & 7
-        two_least_significant = flag & 3
-
-        if three_least_significant <= 3: # bit 2**3 is not set
-            format = 1 # short form
-        elif three_least_significant == 7: # all 3-bit are set
-            format = 3 # long form
-        else: # 3 < 3-bit < 7, bit 2**3 is set
-            format = 2 # extended form
-
-        # preambule_length is counted next to packed_length
-
-        if format == 1:
-            # (flag mod 4)*256 + pl
-            packet_length = (two_least_significant << 8) + stream.read_unsigned_byte1()
-            preambule_length = 8 # 3 + 1*5
-        elif format == 2:
-            packet_length = (two_least_significant << 16) + stream.read_unsigned_byte2()
-            preambule_length = 13 # 3 + 2*5
-        else:
-            packet_length = stream.read_unsigned_byte4()
-            preambule_length = 28 # 4*7
-
-        if format == 3:
-            (char_code, tfm,
-             dx, dy,
-             width, height,
-             horizontal_offset, vertical_offset) = [stream.read_unsigned_byte4() for i in xrange(8)]
-            dm = None
- 
-        else:
-            if format == 1:
-                read_unsigned_byte = stream.read_unsigned_byte1
-                read_signed_byte = stream.read_signed_byte1
-            else:
-                read_unsigned_byte = stream.read_unsigned_byte2
-                read_signed_byte = stream.read_signed_byte2
-
-            char_code = stream.read_unsigned_byte1()
-            tfm = stream.read_unsigned_byte3()
-            (dm, width, height) = [read_unsigned_byte() for i in xrange(3)]
-            (horizontal_offset, vertical_offset) = [read_signed_byte() for i in xrange(2)]
-            dx = dm
-            dy = 0
-
-        tfm = to_fix_word(tfm)
-
-        nybbles = stream.read(packet_length - preambule_length)
-
-        PkGlyph(pk_font_parser.pk_font,
-                char_code,
-                tfm, dm, dx, dy,
-                height, width,
-                horizontal_offset, vertical_offset,
-                nybbles, dyn_f, first_pixel_is_black)
-
-        if True:
-            string_template = '''Char %u
- - Flag: %u
- - Dynamic Packing Variable: %u
- - First pixel is black: %s
- - Two Bytes: %s
- - Format: %u
- - Packet Length: %u
- - TFM width: %u
- - dm: %u
- - dx: %u
- - dy: %u
- - Height: %u
- - Width: %u
- - Horizontal Offset: %u
- - Vertical Offset: %u
-'''
-
-            print_card(string_template % (
-                    char_code,
-                    flag, dyn_f, first_pixel_is_black, two_bytes, format, packet_length,
-                    tfm, dm, dx, dy,
-                    height, width,
-                    horizontal_offset, vertical_offset,
-                    ))
-            
+           
 #####################################################################################################
 
 class OpcodeParser_xxx(OpcodeParser):
@@ -439,15 +349,15 @@ class OpcodeParser_xxx(OpcodeParser):
 class PkFontParser(OpcodeStreamParser):
 
     opcode_definitions = (
-        ( [pk_opcodes.CHAR_000,
-           pk_opcodes.CHAR_239], OpcodeParser_char ),
         ( pk_opcodes.NOP, 'nop', 'no operation', None, None ),
         ( [pk_opcodes.XXX1,
            pk_opcodes.XXX4], OpcodeParser_xxx ),
         ( pk_opcodes.YYY, 'yyy', 'numspecial', (4,), None ),
-        ( pk_opcodes.PRE, 'pre', 'preamble', (), None ),
+        ( pk_opcodes.PRE, 'pre', 'preamble', (), None ), # Fixme: pre is not used in the loop
         ( pk_opcodes.POST, 'post', 'postamble', None, None ),
         )
+
+    # Fixme: initialise opcode via factory
    
     ###############################################
 
@@ -466,7 +376,7 @@ class PkFontParser(OpcodeStreamParser):
         self.stream = FileStream(pk_font.filename)
 
         self._process_preambule()
-        self._process_characters()
+        self._process_file()
 
         self.stream = None
 
@@ -518,19 +428,116 @@ Preambule
 
     ###############################################
 
-    def _process_characters(self):
+    def _process_file(self):
 
         """ Process the characters. """
         
         stream = self.stream
 
+        # Fixme: to incorporate pre, check here pre is the first code
+
         while True:
-            opcode = stream.read_unsigned_byte1()
-            if opcode == pk_opcodes.POST:
+            byte = stream.read_unsigned_byte1()
+            if byte == pk_opcodes.POST:
                 break
+            elif byte >= pk_opcodes.XXX1:
+                # Fixme: self.opcode_parsers[byte]()
+                opcode_parser = self.opcode_parsers[byte]
+                opcode_parser.read_parameters(self) # Fixme: return where
             else:
-                opcode_parser = self.opcode_parsers[opcode]
-                opcode_parser.read_parameters(self)
+                self._read_char_definition(byte)
+
+    ###############################################
+
+    def _read_char_definition(self, flag):
+
+        stream = self.stream
+
+        dyn_f = flag >> 4
+        first_pixel_is_black = (flag & 8) != 0
+        two_bytes = (flag & 4) != 0
+
+        three_least_significant = flag & 7
+        two_least_significant = flag & 3
+
+        if three_least_significant <= 3: # bit 2**3 is not set
+            format = 1 # short form
+        elif three_least_significant == 7: # all 3-bit are set
+            format = 3 # long form
+        else: # 3 < 3-bit < 7, bit 2**3 is set
+            format = 2 # extended form
+
+        # preambule_length is counted next to packed_length
+
+        if format == 1:
+            # (flag mod 4)*256 + pl
+            packet_length = (two_least_significant << 8) + stream.read_unsigned_byte1()
+            preambule_length = 8 # 3 + 1*5
+        elif format == 2:
+            packet_length = (two_least_significant << 16) + stream.read_unsigned_byte2()
+            preambule_length = 13 # 3 + 2*5
+        else:
+            packet_length = stream.read_unsigned_byte4()
+            preambule_length = 28 # 4*7
+
+        if format == 3:
+            (char_code, tfm,
+             dx, dy,
+             width, height,
+             horizontal_offset, vertical_offset) = repeat(stream.read_unsigned_byte4, 8)
+            dm = None
+ 
+        else:
+            if format == 1:
+                read_unsigned_byte = stream.read_unsigned_byte1
+                read_signed_byte = stream.read_signed_byte1
+            else:
+                read_unsigned_byte = stream.read_unsigned_byte2
+                read_signed_byte = stream.read_signed_byte2
+
+            char_code = stream.read_unsigned_byte1()
+            tfm = stream.read_unsigned_byte3()
+            (dm, width, height) = repeat(read_unsigned_byte, 3)
+            (horizontal_offset, vertical_offset) = repeat(read_signed_byte, 2)
+            dx = dm
+            dy = 0
+
+        tfm = to_fix_word(tfm)
+
+        nybbles = stream.read(packet_length - preambule_length)
+
+        PkGlyph(self.pk_font,
+                char_code,
+                tfm, dm, dx, dy,
+                height, width,
+                horizontal_offset, vertical_offset,
+                nybbles, dyn_f, first_pixel_is_black)
+
+        if True:
+            string_template = '''Char %u
+ - Flag: %u
+ - Dynamic Packing Variable: %u
+ - First pixel is black: %s
+ - Two Bytes: %s
+ - Format: %u
+ - Packet Length: %u
+ - TFM width: %u
+ - dm: %u
+ - dx: %u
+ - dy: %u
+ - Height: %u
+ - Width: %u
+ - Horizontal Offset: %u
+ - Vertical Offset: %u
+'''
+
+            print_card(string_template % (
+                    char_code,
+                    flag, dyn_f, first_pixel_is_black, two_bytes, format, packet_length,
+                    tfm, dm, dx, dy,
+                    height, width,
+                    horizontal_offset, vertical_offset,
+                    ))
 
 #####################################################################################################
 #

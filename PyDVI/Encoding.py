@@ -16,7 +16,7 @@
 """
 This module handles TeX encoding file.
 
-An encoding file map the glyph index with its symbolic name. It uses the ".enc" extension.
+An encoding file map the glyph index with its symbolic name. It uses the ``.enc`` extension.
 
 For example, the content of :file:`cork.enc` is::
 
@@ -32,6 +32,32 @@ For example, the content of :file:`cork.enc` is::
   ] def
 
 The percent character is used for comment as for TeX.
+
+The content of this file can be parsed using::
+
+  cork_encoding = Encoding('/usr/share/texmf/fonts/enc/dvips/base/cork.enc')
+
+The encoding's name can be retrieved using::
+
+  >>> cork_encoding.name
+  'CorkEncoding'
+
+The number of glyphes can be obtained using the function :func:`len`::
+
+  >>> len(cork_encoding)
+  256
+
+The index of the glyph ``eth`` can be retrieved using::
+
+  >>> cork_encoding['eth']
+  0xF0
+
+and reciprocally::
+
+  >>> cork_encoding[0xF0]
+  'eth'
+
+The methods :meth:`to_index` and :meth:`to_name` and are used internally for this purpose.
 """
 
 #####################################################################################################
@@ -50,7 +76,9 @@ class Encoding(object):
     """
     Parse an encoding file and store the association between the index and the glyph's name.
 
-    The number of glyphes can be obtained using the function :func:`len`.
+    Public attributes are:
+
+      ``name``
     """
 
     ###############################################
@@ -60,7 +88,7 @@ class Encoding(object):
         self.name = None
 
         self._glyph_indexes = [] # Map glyph index to glyph name
-        self._glyph_names   = {} # Map glyph name  to glyph index
+        self._glyph_names = {} # Map glyph name  to glyph index
 
         try:
             with TexCommentedFile(filename) as encoding_file:
@@ -83,6 +111,19 @@ class Encoding(object):
         """ Return the number of glyphes. """
 
         return len(self._glyph_indexes)        
+
+    ###############################################
+
+    def __getitem__(self, index):
+
+        """ If *index* is a glyph index then return the corresponding symbolic name else try to
+        return the glyph index corresponding to the symbolic name *index*.
+        """
+
+        try:
+            return self.to_name(int(index))
+        except ValueError:
+            return self.to_index(index)
 
     ###############################################
 

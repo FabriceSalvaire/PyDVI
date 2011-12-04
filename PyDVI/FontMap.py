@@ -18,7 +18,7 @@
 This module handles font map file.
 
 A font map gives the correspondance between the TeX PK fonts and their PostScript equivalents. It
-uses the ".map" extension.
+uses the ``.map`` extension.
 
 For example, the file :file:`pdftex.map` contains lines like::
 
@@ -29,11 +29,11 @@ Each line describes a PK font using the following format::
   PK_FONT_NAME PS_FONT_NAME "PostScript snippet" <FILE_NAME1 <FILE_NAME2
 
 The first word is the TeX font name and the second word is the PostScript font name. The PostScript
-font name can be omitted if it is the same than the TeX font name. The word starting by '<' are
-filenames to be included in the PostScript file. A filename with the extension '.enc' is an encoding
-file and a filename with the extension '.pfb' is a Printer Font Binary file. The text enclosed by
-double quotes is optional and gives a PostScript snippet to be inserted in the PostScript file. It
-can be placed at the end of the line.
+font name can be omitted if it is the same than the TeX font name. The word starting by "<" are
+filenames to be included in the PostScript file. A filename with the extension ``.enc`` is an
+encoding file and a filename with the extension ``.pfb`` is a Printer Font Binary file. The text
+enclosed by double quotes is optional and gives a PostScript snippet to be inserted in the
+PostScript file. It can be placed at the end of the line.
 
 The percent character is used for comment as for TeX.
 
@@ -45,8 +45,23 @@ References:
 
 * The Font Installation Guide Using Postscript fonts to their full potential with Latex. Originally
   written by Philipp Lehman. December 2004. Revision 2.14. cf. Creating map files Part.
+  http://www.ctan.org/tex-archive/info/Type1fonts/fontinstallationguide
 * updmap(1) - Update font map files for TeX output drivers.
-* updmap.cfg(5) - configuration of font mapping/inclusion for dvips and friends
+* updmap.cfg(5) - Configuration of font mapping/inclusion for dvips and friends
+
+The font map :file:`pdftex.map` can be parsed using::
+
+  font_map = FontMap('/usr/share/texmf/fonts/map/pdftex/updmap/pdftex.map')
+
+Each entry is stored in a :class:`FontMapEntry` instance and can be retrieved using its TeX name as
+key::
+
+  font_map_entry = font_map['futbo8r']
+
+Then the ``.pfb`` file name as well the other parameters can be queried as attribute::
+
+  >>> font_map_entry.pfb_filename
+  'putb8a.pfb'
 
 """
 
@@ -77,19 +92,19 @@ class FontMapEntry(object):
 
       :attr:`encoding`
 
-      :attr:`filename`
+      :attr:`pfb_filename`
     """
 
     ###############################################
 
-    def __init__(self, tex_name, ps_font_name, ps_snippet, effects, encoding, filename):
+    def __init__(self, tex_name, ps_font_name, ps_snippet, effects, encoding, pfb_filename):
 
         self.tex_name = tex_name
         self.ps_font_name = ps_font_name
         self.ps_snippet = ps_snippet
         self.effects = effects
         self.encoding = encoding
-        self.filename = filename
+        self.pfb_filename = pfb_filename
 
     ###############################################
 
@@ -101,7 +116,7 @@ class FontMapEntry(object):
  - ps snippet   "%s"
  - effects      %s
  - encoding     %s
- - filename     %s''' 
+ - pfb_filename %s''' 
 
         message = message_pattern % (
             self.tex_name,
@@ -109,7 +124,7 @@ class FontMapEntry(object):
             self.ps_snippet,
             self.effects,
             self.encoding,
-            self.filename,
+            self.pfb_filename,
             )
 
         print_card(message)
@@ -119,10 +134,6 @@ class FontMapEntry(object):
 class FontMap(object):
 
     """ This class parses a fontmap file.
-
-    A font map entry :class:`FontMapEntry` can be retrivied using the TeX name as key::
-
-      font_map_instance[tex_name]
     """
 
     ###############################################

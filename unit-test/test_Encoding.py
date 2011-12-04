@@ -35,7 +35,9 @@ class TestEncoding(unittest.TestCase):
         encoding = Encoding(encoding_file)
         self.assertEqual(len(encoding), 256)
         self.assertEqual(encoding.to_name(0xA0), 'abreve')
+        self.assertEqual(encoding[0xA0], 'abreve')
         self.assertEqual(encoding.to_index('abreve'), 0xA0)
+        self.assertEqual(encoding['abreve'], 0xA0)
 
 #####################################################################################################
 

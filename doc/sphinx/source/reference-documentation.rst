@@ -2,8 +2,10 @@
  Reference Documentation
 =========================
 
-This software was designed according to the official TeX Web2C
-documentation. Relevant files are:
+This software was designed according to the official TeX Web2C documentation
+(http://www.tug.org/web2c/).
+
+Relevant files are:
 
 * :file:`dvicopy.web`
 * :file:`dvitype.web`

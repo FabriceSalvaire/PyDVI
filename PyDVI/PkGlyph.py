@@ -68,7 +68,7 @@ class PkGlyph(object):
         Get the next nyblle
         '''
 
-        byte = ord(self.nybbles[self.nybble_index])
+        byte = self.nybbles[self.nybble_index]
 
         if self.upper_nybble:
             nybble = byte >> 4
@@ -88,32 +88,33 @@ class PkGlyph(object):
 
         i = self.get_nybble()
 
-        if i == 0:
-
-            while True:
-                j  = self.get_nybble()
+        if i == 0: # large run count
+            # count the number of zeros / nybbles and read the first nybble
+            while True: 
+                j = self.get_nybble()
                 i += 1
                 if j != 0: break
-
+            # decode the large run count
             while i > 0:
-                j  = j * 16 + self.get_nybble()
+                j = j * 16 + self.get_nybble()
                 i -= 1
+            # scale it
+            # next number is (13 - (dyn_f +1))*16 + 15 + (dyn_f +1) = (13 - dyn_f)*16 + dyn_f
+            return j - 15 + (13 - self.dyn_f)*16 + self.dyn_f
 
-            return j - 15 + (13 - self.dyn_f) * 16 + self.dyn_f
-
-        elif i <= self.dyn_f:
+        elif i <= self.dyn_f: # one-nybble packed number
             return i
+        elif i < 14: # two-nybble packed number
+            # next number is dyn_f +1
+            # (nybble_1 - next_number)*16 + nybble_2 + next_number
+            return (i - self.dyn_f - 1)*16 + self.get_nybble() + self.dyn_f + 1
 
-        elif i < 14:
-            return (i - self.dyn_f - 1) * 16 + self.get_nybble() + self.dyn_f + 1
-
-        else:
-
+        else: # repeat count
             if i == 14:
+                # decode the repeat count
                 self.repeat_count = self.pk_packed_num()
-            else :
+            else: # i == 15
                 self.repeat_count = 1
-
             return self.pk_packed_num()
 
     ###############################################

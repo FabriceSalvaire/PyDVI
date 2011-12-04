@@ -110,7 +110,7 @@ class AbstractStream(object):
         """ Read *number_of_bytes* times 8-bit unsigned integers, cf. :meth:`read_bytes`.
         """
 
-        return [ord(x) for x in self.read_bytes(number_of_bytes, position)]
+        return list(self.read_bytes(number_of_bytes, position))
 
     ###############################################
 
@@ -218,7 +218,7 @@ class AbstractStream(object):
         the string is given by the first byte, thus its length is limited to 256 characters.
         """
 
-        return self.read_bytes(self.read_unsigned_byte1(position))
+        return str(self.read_bytes(self.read_unsigned_byte1(position)))
 
 #####################################################################################################
 
@@ -233,16 +233,10 @@ class StandardStream(AbstractStream):
 
     def read(self, number_of_bytes):
 
-        """ Read *n* bytes from the current position.
+        """ Read *n* bytes from the current position and return a :obj:`bytearray`
         """
 
-        # print 'Stream.read %u bytes at %u' % (number_of_bytes, self.tell())
-
-        bytes = self.stream.read(number_of_bytes)
-
-        # print '  bytes:', map(ord, bytes)
-
-        return bytes
+        return bytearray(self.stream.read(number_of_bytes))
 
     ###############################################
 

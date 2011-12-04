@@ -44,7 +44,8 @@ def kpsewhich(filename, file_format=None, options=None):
 
     Examples::
 
-       filename = kpsewhich('cmr10', file_format='tfm')
+       >>> kpsewhich('cmr10', file_format='tfm')
+       '/usr/share/texmf/fonts/tfm/public/cm/cmr10.tfm'
     """
 
     command = ['kpsewhich']
