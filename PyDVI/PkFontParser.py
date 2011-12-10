@@ -109,7 +109,7 @@ and magstephalf, it should be named ``cmr10.1095pk``.
 The PK format has two conflicting goals: to pack character raster and size information as compactly
 as possible, while retaining ease of translation into raster and other forms.  A suitable compromise
 was found in the use of run-encoding of the raster information.  Instead of packing the individual
-bits of the character, we instead count the number of consecutive `black' or `white' pixels in a
+bits of the character, we instead count the number of consecutive "black" or "white" pixels in a
 horizontal raster row, and then encode this number.  Run counts are found for each row from left to
 right, traversing rows from the top to bottom.  This is essentially the way the GF format works.
 Instead of presenting each row individually, however, we concatenate all of the horizontal raster
@@ -119,7 +119,7 @@ special commands to mark the end of one row and the beginning of the next.
 
 Next, we place the burden of finding the minimum bounding box on the part of the font generator,
 since the characters will usually be used much more often than they are generated.  The minimum
-bounding box is the smallest rectangle that encloses all `black' pixels of a character. We also
+bounding box is the smallest rectangle that encloses all "black" pixels of a character. We also
 eliminate the need for a special end of character marker, by supplying exactly as many bits as are
 required to fill the minimum bounding box, from which the end of the character is implicit.
 
@@ -201,7 +201,7 @@ The final algorithm for decoding the run counts based on the above scheme looks 
 that a procedure called ``get_nyb`` is available to get the next nybble from the file, and assuming that
 the global repeat count indicates whether a row needs to be repeated.  Note that this routine is
 recursive, but since a repeat count can never directly follow another repeat count, it can only be
-recursive to one level;;
+recursive to one level::
 
   function pk packed num: integer ;
     var i; j: integer;
@@ -223,7 +223,7 @@ recursive to one level;;
              end;
     end;
 
-For low resolution fonts, or characters with `gray' areas, run encoding can often make the character
+For low resolution fonts, or characters with "gray" areas, run encoding can often make the character
 many times larger.  Therefore, for those characters that cannot be encoded efficiently with run
 counts, the PK format allows bit-mapping of the characters.  This is indicated by a ``dyn_f`` value
 of 14.  The bits are packed tightly, by concatenating all of the horizontal raster rows into one

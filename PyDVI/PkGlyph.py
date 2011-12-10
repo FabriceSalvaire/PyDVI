@@ -15,7 +15,7 @@
 
 #####################################################################################################
 
-__ALL__ = ['PkGlyph']
+__all__ = ['PkGlyph']
 
 #####################################################################################################
 
@@ -56,162 +56,196 @@ class PkGlyph(object):
 
     ###############################################
 
+    def _init_packed_number_decoder(self):
+
+        self._nybble_index = 0
+        self._upper_nybble = True
+        self._repeat_row_count = 0
+
+    ###############################################
+
+    def _next_nybble(self):
+
+        """ Return the next nyblle from the byte array.
+        """
+
+        byte = self.nybbles[self._nybble_index]
+
+        if self._upper_nybble:
+            nybble = byte >> 4
+        else:
+            nybble = byte & 0xF
+            self._nybble_index += 1
+
+        self._upper_nybble = not self._upper_nybble
+
+        return nybble
+
+    ###############################################
+
+    def _next_packed_number(self):
+
+        """ Decode a packed number from the byte array.
+        """
+
+        i = self._next_nybble()
+
+        if i == 0: # large run count
+            # count the number of zeros, coding the number of nybbles and read the first nybble
+            while True: 
+                j = self._next_nybble()
+                i += 1
+                if j != 0: break
+            # then decode the large run count
+            while i > 0:
+                j = j*16 + self._next_nybble()
+                i -= 1
+            # and finally scale it
+            #   for one zero: j = nybble_1*16 + nybble_2
+            #   min(j) = 1*16 + 0 = 16
+            #   thus j -16 + upper_2_nybble +1
+            return j - 15 + (13 - self.dyn_f)*16 + self.dyn_f
+
+        elif i <= self.dyn_f: # one-nybble packed number: [1, dyn_f]
+            return i
+        elif i < 14: # two-nybble packed number: [dyn_f +1, (13 - dyn_f)*16 + dyn_f]
+            next_number = self.dyn_f +1
+            # packed number = (nybble_1 - next_number)*16 + nybble_2 + next_number
+            # upper number = (13 - (dyn_f +1))*16 + 15 + (dyn_f +1) = (13 - dyn_f)*16 + dyn_f
+            return (i - next_number)*16 + self._next_nybble() + next_number
+
+        else: # repeat row count
+            if i == 14:
+                # decode the repeat row count
+                self._repeat_row_count = self._next_packed_number()
+            else: # i == 15
+                self._repeat_row_count = 1
+            return self._next_packed_number()
+
+    ###############################################
+
+    def _decode_bitmap_glyph(self):
+
+        size = self.height * self.width
+        glyph_bitmap = self.glyph_bitmap = np.zeros(size, dtype=np.bool)
+
+        i = 0
+        for byte in self.nybbles:
+            mask = 128
+            for j in xrange(8):
+                glyph_bitmap[i] = bool(byte & mask)
+                mask >>= 1
+                i += 1
+            if i == size:
+                break
+        glyph_bitmap.shape = self.height, self.width
+
+    ###############################################
+
+    def _decode_packed_glyph(self):
+
+        # Fixme: try linear approach
+        #  current i and row = int(i / width)
+
+        # row 0 corresponds to the glyph's top
+
+        glyph_bitmap = self.glyph_bitmap = np.zeros((self.height, self.width), dtype=np.bool)
+
+        self._init_packed_number_decoder()
+        black_pixel = self.first_pixel_is_black
+        x = 0
+        y = 0
+
+        while y < self.height:
+            count = self._next_packed_number()
+            while count > 0:
+                upper_x = x + count
+                # if upper_x is in the actual row then fill count pixels
+                if upper_x < self.width:
+                    if black_pixel:
+                        glyph_bitmap[y, x:upper_x] = True
+                    count = 0
+                    x = upper_x
+                # else split and repeat row if necessary
+                else: 
+                    if black_pixel: # fill the current row
+                        glyph_bitmap[y, x:] = True
+                    y_src = y
+                    y += 1 # goto next row
+                    #!# if self._repeat_row_count:
+                    # copy repeat_row_count times the current row and increment y
+                    for i in xrange(self._repeat_row_count):
+                        glyph_bitmap[y,:] = glyph_bitmap[y_src,:]
+                        y += 1
+                    self._repeat_row_count = 0
+                    count -= self.width - x
+                    x = 0
+            # flip state
+            black_pixel = not black_pixel
+
+    ###############################################
+
+    def _decode_glyph(self):
+
+        '''
+        Unpack the glyph
+        '''
+        
+        if self.is_bitmap():
+            self._decode_bitmap_glyph()
+        else:
+            self._decode_packed_glyph()
+
+    ###############################################
+
+    def count_list(self):
+
+        # The count list start from the top-left corner of the glyph's bounding box and follows the
+        # top-down and left-right raster order.
+
+        if self.is_bitmap():
+            return 'bitmap glyph'
+
+        count_string = ''
+        self._init_packed_number_decoder()
+        black_pixel = self.first_pixel_is_black
+        transition = False
+        i = 0
+        size = self.height * self.width
+        while i < size:
+            count = self._next_packed_number()
+            i += count
+            if transition and self._repeat_row_count:
+                i += self.width * self._repeat_row_count
+                count_string += '[%u]' % (self._repeat_row_count)
+                self._repeat_row_count = 0
+            if black_pixel:
+                count_string += '%u' % (count)
+            else:
+                count_string += '(%u)' % (count)
+            black_pixel = not black_pixel
+            transition = not transition
+
+        return count_string
+
+    ###############################################
+
+    def is_bitmap(self):
+
+        return self.dyn_f == 14
+
+    ###############################################
+
     def get_scaled_width(self, scale_factor):
 
         return int(self.tfm * scale_factor)
 
     ###############################################
 
-    def get_nybble(self):
-
-        '''
-        Get the next nyblle
-        '''
-
-        byte = self.nybbles[self.nybble_index]
-
-        if self.upper_nybble:
-            nybble = byte >> 4
-        else:
-            nybble = byte & 0xF
-            self.nybble_index += 1
-
-        self.upper_nybble = not self.upper_nybble
-
-        return nybble
-
-    ###############################################
-
-    def pk_packed_num(self):
-
-        # cf. pktype.web from web2c
-
-        i = self.get_nybble()
-
-        if i == 0: # large run count
-            # count the number of zeros / nybbles and read the first nybble
-            while True: 
-                j = self.get_nybble()
-                i += 1
-                if j != 0: break
-            # decode the large run count
-            while i > 0:
-                j = j * 16 + self.get_nybble()
-                i -= 1
-            # scale it
-            # next number is (13 - (dyn_f +1))*16 + 15 + (dyn_f +1) = (13 - dyn_f)*16 + dyn_f
-            return j - 15 + (13 - self.dyn_f)*16 + self.dyn_f
-
-        elif i <= self.dyn_f: # one-nybble packed number
-            return i
-        elif i < 14: # two-nybble packed number
-            # next number is dyn_f +1
-            # (nybble_1 - next_number)*16 + nybble_2 + next_number
-            return (i - self.dyn_f - 1)*16 + self.get_nybble() + self.dyn_f + 1
-
-        else: # repeat count
-            if i == 14:
-                # decode the repeat count
-                self.repeat_count = self.pk_packed_num()
-            else: # i == 15
-                self.repeat_count = 1
-            return self.pk_packed_num()
-
-    ###############################################
-
-    def raster_glyph(self, count_list=False):
-
-        '''
-        Unpack the glyph
-        '''
-
-        self.nybble_index = 0
-        self.upper_nybble = True
-
-        glyph_bitmap = self.glyph_bitmap = np.zeros((self.height, self.width), dtype = np.uint8)
-
-        if self.dyn_f == 14: # get raster by bits
-
-            i = 0
-            bit_map = 0
-            bit_weight = 0
-
-            for y in xrange(self.height):
-                for x in xrange(self.width):
-
-                    bit_weight >> 1
-
-                    if bit_weight == 0:
-                        bit_map = self.nybbles[i]
-                        i += 1
-                        bit_weight = 0xFF
-
-                    if bit_map & bit_weight:
-                        glyph_bitmap[y,x] = 1
-
-        else: # get packed raster
-
-            packed_string = ''
-
-            black_pixel = self.first_pixel_is_black
-            transition = False
-            self.repeat_count = 0
-            x = 0
-            y = 0
-
-            while y < self.height:
-
-                count = self.pk_packed_num()
-
-                if count_list:
-
-                    if transition:
-                        packed_string += '[%u]' % (self.repeat_count)
-
-                    if black_pixel:
-                        packed_string += '%u' % (count)
-                    else:
-                        packed_string += '(%u)' % (count)
-
-                while count > 0:
-
-                    upper_x = x + count
-
-                    if upper_x < self.width: # fill
-
-                        if black_pixel:
-                            glyph_bitmap[y,x:upper_x] = 1
-
-                        count = 0
-                        x = upper_x
-
-                    else: # split count and repeat row if necessary
-
-                        if black_pixel:
-                            glyph_bitmap[y,x:] = 1
-
-                        y_src = y
-                        y += 1
-                        for i in xrange(self.repeat_count):
-                            glyph_bitmap[y,:] = glyph_bitmap[y_src,:]
-                            y += 1
-                        self.repeat_count = 0
-
-                        count -= self.width - x
-                        x = 0
-
-                black_pixel = not black_pixel
-                transition = not transition
-
-        if count_list:
-            print packed_string
-
-    ###############################################
-
     def get_glyph_bitmap(self):
 
         if self.glyph_bitmap is None:
-            self.raster_glyph()
+            self._decode_glyph()
 
         return self.glyph_bitmap
 
@@ -223,43 +257,34 @@ class PkGlyph(object):
 
         axis = ' '*4 + '+' + '-'*self.width + '+'
 
+        def print_label_axis():
+            number_of_digit = int(math.ceil(math.log10(self.width)))
+            for i in xrange(number_of_digit, 0, -1):
+                line = ' '*5
+                for x in xrange(self.width):
+                    line += str((x%10**i)/10**(i-1))
+                print line
+
+        print_label_axis()
         print axis
 
         for y in xrange(self.height):
-
             line = ''
             for x in xrange(self.width):
-                if glyph_bitmap[y,x] == 1:
+                if glyph_bitmap[y,x]:
                     line += 'x'
                 else:
                     line += ' '
-
             print '%3u |%s|' % (y, line)
 
-        # print horizontal axis
-
         print axis
-
-        number_of_digit = int(math.ceil(math.log10(self.width)))
-        
-        for i in xrange(number_of_digit, 0, -1):
-
-            def digit(x):
-                return str((x%10**i)/10**(i-1))
-                
-            line = ' '*5
-            for x in xrange(self.width):
-                line += digit(x)
-
-            print line
+        print_label_axis()
 
     ###############################################
 
     def print_summary(self):
 
-        width = self.tfm * self.pk_font.design_font_size
-
-        print_card(''' Char %u
+        string_format = ''' Char %u
  - TFM width: %.3f * design size
               %.1f pt
               %.1f mm
@@ -270,7 +295,10 @@ class PkGlyph(object):
  - Width:             %3u px
  - Horizontal Offset: %3u px
  - Vertical Offset:   %3u px
-''' % (
+'''
+        width = self.get_scaled_width(self.pk_font.design_font_size)
+
+        print_card(string_format % (
                 self.char_code,
                 self.tfm, width, pt2mm(width),
                 self.dm, self.dx, self.dy,

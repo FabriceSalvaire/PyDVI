@@ -56,9 +56,11 @@ class TestPkFont(unittest.TestCase):
         self.assertEqual(glyph.dx, sp2pt(4063232))
         self.assertEqual(glyph.horizontal_offset, -3)
         self.assertEqual(glyph.vertical_offset, 59)
-        glyph.raster_glyph(count_list=True)
+        glyph.print_summary()
+        glyph.print_glyph()
         count_list = '(26)[2]3(51)[2]5(49)[2]7(47)[2]9(45)[1]2(1)8(43)3(1)9(42)[1]2(3)8(41)3(3)9(40)[1]2(5)8(39)3(5)9(38)[1]2(7)8(37)3(7)9(36)[1]2(9)8(35)3(9)9(34)[1]2(11)8(33)2(12)9(32)[1]2(13)8(31)2(14)9(30)[1]2(15)8(29)2(16)9(28)[1]2(17)8(27)2(18)9(26)[1]29(25)31(24)[1]2(21)8(23)[2]2(23)8(21)[2]2(25)8(19)[1]2(27)8(17)3(27)8(17)3(28)8(15)4(28)8(14)6(27)9(11)10(23)12(6)[2]17(15)23'
-
+        print '\n', count_list
+        self.assertEqual(glyph.count_list(), count_list)
 
 #####################################################################################################
 
