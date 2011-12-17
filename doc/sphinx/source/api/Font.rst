@@ -30,13 +30,16 @@ A Packed Font file can be generated from its Metafont source file using the comm
 
 will generate the ``.pk`` file for the cmr10 font at the resolution of 100 dpi. The Metafont mode
 ``nextscrn``, stands for ``Next Screen``, has a resolution of 100 dpi that is closed to the typical
-LCD screen resolution.  The Metafont modes are defined in the file :file:`modes.mf`.  Also the TeX
-Font Metric file can be generated using the :command:`mktextfm`, for example::
+LCD screen resolution.  The Metafont modes are defined in the file :file:`modes.mf`.
+
+Also the TeX Font Metric file can be generated using the :command:`mktextfm`, for example::
 
   mktextfm cmr10
 
-will generate the ``.tfm`` file for the cmr10 font.  The locations of the generated files can be
-retrieved using the command :command:`kpsewhich` from the Kpathsea library::
+will generate the ``.tfm`` file for the cmr10 font.
+
+The locations of the generated files can be retrieved using the command :command:`kpsewhich` from
+the Kpathsea library::
 
   kpsewhich cmr10.tfm
   kpsewhich -mode nextscrn -dpi 100 cmr10.pk

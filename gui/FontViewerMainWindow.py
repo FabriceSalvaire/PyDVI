@@ -11,7 +11,8 @@
 #
 # Audit
 #
-#
+# - 10/12/2011
+# 
 #####################################################################################################
 
 #####################################################################################################
@@ -41,11 +42,11 @@ class MainWindow(MainWindowBase):
 
     ###############################################
 
-    def __init__(self, application, opt):
+    def __init__(self, application, args):
 
         super(MainWindow, self).__init__(application)
 
-        self.opt = opt
+        self.args = args
 
         self.main_window_ui = Ui_main_window()
         self.main_window_ui.setupUi(self)
@@ -70,8 +71,8 @@ class MainWindow(MainWindowBase):
 
         # Init Form
 
-        if opt.font_name is not None:
-            form.font_name_line_edit.setText(opt.font_name)
+        if args.font_name is not None:
+            form.font_name_line_edit.setText(args.font_name)
 
         self.font_information_table_model = FontInfoTableModel()
         form.font_information_table_view.setModel(self.font_information_table_model)

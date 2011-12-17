@@ -57,7 +57,7 @@ and reciprocally::
   >>> cork_encoding[0xF0]
   'eth'
 
-The methods :meth:`to_index` and :meth:`to_name` and are used internally for this purpose.
+The methods :meth:`to_index` and :meth:`to_name` are used internally for this purpose.
 """
 
 #####################################################################################################

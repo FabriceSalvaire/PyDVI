@@ -35,10 +35,7 @@ class TestPkFont(unittest.TestCase):
         pk_file = kpsewhich(font_name, file_format='pk')
         self.assertIsNotNone(pk_file)
 
-        pk_font_parser = PkFontParser()
-
         pk_font = PkFont(font_manager=None, font_id=0, name=font_name)
-        pk_font_parser.process_pk_font(pk_font)
 
         comment_example = 'METAFONT output 2011.11.25:2115'
         self.assertEqual(len(pk_font.comment), len(comment_example))

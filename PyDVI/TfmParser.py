@@ -9,7 +9,8 @@
 #
 # Audit
 #
-# - 22/11/2011 Fabrice
+# - 11/12/2011 Fabrice
+#  - check self registration
 #  - read kern table fix word before kern/lig table ?
 #
 #####################################################################################################
@@ -18,12 +19,18 @@
 The :mod:`TfmParser` module provides a tool to parse TeX Font Metric file.  TFM files contain the
 metrics for TeX fonts.  They have the ".tfm" extension.
 
+To parse a TFM file and get a :class:`PyDVI.Tfm` instance, use the static method
+:meth:`TfmParser.parse`.  For example use this code for the font "cmr10"::
+
+  tfm = TfmParser.parse('cmr10', '/usr/share/texmf/fonts/tfm/public/cm/cmr10.tfm')
+
 The TFM file format in descriped in the :file:`tftopl.web` file from Web2C.  Part of this
 documentation comes from this file.
 
 The information in a TFM file appears in a sequence of 8-bit bytes. Since the number of bytes is
 always a multiple of 4, we could also regard the file as a sequence of 32-bit words. Note that the
 bytes are considered to be unsigned numbers.
+
 """
 
 #####################################################################################################
@@ -34,6 +41,7 @@ __all__ = ['TfmParser']
 
 from PyDVI.Tfm import Tfm, TfmChar, TfmKern, TfmLigature, TfmExtensibleChar
 from PyDVI.Tools.EnumFactory import EnumFactory
+from PyDVI.Tools.FuncTools import repeat_call
 from PyDVI.Tools.Stream import FileStream
 
 #####################################################################################################
@@ -60,14 +68,6 @@ tables = EnumFactory('TableEnums',
 
 #####################################################################################################
 
-def repeat(func, count):
-
-    """ Call *func* *count* times. """
-
-    return [func() for i in xrange(count)]
-
-#####################################################################################################
-
 class TfmParser(object):
 
     """
@@ -76,29 +76,36 @@ class TfmParser(object):
 
     ###############################################
 
-    # Fixme: API ok?
+    @staticmethod
+    def parse(font_name, filename):
 
-    def parse(self, font_name, filename):
-
-        """ Parse the TFM :file:`filename` for the font *font_name* and return a :class:`Tfm`
+        """ Parse the TFM :file:`filename` for the font *font_name* and return a :class:`PyDVI.Tfm`
         instance.
         """
+
+        tfm_parser = TfmParser(font_name, filename)
+        return tfm_parser()
+
+    ###############################################
+
+    def __init__(self, font_name, filename):
 
         self.font_name = font_name
         self.filename = filename
         self.stream = FileStream(filename)
 
+        self.tfm = None
         self._read_lengths()
         self._read_header()
         self._read_font_parameters()
         self._read_lig_kern_programs()
         self._read_characters()
 
-        # Keep a reference to Tfm instance and delete all the attributes
-        tfm = self.tfm
-        self.__dict__.clear()
+    ###############################################
 
-        return tfm
+    def __call__(self):
+
+        return self.tfm
 
     ###############################################
 
@@ -115,7 +122,7 @@ class TfmParser(object):
 
     ###############################################
 
-    def seek_to_table(self, table):
+    def _seek_to_table(self, table):
 
         """ Seek to the table *table*.
         """
@@ -219,7 +226,7 @@ class TfmParser(object):
         (self.entire_file_length,
          header_length,
          self.smallest_character_code,
-         self.largest_character_code) = repeat(stream.read_unsigned_byte2, 4)
+         self.largest_character_code) = repeat_call(stream.read_unsigned_byte2, 4)
 
         header_data_length_min = 18 # words
         self.table_lengths[tables.header] = max(header_data_length_min, header_length)
@@ -304,7 +311,7 @@ class TfmParser(object):
         
         stream = self.stream
 
-        self.seek_to_table(tables.header)
+        self._seek_to_table(tables.header)
 
         # Read header[0 ... 1]
         checksum = stream.read_unsigned_byte4()
@@ -376,23 +383,23 @@ class TfmParser(object):
         
         stream = self.stream
 
-        self.seek_to_table(tables.font_parameter)
+        self._seek_to_table(tables.font_parameter)
  
         if self.tfm.character_coding_scheme == 'TeX math italic':
             # undocumented in tftopl web
             pass
         else:
             # Read the seven fix word parameters
-            self.tfm.set_font_parameters(repeat(stream.read_fix_word, 7))
+            self.tfm.set_font_parameters(repeat_call(stream.read_fix_word, 7))
 
         if self.tfm.character_coding_scheme == 'TeX math symbols':
             # Read the additional 15 fix word parameters
-            self.tfm.set_math_symbols_parameters(repeat(stream.read_fix_word, 15))
+            self.tfm.set_math_symbols_parameters(repeat_call(stream.read_fix_word, 15))
         elif self.tfm.character_coding_scheme in ('TeX math extension',
                                                   'euler substitutions only',
                                                   ):
             # Read the additional 6 fix word parameters
-            self.tfm.set_math_extension_parameters(repeat(stream.read_fix_word, 6))
+            self.tfm.set_math_extension_parameters(repeat_call(stream.read_fix_word, 6))
 
     ###############################################
 
@@ -441,7 +448,7 @@ class TfmParser(object):
         denotes an unconditional halt; no ligature command is performed.
         """
 
-        print 'Lig/Kern Table'
+        # print 'Lig/Kern Table'
 
         # Fixme: complete special cases
 
@@ -488,8 +495,9 @@ class TfmParser(object):
                 # Kern step
                 kern_index = 256*(op_byte - KERN_OPCODE) + remainder
                 kern = self._read_fix_word_in_table(tables.kern, kern_index)
+                # Fixme: self registration ?
                 TfmKern(self.tfm, i, stop, next_char, kern)
-                print "[%u] Kern O %s R %0.6f" % (i, oct(next_char), kern)
+                # print "[%u] Kern O %s R %0.6f" % (i, oct(next_char), kern)
 
             else:
                 # Ligature step
@@ -497,6 +505,7 @@ class TfmParser(object):
                 current_char_is_deleted = (op_byte & 0x02) == 0
                 next_char_is_deleted    = (op_byte & 0x01) == 0
                 ligature_char_code = remainder
+                # Fixme: self registration ?
                 TfmLigature(self.tfm,
                             i,
                             stop,
@@ -505,19 +514,19 @@ class TfmParser(object):
                             number_of_chars_to_pass_over,
                             current_char_is_deleted,
                             next_char_is_deleted)
-                print "[%u] Lig C %s O %s N %u %s %s" % (i,
-                                                         oct(next_char),
-                                                         oct(ligature_char_code),
-                                                         number_of_chars_to_pass_over,
-                                                         current_char_is_deleted,
-                                                         next_char_is_deleted)
+                # print "[%u] Lig C %s O %s N %u %s %s" % (i,
+                #                                          oct(next_char),
+                #                                          oct(ligature_char_code),
+                #                                          number_of_chars_to_pass_over,
+                #                                          current_char_is_deleted,
+                #                                          next_char_is_deleted)
 
             first_instruction = stop == True
 
-            if stop:
-                print 'Stop'
+            # if stop:
+            #     print 'Stop'
 
-        print 'Lig/Kern Table End'
+            # print 'Lig/Kern Table End'
 
     ###############################################
 
@@ -607,6 +616,7 @@ class TfmParser(object):
             extensible_recipe = self._read_extensible_recipe(remainder)
 
         if extensible_recipe is not None:
+            # Fixme: self registration ?
             TfmExtensibleChar(self.tfm,
                               c,
                               width,
@@ -618,6 +628,7 @@ class TfmParser(object):
                               next_larger_char)
 
         else:
+            # Fixme: self registration ?
             TfmChar(self.tfm,
                     c,
                     width,
@@ -648,7 +659,7 @@ class TfmParser(object):
 
     ###############################################
 
-    def print_summary(self):
+    def _print_summary(self):
 
         string_format = '''
 TFM %s

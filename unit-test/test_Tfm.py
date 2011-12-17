@@ -39,13 +39,14 @@ class TestTfm(unittest.TestCase):
         self.assertIsNotNone(tfm_file)
         print 'TFM file:', tfm_file
 
-        tfm_parser = TfmParser() 
-        tfm = tfm_parser.parse(font_name, tfm_file)
+        tfm = TfmParser.parse(font_name, tfm_file)
 
         self.assertEqual(tfm.family, 'CMR')
         self.assertEqual(tfm.checksum, 011374260171) # tftopl output an octal representation
         self.assertEqual(tfm.design_font_size, 10)
         self.assertEqual(tfm.character_coding_scheme, 'TeX text')
+
+        self.assertEqual(len(tfm), 128)
 
         self.assertAlmostEqual(tfm.slant, 0.0, places=6)
         self.assertAlmostEqual(tfm.spacing, 0.333334, places=6)
@@ -92,8 +93,7 @@ class TestTfm(unittest.TestCase):
         self.assertIsNotNone(tfm_file)
         print 'TFM file:', tfm_file
 
-        tfm_parser = TfmParser() 
-        tfm = tfm_parser.parse(font_name, tfm_file)
+        tfm = TfmParser.parse(font_name, tfm_file)
 
         self.assertEqual(tfm.family, 'EUEX V2.2')
         self.assertEqual(tfm.checksum, 014201660461) # tftopl output an octal representation

@@ -295,7 +295,7 @@ import sys
 
 #####################################################################################################
 
-from PyDVI.OpcodeParser import OpcodeStreamParser, OpcodeParser
+from PyDVI.OpcodeParser import OpcodeParserSet, OpcodeParser
 from PyDVI.PkGlyph import PkGlyph
 from PyDVI.TeXUnit import *
 from PyDVI.Tools.EnumFactory import ExplicitEnumFactory
@@ -346,30 +346,29 @@ class OpcodeParser_xxx(OpcodeParser):
 
 #####################################################################################################
 
-class PkFontParser(OpcodeStreamParser):
+opcode_definitions = (
+    ( pk_opcodes.NOP, 'nop', 'no operation', None, None ),
+    ( [pk_opcodes.XXX1,
+       pk_opcodes.XXX4], OpcodeParser_xxx ),
+    ( pk_opcodes.YYY, 'yyy', 'numspecial', (4,), None ),
+    ( pk_opcodes.PRE, 'pre', 'preamble', (), None ), # Fixme: pre is not used in the loop
+    ( pk_opcodes.POST, 'post', 'postamble', None, None ),
+    )
 
-    opcode_definitions = (
-        ( pk_opcodes.NOP, 'nop', 'no operation', None, None ),
-        ( [pk_opcodes.XXX1,
-           pk_opcodes.XXX4], OpcodeParser_xxx ),
-        ( pk_opcodes.YYY, 'yyy', 'numspecial', (4,), None ),
-        ( pk_opcodes.PRE, 'pre', 'preamble', (), None ), # Fixme: pre is not used in the loop
-        ( pk_opcodes.POST, 'post', 'postamble', None, None ),
-        )
+class PkFontParser(object):
 
-    # Fixme: initialise opcode via factory
-   
-    ###############################################
-
-    def __init__(self):
-
-        super(PkFontParser, self).__init__(self.opcode_definitions)
-
-        self.pk_font = None
+    opcode_parser_set = OpcodeParserSet(opcode_definitions)
 
     ###############################################
 
-    def process_pk_font(self, pk_font):
+    @staticmethod
+    def parse(pk_font):
+
+        PkFontParser(pk_font)
+
+    ###############################################
+
+    def __init__(self, pk_font):
 
         self.pk_font = pk_font
 
@@ -377,8 +376,6 @@ class PkFontParser(OpcodeStreamParser):
 
         self._process_preambule()
         self._process_file()
-
-        self.stream = None
 
     ###############################################
 
@@ -422,9 +419,8 @@ Preambule
             vertical_dpi,
             )
         
-        # fixme: ?
-        self.pk_font.set_preambule_data(pk_id, comment, design_font_size, checksum,
-                                        horizontal_dpi, vertical_dpi)
+        self.pk_font._set_preambule_data(pk_id, comment, design_font_size, checksum,
+                                         horizontal_dpi, vertical_dpi)
 
     ###############################################
 
@@ -442,7 +438,7 @@ Preambule
                 break
             elif byte >= pk_opcodes.XXX1:
                 # Fixme: self.opcode_parsers[byte]()
-                opcode_parser = self.opcode_parsers[byte]
+                opcode_parser = self.opcode_parser_set[byte]
                 opcode_parser.read_parameters(self) # Fixme: return where
             else:
                 self._read_char_definition(byte)
@@ -513,7 +509,7 @@ Preambule
                 horizontal_offset, vertical_offset,
                 nybbles, dyn_f, first_pixel_is_black)
 
-        if True:
+        if False:
             string_template = '''Char %u
  - Flag: %u
  - Dynamic Packing Variable: %u

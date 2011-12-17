@@ -1,0 +1,10 @@
+-*- outiline -*-
+
+* Integrate Kpsewhich in ctor
+
+No if we want to pass a file out of Kpathsea search path.
+
+* filename -> file_name
+
+* End
+

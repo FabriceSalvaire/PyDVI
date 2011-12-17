@@ -15,7 +15,7 @@
 
 #####################################################################################################
 
-__all__ = ['OpcodeStreamParser', 'OpcodeParser']
+__all__ = ['OpcodeParserSet', 'OpcodeParser']
 
 #####################################################################################################
 
@@ -85,14 +85,14 @@ class OpcodeParser(object):
 
 #####################################################################################################
 
-class OpcodeStreamParser(object):
+class OpcodeParserSet(list):
     
     ###############################################
 
     def __init__(self, opcode_definitions):
 
         """
-        Opcode Stream Parser
+        Opcode Set
 
         opcode_definitions : (opcode_definition, ...)
 
@@ -111,7 +111,7 @@ class OpcodeStreamParser(object):
         """
 
         # Allocate 256 opcode
-        self.opcode_parsers = [None]*256
+        self.extend([None]*256)
         for opcode_definition in opcode_definitions:
             self._init_opcode_parser(opcode_definition)
 
@@ -129,7 +129,7 @@ class OpcodeStreamParser(object):
 
         if isinstance(opcode_definition[1], OpcodeParser.__class__):
             for i in indexes:
-                self.opcode_parsers[i] = opcode_definition[1](i)
+                self[i] = opcode_definition[1](i)
 
         else: # opcode description string
             name, description, parameters, opcode_class = opcode_definition[1:]
@@ -139,13 +139,13 @@ class OpcodeStreamParser(object):
                 signe = sign_of(lower_n)
                 for n in xrange(abs(lower_n), abs(upper_n) +1):
                     i = index + n -1 # Fixme: bad: index vs indexes
-                    self.opcode_parsers[i] = OpcodeParser(i, name, description, tuple([signe*n]), opcode_class)
+                    self[i] = OpcodeParser(i, name, description, tuple([signe*n]), opcode_class)
 
             else:
                 for i in indexes:
-                    self.opcode_parsers[i] = OpcodeParser(i, name, description, parameters, opcode_class)
+                    self[i] = OpcodeParser(i, name, description, parameters, opcode_class)
 
-        # for opcode_parser in self.opcode_parsers:
+        # for opcode_parser in self:
         #    print opcode_parser
 
 #####################################################################################################

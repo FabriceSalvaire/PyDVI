@@ -1,52 +1,45 @@
 #####################################################################################################
 #
 # PyDVI - Python Library to Process DVI Stream
-# Copyright (C) 2009 Salvaire Fabrice
+# Copyright (C) 2011 Salvaire Fabrice
 #
 #####################################################################################################
 
 #####################################################################################################
 #
-# Audit
+#                                              Audit
+#
+# - 00/00/2010 Fabrice
+#   xx
 #
 #####################################################################################################
 
-#####################################################################################################
-
-import sys
-
-from optparse import OptionParser
+__all__ = ['repeat_call', 'get_filename_extension']
 
 #####################################################################################################
 
-from PyDVI.Kpathsea import kpsewhich
-from PyDVI.TfmParser import TfmParser
+def repeat_call(func, count):
+
+    """ Call *func* *count* times. """
+
+    return [func() for i in xrange(count)]
 
 #####################################################################################################
 
-usage = 'usage: %prog font_name'
+def get_filename_extension(filename):
 
-parser = OptionParser(usage)
-
-opt, args = parser.parse_args()
-
-if len(args) != 1:
-    parser.error("Give a a font name, e.g. cmr10")
-
-font_name = args[0]
-
-#####################################################################################################
-
-tfm_file = kpsewhich(font_name, file_format='tfm')
-if tfm_file is None:
-    print 'TFM file %s not found' % (font_name)
-    sys.exit(1)
-
-tfm = TfmParser.parse(font_name, tfm_file)
-tfm.print_summary()
+    index = filename.rfind('.')
+    if index >= 0:
+        try:
+            return filename[index+1:]
+        except:
+            return None
+    else:    
+        return None
 
 #####################################################################################################
 #
 # End
 #
 #####################################################################################################
+ 

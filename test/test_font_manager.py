@@ -18,7 +18,8 @@ import pylab as pl
 
 #####################################################################################################
 
-from FontManager import *
+from PyDVI.Font import *
+from PyDVI.FontManager import *
 
 #####################################################################################################
 
@@ -26,7 +27,7 @@ font_manager = FontManager(font_map='pdftex')
 
 # Pk Font
 
-cmr10_pk = font_manager.load_font(font_types.Pk, 'cmr10')
+cmr10_pk = font_manager._load_font(font_types.Pk, 'cmr10')
 
 cmr10_pk.print_summary()
 
@@ -44,13 +45,13 @@ glyph_bitmap = glyph.get_glyph_bitmap()
 
 print
 
-font_manager.set_use_pk(False)
-#font_manager.set_use_pk(True)
+#font_manager.set_use_pk(False)
+font_manager.use_pk = True
 
 cmr10_type1 = font_manager['cmr10']
 
 cmr10_type1.print_summary()
-cmr10_type1.print_glyph_table()
+#cmr10_type1.print_glyph_table()
 
 cmr10_type1.tfm[ord('A')].print_summary()
 

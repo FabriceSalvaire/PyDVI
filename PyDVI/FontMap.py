@@ -71,6 +71,10 @@ __all__ = ['FontMap', 'FontMapEntry']
 
 #####################################################################################################
 
+import os
+
+#####################################################################################################
+
 from PyDVI.Tools.Logging import print_card
 from PyDVI.Tools.TexCommentedFile import TexCommentedFile
 
@@ -138,19 +142,17 @@ class FontMap(object):
 
     ###############################################
 
-    def __init__(self, name, filename=None):
+    def __init__(self, filename):
 
-        self.name = name
+        self.name = os.path.basename(filename).replace('.map', '')
         self._map = {}
 
-        # Fixme: why?
-        if filename is not None:
-            #try:
+        try:
             with TexCommentedFile(filename) as font_map_file:
                 for line in font_map_file:
                     self._parse_line(line)
-            #except:
-            #    raise NameError('Bad fontmap file')
+        except:
+            raise NameError('Bad fontmap file')
 
     ###############################################
  
@@ -160,7 +162,7 @@ class FontMap(object):
  
     ###############################################
  
-    def register_entry(self, font_map_entry):
+    def _register_entry(self, font_map_entry):
  
         """ Register a font map entry.
         """
@@ -213,7 +215,7 @@ class FontMap(object):
         font_map_entry = FontMapEntry(tex_name, ps_font_name,
                                       ps_snippet, effects,
                                       encoding_filename, pfb_filename)
-        self.register_entry(font_map_entry)
+        self._register_entry(font_map_entry)
     
     ###############################################
     

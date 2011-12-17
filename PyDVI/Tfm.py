@@ -9,7 +9,9 @@
 #
 # Audit
 #
-# - 20/11/2011 fabrice
+# - 11/12/2011 fabrice
+#   - why ref Tfm, self registration
+#
 #   - why int is scaled_...
 #   - TfmChar -> Char
 #   - Check and complete lig kern table and for special fonts
@@ -18,6 +20,24 @@
 #####################################################################################################
 
 """ This module handles TeX Font Metric.
+
+The class :class:`PyDVI.Tfm` handles the font's metric.  To get a :class:`PyDVI.Tfm` instance for a
+particular font use the static method :meth:`PyDVI.TfmParser.TfmParser.parse`.  For example use this
+code for the font "cmr10"::
+
+  tfm = TfmParser.parse('cmr10', '/usr/share/texmf/fonts/tfm/public/cm/cmr10.tfm')
+
+The number of characters in the font can be obtained using the function :func:`len`::
+
+  >>> len(tfm)
+  128
+
+Each character's metric is stored in a :class:`TfmChar` instance that can be accessed using the char
+code as index on the :class:`Tfm` class instance.  For example to get the metric of the character
+"A" use::
+
+   tfm[ord('A')]
+
 """
 
 #####################################################################################################
@@ -126,6 +146,8 @@ class TfmChar(object):
 
     def get_lig_kern_program(self):
 
+        """ Get the ligature/kern program of the character. """
+
         if self.lig_kern_program_index is not None:
             return self.tfm.get_lig_kern_program(self.lig_kern_program_index)
         else:
@@ -135,7 +157,7 @@ class TfmChar(object):
 
     def chr(self):
 
-        """ Return the character from its index if it printable. """
+        """ Return the character string from its char code if it is printable. """
 
         char = chr(self.char_code)
         if char in self.printable:
@@ -216,6 +238,9 @@ class TfmExtensibleChar(TfmChar):
 
 class TfmLigKern(object):
 
+    """ This classe serves of base class for ligature and kern program instruction.
+    """
+
     ###############################################
 
     def __init__(self, tfm, index, stop, next_char):
@@ -231,6 +256,8 @@ class TfmLigKern(object):
 
     def __iter__(self):
 
+        """ Iterate of the ligature/kern program. """
+
         i = self.index
         while True:
             lig_kern = self.tfm.get_lig_kern_program(i)
@@ -244,11 +271,16 @@ class TfmLigKern(object):
 
 class TfmKern(TfmLigKern):
 
-    '''Kerning
+    """ This class represents a Kerning Program Instruction.
 
-    Public:
-      - kern
-    '''
+    Public Attributes:
+
+      :attr:`next_char`
+        next character
+
+      :attr:`kern`
+        kerning value
+    """
 
     ###############################################
 
@@ -272,8 +304,26 @@ class TfmKern(TfmLigKern):
 
 class TfmLigature(TfmLigKern):
 
-    '''Ligature
-    '''
+    """ This class represents a Ligature Program Instruction.
+
+    Public Attributes:
+
+      :attr:`next_char`
+        next character
+
+      :attr:`ligature_char_code`
+        ligature character code
+
+      :attr:`current_char_is_deleted`
+        the current characters must be deleted of the stream
+
+      :attr:`next_char_is_deleted`
+        the next characters must be deleted of the stream
+
+      :attr:`number_of_chars_to_pass_over`
+        number of characters to pass over
+
+    """
 
     ###############################################
 
@@ -489,11 +539,15 @@ class Tfm(object):
 
     def add_lig_kern(self, obj):
 
+        """ Add a ligature/kern program *obj*. """
+
         self._lig_kerns.append(obj)
 
     ###############################################
 
     def get_lig_kern_program(self, i):
+
+        """ Return the ligature/kern program at index *i*. """
 
         return self._lig_kerns[i]
 

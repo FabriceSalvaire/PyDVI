@@ -45,7 +45,7 @@ if font_map_file is None:
     print 'Font map %s not found' % (font_map_file)
     sys.exit(1)
 
-font_map = FontMap(font_map, filename=font_map_file)
+font_map = FontMap(font_map_file)
 font_map.print_summary()
 
 print '\nLook-up cmr10'

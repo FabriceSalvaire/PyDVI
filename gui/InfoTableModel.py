@@ -10,13 +10,14 @@
 #####################################################################################################
 #
 # Audit
-#
+# 
+# - 10/12/2011
 #
 #####################################################################################################
 
 #####################################################################################################
 
-__ALL__ = ['InfoTableModel']
+__all__ = ['InfoTableModel']
 
 #####################################################################################################
 
@@ -26,7 +27,7 @@ from PyQt4.QtCore import Qt, QVariant, QModelIndex
 
 #####################################################################################################
 
-from EnumFactory import EnumFactory
+from PyDVI.Tools.EnumFactory import EnumFactory
 
 #####################################################################################################
 
@@ -52,17 +53,14 @@ class InfoTableModel(QtCore.QAbstractTableModel):
 
     def data(self, index, role=QtCore.Qt.DisplayRole):
 
-        if not index.isValid() or not(0 <= index.row() < len(self.fields)):
+        if not index.isValid() or not (0 <= index.row() < len(self.fields)):
             return QVariant()
 
-        field = self.fields[index.row()]
-
-        column = index.column()
-
         if role == Qt.DisplayRole:
+            field = self.fields[index.row()]
+            column = index.column()
             if column == columns_enum.field:
                 return QVariant(field)
-
             elif column == columns_enum.value:
                 return QVariant(self.values[field])
 
@@ -75,7 +73,6 @@ class InfoTableModel(QtCore.QAbstractTableModel):
         if role == Qt.TextAlignmentRole:
             if orientation == Qt.Horizontal:
                 return QVariant(int(Qt.AlignRight|Qt.AlignVCenter))
-
             return QVariant(int(Qt.AlignRight|Qt.AlignVCenter))
         
         if role != Qt.DisplayRole:
@@ -84,7 +81,6 @@ class InfoTableModel(QtCore.QAbstractTableModel):
         if orientation == Qt.Horizontal:
             if section == columns_enum.field:
                 return QVariant('Field')
-
             elif section == columns_enum.value:
                 return QVariant('Value')
 
@@ -93,11 +89,13 @@ class InfoTableModel(QtCore.QAbstractTableModel):
     #############################################################################
 
     def columnCount(self, index=QModelIndex()):
+
         return len(columns_enum)
 
     #############################################################################
 
     def rowCount(self, index=QModelIndex()):
+
         return len(self.fields)
 
 #####################################################################################################

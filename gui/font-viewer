@@ -12,7 +12,7 @@
 #
 # Audit
 #
-#  - 23/01/2010 fabrice
+# - 10/12/2011 fabrice
 #
 #####################################################################################################
 
@@ -21,7 +21,7 @@
 import sys
 import time
 
-from optparse import OptionParser
+import argparse
 
 from PyQt4 import QtGui, QtCore
 
@@ -30,75 +30,34 @@ from PyQt4 import QtGui, QtCore
 from FontViewerMainWindow import MainWindow
 
 #####################################################################################################
-#
-# Application
-#
 
 class Application(QtGui.QApplication):
 
     ################################################
 
-    def __init__(self, opt):
+    def __init__(self, args):
 
-        QtGui.QApplication.__init__(self, sys.argv)
+        super(Application, self).__init__(sys.argv)
 
-        self.opt = opt
-
-        # pixmap = QtGui.QPixmap(':/splash screen/images/splash_screen.png')
-        # 
-        # splash = QtGui.QSplashScreen(pixmap)
-        # splash.show()
-        # 
-        # splash.showMessage('<h2>PyDvi v%(version)s</h2>' % {'version': Version.pydvi_version.to_string()})
-        # 
-        # self.processEvents()
-        # 
-        # time.sleep(.5)
-
-        self.main_window = MainWindow(self, opt)
-
-        # splash.finish(self.main_window)
-
+        self.main_window = MainWindow(self, args)
         self.main_window.show()
-        self.processEvents()
-
-        QtCore.QTimer.singleShot(0, self.process_program_options)
-
-    ###############################################
-
-    def process_program_options(self):
-
-        pass
 
 #####################################################################################################
 #
-# Main
+# Options
 #
+
+parser = argparse.ArgumentParser(description='TeX Font Viewer.')
+
+parser.add_argument('font_name', metavar='font_name',
+                    help='Font Name')
+
+args = parser.parse_args()
+
 #####################################################################################################
 
-if __name__ == "__main__":
-
-    ################################################
-    #
-    # Options
-    #
-
-    usage = 'usage: %prog [options]'
-
-    parser = OptionParser(usage)
-
-    parser.add_option('--font' ,
-                      dest = 'font_name',
-                      type = 'string', default = None,
-                      help = 'Font Name')
-
-    opt, args = parser.parse_args()
-
-   ################################################
-
-    application = Application(opt)
-
-    application.exec_()
+application = Application(args)
+application.exec_()
 
 #####################################################################################################
 #

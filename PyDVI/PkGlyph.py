@@ -9,9 +9,13 @@
 #
 # Audit
 #
-#  - 17/01/2010 fabrice
+# - 11/12/2011 fabrice
+#  - check bitmap glyph
 #
 #####################################################################################################
+
+""" This module provides functions to handle Packed Font Glyphs.
+"""
 
 #####################################################################################################
 
@@ -31,6 +35,90 @@ from PyDVI.Tools.Logging import print_card
 #####################################################################################################
 
 class PkGlyph(object):
+
+    """ This class contains the information stored in the Packed Font file for each glyph.  For
+    efficiency, the run count list is lazy decoded.
+
+    The glyph bitmap can be printed using the method :meth:`print_glyph`.  For example the output
+    for the letter "A" of the font "cmr10" at 600 dpi is::
+
+          0000000000111111111122222222223333333333444444444455555
+          0123456789012345678901234567890123456789012345678901234
+         +-------------------------------------------------------+
+       0 |                          xxx                          |
+       1 |                          xxx                          |
+       2 |                          xxx                          |
+       3 |                         xxxxx                         |
+       4 |                         xxxxx                         |
+       5 |                         xxxxx                         |
+       6 |                        xxxxxxx                        |
+       7 |                        xxxxxxx                        |
+       8 |                        xxxxxxx                        |
+       9 |                       xxxxxxxxx                       |
+      10 |                       xxxxxxxxx                       |
+      11 |                       xxxxxxxxx                       |
+      12 |                      xx xxxxxxxx                      |
+      13 |                      xx xxxxxxxx                      |
+      14 |                     xxx xxxxxxxxx                     |
+      15 |                     xx   xxxxxxxx                     |
+      16 |                     xx   xxxxxxxx                     |
+      17 |                    xxx   xxxxxxxxx                    |
+      18 |                    xx     xxxxxxxx                    |
+      19 |                    xx     xxxxxxxx                    |
+      20 |                   xxx     xxxxxxxxx                   |
+      21 |                   xx       xxxxxxxx                   |
+      22 |                   xx       xxxxxxxx                   |
+      23 |                  xxx       xxxxxxxxx                  |
+      24 |                  xx         xxxxxxxx                  |
+      25 |                  xx         xxxxxxxx                  |
+      26 |                 xxx         xxxxxxxxx                 |
+      27 |                 xx           xxxxxxxx                 |
+      28 |                 xx           xxxxxxxx                 |
+      29 |                xx            xxxxxxxxx                |
+      30 |                xx             xxxxxxxx                |
+      31 |                xx             xxxxxxxx                |
+      32 |               xx              xxxxxxxxx               |
+      33 |               xx               xxxxxxxx               |
+      34 |               xx               xxxxxxxx               |
+      35 |              xx                xxxxxxxxx              |
+      36 |              xx                 xxxxxxxx              |
+      37 |              xx                 xxxxxxxx              |
+      38 |             xx                  xxxxxxxxx             |
+      39 |             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx             |
+      40 |             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx             |
+      41 |            xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx            |
+      42 |            xx                     xxxxxxxx            |
+      43 |            xx                     xxxxxxxx            |
+      44 |           xx                       xxxxxxxx           |
+      45 |           xx                       xxxxxxxx           |
+      46 |           xx                       xxxxxxxx           |
+      47 |          xx                         xxxxxxxx          |
+      48 |          xx                         xxxxxxxx          |
+      49 |          xx                         xxxxxxxx          |
+      50 |         xx                           xxxxxxxx         |
+      51 |         xx                           xxxxxxxx         |
+      52 |        xxx                           xxxxxxxx         |
+      53 |        xxx                            xxxxxxxx        |
+      54 |       xxxx                            xxxxxxxx        |
+      55 |      xxxxxx                           xxxxxxxxx       |
+      56 |    xxxxxxxxxx                       xxxxxxxxxxxx      |
+      57 |xxxxxxxxxxxxxxxxx               xxxxxxxxxxxxxxxxxxxxxxx|
+      58 |xxxxxxxxxxxxxxxxx               xxxxxxxxxxxxxxxxxxxxxxx|
+      59 |xxxxxxxxxxxxxxxxx               xxxxxxxxxxxxxxxxxxxxxxx|
+         +-------------------------------------------------------+
+          0000000000111111111122222222223333333333444444444455555
+          0123456789012345678901234567890123456789012345678901234
+    
+    Moreover the method :meth:`count_list` return a run count list string equivalent at the output of
+    the command :command:`pktype`.  For example the output for the previous glyph is::
+    
+      (26)[2]3(51)[2]5(49)[2]7(47)[2]9(45)[1]2(1)8(43)3(1)9(42)[1]2(3)8(41)3(3)9 
+      (40)[1]2(5)8(39)3(5)9(38)[1]2(7)8(37)3(7)9(36)[1]2(9)8(35)3(9)9(34)[1]2(11)8 
+      (33)2(12)9(32)[1]2(13)8(31)2(14)9(30)[1]2(15)8(29)2(16)9(28)[1]2(17)8(27)2 
+      (18)9(26)[1]29(25)31(24)[1]2(21)8(23)[2]2(23)8(21)[2]2(25)8(19)[1]2(27)8(17) 
+      3(27)8(17)3(28)8(15)4(28)8(14)6(27)9(11)10(23)12(6)[2]17(15)23 
+
+    """
 
     ###############################################
 
@@ -58,6 +146,8 @@ class PkGlyph(object):
 
     def _init_packed_number_decoder(self):
 
+        """ Init the packed number decoder. """
+
         self._nybble_index = 0
         self._upper_nybble = True
         self._repeat_row_count = 0
@@ -66,7 +156,7 @@ class PkGlyph(object):
 
     def _next_nybble(self):
 
-        """ Return the next nyblle from the byte array.
+        """ Return the next nybble from the byte array.
         """
 
         byte = self.nybbles[self._nybble_index]
@@ -126,6 +216,8 @@ class PkGlyph(object):
 
     def _decode_bitmap_glyph(self):
 
+        """ Decode a bitmap glyph. """
+
         size = self.height * self.width
         glyph_bitmap = self.glyph_bitmap = np.zeros(size, dtype=np.bool)
 
@@ -143,6 +235,8 @@ class PkGlyph(object):
     ###############################################
 
     def _decode_packed_glyph(self):
+
+        """ Decode a packed glyph. """
 
         # Fixme: try linear approach
         #  current i and row = int(i / width)
@@ -187,9 +281,7 @@ class PkGlyph(object):
 
     def _decode_glyph(self):
 
-        '''
-        Unpack the glyph
-        '''
+        """ Decode the glyph. """
         
         if self.is_bitmap():
             self._decode_bitmap_glyph()
@@ -199,6 +291,8 @@ class PkGlyph(object):
     ###############################################
 
     def count_list(self):
+
+        """ Return the count list as :command:`pktype`. """
 
         # The count list start from the top-left corner of the glyph's bounding box and follows the
         # top-down and left-right raster order.
@@ -232,17 +326,23 @@ class PkGlyph(object):
 
     def is_bitmap(self):
 
+        """ Return :obj:`True` is the glyph use the bitmap format. """
+
         return self.dyn_f == 14
 
     ###############################################
 
     def get_scaled_width(self, scale_factor):
 
+        """ Return the width scaled by *scale_factor*. """
+
         return int(self.tfm * scale_factor)
 
     ###############################################
 
     def get_glyph_bitmap(self):
+
+        """ Return the glyph bitmap as a Numpy array. """
 
         if self.glyph_bitmap is None:
             self._decode_glyph()
@@ -252,6 +352,8 @@ class PkGlyph(object):
     ###############################################
 
     def print_glyph(self):
+
+        """ Print the glyph. """
 
         glyph_bitmap = self.get_glyph_bitmap()
 
