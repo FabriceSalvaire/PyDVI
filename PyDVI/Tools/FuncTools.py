@@ -9,7 +9,7 @@
 #
 #                                              Audit
 #
-# - 00/00/2010 Fabrice
+# - 17/12/2011 Fabrice
 #   xx
 #
 #####################################################################################################
@@ -20,13 +20,15 @@ __all__ = ['repeat_call', 'get_filename_extension']
 
 def repeat_call(func, count):
 
-    """ Call *func* *count* times. """
+    """ Call the function *func* *count* times and return the output as a list. """
 
     return [func() for i in xrange(count)]
 
 #####################################################################################################
 
 def get_filename_extension(filename):
+
+    """ Return the filename extension. """
 
     index = filename.rfind('.')
     if index >= 0:

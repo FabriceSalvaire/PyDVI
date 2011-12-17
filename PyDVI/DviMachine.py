@@ -16,7 +16,38 @@
 
 #####################################################################################################
 
-__all__ = ['DviMachine', 'DviSimplifyMachine']
+__all__ = ['OpcodeProgram',
+           'Opcode',
+           'Opcode_set_char',
+           'Opcode_put_char',
+           'Opcode_set_rule',
+           'Opcode_put_rule',
+           'Opcode_push',
+           'Opcode_pop',
+           'Opcode_push_colour',
+           'Opcode_pop_colour',
+           'Opcode_right',
+           'Opcode_w0',
+           'Opcode_w',
+           'Opcode_x0',
+           'Opcode_x',
+           'Opcode_down',
+           'Opcode_y0',
+           'Opcode_y',
+           'Opcode_z0',
+           'Opcode_z',
+           'Opcode_font',
+           'Opcode_xxx',
+           'DviFont',
+           'DviColorBlack',
+           'DviColorGray',
+           'DviColorRGB',
+           'DviColorCMYK',
+           'DviProgam',
+           'DviMachineRegisters',
+           'DviMachine',
+           'DviSimplifyMachine',
+           ]
 
 #####################################################################################################
 

@@ -22,6 +22,9 @@
 #
 #####################################################################################################
 
+""" This module provides functions to run Daemon process.
+"""
+
 #####################################################################################################
 
 __ALL__ = ['make_nonblocking', 'SubprocessError', 'DaemonSubprocess']
@@ -38,12 +41,12 @@ from subprocess import Popen, PIPE
 
 def make_nonblocking(fd):
 
-    """Makes a file descriptor non-blocking.
+    """ Makes a file descriptor non-blocking.
 
     When a non-blocking file is read, the read does not wait for end-of-file.  Instead, the read can
     return just as soon as there is nothing left to read.  This might be because a buffer is empty.
 
-    See Python Cookbook, Recipe 6.6
+    See Python Cookbook, Recipe 6.6.
     """
 
     flags = fcntl.fcntl(fd, fcntl.F_GETFL)
@@ -53,24 +56,28 @@ def make_nonblocking(fd):
 #####################################################################################################
 
 class SubprocessError(EnvironmentError):
- 
     pass
 
 #####################################################################################################
 
 class DaemonSubprocess(object):
 
+    """ This class implements a Daemon sub-process.
+    """
+
+    #: List of fifos to be created.
     fifos = ()
 
     ###############################################
 
     def __init__(self, working_directory):
 
+        # Create the working directory
         self.working_directory = os.path.abspath(working_directory)
-
         # try
         os.mkdir(working_directory)
 
+        # Create the Fifos
         for name in self.fifos:
             os.mkfifo(os.path.join(self.working_directory, name))
 
@@ -80,26 +87,21 @@ class DaemonSubprocess(object):
 
     def __del__(self):
 
+        """ Stop the child process and cleanup the working directory. """
+
         try:
             self.stop()
-
         finally:
             if self.working_directory is not None:
                 for filename in os.listdir(self.working_directory):
                     os.remove(os.path.join(self.working_directory, filename))
-
                 os.rmdir(self.working_directory)
 
     ###############################################
 
-    def restart(self):
-
-        self.stop()
-        self.start()
-
-    ###############################################
-
     def start(self):
+
+        """ Start the child process. """
 
         child = self.child = Popen(self.make_args(),
                                    cwd=self.working_directory,
@@ -110,10 +112,19 @@ class DaemonSubprocess(object):
 
     ###############################################
 
+    def make_args(self):
+
+        """ Return the args for Popen. To be implemented in subclass. """
+        
+        raise NotImplementedError
+
+    ###############################################
+
     def stop(self):
 
-        # poll: check if child process has terminated
+        """ Stop the child process. """
 
+        # poll: Check if child process has terminated.
         if self.child is not None and self.child.poll() is None:
             self.kill()
 
@@ -123,14 +134,20 @@ class DaemonSubprocess(object):
 
     def kill(self):
 
-        os.kill(self.child.pid, signal.SIGKILL)
+        """ Send Kill signal to the child process. """
+
+        self.child.kill()
+        # Wait for child process to terminate.
         self.child.wait()
 
     ###############################################
 
-    def make_args(self):
+    def restart(self):
 
-        raise NotImplementedError
+        """ Restart the child process. """
+
+        self.stop()
+        self.start()
 
 #####################################################################################################
 #

@@ -14,29 +14,17 @@ Relevant files are:
 * :file:`tftopl.web`
 * :file:`vftovp.web`
 
-The source code of these softwares was also useful:
+A copy of this documentation is available here and later in the API documentation:
 
-* Hacking DVI files: Birth of DVIasm
-  (http://www.tug.org/pracjourn/2007-1/cho/cho.pdf,
-  http://www.ctan.org/tex-archive/dviware/dviasm)
+.. toctree::
 
-* Dvipng
-  (http://savannah.nongnu.org/projects/dvipng)
+   dvi-format.rst
+   pk-format.rst
 
-* Matplotlib
-  (http://matplotlib.sourceforge.net)
-  cf. dviread.py
+Other relevant information could be found here:
 
-* MathTran
-  (http://www.mathtran.org,
-  http://sourceforge.net/projects/mathtran)
+.. toctree::
 
-Other relevant projects:
-
-* okular
-* evince
-* xdvi
-* TFMPK - TEX's Fonts Viewer
-  (http://www.medini.org/software/tfmpk)
+   reference-links.rst
 
 .. End

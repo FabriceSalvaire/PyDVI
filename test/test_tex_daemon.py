@@ -7,15 +7,17 @@
 
 #####################################################################################################
 #
-# Audit
+#                                              Audit
+#
+# - 17/12/2011 Fabrice
+#   xx
 #
 #####################################################################################################
 
 #####################################################################################################
 
-from DviParser import dvi_opcodes_tuple
-
-from TexDaemon import *
+from PyDVI.DviParser import dvi_opcodes_tuple
+from PyDVI.TexDaemon import TexDaemon
 
 #####################################################################################################
 
@@ -34,8 +36,8 @@ for input in ('Azerty', 'Qwerty'):
     print result['log']
     print map(ord, result['dvi'])
     
-    print dvi_opcodes_tuple[ord(result['dvi'][0])]
-    print dvi_opcodes_tuple[ord(result['dvi'][-1])]
+    #print dvi_opcodes_tuple[ord(result['dvi'][0])]
+    #print dvi_opcodes_tuple[ord(result['dvi'][-1])]
 
 tex_daemon.stop()
 
