@@ -17,8 +17,8 @@
 #
 # Audit
 # 
-#  - 09/01/2010 fabrice
-#  - 13/05/2010 fabrice license !
+# - 17/12/2011 fabrice
+#  - license !
 #
 #####################################################################################################
 
@@ -32,10 +32,15 @@ __ALL__ = ['make_nonblocking', 'SubprocessError', 'DaemonSubprocess']
 #####################################################################################################
 
 import fcntl # For non-blocking file descriptor
+import logging
 import os
 import signal
 
 from subprocess import Popen, PIPE
+
+#####################################################################################################
+
+logger = logging.getLogger(__name__)
 
 #####################################################################################################
 
@@ -74,6 +79,7 @@ class DaemonSubprocess(object):
 
         # Create the working directory
         self.working_directory = os.path.abspath(working_directory)
+        logger.info('Create working directory %s' % (self.working_directory))
         # try
         os.mkdir(working_directory)
 
@@ -93,6 +99,7 @@ class DaemonSubprocess(object):
             self.stop()
         finally:
             if self.working_directory is not None:
+                logger.info('Cleanup working directory %s' % (self.working_directory))
                 for filename in os.listdir(self.working_directory):
                     os.remove(os.path.join(self.working_directory, filename))
                 os.rmdir(self.working_directory)
@@ -103,7 +110,10 @@ class DaemonSubprocess(object):
 
         """ Start the child process. """
 
-        child = self.child = Popen(self.make_args(),
+        args = self.make_args()
+        logger.info('Start child process: ' + ' '.join(args))
+        
+        child = self.child = Popen(args,
                                    cwd=self.working_directory,
                                    stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
@@ -124,6 +134,8 @@ class DaemonSubprocess(object):
 
         """ Stop the child process. """
 
+        logger.info('Stop child process')
+
         # poll: Check if child process has terminated.
         if self.child is not None and self.child.poll() is None:
             self.kill()
@@ -136,6 +148,7 @@ class DaemonSubprocess(object):
 
         """ Send Kill signal to the child process. """
 
+        logger.info('Kill child process')
         self.child.kill()
         # Wait for child process to terminate.
         self.child.wait()
@@ -146,6 +159,7 @@ class DaemonSubprocess(object):
 
         """ Restart the child process. """
 
+        logger.info('Restart child process')
         self.stop()
         self.start()
 
