@@ -1255,6 +1255,10 @@ class DviSimplifyMachine(DviMachine):
                     logger.info("Merge OpcodeX")
                     previous_opcode.x += opcode.x
                     delete_opcode = True
+                    if previous_opcode.x == 0:
+                        # delete also previous opcode
+                        del program_page[i-1]
+                        i -= 1
 
             if delete_opcode:
                 del program_page[i]

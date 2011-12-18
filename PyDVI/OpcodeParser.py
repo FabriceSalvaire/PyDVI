@@ -62,7 +62,7 @@ class OpcodeParser(object):
     def _init_parameter_readers(self, parameters):
 
         for number_of_bytes in parameters:
-            if parameters > 0:
+            if number_of_bytes > 0:
                 read_byten = AbstractStream.read_unsigned_byten
             else:
                 read_byten = AbstractStream.read_signed_byten
@@ -141,17 +141,16 @@ class OpcodeParserSet(list):
 
         """ Build the set. """
 
-        # opcode index
-
-        index = opcode_definition[0]
-        if isinstance(index, list):
-            indexes = range(index[0], index[1] +1)
+        opcode_index = opcode_definition[0]
+        if isinstance(opcode_index, list):
+            opcode_indexes = range(opcode_index[0], opcode_index[1] +1)
         else:
-            indexes = [index]
+            opcode_indexes = [opcode_index]
 
         if isinstance(opcode_definition[1], OpcodeParser.__class__):
-            for i in indexes:
-                self[i] = opcode_definition[1](i)
+            opcode_parser_class = opcode_definition[1]
+            for i in opcode_indexes:
+                self[i] = opcode_parser_class(i)
 
         else: # opcode description string
             name, description, parameters, opcode_class = opcode_definition[1:]
@@ -160,11 +159,11 @@ class OpcodeParserSet(list):
                 lower_n, upper_n = parameters
                 signe = sign_of(lower_n)
                 for n in xrange(abs(lower_n), abs(upper_n) +1):
-                    i = index + n -1 # Fixme: bad: index vs indexes
+                    i = opcode_index + n -1 # Fixme: bad: opcode_index vs opcode_indexes
                     self[i] = OpcodeParser(i, name, description, tuple([signe*n]), opcode_class)
 
             else:
-                for i in indexes:
+                for i in opcode_indexes:
                     self[i] = OpcodeParser(i, name, description, parameters, opcode_class)
 
 #####################################################################################################

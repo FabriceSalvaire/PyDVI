@@ -191,10 +191,10 @@ class DviParser(object):
     opcode_definitions = (
         ( [dvi_opcodes.SETC_000,
            dvi_opcodes.SETC_127], OpcodeParser_set_char ),
-        ( dvi_opcodes.SET1, 'set', set_char_description, ([1,4]), Opcode_set_char ),
+        ( dvi_opcodes.SET1, 'set', set_char_description, [1,4], Opcode_set_char ),
         # ... to SET4
         ( dvi_opcodes.SET_RULE, 'set rule', 'typeset a rule and move right', (4,4), Opcode_set_rule ),
-        ( dvi_opcodes.PUT1, 'put', 'typeset a character', ([1,4]), Opcode_put_char ),
+        ( dvi_opcodes.PUT1, 'put', 'typeset a character', [1,4], Opcode_put_char ),
         # ... to PUT4
         ( dvi_opcodes.PUT_RULE, 'put rule', 'typeset a rule', (4,4), Opcode_put_rule ),
         ( dvi_opcodes.NOP, 'nop', 'no operation', None, None ),
@@ -202,25 +202,25 @@ class DviParser(object):
         ( dvi_opcodes.EOP, 'eop', 'ending of page', None, None ),
         ( dvi_opcodes.PUSH, 'push', 'save the current positions', None, Opcode_push ),
         ( dvi_opcodes.POP, 'pop', 'restore previous positions', None, Opcode_pop ),
-        ( dvi_opcodes.RIGHT1, 'right', 'move right', ([-1,-4]), Opcode_right ),
+        ( dvi_opcodes.RIGHT1, 'right', 'move right', [-1,-4], Opcode_right ),
         # ... to RIGHT4
         ( dvi_opcodes.W0, 'w0', 'move right by w', None, Opcode_w0 ),
-        ( dvi_opcodes.W1, 'w', 'move right and set w', ([-1,-4]), Opcode_w ),
+        ( dvi_opcodes.W1, 'w', 'move right and set w', [-1,-4], Opcode_w ),
         # ... to W4
         ( dvi_opcodes.X0, 'x0', 'move right by x', None, Opcode_x0 ),
-        ( dvi_opcodes.X1, 'x', 'move right and set x', ([-1,-4]), Opcode_x ),
+        ( dvi_opcodes.X1, 'x', 'move right and set x', [-1,-4], Opcode_x ),
         # ... to X4
-        ( dvi_opcodes.DOWN1, 'down', 'move down', ([-1,-4]), Opcode_down ),
+        ( dvi_opcodes.DOWN1, 'down', 'move down', [-1,-4], Opcode_down ),
         # ... to DOWN4
         ( dvi_opcodes.Y0, 'y0', 'move down by y', None, Opcode_y0 ),
-        ( dvi_opcodes.Y1, 'y', 'move down and set y', ([-1,-4]), Opcode_y ),
+        ( dvi_opcodes.Y1, 'y', 'move down and set y', [-1,-4], Opcode_y ),
         # ... to Y4
         ( dvi_opcodes.Z0, 'z0', 'move down by z', None, Opcode_z0 ),
-        ( dvi_opcodes.Z1, 'z', 'move down and set z', ([-1,-4]), Opcode_z ),
+        ( dvi_opcodes.Z1, 'z', 'move down and set z', [-1,-4], Opcode_z ),
         # ... to Z4
         ( [dvi_opcodes.FONT_00,
            dvi_opcodes.FONT_63], OpcodeParser_font ),
-        ( dvi_opcodes.FNT1, 'fnt', 'set current font', ([1,4]), Opcode_font ),
+        ( dvi_opcodes.FNT1, 'fnt', 'set current font', [1,4], Opcode_font ),
         ( [dvi_opcodes.XXX1,
            dvi_opcodes.XXX4], OpcodeParser_xxx ),
         ( [dvi_opcodes.FNT_DEF1,

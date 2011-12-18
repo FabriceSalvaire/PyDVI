@@ -64,6 +64,10 @@ print line
 print 'Compute bounding box of the first page:'
 dvi_machine.compute_page_bounding_box(0)
 
+print line
+print 'Run the first page:'
+dvi_machine.run_page(0)
+
 #print 'Compute bounding box of the last page:'
 # if len(dvi_program.pages) > 0:
 #     dvi_machine.compute_page_bounding_box(-1)
