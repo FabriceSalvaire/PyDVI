@@ -1,6 +1,6 @@
 DaemonSubprocess.py | done
 EnumFactory.py	    | done
-Interval.py	    | to doc
+Interval.py	    | done
 Logging.py	    | done
 RevisionVersion.py  | done
 Stream.py	    | done

@@ -26,11 +26,11 @@ import numpy as np
 
 from PyDVI.DviMachine import DviMachine
 from PyDVI.DviParser import DviParser 
-from PyDVI.FontManager import *
-from PyDVI.PkFont import *
+from PyDVI.FontManager import FontManager
+from PyDVI.PkFont import PkFont
 from PyDVI.TeXUnit import *
-from PyDVI.Type1Font import *
-from PyDVI.Stream import FileStream
+from PyDVI.Tools.Stream import FileStream
+from PyDVI.Type1Font import Type1Font
 
 from QtGlyph import *
 
@@ -213,9 +213,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def __init_dvi_machine(self):
 
-        self.dvi_parser = DviParser(debug = False)
+        self.dvi_parser = DviParser()
 
-        self.font_manager = FontManager(font_map = 'pdftex', use_pk = True)
+        self.font_manager = FontManager(font_map='pdftex', use_pk=True)
 
         self.dvi_machine = QtDviMachine(self.font_manager, self.scene)
 

@@ -12,14 +12,14 @@
 #
 # Audit
 #
+# - 18/12/2011
 #
 #####################################################################################################
 
 #####################################################################################################
 
+import argparse
 import sys
-
-from optparse import OptionParser
 
 from PyQt4 import QtGui, QtCore, uic
 
@@ -38,34 +38,27 @@ class Application(QtGui.QApplication):
 
     def __init__(self, dvi_file):
 
-        QtGui.QApplication.__init__(self, sys.argv)
+        super(Application, self).__init__(sys.argv)
 
         self.main_window = MainWindow(dvi_file)
-
         self.main_window.show()
 
 #####################################################################################################
 #
-# Main
+# Options
 #
+
+parser = argparse.ArgumentParser(description='DVI Viewer.')
+
+parser.add_argument('dvi_file', metavar='DVI_File',
+                    help='DVI File')
+
+args = parser.parse_args()
+
 #####################################################################################################
 
-if __name__ == "__main__":
-
-    usage = 'usage: %prog [options]'
-
-    parser = OptionParser(usage)
-
-    opt, args = parser.parse_args()
-
-    if len(args) > 0:
-        dvi_file = args[0]
-    else:
-        dvi_file = None
-
-    application = Application(dvi_file)
-
-    application.exec_()
+application = Application(args.dvi_file)
+application.exec_()
 
 #####################################################################################################
 #

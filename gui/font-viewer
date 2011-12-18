@@ -18,10 +18,9 @@
 
 #####################################################################################################
 
+import argparse
 import sys
 import time
-
-import argparse
 
 from PyQt4 import QtGui, QtCore
 

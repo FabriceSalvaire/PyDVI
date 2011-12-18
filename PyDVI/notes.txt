@@ -1,5 +1,5 @@
-DviMachine.py       | to doc
-DviParser.py	    | to doc
+DviMachine.py       | on going
+DviParser.py	    | one going
 Encoding.py	    | done
 FontManager.py	    | on going
 FontMap.py	    | done
