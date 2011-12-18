@@ -13,11 +13,12 @@
 #
 #####################################################################################################
 
-"""
+""" This module implements a DVI Stream Parser.
 """
 
 #####################################################################################################
 
+import logging
 import os
 
 #####################################################################################################
@@ -26,6 +27,10 @@ from PyDVI.DviMachine import *
 from PyDVI.OpcodeParser import OpcodeParserSet, OpcodeParser
 from PyDVI.Tools.EnumFactory import EnumFactory, ExplicitEnumFactory
 from PyDVI.Tools.Stream import AbstractStream
+
+#####################################################################################################
+
+logger = logging.getLogger(__name__)
 
 #####################################################################################################
 
@@ -78,6 +83,8 @@ set_char_description = 'typeset a character and move right'
 
 class OpcodeParser_set_char(OpcodeParser):
 
+    """ This class parse the ``set_char`` opcode. """
+
     ###############################################
 
     def __init__(self, opcode):
@@ -95,6 +102,8 @@ class OpcodeParser_set_char(OpcodeParser):
 #####################################################################################################
 
 class OpcodeParser_font(OpcodeParser):
+
+    """ This class parse the ``font`` opcode. """
 
     ###############################################
 
@@ -114,6 +123,8 @@ class OpcodeParser_font(OpcodeParser):
 
 class OpcodeParser_xxx(OpcodeParser):
 
+    """ This class parse the ``xxx`` opcode. """
+
     base_opcode = dvi_opcodes.XXX1
 
     ###############################################
@@ -132,11 +143,13 @@ class OpcodeParser_xxx(OpcodeParser):
 
         stream = dvi_parser.stream
 
-        return [stream.read(self.read_unsigned_byten(stream))]
+        return [str(stream.read(self.read_unsigned_byten(stream)))]
 
 #####################################################################################################
 
 class OpcodeParser_fnt_def(OpcodeParser):
+
+    """ This class parse the ``fnt_def`` opcode. """
 
     base_opcode = dvi_opcodes.FNT_DEF1
 
@@ -159,17 +172,21 @@ class OpcodeParser_fnt_def(OpcodeParser):
         font_checksum = stream.read_unsigned_byte4()
         font_scale_factor = stream.read_unsigned_byte4()
         font_design_size = stream.read_unsigned_byte4()
-        font_name = stream.read(stream.read_unsigned_byte1() + stream.read_unsigned_byte1())
+        font_name = str(stream.read(stream.read_unsigned_byte1() + stream.read_unsigned_byte1()))
 
         font = DviFont(font_id, font_name, font_checksum, font_scale_factor, font_design_size)
-
         dvi_parser.dvi_program.register_font(font)
 
 #####################################################################################################
 
 BadDviStream = NameError('Bad DVI stream')
 
+#####################################################################################################
+
 class DviParser(object):
+
+    """ This class implements a DVI Stream Parser.
+    """
 
     opcode_definitions = (
         ( [dvi_opcodes.SETC_000,
@@ -217,15 +234,9 @@ class DviParser(object):
    
     ###############################################
 
-    def __init__(self, debug = False):
+    def _reset(self):
 
-        self.debug = debug
-
-        super(DviParser, self).__init__(self.opcode_definitions)
-
-    ###############################################
-
-    def reset(self):
+        """ Reset the DVI parser. """
 
         self.dvi_program = DviProgam()
         self.post_pointer = None
@@ -236,32 +247,30 @@ class DviParser(object):
 
     def process_stream(self, stream):
 
+        """ Process a DVI stream and return a :class:`DviProgam` instance. """
+
         # Fixme: read pages before postamble
 
-        self.reset()
-
+        self._reset()
         self.stream = stream
-
-        self.process_preambule()
-        self.process_postambule()
-        self.process_pages_backward()
-
-        if self.debug:
-            for bop_pointer in self.bop_pointer_stack:
-                print 'BOP at', bop_pointer
-
+        self._process_preambule()
+        self._process_postambule()
+        self._process_pages_backward()
         self.stream = None
 
         return self.dvi_program
 
     ###############################################
 
-    def process_preambule(self):
+    def _process_preambule(self):
+
+        """ Process the preamble. """
+
+        logger.info('Process the preamble')
 
         stream = self.stream
 
         stream.seek(0)
-
         if stream.read_unsigned_byte1() != dvi_opcodes.PRE:
             raise NameError("DVI stream don't start by PRE")
 
@@ -272,19 +281,29 @@ class DviParser(object):
         numerator = stream.read_unsigned_byte4()
         denominator = stream.read_unsigned_byte4()
         magnification = stream.read_unsigned_byte4()
-
         comment = stream.read(stream.read_unsigned_byte1())
 
         self.dvi_program.set_preambule_data(comment,
                                             dvi_format,
                                             numerator, denominator, magnification)
 
-        if self.debug:
-            print 'Preamble end at', self.tell() -1
+        logger.info('Preamble end at %u' % (stream.tell() -1))
 
     ###############################################
 
-    def process_postambule(self):
+    def _process_postambule(self):
+
+        """ Process the postamble. """
+
+        # DVI postamble format:
+        #   postamble: post opcode
+        #   <font definitions>
+        #   post post opcode
+        #     post pointer
+        #     dvi format
+        #   EOF_SIGNATURE [at least 4 times]
+
+        logger.info('Process the postamble')
 
         stream = self.stream
 
@@ -307,9 +326,7 @@ class DviParser(object):
 
         # Move to Postamble
         stream.seek(self.post_pointer)
-
-        if self.debug:
-            print 'Postamble start at', self.tell()
+        logger.info('Postamble start at %u' % (stream.tell()))
 
         if stream.read_unsigned_byte1() != dvi_opcodes.POST:
             raise BadDviStream
@@ -320,7 +337,6 @@ class DviParser(object):
         numerator = stream.read_unsigned_byte4()
         denominator = stream.read_unsigned_byte4()
         magnification = stream.read_unsigned_byte4()
-
         max_height = stream.read_unsigned_byte4()
         max_width  = stream.read_unsigned_byte4()
         stack_depth = stream.read_unsigned_byte2()
@@ -329,8 +345,8 @@ class DviParser(object):
         # Read Font definitions
         while True:
             opcode = stream.read_unsigned_byte1()
-            if opcode >= dvi_opcodes.FNT_DEF1 and opcode <= dvi_opcodes.FNT_DEF4:
-                self.opcode_parsers[opcode].read_parameters(self)
+            if dvi_opcodes.FNT_DEF1 <= opcode <= dvi_opcodes.FNT_DEF4:
+                self.opcode_parser_set[opcode].read_parameters(self)
             elif opcode != dvi_opcodes.NOP:
                 break
             # Fixme: else
@@ -345,13 +361,17 @@ class DviParser(object):
         self.number_of_pages = number_of_pages
         self.dvi_program.set_postambule_data(max_height, max_width, stack_depth, number_of_pages)
 
+        logger.info('Number of pages: %u' % (number_of_pages))
+        logger.info('Stack depth: %u' % (stack_depth))
+
     ###############################################
 
-    def process_pages_backward(self):
+    def _process_pages_backward(self):
 
-        '''
-        Process pages in backward order
-        '''
+        """ Process the pages in backward order.
+        """
+
+        logger.info('Process the pages in backward order.')
 
         stream = self.stream
         self.page_number = self.number_of_pages
@@ -360,13 +380,9 @@ class DviParser(object):
         bop_pointer = self.bop_pointer_stack[0]
         # Move backward from page to page and process the pages
         while bop_pointer >= 0:
-
             stream.seek(bop_pointer)
-
             self.page_number -= 1
-
-            if self.debug:
-                print 'BOP at', self.tell()
+            logger.info('BOP at %u, page # %u' % (stream.tell(), self.page_number))
 
             opcode = stream.read_unsigned_byte1()
             if opcode != dvi_opcodes.BOP:
@@ -393,15 +409,13 @@ class DviParser(object):
             if opcode == dvi_opcodes.EOP:
                 break
             else:
-                opcode_parser = self.opcode_parsers[opcode]
-
+                opcode_parser = self.opcode_parser_set[opcode]
                 parameters = opcode_parser.read_parameters(self)
+                
+                logger.info('Opcode %s %s %s' % (opcode, opcode_parser.name, parameters))
 
-                if self.debug:
-                    print 'Opcode', opcode, opcode_parser.name, parameters
-
-                # If the current and the previous opcode correspond to set char
-                # then the new char is concatenated
+                # If the current and the previous opcode correspond to set char then the new char is
+                # concatenated
                 is_set_char = opcode <= dvi_opcodes.SET4
                 if is_set_char and previous_opcode_obj is not None:
                     previous_opcode_obj.append(parameters[0])

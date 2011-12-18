@@ -16,9 +16,8 @@
 
 #####################################################################################################
 
+import argparse
 import sys
-
-from optparse import OptionParser
 
 #####################################################################################################
 
@@ -27,23 +26,17 @@ from PyDVI.Kpathsea import kpsewhich
 
 #####################################################################################################
 
-usage = 'usage: %prog encoding'
-
-parser = OptionParser(usage)
-
-opt, args = parser.parse_args()
-
-if len(args) != 1:
-    parser.error("Give a TeX encoding, e.g. cork")
-
-encoding = args[0]
+parser = argparse.ArgumentParser(description='Test Encoding.')
+parser.add_argument('encoding', metavar='Encoding',
+                    help='TeX encoding, e.g. cork')
+args = parser.parse_args()
 
 #####################################################################################################
 
-encoding_file = kpsewhich(encoding, file_format='enc files')
+encoding_file = kpsewhich(args.encoding, file_format='enc files')
 
 if encoding_file is None:
-    print 'Encoding %s not found' % (encoding)
+    print 'Encoding %s not found' % (args.encoding)
     sys.exit(1)
 
 print 'Read %s encoding file' % (encoding_file)

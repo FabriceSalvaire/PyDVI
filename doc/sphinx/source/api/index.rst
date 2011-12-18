@@ -7,9 +7,9 @@
 .. toctree::
 
    intro.rst
-   TeX.rst
-   Tools.rst
-   Font.rst
-   todo.rst
+   tex.rst
+   tools.rst
+   font.rst
+   dvi.rst
 
 .. End

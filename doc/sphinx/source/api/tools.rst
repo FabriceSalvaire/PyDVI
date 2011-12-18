@@ -4,6 +4,7 @@
 
 .. toctree::
 
+  modules/PyDviVersion.rst
   modules/DaemonSubprocess.rst
   modules/EnumFactory.rst
   modules/FuncTools.rst

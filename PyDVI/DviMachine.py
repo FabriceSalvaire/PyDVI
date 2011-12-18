@@ -9,16 +9,14 @@
 #
 # Audit
 #
-#  - 17/01/2010 fabrice
+# - 17/12/2011 fabrice
 #   - __init__
 #
 #####################################################################################################
 
 #####################################################################################################
 
-__all__ = ['OpcodeProgram',
-           'Opcode',
-           'Opcode_set_char',
+__all__ = ['Opcode_set_char',
            'Opcode_put_char',
            'Opcode_set_rule',
            'Opcode_put_rule',
@@ -44,7 +42,7 @@ __all__ = ['OpcodeProgram',
            'DviColorRGB',
            'DviColorCMYK',
            'DviProgam',
-           'DviMachineRegisters',
+           'DviProgramPage',
            'DviMachine',
            'DviSimplifyMachine',
            ]
@@ -52,277 +50,221 @@ __all__ = ['OpcodeProgram',
 #####################################################################################################
 
 import fractions
+import logging
 
 #####################################################################################################
 
 from PyDVI.TeXUnit import *
-from PyDVI.Tools.EnumFactory import *
-from PyDVI.Tools.Interval import *
-from PyDVI.Tools.Logging import *
+from PyDVI.Tools.EnumFactory import EnumFactory
+from PyDVI.Tools.Interval import Interval2D
+from PyDVI.Tools.Logging import print_card
 
 #####################################################################################################
 
-xxx_papersize = 'papersize='
-xxx_landscape = '! /landplus90 true store'
-xxx_colour = 'color '
+logger = logging.getLogger(__name__)
 
 #####################################################################################################
 
+#: Defines Paper Orientation
 paper_orientation_enum = EnumFactory('PaperOrientation',
                                      ('portrait', 'landscape'))
 
 #####################################################################################################
 
-# Fixme: object -> list
-class OpcodeProgram(object):
-
-    ###############################################
-
-    def __init__(self,
-                 height=None, width=None,
-                 paper_orientation=paper_orientation_enum.portrait):
-
-        self.program = []
-
-        self.set_paper_size(height, width)
-        self.set_paper_orientation(paper_orientation)
-
-    ###############################################
-
-    def __delitem__(self, i):
-
-        del self.program[i]
-
-    ###############################################
-
-    def __getitem__(self, i):
-
-        return self.program[i]
-
-    ###############################################
-
-    def __setitem__(self, i, opcode):
-
-        self.program[i] = opcode
-
-    ###############################################
-
-    def __iter__(self):
-
-        for opcode in self.program:
-            yield opcode
-
-    ###############################################
-
-    def __len__(self):
-
-        return len(self.program)
-
-    ###############################################
-
-    def append(self, opcode):
-
-        self.program.append(opcode)
-
-    ###############################################
-
-    def set_paper_size(self, height, width):
-
-        self.height, self.width = height, width
-
-    ###############################################
-
-    def set_paper_orientation(self, orientation):
-
-        self.paper_orientation = orientation
-
-    ###############################################
-
-    def print_program(self):
-
-        message = '''Opcode Program
-
- - Paper Size: height = %.3f pt width = %.3f pt
- - Paper Orientation: %u
-''' % (
-            self.height, self.width,
-            self.paper_orientation,
-            )
-
-        print_card(message)
-
-        for opcode in self:
-            print opcode
-
-#####################################################################################################
-
 class Opcode(object):
-
-    pass
-
-#####################################################################################################
-
-class Opcode_set_char(Opcode):
-
-    ###############################################
-
-    def __init__(self, char, set=True):
-
-        self.characters = [char]
-
-        self.set = set
-
-        if self.set:
-            self.opcode_name = 'set'
-        else:
-            self.opcode_name = 'put'
-
-    ###############################################
-
-    def __str__(self):
-
-        return '%s char "%s"' % (self.opcode_name, ''.join([chr(x) for x in self.characters]))
-
-        # return 'set char "%s"' % str(self.characters)
-
-    ###############################################
-
-    def append(self, char):
-
-        self.characters.append(char)
 
     ###############################################
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
-        registers = dvi_machine.get_registers()
+        pass
 
-        current_font = dvi_machine.get_current_font()
-        dvi_font = dvi_machine.get_current_dvi_font()
+#####################################################################################################
+
+class OpcodeX(Opcode):
+
+    ###############################################
+
+    def __init__(self, x):
+
+        self.x = x
+
+#####################################################################################################
+
+class Opcode_putset_char(Opcode):
+
+    """ This class implements the ``set_char`` and ''put_char`` opcodes. """
+
+    ###############################################
+
+    def __init__(self, char_code, set_char=True):
+
+        self.characters = [char_code]
+        self.set_char = set_char
+
+    ###############################################
+
+    def __str__(self):
+
+        return '%s char "%s"' % (self.opcode_name,
+                                 ''.join([chr(x) for x in self.characters]))
+
+    ###############################################
+
+    def append(self, char_code):
+
+        """ Append the char code. """
+
+        self.characters.append(char_code)
+
+    ###############################################
+
+    def run(self, dvi_machine, compute_bounding_box=False):
+
+        registers = dvi_machine.registers
+        current_font = dvi_machine.current_font
+        dvi_font = dvi_machine.current_dvi_font
 
         bounding_box = None
-
         for char_code in self.characters:
-
             tfm_char = current_font.tfm[char_code]
-
-            #!# glyph = current_font[char_code]
-            #!# glyph.print_summary()
-            #!# glyph.print_glyph()
-               
-            char_width  = dvi_font.get_char_scaled_width(tfm_char)
-            char_depth  = dvi_font.get_char_scaled_depth(tfm_char)
-            char_height = dvi_font.get_char_scaled_height(tfm_char)
+            char_width  = dvi_font.char_scaled_width(tfm_char)
+            char_depth  = dvi_font.char_scaled_depth(tfm_char)
+            char_height = dvi_font.char_scaled_height(tfm_char)
             
             char_bounding_box = Interval2D([registers.h, registers.h + char_width],
                                            [registers.v - char_height, registers.v + char_depth])
 
-            #!# registers.h - glyph.horizontal_offset,
-            #!# registers.v - glyph.vertical_offset,
-
-            if not compute_bounding_box:
+            if compute_bounding_box:
+                print 'Char bounding box', char_bounding_box
+                if bounding_box is None:
+                    bounding_box = char_bounding_box
+                else:
+                    bounding_box |= char_bounding_box
+            else:
                 dvi_machine.paint_char(registers.h, registers.v,
                                        char_bounding_box,
                                        current_font,
                                        char_code,
                                        dvi_font.magnification)
 
-                #!# glyph,
- 
-            else:
-
-                print 'Char bounding box', char_bounding_box
-
-                if bounding_box is None:
-                    bounding_box = char_bounding_box
-                else:
-                    bounding_box |= char_bounding_box
-
-            if self.set:
+            if self.set_char:
                 registers.h += char_width
 
             print '%s char %3u "%s" width %8u h %10u' % (self.opcode_name,
                                                          char_code, chr(char_code),
                                                          char_width, registers.h)
-
+            
         if compute_bounding_box:
             return bounding_box
-            
-###################################################
-
-class Opcode_put_char(Opcode):
-
-    ###############################################
-
-    def __init__(self, char):
-
-        super(Opcode_put_char, self).__init__(char, set=False)
 
 #####################################################################################################
 
-class Opcode_set_rule(Opcode):
+class Opcode_set_char(Opcode_putset_char):
+
+    """ This class implements the ``set_char`` opcode. """
 
     ###############################################
 
-    def __init__(self, height, width, set=True):
+    def __init__(self, char_code):
+
+        super(Opcode_set_char, self).__init__(char_code, set_char=True)
+
+        self.opcode_name = 'set'
+
+#####################################################################################################
+
+class Opcode_put_char(Opcode_putset_char):
+
+    """ This class implements the ``put_char`` opcode. """
+
+    ###############################################
+
+    def __init__(self, char_code):
+
+        super(Opcode_put_char, self).__init__(char_code, set_char=False)
+
+        self.opcode_name = 'put'
+
+#####################################################################################################
+
+class Opcode_putset_rule(Opcode):
+
+    """ This class implements the ``set_rule`` and ``put_rule`` opcodes. """
+
+    ###############################################
+
+    def __init__(self, height, width, set_rule=True):
 
         self.height = height
         self.width = width
-        self.set = set
-
-    ###############################################
-
-    def __str__(self):
-
-        if self.set:
-            return 'set rule height %u width %u, h += width' % (self.height, self.width)
-        else:
-            return 'put rule height %u width %u' % (self.height, self.width)
+        self.set_rule = set_rule
 
     ###############################################
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
-        registers = dvi_machine.get_registers()
-
-        if not compute_bounding_box:
-            dvi_machine.paint_rule(registers.h, registers.v, self.width, self.height)
+        registers = dvi_machine.registers
 
         if compute_bounding_box:
             bounding_box = Interval2D([registers.h, registers.h + self.width],
                                       [registers.v, registers.v - self.height])
+        else:
+            dvi_machine.paint_rule(registers.h, registers.v, self.width, self.height)
 
-        if self.set:
+        if self.set_rule:
             registers.h += self.width
 
         if compute_bounding_box:
             return bounding_box
 
-###################################################
+#####################################################################################################
 
-class Opcode_put_rule(Opcode_set_rule):
+class Opcode_set_rule(Opcode_putset_rule):
+
+    """ This class implements the ``set_rule`` opcode. """
 
     ###############################################
 
     def __init__(self, height, width):
 
-        super(Opcode_put_rule, self).__init__(height, width, set=False)
-
-#####################################################################################################
-
-class Opcode_push(Opcode):
-
-    ###############################################
-
-    def __init__(self):
-
-        pass
+        super(Opcode_set_rule, self).__init__(height, width, set_rule=False)
 
     ###############################################
 
     def __str__(self):
 
-        return 'push'
+        return 'set rule height %u width %u, h += width' % (self.height, self.width)
+
+#####################################################################################################
+
+class Opcode_put_rule(Opcode_putset_rule):
+
+    """ This class implements the ``put_rule`` opcode. """
+
+    ###############################################
+
+    def __init__(self, height, width):
+
+        super(Opcode_put_rule, self).__init__(height, width, set_rule=False)
+
+    ###############################################
+
+    def __str__(self):
+        
+        return 'put rule height %u width %u' % (self.height, self.width)
+
+#####################################################################################################
+
+class Opcode_push(Opcode):
+
+    """ This class implements the ``push`` opcode. """
+
+    ###############################################
+
+    def __str__(self):
+
+        return 'push register'
 
     ###############################################
 
@@ -334,9 +276,11 @@ class Opcode_push(Opcode):
 
 class Opcode_pop(Opcode):
 
+    """ This class implements the ``pop`` opcode. """
+
     ###############################################
 
-    def __init__(self, n = 1):
+    def __init__(self, n=1):
 
         self.n = n
 
@@ -344,7 +288,7 @@ class Opcode_pop(Opcode):
 
     def __str__(self):
 
-        return 'pop %u' % (self.n)
+        return 'pop register *%u' % (self.n)
 
     ###############################################
 
@@ -356,6 +300,8 @@ class Opcode_pop(Opcode):
 
 class Opcode_push_colour(Opcode):
 
+    """ This class implements the ``push_colour`` opcode. """
+
     ###############################################
 
     def __init__(self, colour):
@@ -366,7 +312,7 @@ class Opcode_push_colour(Opcode):
 
     def __str__(self):
 
-        return 'push ' + str(self.colour)
+        return 'push colour' + str(self.colour)
 
     ###############################################
 
@@ -378,6 +324,8 @@ class Opcode_push_colour(Opcode):
 
 class Opcode_pop_colour(Opcode):
 
+    """ This class implements the ``pop_colour`` opcode. """
+
     ###############################################
 
     def __init__(self, n = 1):
@@ -388,7 +336,7 @@ class Opcode_pop_colour(Opcode):
 
     def __str__(self):
 
-        return 'pop colour %u' % (self.n)
+        return 'pop colour *%u' % (self.n)
 
     ###############################################
 
@@ -398,13 +346,9 @@ class Opcode_pop_colour(Opcode):
 
 #####################################################################################################
 
-class Opcode_right(Opcode):
+class Opcode_right(OpcodeX):
 
-    ###############################################
-
-    def __init__(self, x):
-
-        self.x = x
+    """ This class implements the ``right`` opcode. """
 
     ###############################################
 
@@ -418,18 +362,14 @@ class Opcode_right(Opcode):
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
-        registers = dvi_machine.get_registers()
+        registers = dvi_machine.registers
         registers.h += self.x
 
 #####################################################################################################
 
 class Opcode_w0(Opcode):
 
-    ###############################################
-
-    def __init__(self):
-
-        pass
+    """ This class implements the ``w0`` opcode. """
 
     ###############################################
 
@@ -441,18 +381,14 @@ class Opcode_w0(Opcode):
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
-        registers = dvi_machine.get_registers()
+        registers = dvi_machine.registers
         registers.h += registers.w
 
 #####################################################################################################
 
-class Opcode_w(Opcode):
+class Opcode_w(OpcodeX):
 
-    ###############################################
-
-    def __init__(self, x):
-
-        self.x = x
+    """ This class implements the ``w`` opcode. """
 
     ###############################################
 
@@ -464,7 +400,7 @@ class Opcode_w(Opcode):
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
-        registers = dvi_machine.get_registers()
+        registers = dvi_machine.registers
         registers.w  = self.x
         registers.h += self.x
 
@@ -472,11 +408,7 @@ class Opcode_w(Opcode):
 
 class Opcode_x0(Opcode):
 
-    ###############################################
-
-    def __init__(self):
-
-        pass
+    """ This class implements the ``x0`` opcode. """
 
     ###############################################
 
@@ -488,18 +420,14 @@ class Opcode_x0(Opcode):
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
-        registers = dvi_machine.get_registers()
+        registers = dvi_machine.registers
         registers.h += registers.x
 
 #####################################################################################################
 
-class Opcode_x(Opcode):
+class Opcode_x(OpcodeX):
 
-    ###############################################
-
-    def __init__(self, x):
-
-        self.x = x
+    """ This class implements the ``x`` opcode. """
 
     ###############################################
 
@@ -511,19 +439,15 @@ class Opcode_x(Opcode):
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
-        registers = dvi_machine.get_registers()
+        registers = dvi_machine.registers
         registers.x  = self.x
         registers.h += self.x
 
 #####################################################################################################
 
-class Opcode_down(Opcode):
+class Opcode_down(OpcodeX):
 
-    ###############################################
-
-    def __init__(self, x):
-
-        self.x = x
+    """ This class implements the ``down`` opcode. """
 
     ###############################################
 
@@ -535,18 +459,14 @@ class Opcode_down(Opcode):
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
-        registers = dvi_machine.get_registers()
+        registers = dvi_machine.registers
         registers.v += self.x
 
 #####################################################################################################
 
 class Opcode_y0(Opcode):
 
-    ###############################################
-
-    def __init__(self):
-
-        pass
+    """ This class implements the ``y0`` opcode. """
 
     ###############################################
 
@@ -558,18 +478,14 @@ class Opcode_y0(Opcode):
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
-        registers = dvi_machine.get_registers()
+        registers = dvi_machine.registers
         registers.v += registers.y
 
 #####################################################################################################
  
-class Opcode_y(Opcode):
+class Opcode_y(OpcodeX):
 
-    ###############################################
-
-    def __init__(self, x):
-
-        self.x = x
+    """ This class implements the ``y`` opcode. """
 
     ###############################################
 
@@ -581,7 +497,7 @@ class Opcode_y(Opcode):
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
-        registers = dvi_machine.get_registers()
+        registers = dvi_machine.registers
         registers.y  = self.x
         registers.v += self.x
 
@@ -589,11 +505,7 @@ class Opcode_y(Opcode):
 
 class Opcode_z0(Opcode):
 
-    ###############################################
-
-    def __init__(self):
-
-        pass
+    """ This class implements the ``z0`` opcode. """
 
     ###############################################
 
@@ -605,18 +517,14 @@ class Opcode_z0(Opcode):
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
-        registers = dvi_machine.get_registers()
+        registers = dvi_machine.registers
         registers.v += registers.z
 
 #####################################################################################################
 
-class Opcode_z(Opcode):
+class Opcode_z(OpcodeX):
 
-    ###############################################
-
-    def __init__(self, x):
-
-        self.x = x
+    """ This class implements the ``z`` opcode. """
 
     ###############################################
 
@@ -628,13 +536,15 @@ class Opcode_z(Opcode):
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
-        registers = dvi_machine.get_registers()
+        registers = dvi_machine.registers
         registers.z  = self.x
         registers.v += self.x
 
 #####################################################################################################
 
 class Opcode_font(Opcode):
+
+    """ This class implements the ``font`` opcode. """
 
     ###############################################
 
@@ -652,11 +562,13 @@ class Opcode_font(Opcode):
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
-        dvi_machine.current_font = self.font_id
+        dvi_machine.current_font_id = self.font_id
 
 #####################################################################################################
 
 class Opcode_xxx(Opcode):
+
+    """ This class implements the ``xxx`` opcode. """
 
     ###############################################
 
@@ -670,21 +582,17 @@ class Opcode_xxx(Opcode):
 
         return 'xxx [%s]' % (self.code)
 
-    ###############################################
-
-    def run(self, dvi_machine, compute_bounding_box=False):
-
-        pass
-
 #####################################################################################################
 
 class DviFont(object):
 
+    """ This class implements a DVI Font. """
+
     ###############################################
 
-    def __init__(self, id, name, checksum, scale_factor, design_size):
+    def __init__(self, font_id, name, checksum, scale_factor, design_size):
 
-        self.id = id
+        self.id = font_id
         self.name = name
         self.checksum = checksum
         self.scale_factor = scale_factor
@@ -696,46 +604,57 @@ class DviFont(object):
 
     def __str__(self):
 
-        return '''Font ID %u
+        string_format = '''Font ID %u
  - Name          %s
  - Checksum      %u
  - Design size   %u
  - Scale factor  %u
  - Magnification %u %%
-''' % (self.id,
-       self.name,
-       self.checksum,
-       self.scale_factor,
-       self.design_size,
-       self.magnification * 100)
+'''
+        
+        return string_format % (
+            self.id,
+            self.name,
+            self.checksum,
+            self.scale_factor,
+            self.design_size,
+            self.magnification * 100,
+            )
 
     ###############################################
 
-    def get_char_scaled_width(self, tfm_char):
+    def char_scaled_width(self, tfm_char):
 
-        return tfm_char.get_scaled_width(self.scale_factor)
+        """ Return the scale width for the :class:`PyDVI.TfmChar` instance. """
 
-    ###############################################
-
-    def get_char_scaled_height(self, tfm_char):
-
-        return tfm_char.get_scaled_height(self.scale_factor)
+        return tfm_char.scaled_width(self.scale_factor)
 
     ###############################################
 
-    def get_char_scaled_depth(self, tfm_char):
+    def char_scaled_height(self, tfm_char):
 
-        return tfm_char.get_scaled_depth(self.scale_factor)
+        """ Return the scale height for the :class:`PyDVI.TfmChar` instance. """
+
+        return tfm_char.scaled_height(self.scale_factor)
+
+    ###############################################
+
+    def char_scaled_depth(self, tfm_char):
+
+        """ Return the scale depth for the :class:`PyDVI.TfmChar` instance. """
+
+        return tfm_char.scaled_depth(self.scale_factor)
 
 #####################################################################################################
 
-class DviColorBlack(object):
+class DviColor(object):
+    pass
+ 
+#####################################################################################################
 
-    ###############################################
+class DviColorBlack(DviColor):
 
-    def __init__(self):
-
-        pass
+    """ This class implements the black colour. """
 
     ###############################################
 
@@ -745,7 +664,9 @@ class DviColorBlack(object):
 
 #####################################################################################################
 
-class DviColorGray(object):
+class DviColorGray(DviColor):
+
+    """ This class implements gray colour. """
 
     ###############################################
 
@@ -761,7 +682,9 @@ class DviColorGray(object):
 
 #####################################################################################################
 
-class DviColorRGB(object):
+class DviColorRGB(DviColor):
+
+    """ This class implements RGB colour. """
 
     ###############################################
 
@@ -777,7 +700,9 @@ class DviColorRGB(object):
 
 #####################################################################################################
 
-class DviColorCMYK(object):
+class DviColorCMYK(DviColor):
+
+    """ This class implements CMYK colour. """
 
     ###############################################
 
@@ -793,14 +718,60 @@ class DviColorCMYK(object):
 
 #####################################################################################################
 
+class DviProgramPage(list):
+
+    """ This class defines a page. """
+
+    ###############################################
+
+    def __init__(self,
+                 page_number,
+                 height=0, width=0,
+                 paper_orientation=paper_orientation_enum.portrait):
+
+        self.page_number = page_number
+        self.set_paper_size(height, width)
+        self.paper_orientation = paper_orientation
+
+    ###############################################
+
+    def set_paper_size(self, height, width):
+
+        """ Set the paper size. """
+
+        self.height, self.width = height, width
+
+    ###############################################
+
+    def print_program(self):
+
+        """ Print the program. """
+
+        string_format = \
+'''Page Program
+ - Paper Size: height = %.3f pt width = %.3f pt
+ - Paper Orientation: %s
+'''
+
+        message = string_format % (
+            self.height, self.width,
+            self.paper_orientation,
+            )
+        print message
+        for opcode in self:
+            print opcode
+
+#####################################################################################################
+
 class DviProgam(object):
+
+    """ This class implements a DVI program. """
 
     ###############################################
 
     def __init__(self):
 
         self.fonts = {} # dict of DviFont
-
         self.pages = []
 
     ###############################################
@@ -826,8 +797,7 @@ class DviProgam(object):
 
     def dvi_font_iterator(self):
         
-        for font in self.fonts.values():
-            yield font
+        return self.fonts.itervalues()
 
     ###############################################
 
@@ -836,12 +806,15 @@ class DviProgam(object):
                            dvi_format,
                            numerator, denominator, magnification):
 
+        """ Set the preambule data. """
+
         self.comment = comment
         self.dvi_format = dvi_format
         self.numerator, self.denominator, self.magnification = numerator, denominator, magnification
 
         # Fixme: use it to convert
-        self.dvi_unit = fractions.Fraction(self.magnification * self.numerator, 1000 * self.denominator) # 1e-7 m
+        self.dvi_unit = fractions.Fraction(self.magnification * self.numerator,
+                                           1000 * self.denominator) # 1e-7 m
 
     ###############################################
 
@@ -850,23 +823,26 @@ class DviProgam(object):
                             stack_depth,
                             number_of_pages):
 
+        """ Set the postamble data. """
+
         self.max_height, self.max_width = max_height, max_width
         self.stack_depth = stack_depth
         self.number_of_pages = number_of_pages
 
         for i in xrange(self.number_of_pages):
-            self.pages.append(OpcodeProgram())
+            self.pages.append(DviProgramPage(i))
 
     ###############################################
         
     def register_font(self, font):
 
-        if self.fonts.has_key(font.id):
-            pass 
-            # print 'Font ID %u already registered' % (font.id)
-        else:
+        """ Register a :class:`DviFont` instance. """
+
+        if font.id not in self.fonts:
             self.fonts[font.id] = font
-        
+        # else:
+        #     print 'Font ID %u already registered' % (font.id)
+            
     ###############################################
 
     def get_font(self, i):
@@ -883,7 +859,7 @@ class DviProgam(object):
 
     def print_summary(self):
 
-        print '''DVI Program
+        string_format = '''DVI Program
 
 Preambule
   - Comment       '%s'
@@ -898,20 +874,22 @@ Postamble
   - Stack Depth     %u
   - Max Height      %u sp %.1f mm
   - Max Width       %u sp %.1f mm
-''' % (self.comment,
-       self.dvi_format,
-       self.numerator,
-       self.denominator,
-       self.magnification,
-       self.dvi_unit * 100,
-       self.number_of_pages,
-       self.stack_depth,
-       self.max_height, sp2mm(self.max_height),
-       self.max_width, sp2mm(self.max_width),
+'''
+
+        print string_format  % (
+            self.comment,
+            self.dvi_format,
+            self.numerator,
+            self.denominator,
+            self.magnification,
+            self.dvi_unit * 100,
+            self.number_of_pages,
+            self.stack_depth,
+            self.max_height, sp2mm(self.max_height),
+            self.max_width, sp2mm(self.max_width),
        )
-
+        
         print 'List of fonts:'
-
         for font in self.dvi_font_iterator():
             print font
 
@@ -921,13 +899,15 @@ Postamble
 
 #####################################################################################################
 
-one_in_in_sp = in2sp(1)
+one_in_sp = in2sp(1)
 
 class DviMachineRegisters(object):
 
+    """ This class implements a set of registers. """
+
     ###############################################
 
-    def __init__(self, h = one_in_in_sp, v = one_in_in_sp, w = 0, x = 0, y = 0, z = 0):
+    def __init__(self, h=one_in_sp, v=one_in_sp, w=0, x=0, y=0, z=0):
 
         self.h, self.v, self.w, self.x, self.y, self.z = h, v, w, x, y, z
 
@@ -935,27 +915,33 @@ class DviMachineRegisters(object):
 
     def __str__(self):
         
-        return '''
+        string_format = '''
 (h=+%10u sp %+10.2f mm v=+%10u sp %+10.2f mm
  w=+%10u sp %+10.2f mm x=+%10u sp %+10.2f mm
  y=+%10u sp %+10.2f mm z=+%10u sp %+10.2f mm)
-''' % (self.h, sp2mm(self.h),
-       self.v, sp2mm(self.v),
-       self.w, sp2mm(self.w),
-       self.x, sp2mm(self.x),
-       self.y, sp2mm(self.y),
-       self.z, sp2mm(self.z),
-       )
+'''
+        return string_format % (
+            self.h, sp2mm(self.h),
+            self.v, sp2mm(self.v),
+            self.w, sp2mm(self.w),
+            self.x, sp2mm(self.x),
+            self.y, sp2mm(self.y),
+            self.z, sp2mm(self.z),
+            )
 
     ###############################################
 
     def clone(self):
+
+        """ Clone the set of registers. """
 
         return DviMachineRegisters(self.h, self.v, self.w, self.x, self.y, self.z)
 
 #####################################################################################################
 
 class DviMachine(object):
+
+    """ This class implements a DVI Machine. """
     
     ###############################################
 
@@ -964,33 +950,41 @@ class DviMachine(object):
         self.font_manager = font_manager
 
         self.fonts = {}
-
         self.reset()
 
     ###############################################
 
     def reset(self):
 
-        self.current_font = None
+        """ Reset the machine. """
 
+        self.current_font_id = None
         self.registers_stack = [DviMachineRegisters()]
         self.colour_stack = [DviColorBlack()]
 
     ###############################################
 
-    def get_registers(self):
+    def _get_registers(self):
+
+        """ Return the current register set. """
 
         return self.registers_stack[-1]
+
+    registers = property(_get_registers, None, None, 'Register set')
 
     ###############################################
 
     def push_registers(self):
 
-        self.registers_stack.append(self.get_registers().clone())
+        """ Push the register set. """
+
+        self.registers_stack.append(self.registers.clone())
 
     ###############################################
 
-    def pop_registers(self, n = 1):
+    def pop_registers(self, n=1):
+
+        """ Pop *n* level in the register set stack. """
 
         del self.registers_stack[n]
 
@@ -998,38 +992,54 @@ class DviMachine(object):
 
     def push_colour(self, colour):
 
+        """ Push the current colour. """
+
         self.colour_stack.append(colour)
 
     ###############################################
 
     def pop_colour(self, n = 1):
 
+        """ Pop *n* level in the colour stack. """
+
         del self.registers_stack[-n]
 
     ###############################################
 
-    def get_current_font(self):
+    def _get_current_font(self):
 
-        return self.fonts[self.current_font]
+        """ Return the current font. """
 
-    ###############################################
+        return self.fonts[self.current_font_id]
 
-    def get_current_dvi_font(self):
-
-        return self.dvi_program.get_font(self.current_font)
+    current_font = property(_get_current_font, None, None, 'Current font')
 
     ###############################################
 
-    def load_dvi_program(self, dvi_program, load_fonts = True):
+    def _get_current_dvi_font(self):
+
+        """ Return the current dvi font. """
+
+        return self.dvi_program.get_font(self.current_font_id)
+
+    current_dvi_font = property(_get_current_dvi_font, None, None, 'Current dvi font')
+
+    ###############################################
+
+    def load_dvi_program(self, dvi_program, load_fonts=True):
+
+        """ Load a :class:`DviProgam` instance. """
 
         self.dvi_program = dvi_program
 
         if load_fonts:
-            self.load_dvi_fonts()
+            self._load_dvi_fonts()
 
     ###############################################
 
-    def load_dvi_fonts(self):
+    def _load_dvi_fonts(self):
+
+        """ Load the fonts used by the DVI program. """
 
         # Load the Fonts
         for dvi_font in self.dvi_program.dvi_font_iterator():
@@ -1039,11 +1049,11 @@ class DviMachine(object):
 
     def simplify_dvi_program(self):
 
-        dvi_simpily_machine = DviSimplifyMachine(self.font_manager)
+        """ Simplify the DVI program. """
 
-        dvi_simpily_machine.load_dvi_program(self.dvi_program)
-
-        dvi_simpily_machine.process_xxx_opcodes()
+        dvi_simplify_machine = DviSimplifyMachine(self.font_manager)
+        dvi_simplify_machine.load_dvi_program(self.dvi_program, load_fonts=False)
+        dvi_simplify_machine.simplify()
 
     ###############################################
 
@@ -1058,7 +1068,7 @@ class DviMachine(object):
         for opcode in opcode_program:
             print opcode
             opcode.run(self)
-            print 'level %u' % (len(self.registers_stack)), self.get_registers()
+            print 'level %u' % (len(self.registers_stack)), self.registers
 
     ###############################################
 
@@ -1068,31 +1078,23 @@ class DviMachine(object):
 
         opcode_program = self.dvi_program.get_page(page)
 
-        print 'Program Length:', len(opcode_program)
-
         bounding_box = None
-
         for opcode in opcode_program:
             print opcode
-            opcode_bounding_box = opcode.run(self, compute_bounding_box = True)
-            print 'level %u' % (len(self.registers_stack)), self.get_registers()
-
+            opcode_bounding_box = opcode.run(self, compute_bounding_box=True)
+            print 'Register Stack level %u' % (len(self.registers_stack)), self.registers
             if opcode_bounding_box is not None:
-
                 print 'Opcode bounding box', opcode_bounding_box
-
                 if bounding_box is None:
                     bounding_box = opcode_bounding_box
                 else:
                     bounding_box |= opcode_bounding_box
-                
                 print 'Current page bounding box', bounding_box
 
-        print 'Page bounding box', bounding_box, 'sp'
-
-        (x_min_mm, x_max_mm, y_min_mm, y_max_mm) = [sp2mm(x) for x in (bounding_box.x.inf, bounding_box.x.sup,
-                                                                       bounding_box.y.inf, bounding_box.y.sup)]
-
+        print 'Page bounding box\n ', bounding_box, 'sp'
+        (x_min_mm, x_max_mm,
+         y_min_mm, y_max_mm) = [sp2mm(x) for x in (bounding_box.x.inf, bounding_box.x.sup,
+                                                   bounding_box.y.inf, bounding_box.y.sup)]
         print '  [%.2f, %.2f]*[%.2f, %.2f] mm' % (x_min_mm, x_max_mm, y_min_mm, y_max_mm) 
 
         return bounding_box
@@ -1112,131 +1114,153 @@ class DviMachine(object):
 #####################################################################################################
 
 class DviSimplifyMachine(DviMachine):
+
+    #: Defines papersize special
+    xxx_papersize = 'papersize='
+
+    #: Defines landscape special
+    xxx_landscape = '! /landplus90 true store'
+
+    #: Defines colour special
+    xxx_colour = 'color '
     
     ###############################################
 
-    def __init__(self, font_manager):
+    def simplify(self):
 
-        super(DviSimplifyMachine, self).__init__(font_manager)
+        """ Simplify the program. """
 
-    ###############################################
+        logger.info('Process the xxx opcodes in the program')
 
-    def __init__(self, font_manager):
-
-        super(DviSimplifyMachine, self).__init__(font_manager)
-
-    ###############################################
-
-    def load_dvi_program(self, dvi_program):
-
-        super(DviSimplifyMachine, self).load_dvi_program(dvi_program, load_fonts=False)
+        for program_page in self.dvi_program:
+            self.simplify_page(program_page)
+            self.process_page_xxx_opcodes(program_page)
 
     ###############################################
 
-    def process_xxx_opcodes(self):
+    def process_page_xxx_opcodes(self, program_page):
 
-        for opcode_program in self.dvi_program:
-            self.process_page_xxx_opcodes(opcode_program)
+        """ Process the xxx opcodes in the page program. """
 
-    ###############################################
-
-    def process_page_xxx_opcodes(self, opcode_program):
-
-        self.reset()
+        logger.info('Process the xxx opcodes in the page program #%u' % program_page.page_number)
 
         i = 0
-        while i < len(opcode_program):
-
-            opcode = opcode_program[i]
-
+        while i < len(program_page):
+            opcode = program_page[i]
             if isinstance(opcode, Opcode_xxx):
-
-                xxx = opcode.code
-
-                print opcode
-
-                if xxx.find(xxx_papersize) == 0:
-                    new_opcode = self.transform_xxx_paper_size(opcode_program, i, xxx)
-
-                elif xxx == xxx_landscape:
-                    new_opcode = self.transform_xxx_paper_orientation(opcode_program, i, xxx)
-
-                elif xxx.find(xxx_colour) == 0:
-                    new_opcode = self.transform_xxx_colour(opcode_program, i, xxx)
-
+                xxx_code = opcode.code
+                if xxx_code.startswith(self.xxx_papersize):
+                    new_opcode = self.transform_xxx_paper_size(program_page, xxx_code)
+                elif xxx_code == self.xxx_landscape:
+                    new_opcode = self.transform_xxx_paper_orientation(program_page, xxx_code)
+                elif xxx_code.startswith(self.xxx_colour):
+                    new_opcode = self.transform_xxx_colour(program_page, xxx_code)
                 else:
                     new_opcode = None
 
                 if new_opcode is not None:
-                    opcode_program[i] = new_opcode
+                    program_page[i] = new_opcode
+                    i += 1
                 else:
-                    del opcode_program[i]
+                    del program_page[i]
 
             else:
                 i += 1
 
     ###############################################
 
-    def transform_xxx_colour(self, opcode_program, i, xxx):
+    def transform_xxx_colour(self, program_page, xxx_code):
 
-        print 'transform_xxx_colour'
+        """ Transform a xxx colour opcode. """
 
-        words = xxx.split()
+        logger.info("Transform the xxx colour opcode: '%s'" % xxx_code)
+
+        words = xxx_code.split()
 
         try:
-            print words
-
             operation = words[1]
-
             if operation == 'pop':
-
                 return Opcode_pop_colour()
 
             elif operation == 'push':
-
                 colour_class = words[2]
-
                 if colour_class == 'Black':
                     colour = DviColorBlack()
-
                 elif colour_class == 'gray':
                     colour = DviColorGray(float(words[3]))
-
                 elif colour_class == 'rgb':
                     colour = DviColorRGB(* [float(x) for x in words[3:6]])
-
                 elif colour_class == 'cmyk':
                     colour = DviColorCMYK(* [float(x) for x in words[3:7]])
-
                 else:
-                    return None
-                    
+                    raise ValueError('Unknown colour type')
                 return Opcode_push_colour(colour)
 
         except:
+            # Fixme: ValueError
             return None
 
     ###############################################
 
-    def transform_xxx_paper_size(self, opcode_program, i, xxx):
+    def transform_xxx_paper_size(self, program_page, xxx_code):
 
-        start = xxx.rfind('=') +1
-        dimensions = xxx[start:]
+        """ Transform a xxx paper size opcode. """
 
+        logger.info("Transform the xxx paper size opcode: '%s'" % xxx_code)
+
+        start = xxx_code.rfind('=') +1
+        dimensions = xxx_code[start:]
         height, width = [float(x[:-2]) for x in dimensions.split(',')]
 
-        opcode_program.set_paper_size(height, width)
+        program_page.set_paper_size(height, width)
 
         return None
 
     ###############################################
 
-    def transform_xxx_paper_orientation(self, opcode_program, i, xxx):
+    def transform_xxx_paper_orientation(self, program_page, xxx_code):
 
-        if xxx == xxx_landscape:
-            opcode_program.set_paper_orientation(paper_orientation_enum.landscape)
+        """ Transform a xxx paper orientation opcode. """
 
+        logger.info("Transform the paper orientation opcode: '%s'" % xxx_code)
+
+        if xxx_code == self.xxx_landscape:
+            program_page.set_paper_orientation = paper_orientation_enum.landscape
+ 
         return None
+
+    ###############################################
+
+    def simplify_page(self, program_page):
+
+        """ Simplify the page. """
+
+        logger.info('Simplify the program page #%u' % program_page.page_number)
+
+        i = 0
+        previous_opcode = None
+        while i < len(program_page):
+            opcode = program_page[i]
+            delete_opcode = False
+
+            if previous_opcode is not None and opcode.__class__ == previous_opcode.__class__:
+                logger.info("Same opcode %s" % opcode.__class__.__name__)
+
+                if isinstance(opcode, (Opcode_pop, Opcode_pop_colour)):
+                    logger.info("Merge pop opcode")
+                    previous_opcode.n += 1
+                    delete_opcode = True
+
+                elif isinstance(opcode, OpcodeX):
+                    logger.info("Merge OpcodeX")
+                    previous_opcode.x += opcode.x
+                    delete_opcode = True
+
+            if delete_opcode:
+                del program_page[i]
+            else:
+                previous_opcode = opcode
+                i += 1
 
 #####################################################################################################
 #

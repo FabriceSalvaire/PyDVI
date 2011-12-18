@@ -15,9 +15,8 @@
 
 #####################################################################################################
 
+import argparse
 import sys
-
-from optparse import OptionParser
 
 #####################################################################################################
 
@@ -26,23 +25,17 @@ from PyDVI.Kpathsea import kpsewhich
 
 #####################################################################################################
 
-usage = 'usage: %prog font_map'
-
-parser = OptionParser(usage)
-
-opt, args = parser.parse_args()
-
-if len(args) != 1:
-    parser.error("Give a TeX font map, e.g. pdftex")
-
-font_map = args[0]
+parser = argparse.ArgumentParser(description='Test Font Map.')
+parser.add_argument('font_map', metavar='FontMap',
+                    help='TeX font map, e.g. pdftex')
+args = parser.parse_args()
 
 #####################################################################################################
 
-font_map_file = kpsewhich(font_map, file_format='map')
+font_map_file = kpsewhich(args.font_map, file_format='map')
 
 if font_map_file is None:
-    print 'Font map %s not found' % (font_map_file)
+    print 'Font map %s not found' % (args.font_map)
     sys.exit(1)
 
 font_map = FontMap(font_map_file)

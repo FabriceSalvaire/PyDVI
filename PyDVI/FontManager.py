@@ -107,7 +107,7 @@ class FontManager(object):
 
         """ Return :obj:`True` if the Font Manager holds the font *font_name*. """
 
-        return self.fonts.has_key(font_name)
+        return font_name in self.fonts
 
     ###############################################
 

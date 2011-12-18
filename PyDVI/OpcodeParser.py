@@ -13,33 +13,39 @@
 #
 #####################################################################################################
 
+""" This modules provides tools to parse TeX stream like DVI file and PK Font.
+"""
+
 #####################################################################################################
 
 __all__ = ['OpcodeParserSet', 'OpcodeParser']
 
 #####################################################################################################
 
+from PyDVI.Tools.FuncTools import sign_of
 from PyDVI.Tools.Stream import AbstractStream
-
-#####################################################################################################
-
-def sign_of(x):
-    
-    if x < 0:
-        return -1
-    else:
-        return 1
 
 #####################################################################################################
 
 class OpcodeParser(object):
 
+    """ This class implements an opcode parser. """
+
     ###############################################
 
     def __init__(self, opcode, name, description, parameters=(), opcode_class=None):
 
-        """
-        Opcode Parser
+        """ The argument *opcode* defines the opcode byte.
+
+        The argument *name* and *description* defines the name and a description string, respectively.
+
+        The argument *parameters* is a tuple that defines the parameters of the opcode.  Each item
+        is an integer that gives the number of bytes of the parameter.  If this number is negative
+        then the parameter is a signed integer.  For example ``(2, -3)`` defines an opcode having as
+        parameters a 2-byte unsigned integer followed by a 3-byte signed integer.
+
+        The optional *opcode_class* defines an :class:`PyDVI.DviMachine.Opcode` subclass for the
+        opcode.
         """
 
         self.opcode = opcode
@@ -72,11 +78,15 @@ class OpcodeParser(object):
 
     def read_parameters(self, opcode_parser):
 
+        """ Read the opcode parameters. """
+
         return [parameter_reader(opcode_parser.stream) for parameter_reader in self.parameter_readers]
 
     ###############################################
 
     def to_opcode(self, args):
+
+        """ Return an an :class:`PyDVI.DviMachine.Opcode` subclass isntance. """
 
         if self.opcode_class is not None:
             return self.opcode_class(* args)
@@ -86,27 +96,37 @@ class OpcodeParser(object):
 #####################################################################################################
 
 class OpcodeParserSet(list):
+
+    """ This class defines an opcode parser set. """
     
     ###############################################
 
     def __init__(self, opcode_definitions):
 
-        """
-        Opcode Set
+        """ The parameter *opcode_definitions* is a tuple of 'opcode definition'.
 
-        opcode_definitions : (opcode_definition, ...)
+        An opcode definition is a tuple that corresponds to the parameters of the
+        :class:`OpcodeParser` constructor.  Except that the opcode byte can be a list that defines a
+        range of opcode bytes.  In this case the opcode is duplicated in the opcode range.  Moreover
+        the parameter's definition can be a list that defines a range for a mono parameter set of
+        opcodes.  For example ``[1,4]`` will create successively an opcode with 1 to 4-byte unsigned
+        parameter with an incremental opcode byte starting from the one specified.
+        
+        Usage summary::
 
-        opcode_definition : 
-          (opcode_indexes, opcode_name, opcode_description, opcode_parameters=(), opcode_class=None) |
-          (opcode_indexes, opcode_parser_class),
-
-        opcode_indexes :
-          index |
-          [lower_index, upper_index] # duplicate the opcode in the range
-
-        opcode_parameters :
-          (p0, p1, ...) |
-          ([lower_n, upper_n]) # opcode at [index + i] has parameter p[i]
+          opcode_definitions : (opcode_definition, ...)
+          
+          opcode_definition : 
+            (opcode_indexes, opcode_name, opcode_description, opcode_parameters=(), opcode_class=None) |
+            (opcode_indexes, opcode_parser_class),
+          
+          opcode_indexes :
+            index |
+            [lower_index, upper_index] # duplicate the opcode in the range
+          
+          opcode_parameters :
+            (p0, p1, ...) |
+            ([lower_n, upper_n]) # opcode at [index + i] has parameter p[i]
 
         """
 
@@ -118,6 +138,8 @@ class OpcodeParserSet(list):
     ###############################################
 
     def _init_opcode_parser(self, opcode_definition):
+
+        """ Build the set. """
 
         # opcode index
 
@@ -144,9 +166,6 @@ class OpcodeParserSet(list):
             else:
                 for i in indexes:
                     self[i] = OpcodeParser(i, name, description, parameters, opcode_class)
-
-        # for opcode_parser in self:
-        #    print opcode_parser
 
 #####################################################################################################
 #

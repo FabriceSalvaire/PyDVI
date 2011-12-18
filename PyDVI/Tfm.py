@@ -108,7 +108,7 @@ class TfmChar(object):
 
     ###############################################
 
-    def get_scaled_height(self, scale_factor):
+    def scaled_height(self, scale_factor):
 
         """ Return the scaled height by *scale_factor*. """
 
@@ -116,7 +116,7 @@ class TfmChar(object):
 
     ###############################################
 
-    def get_scaled_depth(self, scale_factor):
+    def scaled_depth(self, scale_factor):
 
         """ Return the scaled depth by *scale_factor*. """
 

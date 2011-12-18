@@ -133,24 +133,24 @@ class PkFontParser(object):
         horizontal_dpi = sp2dpi(stream.read_signed_byte4())
         vertical_dpi = sp2dpi(stream.read_signed_byte4())
 
-        string_template = '''
-Preambule
-  - PK ID        %u
-  - Comment      '%s'
-  - Design size  %.1f pt
-  - Checksum     %u
-  - Resolution
-   - Horizontal  %.1f dpi
-   - Vertical    %.1f dpi '''
-
-        print string_template % (
-            pk_id,
-            comment,
-            design_font_size,
-            checksum,
-            horizontal_dpi,
-            vertical_dpi,
-            )
+#         string_template = '''
+# Preambule
+#   - PK ID        %u
+#   - Comment      '%s'
+#   - Design size  %.1f pt
+#   - Checksum     %u
+#   - Resolution
+#    - Horizontal  %.1f dpi
+#    - Vertical    %.1f dpi '''
+# 
+#         print string_template % (
+#             pk_id,
+#             comment,
+#             design_font_size,
+#             checksum,
+#             horizontal_dpi,
+#             vertical_dpi,
+#             )
         
         self.pk_font._set_preambule_data(pk_id, comment, design_font_size, checksum,
                                          horizontal_dpi, vertical_dpi)

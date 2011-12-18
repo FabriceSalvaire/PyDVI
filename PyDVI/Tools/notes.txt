@@ -1,4 +1,4 @@
-DaemonSubprocess.py | to doc
+DaemonSubprocess.py | done
 EnumFactory.py	    | done
 Interval.py	    | to doc
 Logging.py	    | done

@@ -1,16 +1,16 @@
 DviMachine.py       | to doc
 DviParser.py	    | to doc
 Encoding.py	    | done
-FontManager.py	    | to doc
+FontManager.py	    | on going
 FontMap.py	    | done
-Font.py		    | to doc
+Font.py		    | on going
 Kpathsea.py	    | done
 OpcodeParser.py	    | on going
 PkFontParser.py	    | on going
 PkFont.py	    | on going
 PkGlyph.py	    | on going
 PyDviVersion.py	    | done
-TexDaemon.py	    | to doc
+TexDaemon.py	    | done
 TeXUnit.py	    | done
 TfmParser.py	    | done
 Tfm.py		    | on going
