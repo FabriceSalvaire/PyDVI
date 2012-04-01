@@ -242,7 +242,7 @@ class DviParser(object):
         self.post_pointer = None
         self.page_number = None
         self.bop_pointer_stack = []
-      
+     
     ###############################################
 
     def process_stream(self, stream):
@@ -395,6 +395,31 @@ class DviParser(object):
 
             # Fixme: page?
             page = self.process_page()
+
+    ###############################################
+
+    def process_page_forward(self):
+
+        stream = self.stream
+
+        if self.page_number is None:
+            self.page_number = 0
+        else:
+            self.page_number += 1
+        self.dvi_program.append_page(self.page_number)
+        logger.info('BOP at %u, page # %u' % (stream.tell(), self.page_number))
+
+        opcode = stream.read_unsigned_byte1()
+        if opcode != dvi_opcodes.BOP:
+            raise BadDviStream
+
+        counts = [stream.read_unsigned_byte4() for i in xrange(10)]
+
+        bop_pointer = stream.read_signed_byte4()
+        #? forward # self.bop_pointer_stack.append(bop_pointer)
+
+        # Fixme: page?
+        page = self.process_page()
 
     ###############################################
 

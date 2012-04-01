@@ -774,6 +774,11 @@ class DviProgam(object):
         self.fonts = {} # dict of DviFont
         self.pages = []
 
+        # Fixme: default parameters
+        self.max_height, self.max_width = 0, 0
+        self.stack_depth = 0
+        self.number_of_pages = 0
+
     ###############################################
 
     def __getitem__(self, i):
@@ -831,6 +836,12 @@ class DviProgam(object):
 
         for i in xrange(self.number_of_pages):
             self.pages.append(DviProgramPage(i))
+
+    ###############################################
+
+    def append_page(self, i):
+
+        self.pages.append(DviProgramPage(i))
 
     ###############################################
         
@@ -895,7 +906,7 @@ Postamble
 
         # for i in xrange(self.number_of_pages):
         #     print '\nPage', i
-        #     self.page_opcode_programs[i].print_program()
+        #     self.pages[i].print_program()
 
 #####################################################################################################
 

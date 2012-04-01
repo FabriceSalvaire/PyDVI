@@ -20,8 +20,9 @@ import logging
 
 #####################################################################################################
 
-from PyDVI.DviParser import dvi_opcodes_tuple
+from PyDVI.DviParser import dvi_opcodes_tuple, DviParser
 from PyDVI.TexDaemon import TexDaemon
+from PyDVI.Tools.Stream import ByteStream
 
 #####################################################################################################
 
@@ -105,6 +106,8 @@ secplain = TeXParameters(tex_format='secplain',
 
 #####################################################################################################
 
+dvi_parser = DviParser()
+
 tex_daemon = TexDaemon(working_directory='/tmp/tex_daemon',
                        tex_format='plain',
                        start_code=r'\shipout\hbox{}' '\n',
@@ -113,17 +116,30 @@ tex_daemon = TexDaemon(working_directory='/tmp/tex_daemon',
                        )
 result = tex_daemon.start()
 print_result(result)
+print dvi_opcodes_tuple[ord(result['dvi'][0])]
+print dvi_opcodes_tuple[ord(result['dvi'][-1])]
 
-for text in ('Azerty', 'Qwerty'):
+dvi_parser._reset()
+dvi_parser.stream = ByteStream(result['dvi'])
+dvi_parser._process_preambule()
+dvi_parser.dvi_program.print_summary()
+
+for text in 'Azerty', 'Qwerty':
+
     text_input = r'\shipout\hbox{%s}\message{Shipout a page}' % (text)
     result = tex_daemon.process(text_input)
     print_result(result)
     print dvi_opcodes_tuple[ord(result['dvi'][0])]
     print dvi_opcodes_tuple[ord(result['dvi'][-1])]
 
-text_input = '\_end' '\n'
-result = tex_daemon.process(text_input)
-print_result(result)
+    dvi_parser.stream = ByteStream(result['dvi'])
+    dvi_parser.process_page_forward()
+    dvi_parser.dvi_program.print_summary()
+    dvi_parser.dvi_program.pages[-1].print_program()
+
+###text_input = '\_end' '\n'
+###result = tex_daemon.process(text_input)
+###print_result(result)
 
 # Done by dtor
 # tex_daemon.stop()

@@ -9,7 +9,7 @@
 #
 # Audit
 #
-#  - 17/01/2010 fabrice
+# - 18/12/2011 fabrice
 #    char code 0 -> 127 + 1 = 128
 #
 #####################################################################################################
@@ -20,11 +20,11 @@ __all__ = ['Type1Font']
 
 #####################################################################################################
 
-#!# import ft2
+import freetype
 
 #####################################################################################################
 
-from PyDVI.Font import *
+from PyDVI.Font import Font, font_types
 from PyDVI.Tools.Logging import print_card
 
 #####################################################################################################
@@ -61,9 +61,11 @@ class FtGlyph(object):
         # distance, equaling 1/72th of an inch.
 
         size *= 64
-        face.setCharSize(size, size, resolution, resolution)
+        # Fixme ....
+        f.set_char_size(self, width=0, height=0, hres=72, vres=72)
+        face.set_char_size()
 
-        self.glyph = ft2.Glyph(face, glyph_index, 0)
+        self.glyph = face.load_glyph(glyph_index, flags=4))
 
         # print 'Char Box:', map(convert_26_6, self.glyph.getCBox(ft2.ft_glyph_bbox_subpixels))
         # print 'Advance:', map(convert_16_16, self.glyph.advance)
@@ -85,6 +87,7 @@ class FtGlyph(object):
 
 class Type1Font(Font):
 
+    font_type = font_types.Pk
     font_type_string = 'PostScript Type1 Font'
     extension = 'pfb'
 
@@ -94,69 +97,23 @@ class Type1Font(Font):
 
         super(Type1Font, self).__init__(font_manager, font_id, name)
 
-        self.__load_font()
-        self.__init_char_map()
-
         self.glyphs = {}
+
+        try:
+            self.face = freetype.Face(self.filename)
+        except:
+            raise NameError("Freetype can't open file %s" % (self.filename))
+
+        try:
+            self.face.select_charmap(freetype.FT_ENCODING_UNICODE)
+        except:
+            raise NameError("Font %s doesn't have an Unicode char map" % (self.name))
 
     ###############################################
 
     def __len__(self):
 
         return self.face.num_glyphs
-
-    ###############################################
-
-    def __load_font(self):
-
-        try:
-            self.face = ft2.Face(self.font_manager.freetype_library, self.filename, 0) # Fixme: index 0?
-        except:
-            raise NameError("Freetype can't open file %s" % (self.filename))
-
-    ###############################################
-
-    def __init_char_map(self):
-
-        if not self.set_unicode_char_map():
-            raise NameError("Font %s doesn't have an Unicode char map" % (self.name))
-
-        self.glyph_index_to_unicodes = [None]*len(self)
-
-        for unicode_index, glyph_index in self.encoding_vector.iteritems():
-            if self.glyph_index_to_unicodes[glyph_index] is None:
-                self.glyph_index_to_unicodes[glyph_index] = [unicode_index]
-            else:
-                self.glyph_index_to_unicodes[glyph_index].append(unicode_index)
-
-            # print '%5u -> %5u %s' % (unicode_index, glyph_index, self.get_glyph_name(glyph_index))
-            
-    ###############################################
-
-    def get_char_map(self, i):
-
-        return ft2.CharMap(self.face, i)
-
-    ###############################################
-
-    def set_unicode_char_map(self):
-
-        for i in range(self.face.num_charmaps):
-            
-            charmap = self.get_char_map(i)
-            
-            if charmap.encoding_as_string == 'unic':
-                self.face.setCharMap(charmap)
-                self.encoding_vector = self.face.encodingVector()
-                return True
-
-        return False
-
-    ###############################################
-
-    def glyph_index_to_unicode(self, glyph_index):
-
-        return self.face.getCharCode[glyph_index]
 
     ###############################################
 
@@ -167,17 +124,7 @@ class Type1Font(Font):
         the mapping.
         '''
 
-        return self.face.getCharIndex[char_code]
-
-    ###############################################
-
-    def get_glyph_name(self, glyph_index):
-
-        '''
-        Retrieve the ASCII name of a given glyph in a face.
-        '''
-
-        return self.face.getGlyphName(glyph_index)
+        return self.face.get_char_index[char_code]
 
     ###############################################
 
@@ -188,7 +135,7 @@ class Type1Font(Font):
         do the translation.
         '''
 
-        return self.face.getNameIndex(glyph_name)
+        return self.face.get_name_index(glyph_name)
 
     ###############################################
 
@@ -216,29 +163,61 @@ class Type1Font(Font):
 
         face = self.face
 
-        print_card(self.print_header() + 
-                    '''
-Postscript Name: %s
-Family Name: %s
-Style Name: %s
-Number of Glyphs: %u
-Flags: %s
-Units per EM: %u
-Bold: %s
-Italic: %s
-Scalable: %s
-Char Maps: %s''' % (
-                face.getPostscriptName(),
-                face.family_name,
-                face.style_name,
-                len(self),
-                hex(face.style_flags),
-                face.units_per_EM,
-                test_bit(face.style_flags, ft2.FT_STYLE_FLAG_BOLD),
-                test_bit(face.style_flags, ft2.FT_STYLE_FLAG_ITALIC),
-                test_bit(face.style_flags, ft2.FT_FACE_FLAG_SCALABLE),
-                [self.get_char_map(i).encoding_as_string for i in xrange(face.num_charmaps)],
-                ))
+        string_template = '''
+postscript name:     %s
+family name:         %s
+style name:          %s
+number of faces:     %u
+number of glyphs:    %u
+available sizes:     %s
+char maps:           %s
+units per em:        %s
+flags:               %s
+bold:                %s
+italic:              %s
+scalable:            %s
+ascender:            %u
+descender:           %u
+height:              %u
+max advance width:   %u
+max advance height:  %u
+underline position:  %u
+underline thickness: %u
+has horizontal:      %s
+has vertical:        %s
+has kerning:         %s
+is fixed width:      %s
+is scalable:         %s
+'''
+
+        text = string_template % (
+            face.postscript_name,
+            face.family_name,
+            face.style_name,
+            face.num_faces,
+            len(self),
+            str(face.available_sizes),
+            str([charmap.encoding_name for charmap in face.charmaps]),
+            hex(face.style_flags),
+            face.units_per_EM,
+            test_bit(face.style_flags, freetype.FT_STYLE_FLAG_BOLD),
+            test_bit(face.style_flags, freetype.FT_STYLE_FLAG_ITALIC),
+            test_bit(face.style_flags, freetype.FT_FACE_FLAG_SCALABLE),
+            face.ascender,
+            face.descender,
+            face.height,
+            face.max_advance_width,
+            face.max_advance_height,
+            face.underline_position,
+            face.underline_thickness,
+            face.has_horizontal,
+            face.has_vertical,
+            face.has_kerning,
+            face.is_fixed_width,
+            face.is_scalable,
+            )
+
+        print_card(self.print_header() + text)
 
     ###############################################
 

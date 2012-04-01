@@ -10,6 +10,7 @@
 # Audit
 #
 # - 31/10/2011 fabrice
+#  - looks http://docs.python.org/library/io.html
 #  - Check FileStream design.
 #  - Use context manager ?
 #  - read_unsigned_byten is badly displayed in doc
@@ -18,10 +19,11 @@
 
 #####################################################################################################
 
-__all__ = ['AbstractStream', 'StandardStream', 'FileStream', 'to_fix_word']
+__all__ = ['AbstractStream', 'StandardStream', 'FileStream', 'ByteStream', 'to_fix_word']
 
 #####################################################################################################
 
+import io
 import mmap
 import os
 
@@ -274,6 +276,17 @@ class FileStream(StandardStream):
 
         self.stream.close()
         self.file.close()
+
+#####################################################################################################
+
+class ByteStream(StandardStream):
+    
+    ###############################################
+
+    def __init__(self, string_bytes):
+
+        self.stream = io.BytesIO(string_bytes)
+        # self.seek(0)
 
 #####################################################################################################
 #

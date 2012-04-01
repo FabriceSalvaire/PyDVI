@@ -570,16 +570,6 @@ class Interval2D(object):
 
     ###############################################
 
-    def map_in(self, interval_reference):
-
-        """ Construct a new interval shifted of interval_reference.inf
-        """
-
-        return self.__class__(self.x.map_in(interval_reference.x),
-                              self.y.map_in(interval_reference.y))
-
-    ###############################################
-
     def size(self):
 
         """ Return the horizontal and vertical size 

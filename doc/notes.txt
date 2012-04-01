@@ -1,0 +1,37 @@
+2**
+bit |  8||  7|  6|  5|  4||  3|  2|  1|  0|
+    |256||128| 64| 32| 16||  8|  4|  2|  1|
+
+Command bytes
+-------------
+240 - 255
+ F0 -  FF
+
+repeat count
+------------
+
+repeat count = nybble 14
+repeat count +1 = nybble 15
+
+packed number
+-------------
+
+large run count >= 3 nybble = nybble 0
+
+1 ... 13 are left
+
+1 ... dynf : 1 nybble run count [1 ... dynf]
+dynf+1 ... 13 | 2nd nybble : 2 nybble run count
+ (13 - dynf) values | 0 ... 15 = 16 values
+ (13 - dynf) * 16
+ [1 ... (13 - dynf)*16] + dynf
+ [dynf+1 ... (13 - dynf)*16+dynf]
+
+long run count
+--------------
+
+|prepend N 0 | N nybble values|
+
+- (13 - dynf)*16+dynf
+
+# End
