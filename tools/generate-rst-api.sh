@@ -1,9 +1,9 @@
 ####################################################################################################
 
 api=doc/sphinx/source/api
-old_api=doc/sphinx/old-api
+##old_api=doc/sphinx/old-api
 
-mkdir -p ${old_api}
+##mkdir -p ${old_api}
 #mv --backup=numbered $api ${old_api}
 
 echo
@@ -16,9 +16,9 @@ cd doc/sphinx/
 ./make-html #--clean
 cd -
 
-echo
-echo Old api directory moved to
-ls -l -h ${old_api}
+##echo
+##echo Old api directory moved to
+##ls -l -h ${old_api}
 
 ####################################################################################################
 #
