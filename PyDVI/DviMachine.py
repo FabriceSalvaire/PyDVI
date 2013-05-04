@@ -207,8 +207,9 @@ class Opcode_putset_rule(Opcode):
         registers = dvi_machine.registers
 
         if compute_bounding_box:
+            # Fixme: check
             bounding_box = Interval2D([registers.h, registers.h + self.width],
-                                      [registers.v, registers.v - self.height])
+                                      [registers.v + self.height, registers.v])
         else:
             dvi_machine.paint_rule(registers.h, registers.v, self.width, self.height)
 

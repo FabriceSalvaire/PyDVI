@@ -30,7 +30,7 @@ class TestTfm(unittest.TestCase):
 
     def test_cmr10(self):
 
-        encoding_file = kpsewhich('cork', file_format='enc files')
+        encoding_file = kpsewhich('ec', file_format='enc files')
         self.assertIsNotNone(encoding_file)
         encoding = Encoding(encoding_file)
 

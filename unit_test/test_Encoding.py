@@ -28,7 +28,7 @@ class TestEncoding(unittest.TestCase):
 
     def test(self):
 
-        encoding_file = kpsewhich('cork', file_format='enc files')
+        encoding_file = kpsewhich('ec', file_format='enc files')
         self.assertIsNotNone(encoding_file)
         print 'Encoding file:', encoding_file
 

@@ -147,12 +147,15 @@ class FontMap(object):
         self.name = os.path.basename(filename).replace('.map', '')
         self._map = {}
 
-        try:
-            with TexCommentedFile(filename) as font_map_file:
-                for line in font_map_file:
+        # try:
+        with TexCommentedFile(filename) as font_map_file:
+            for line in font_map_file:
+                try:
                     self._parse_line(line)
-        except:
-            raise NameError('Bad fontmap file')
+                except:
+                    pass
+        # except:
+        #     raise NameError('Bad fontmap file')
 
     ###############################################
  
@@ -186,6 +189,9 @@ class FontMap(object):
         else:
             ps_snippet = ''
             effects = {}
+
+        # Fixme:
+        # pigpen <<pigpen.pfa
  
         sub_strings = [x.strip() for x in line.split('<')]
         if len(sub_strings) == 1:
@@ -206,7 +212,7 @@ class FontMap(object):
             elif filename.endswith('.enc'):
                 assert encoding_filename is None
                 encoding_filename = filename
-            elif filename.endswith('.pfb') or filename.endswith('.ttf'):
+            elif filename.endswith('.pfb') or filename.endswith('.pfa') or filename.endswith('.ttf'):
                 assert pfb_filename is None
                 pfb_filename = filename
             else:

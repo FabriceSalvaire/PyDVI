@@ -65,7 +65,7 @@ class FtGlyph(object):
         f.set_char_size(self, width=0, height=0, hres=72, vres=72)
         face.set_char_size()
 
-        self.glyph = face.load_glyph(glyph_index, flags=4))
+        self.glyph = face.load_glyph(glyph_index, flags=4)
 
         # print 'Char Box:', map(convert_26_6, self.glyph.getCBox(ft2.ft_glyph_bbox_subpixels))
         # print 'Advance:', map(convert_16_16, self.glyph.advance)
