@@ -1,6 +1,6 @@
 ####################################################################################################
 #
-# PyDVI - Python Library to Process DVI Stream
+# PyDVI - A Python Library to Process DVI Stream.
 # Copyright (C) 2009 Salvaire Fabrice
 #
 ####################################################################################################
@@ -18,7 +18,7 @@ from PyDVI.Tools.Logging import *
 ####################################################################################################
 
 text = remove_enclosing_new_line('''
-PyDVI - Python Library to Process DVI Stream
+PyDVI - A Python Library to Process DVI Stream.
 Copyright (C) 2009 Salvaire Fabrice
 ''')
 

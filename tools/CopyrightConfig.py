@@ -1,6 +1,6 @@
 ####################################################################################################
 #
-# PyDVI - Python Library to Process DVI Stream
+# PyDVI - A Python Library to Process DVI Stream.
 # Copyright (C) 2009 Salvaire Fabrice
 #
 ####################################################################################################
@@ -31,7 +31,7 @@ mime_extensions = (
 ###################################################
 
 copyright_text = remove_enclosing_new_line('''
-PyDVI - Python Library to Process DVI Stream
+PyDVI - A Python Library to Process DVI Stream.
 Copyright (C) 2009 Salvaire Fabrice
 ''')
 
