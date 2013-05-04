@@ -1,11 +1,11 @@
-#####################################################################################################
+####################################################################################################
 #
 # PyDVI - Python Library to Process DVI Stream
 # Copyright (C) 2009 Salvaire Fabrice
 #
-#####################################################################################################
+####################################################################################################
 
-#####################################################################################################
+####################################################################################################
 #
 # Audit
 #
@@ -13,7 +13,7 @@
 #  - check self registration
 #  - read kern table fix word before kern/lig table ?
 #
-#####################################################################################################
+####################################################################################################
 
 """
 The :mod:`TfmParser` module provides a tool to parse TeX Font Metric file.  TFM files contain the
@@ -33,24 +33,24 @@ bytes are considered to be unsigned numbers.
 
 """
 
-#####################################################################################################
+####################################################################################################
 
 __all__ = ['TfmParser']
 
-#####################################################################################################
+####################################################################################################
 
 from PyDVI.Tfm import Tfm, TfmChar, TfmKern, TfmLigature, TfmExtensibleChar
 from PyDVI.Tools.EnumFactory import EnumFactory
 from PyDVI.Tools.FuncTools import repeat_call
 from PyDVI.Tools.Stream import FileStream
 
-#####################################################################################################
+####################################################################################################
 
 NO_TAG, LIG_TAG, LIST_TAG, EXT_TAG = range(4)
 
 KERN_OPCODE = 128
 
-#####################################################################################################
+####################################################################################################
 
 #: Defines the tables present in a TFM file.
 tables = EnumFactory('TableEnums', 
@@ -66,7 +66,7 @@ tables = EnumFactory('TableEnums',
                       'font_parameter',
                       ))
 
-#####################################################################################################
+####################################################################################################
 
 class TfmParser(object):
 
@@ -74,7 +74,7 @@ class TfmParser(object):
     This class parse a TFM file.
     """
 
-    ###############################################
+    ##############################################
 
     @staticmethod
     def parse(font_name, filename):
@@ -86,7 +86,7 @@ class TfmParser(object):
         tfm_parser = TfmParser(font_name, filename)
         return tfm_parser()
 
-    ###############################################
+    ##############################################
 
     def __init__(self, font_name, filename):
 
@@ -101,13 +101,13 @@ class TfmParser(object):
         self._read_lig_kern_programs()
         self._read_characters()
 
-    ###############################################
+    ##############################################
 
     def __call__(self):
 
         return self.tfm
 
-    ###############################################
+    ##############################################
 
     @staticmethod
     def word_ptr(base, index):
@@ -120,7 +120,7 @@ class TfmParser(object):
 
         return base + 4*index
 
-    ###############################################
+    ##############################################
 
     def _seek_to_table(self, table):
 
@@ -129,7 +129,7 @@ class TfmParser(object):
 
         self.stream.seek(self.table_pointers[table])
 
-    ###############################################
+    ##############################################
 
     def _position_in_table(self, table, index):
 
@@ -138,7 +138,7 @@ class TfmParser(object):
 
         return self.word_ptr(self.table_pointers[table], index)
 
-    ###############################################
+    ##############################################
 
     def _read_fix_word_in_table(self, table, index):
 
@@ -147,7 +147,7 @@ class TfmParser(object):
 
         return self.stream.read_fix_word(self._position_in_table(table, index))
 
-    ###############################################
+    ##############################################
 
     def _read_four_byte_numbers_in_table(self, table, index):
 
@@ -156,7 +156,7 @@ class TfmParser(object):
 
         return self.stream.read_four_byte_numbers(self._position_in_table(table, index))
 
-    ###############################################
+    ##############################################
 
     def _read_extensible_recipe(self, index):
 
@@ -171,7 +171,7 @@ class TfmParser(object):
  
         return self._read_four_byte_numbers_in_table(tables.extensible_character, index)
 
-    ###############################################
+    ##############################################
 
     def _read_lengths(self):
         
@@ -254,7 +254,7 @@ class TfmParser(object):
         if length != self.word_ptr(0, self.entire_file_length):
             raise NameError('Bad TFM file')
 
-    ###############################################
+    ##############################################
 
     def _read_header(self):
 
@@ -353,7 +353,7 @@ class TfmParser(object):
                        character_coding_scheme,
                        family)
 
-    ###############################################
+    ##############################################
 
     def _read_font_parameters(self):
 
@@ -401,7 +401,7 @@ class TfmParser(object):
             # Read the additional 6 fix word parameters
             self.tfm.set_math_extension_parameters(repeat_call(stream.read_fix_word, 6))
 
-    ###############################################
+    ##############################################
 
     def _read_lig_kern_programs(self):
 
@@ -528,7 +528,7 @@ class TfmParser(object):
 
             # print 'Lig/Kern Table End'
 
-    ###############################################
+    ##############################################
 
     def _read_characters(self):
 
@@ -572,7 +572,7 @@ class TfmParser(object):
         for c in xrange(self.smallest_character_code, self.largest_character_code +1):
             self._process_char(c)
 
-    ###############################################
+    ##############################################
 
     def _process_char(self, c):
 
@@ -638,7 +638,7 @@ class TfmParser(object):
                     lig_kern_program_index,
                     next_larger_char)
 
-    ###############################################
+    ##############################################
 
     def _read_char_info(self, c):
  
@@ -657,7 +657,7 @@ class TfmParser(object):
 
         return width_index, height_index, depth_index, italic_index, tag, remainder
 
-    ###############################################
+    ##############################################
 
     def _print_summary(self):
 
@@ -693,8 +693,8 @@ TFM %s
                                 self.table_lengths[tables.font_parameter],
                                 )
 
-#####################################################################################################
+####################################################################################################
 #
 # End
 #
-#####################################################################################################
+####################################################################################################

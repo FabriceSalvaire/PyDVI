@@ -1,27 +1,27 @@
 # -*- coding: utf-8 -*-
 
-#####################################################################################################
+####################################################################################################
 #
 # PyDVI - Python Library to Process DVI Stream
 # Copyright (C) 2009 Salvaire Fabrice
 #
-#####################################################################################################
+####################################################################################################
 
-#####################################################################################################
+####################################################################################################
 #
 # Audit
 #
 #  - 23/01/2010 fabrice
 #
-#####################################################################################################
+####################################################################################################
 
-#####################################################################################################
+####################################################################################################
 
 import math
 
 from PyQt4 import QtGui, QtCore
 
-#####################################################################################################
+####################################################################################################
 
 from PyDVI.PkFont import PkFont
 from PyDVI.TeXUnit import *
@@ -29,11 +29,11 @@ from PyDVI.Type1Font import Type1Font
 
 from QtGlyph import QtPkGlyph, QtFtGlyph
 
-#####################################################################################################
+####################################################################################################
 
 class GlyphGraphicsView(QtGui.QGraphicsView):
 
-    ###############################################
+    ##############################################
 
     def __init__(self, parent):
 
@@ -57,7 +57,7 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
         self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
 
-    ###############################################
+    ##############################################
 
     def show_glyph(self, font, glyph_index):
    
@@ -73,7 +73,7 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
 
         self.scene.update()
 
-    ###############################################
+    ##############################################
 
     def add_glyph_box(self):
 
@@ -87,7 +87,7 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
         char_box_item = self.scene.addRect(char_box, pen)
         char_box_item.scale(qt_glyph.h_scale, qt_glyph.v_scale)
 
-    ###############################################
+    ##############################################
 
     def add_grid(self):
 
@@ -120,7 +120,7 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
         grid_iterator(x_min, x_max, paint_hline)
         grid_iterator(y_min, y_max, paint_vline)
 
-    ###############################################
+    ##############################################
 
     def add_type1_char(self, font, glyph_index):
 
@@ -130,7 +130,7 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
         char_pixmap_item.setOffset(qt_glyph.horizontal_offset, qt_glyph.vertical_offset)
         char_pixmap_item.scale(qt_glyph.h_scale, qt_glyph.v_scale)
 
-    ###############################################
+    ##############################################
 
     def add_pk_char(self, font, glyph_index):
 
@@ -140,7 +140,7 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
         char_pixmap_item.setOffset(qt_glyph.horizontal_offset, qt_glyph.vertical_offset)
         char_pixmap_item.scale(qt_glyph.h_scale, qt_glyph.v_scale)
 
-    ###############################################
+    ##############################################
 
     def keyPressEvent(self, event):
 
@@ -171,7 +171,7 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
         else:
             QtGui.QGraphicsView.keyPressEvent(self, event)
 
-    ###############################################
+    ##############################################
 
     def wheelEvent(self, event):
 
@@ -182,7 +182,7 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
         else:
             self.scale_view(0.5)
 
-    ###############################################
+    ##############################################
 
     def scale_view(self, scale_factor):
 
@@ -195,8 +195,8 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
 
         self.scale(scale_factor, scale_factor)
 
-#####################################################################################################
+####################################################################################################
 #
 # End
 #
-#####################################################################################################
+####################################################################################################
