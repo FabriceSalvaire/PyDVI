@@ -1,48 +1,27 @@
 #! /usr/bin/env python
 # -*- python -*-
 
-#####################################################################################################
-#
-# PyDVI - Python Library to Process DVI Stream
-# Copyright (C) 2009 Salvaire Fabrice
-#
-#####################################################################################################
-
-#####################################################################################################
-#
-#                                              Audit
-#
-# - 11/05/2011 Fabrice
-#    x
-#
-#####################################################################################################
-
-#####################################################################################################
-#
-# ./replace --root-tree-path=~/dev/gvlab
-#
-#####################################################################################################
-
-#####################################################################################################
-#
-# Fixme:
-#
-# Traceback (most recent call last):
-#   File "/home/gv/sys/sl52/fabrice/dev/gvlab/v0.5.x/tools/replace", line 96, in <module>
-#     retcode = subprocess.call(['./tools/perl-grep', opt.pattern, absolut_file])
-#   File "/opt/gv/stow/python-2.6/lib/python2.6/subprocess.py", line 480, in call
-#     return Popen(*popenargs, **kwargs).wait()
-#   File "/opt/gv/stow/python-2.6/lib/python2.6/subprocess.py", line 633, in __init__
-#     errread, errwrite)
-#   File "/opt/gv/stow/python-2.6/lib/python2.6/subprocess.py", line 1139, in _execute_child
-#     raise child_exception
-# OSError: [Errno 2] No such file or directory
+####################################################################################################
 # 
-#####################################################################################################
+# PyDVI - A Python Library to Process DVI Stream..
+# Copyright (C) 2012 Salvaire Fabrice
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+# 
+####################################################################################################
 
-#####################################################################################################
-
-from __future__ import with_statement
+####################################################################################################
 
 import os
 import re
@@ -51,7 +30,7 @@ import sys
 
 from optparse import OptionParser
 
-#####################################################################################################
+####################################################################################################
 
 default_excluded_extension = ','.join(('~',
                                        '#',
@@ -60,11 +39,12 @@ default_excluded_extension = ','.join(('~',
                                        '.pyc',
                                        '.tex',
                                        '.xml',
+                                       '.txt',
                                        ))
 
 default_exclusion_pattern = '\.bzr'
 
-#####################################################################################################x
+####################################################################################################
 #
 # Options
 #
@@ -100,13 +80,13 @@ parser.add_option('--new-pattern',
 
 opt, args = parser.parse_args()
 
-#####################################################################################################
+####################################################################################################
 
 def to_absolute_path(path):
 
     return os.path.abspath(os.path.expanduser(path))
 
-#####################################################################################################
+####################################################################################################
 
 program_path = os.path.dirname(os.path.abspath(__file__))
 perl_grep = os.path.join(program_path, 'perl-grep')
@@ -123,7 +103,7 @@ if opt.exclusion_pattern is not None:
 else:
     exclude_re = None
 
-#####################################################################################################
+####################################################################################################
 
 def process_file(absolut_file_name):
 
@@ -138,7 +118,7 @@ def process_file(absolut_file_name):
                              absolut_file_name,
                              ])
 
-#####################################################################################################
+####################################################################################################
 
 for root, dirs, files in os.walk(root_tree_path):
     for file_name in files:
@@ -161,8 +141,8 @@ for root, dirs, files in os.walk(root_tree_path):
 
 sys.exit(0)
 
-#####################################################################################################
+####################################################################################################
 #
 # End
 #
-#####################################################################################################
+####################################################################################################

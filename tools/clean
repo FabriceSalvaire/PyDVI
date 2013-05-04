@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /bin/bash
 
 ####################################################################################################
 # 
@@ -20,17 +20,18 @@
 # 
 ####################################################################################################
 
-####################################################################################################
-
-import os
-from distutils.core import setup
-# from setuptools import setup
+# Clean the repository 
 
 ####################################################################################################
 
-execfile('setup_data.py')
+root_dir=`dirname $0`
+root_dir=`dirname ${root_dir}`
 
-setup(**setup_dict)
+rm -rf ${root_dir}/build
+rm -rf ${root_dir}/dist
+find ${root_dir} -name "*pyc" -exec rm {} \;
+find ${root_dir} -name "*~" -exec rm {} \;
+find ${root_dir} -name "*_flymake.py" -exec rm {} \;
 
 ####################################################################################################
 #

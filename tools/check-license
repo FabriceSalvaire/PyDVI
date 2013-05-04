@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /bin/bash
 
 ####################################################################################################
 # 
@@ -20,17 +20,12 @@
 # 
 ####################################################################################################
 
-####################################################################################################
+root_dir=`python -c "import os ; print os.path.dirname(os.path.dirname(os.path.realpath('$0')))"`
 
-import os
-from distutils.core import setup
-# from setuptools import setup
-
-####################################################################################################
-
-execfile('setup_data.py')
-
-setup(**setup_dict)
+for i in `find ${root_dir} -name '*.py' | sort -n` ; do
+  # echo Check $i
+  grep -L 'PyDVI - A Python Library to Process DVI Stream.' $i;
+done
 
 ####################################################################################################
 #
