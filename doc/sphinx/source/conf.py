@@ -57,7 +57,7 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'contents'
+master_doc = 'index'
 
 # General information about the project.
 project = u'PyDVI'
@@ -218,7 +218,7 @@ latex_font_size = '10pt'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('contents', 'PyDVI.tex', u'PyDVI Documentation', u'Fabrice Salvaire', 'manual'),
+  ('index', 'PyDVI.tex', u'PyDVI Documentation', u'Fabrice Salvaire', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -252,7 +252,7 @@ latex_logo = None
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('contents', 'PyDVI', u'PyDVI Documentation', [u'Fabrice Salvaire'], 1)
+    ('index', 'PyDVI', u'PyDVI Documentation', [u'Fabrice Salvaire'], 1)
 ]
 
 # Example configuration for intersphinx: refer to the Python standard library.
