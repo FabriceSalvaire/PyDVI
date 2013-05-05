@@ -1,0 +1,315 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDVI.TexDaemon &mdash; PyDVI 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="PyDVI 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDVI.TexDaemon</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># PyDVI - A Python Library to Process DVI Stream.</span>
+<span class="c"># Copyright (C) 2009 Salvaire Fabrice</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># Derived from: Mathtran</span>
+<span class="c">#   Copyright: (c) 2007 The Open University, Milton Keynes, UK</span>
+<span class="c">#   License: GPL version 2 or (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># Audit</span>
+<span class="c">#</span>
+<span class="c"># - 17/12/2011 fabrice</span>
+<span class="c">#   License !</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="sd">&quot;&quot;&quot; This module provides a TeX Daemon interface.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;TexDaemon&#39;</span><span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">select</span> <span class="kn">import</span> <span class="n">select</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">PyDVI.Tools.DaemonSubprocess</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="TexDaemon"><a class="viewcode-back" href="../../api/PyDVI/TexDaemon.html#PyDVI.TexDaemon.TexDaemon">[docs]</a><span class="k">class</span> <span class="nc">TexDaemon</span><span class="p">(</span><span class="n">DaemonSubprocess</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements a TeX Daemon Subprocess.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">#: Defines the FIFOs used by the TeX daemon to communicate.</span>
+    <span class="n">fifos</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;texput.tex&#39;</span><span class="p">,</span> <span class="s">&#39;texput.log&#39;</span><span class="p">,</span> <span class="s">&#39;texput.dvi&#39;</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">working_directory</span><span class="p">,</span> <span class="n">tex_format</span><span class="p">,</span> <span class="n">start_code</span><span class="p">,</span> <span class="n">done_code</span><span class="p">,</span> <span class="n">done_string</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; The TeX process run in the working directory *working_directory*.</span>
+
+<span class="sd">        The argument *tex_format* specify the format to be used by TeX.</span>
+
+<span class="sd">        The argument *start_code* defines the code to be executed first by TeX.</span>
+
+<span class="sd">        The argument *done_code* defines to code to be appended to the input code.  This code must</span>
+<span class="sd">        print on the standard output a *done_string* string in order to indicate the page was</span>
+<span class="sd">        successfully and completely ship-out.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">TexDaemon</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">working_directory</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tex_format</span> <span class="o">=</span> <span class="n">tex_format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_code</span> <span class="o">=</span> <span class="n">start_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">done_code</span> <span class="o">=</span> <span class="n">done_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">done_string</span> <span class="o">=</span> <span class="n">done_string</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="TexDaemon.make_args"><a class="viewcode-back" href="../../api/PyDVI/TexDaemon.html#PyDVI.TexDaemon.TexDaemon.make_args">[docs]</a>    <span class="k">def</span> <span class="nf">make_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the TeX calling sequence. &quot;&quot;&quot;</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;tex&#39;</span><span class="p">,</span> <span class="s">&#39;--ipc&#39;</span><span class="p">)</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="p">(</span><span class="s">&#39;--output-comment=&quot;&quot;&#39;</span><span class="p">,)</span> <span class="c"># Don&#39;t record time of run.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tex_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;plain&#39;</span><span class="p">,</span> <span class="s">&#39;tex&#39;</span><span class="p">):</span>
+            <span class="n">fmt</span> <span class="o">=</span> <span class="s">&#39;--fmt=&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tex_format</span>
+            <span class="n">args</span> <span class="o">+=</span> <span class="p">(</span><span class="n">fmt</span><span class="p">,)</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="p">(</span><span class="s">&#39;texput.tex&#39;</span><span class="p">,)</span>
+
+        <span class="k">return</span> <span class="n">args</span>
+
+    <span class="c">##############################################</span>
+ </div>
+<div class="viewcode-block" id="TexDaemon.start"><a class="viewcode-back" href="../../api/PyDVI/TexDaemon.html#PyDVI.TexDaemon.TexDaemon.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Start the TeX daemon. &quot;&quot;&quot;</span>
+ 
+        <span class="nb">super</span><span class="p">(</span><span class="n">TexDaemon</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+ 
+        <span class="c"># We will now initialise TeX, and connect to file descriptors.  We need to do some low-level</span>
+        <span class="c"># input/output, in order to manage long input strings.  Therefore, we use file descriptors</span>
+        <span class="c"># rather than file objects.</span>
+
+        <span class="c"># We map output fds to a dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_fd_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout_fd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fd_dict</span><span class="p">[</span><span class="s">&#39;stdout&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">fileno</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stderr_fd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fd_dict</span><span class="p">[</span><span class="s">&#39;stderr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">fileno</span><span class="p">()</span>
+ 
+        <span class="c"># Open &#39;texput.tex&#39;, and block until it is available, which is when TeX has started.</span>
+        <span class="c"># Then make &#39;texput.tex&#39; non-blocking, in case of a long write.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tex_input_fd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">working_directory</span><span class="p">,</span> <span class="s">&#39;texput.tex&#39;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">O_WRONLY</span><span class="p">)</span>
+        <span class="n">make_nonblocking</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tex_input_fd</span><span class="p">)</span>
+            
+        <span class="c"># Open &#39;texput.log&#39; and &#39;texput.dvi&#39;</span>
+        <span class="k">for</span> <span class="n">filename</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">((</span><span class="s">&#39;texput.log&#39;</span><span class="p">,</span> <span class="s">&#39;logfile&#39;</span><span class="p">),</span>
+                               <span class="p">(</span><span class="s">&#39;texput.dvi&#39;</span><span class="p">,</span> <span class="s">&#39;dvi&#39;</span><span class="p">)):</span>
+            <span class="n">fd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">working_directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">O_RDONLY</span><span class="o">|</span><span class="n">os</span><span class="o">.</span><span class="n">O_NONBLOCK</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_fd_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">fd</span>
+ 
+        <span class="c"># Ship out a blank page</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Ship out start page&quot;</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_code</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="c">##############################################</span>
+ </div>
+<div class="viewcode-block" id="TexDaemon.process"><a class="viewcode-back" href="../../api/PyDVI/TexDaemon.html#PyDVI.TexDaemon.TexDaemon.process">[docs]</a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_string</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Process the input string and return a dictionary with &#39;dvi&#39;, &#39;stdout&#39;, &#39;logfile&#39; and</span>
+<span class="sd">        &#39;stderr&#39; entries.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c"># TeX will read the data, following by the &#39;done&#39; command.  The &#39;done&#39; command will cause</span>
+        <span class="c"># TeX to write the &#39;done_string&#39;, which signals the end of the process.  It will also pause</span>
+        <span class="c"># TeX for input.</span>
+        
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process</span><span class="p">(</span><span class="n">input_string</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_code</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">done_string</span><span class="p">)</span>
+        
+        <span class="c"># TeX is waiting for input</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="c">##############################################</span>
+ </div>
+<div class="viewcode-block" id="TexDaemon._process"><a class="viewcode-back" href="../../api/PyDVI/TexDaemon.html#PyDVI.TexDaemon.TexDaemon._process">[docs]</a>    <span class="k">def</span> <span class="nf">_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_string</span><span class="p">,</span> <span class="n">done_string</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Process the input string. &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Write to &#39;input.tex&#39;:</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">input_string</span><span class="p">)</span>
+ 
+        <span class="c"># Write input_string, and read output, until we are done.  Then gather up the accumulated</span>
+        <span class="c"># output, and return as a dictionary.  The input string might be long.  Later, we might</span>
+        <span class="c"># allow writing to stdin, in response to errors.</span>
+ 
+        <span class="c"># Initialise input/output file descriptor list</span>
+        <span class="n">output_fds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fd_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="n">input_fds</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tex_input_fd</span><span class="p">]</span>
+
+        <span class="c"># Initialise output string dictionary</span>
+        <span class="n">output_strings</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">fd</span> <span class="ow">in</span> <span class="n">output_fds</span><span class="p">:</span>
+            <span class="n">output_strings</span><span class="p">[</span><span class="n">fd</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+ 
+        <span class="n">input_pointer</span><span class="p">,</span> <span class="n">input_string_length</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_string</span><span class="p">)</span>
+ 
+        <span class="c"># The main input/ouput loop</span>
+        <span class="c"># TODO: magic number, timeout</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+
+            <span class="c"># Wait for input/ouput to be ready</span>
+            <span class="n">timeout</span> <span class="o">=</span> <span class="o">.</span><span class="mi">1</span> <span class="c"># s</span>
+            <span class="n">readable</span><span class="p">,</span> <span class="n">writable</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">output_fds</span><span class="p">,</span> <span class="n">input_fds</span><span class="p">,</span> <span class="p">(),</span> <span class="n">timeout</span><span class="p">)[:</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="c"># If input string was sent and output_fds are not readable</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">readable</span> <span class="ow">and</span> <span class="n">input_pointer</span> <span class="o">==</span> <span class="n">input_string_length</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+                <span class="k">raise</span> <span class="n">SubprocessError</span><span class="p">(</span><span class="s">&#39;Subprocess I/O timed out&#39;</span><span class="p">)</span>
+                
+            <span class="c"># If input has to be filled and input_fd is writable</span>
+            <span class="k">if</span> <span class="n">input_pointer</span> <span class="o">!=</span> <span class="n">input_string_length</span> <span class="ow">and</span> <span class="n">writable</span><span class="p">:</span>
+                <span class="c"># Try to write 4096 bytes on input_fd</span>
+                <span class="n">written</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tex_input_fd</span><span class="p">,</span> <span class="n">input_string</span><span class="p">[</span><span class="n">input_pointer</span><span class="p">:</span><span class="n">input_pointer</span><span class="o">+</span><span class="mi">4096</span><span class="p">])</span>
+                <span class="c"># If input_pointer was completely sent then disable input_fd</span>
+                <span class="n">input_pointer</span> <span class="o">+=</span> <span class="n">written</span>
+                <span class="k">if</span> <span class="n">input_pointer</span> <span class="o">==</span> <span class="n">input_string_length</span><span class="p">:</span>
+                    <span class="n">input_fds</span> <span class="o">=</span> <span class="p">()</span>
+                
+            <span class="c"># Read output_fds</span>
+            <span class="k">for</span> <span class="n">fd</span> <span class="ow">in</span> <span class="n">readable</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">SubprocessError</span><span class="p">(</span><span class="s">&#39;Read from terminated subprocess&#39;</span><span class="p">)</span>
+                <span class="c"># Read 4096 bytes</span>
+                <span class="n">output_string</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="mi">4096</span><span class="p">)</span>
+                <span class="c"># Remove done_string in stdout if necessary</span>
+                <span class="k">if</span> <span class="n">fd</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdout_fd</span> <span class="ow">and</span> <span class="n">output_string</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">done_string</span><span class="p">):</span>
+                    <span class="n">output_string</span> <span class="o">=</span> <span class="n">output_string</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">done_string</span><span class="p">)]</span>
+                    <span class="n">done</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="c"># Concatenate output</span>
+                <span class="n">output_strings</span><span class="p">[</span><span class="n">fd</span><span class="p">]</span> <span class="o">+=</span> <span class="n">output_string</span>
+
+        <span class="c"># Check input was completely read</span>
+        <span class="k">if</span> <span class="n">input_pointer</span> <span class="o">!=</span> <span class="n">input_string_length</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">SystemError</span><span class="p">(</span><span class="s">&quot;TeX said &#39;done&#39; before end of input.&quot;</span><span class="p">)</span>
+ 
+        <span class="c"># Return ouput dictionary</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_fd_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_strings</span><span class="p">[</span><span class="n">fd</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

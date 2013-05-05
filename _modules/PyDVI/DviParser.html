@@ -1,0 +1,555 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDVI.DviParser &mdash; PyDVI 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="PyDVI 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDVI.DviParser</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># PyDVI - A Python Library to Process DVI Stream.</span>
+<span class="c"># Copyright (C) 2009 Salvaire Fabrice</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># Audit</span>
+<span class="c">#</span>
+<span class="c">#  - 17/01/2010 fabrice</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="sd">&quot;&quot;&quot; This module implements a DVI Stream Parser.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">PyDVI.DviMachine</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">PyDVI.OpcodeParser</span> <span class="kn">import</span> <span class="n">OpcodeParserSet</span><span class="p">,</span> <span class="n">OpcodeParser</span>
+<span class="kn">from</span> <span class="nn">PyDVI.Tools.EnumFactory</span> <span class="kn">import</span> <span class="n">EnumFactory</span><span class="p">,</span> <span class="n">ExplicitEnumFactory</span>
+<span class="kn">from</span> <span class="nn">PyDVI.Tools.Stream</span> <span class="kn">import</span> <span class="n">AbstractStream</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">dvi_opcodes_tuple</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;SETC_</span><span class="si">%03u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">128</span><span class="p">)]</span>
+
+<span class="n">dvi_opcodes_tuple</span> <span class="o">+=</span> <span class="p">[</span>
+    <span class="s">&#39;SET1&#39;</span><span class="p">,</span> <span class="s">&#39;SET2&#39;</span><span class="p">,</span> <span class="s">&#39;SET3&#39;</span><span class="p">,</span> <span class="s">&#39;SET4&#39;</span><span class="p">,</span>
+    <span class="s">&#39;SET_RULE&#39;</span><span class="p">,</span>
+    <span class="s">&#39;PUT1&#39;</span><span class="p">,</span> <span class="s">&#39;PUT2&#39;</span><span class="p">,</span> <span class="s">&#39;PUT3&#39;</span><span class="p">,</span> <span class="s">&#39;PUT4&#39;</span><span class="p">,</span>
+    <span class="s">&#39;PUT_RULE&#39;</span><span class="p">,</span>
+    <span class="s">&#39;NOP&#39;</span><span class="p">,</span>
+    <span class="s">&#39;BOP&#39;</span><span class="p">,</span>
+    <span class="s">&#39;EOP&#39;</span><span class="p">,</span>
+    <span class="s">&#39;PUSH&#39;</span><span class="p">,</span>
+    <span class="s">&#39;POP&#39;</span><span class="p">,</span>
+    <span class="s">&#39;RIGHT1&#39;</span><span class="p">,</span> <span class="s">&#39;RIGHT2&#39;</span><span class="p">,</span> <span class="s">&#39;RIGHT3&#39;</span><span class="p">,</span> <span class="s">&#39;RIGHT4&#39;</span><span class="p">,</span>
+    <span class="s">&#39;W0&#39;</span><span class="p">,</span> <span class="s">&#39;W1&#39;</span><span class="p">,</span> <span class="s">&#39;W2&#39;</span><span class="p">,</span> <span class="s">&#39;W3&#39;</span><span class="p">,</span> <span class="s">&#39;W4&#39;</span><span class="p">,</span>
+    <span class="s">&#39;X0&#39;</span><span class="p">,</span> <span class="s">&#39;X1&#39;</span><span class="p">,</span> <span class="s">&#39;X2&#39;</span><span class="p">,</span> <span class="s">&#39;X3&#39;</span><span class="p">,</span> <span class="s">&#39;X4&#39;</span><span class="p">,</span>
+    <span class="s">&#39;DOWN1&#39;</span><span class="p">,</span> <span class="s">&#39;DOWN2&#39;</span><span class="p">,</span> <span class="s">&#39;DOWN3&#39;</span><span class="p">,</span> <span class="s">&#39;DOWN4&#39;</span><span class="p">,</span>
+    <span class="s">&#39;Y0&#39;</span><span class="p">,</span> <span class="s">&#39;Y1&#39;</span><span class="p">,</span> <span class="s">&#39;Y2&#39;</span><span class="p">,</span> <span class="s">&#39;Y3&#39;</span><span class="p">,</span> <span class="s">&#39;Y4&#39;</span><span class="p">,</span>
+    <span class="s">&#39;Z0&#39;</span><span class="p">,</span> <span class="s">&#39;Z1&#39;</span><span class="p">,</span> <span class="s">&#39;Z2&#39;</span><span class="p">,</span> <span class="s">&#39;Z3&#39;</span><span class="p">,</span> <span class="s">&#39;Z4&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+<span class="n">dvi_opcodes_tuple</span> <span class="o">+=</span> <span class="p">[</span><span class="s">&#39;FONT_</span><span class="si">%02u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">64</span><span class="p">)]</span>
+
+<span class="n">dvi_opcodes_tuple</span> <span class="o">+=</span> <span class="p">[</span>
+    <span class="s">&#39;FNT1&#39;</span><span class="p">,</span> <span class="s">&#39;FNT2&#39;</span><span class="p">,</span> <span class="s">&#39;FNT3&#39;</span><span class="p">,</span> <span class="s">&#39;FNT4&#39;</span><span class="p">,</span>
+    <span class="s">&#39;XXX1&#39;</span><span class="p">,</span> <span class="s">&#39;XXX2&#39;</span><span class="p">,</span> <span class="s">&#39;XXX3&#39;</span><span class="p">,</span> <span class="s">&#39;XXX4&#39;</span><span class="p">,</span>
+    <span class="s">&#39;FNT_DEF1&#39;</span><span class="p">,</span> <span class="s">&#39;FNT_DEF2&#39;</span><span class="p">,</span> <span class="s">&#39;FNT_DEF3&#39;</span><span class="p">,</span> <span class="s">&#39;FNT_DEF4&#39;</span><span class="p">,</span>
+    <span class="s">&#39;PRE&#39;</span><span class="p">,</span>
+    <span class="s">&#39;POST&#39;</span><span class="p">,</span>
+    <span class="s">&#39;POST_POST&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+<span class="n">dvi_opcodes</span> <span class="o">=</span> <span class="n">EnumFactory</span><span class="p">(</span><span class="s">&#39;DviOpcodes&#39;</span><span class="p">,</span> <span class="n">dvi_opcodes_tuple</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">DVI_EOF_SIGNATURE</span> <span class="o">=</span> <span class="mi">223</span>
+
+<span class="n">dvi_formats</span> <span class="o">=</span> <span class="n">ExplicitEnumFactory</span><span class="p">(</span><span class="s">&#39;DviFormats&#39;</span><span class="p">,</span>
+                                  <span class="p">{</span><span class="s">&#39;DVI&#39;</span><span class="p">:</span>  <span class="mi">2</span><span class="p">,</span>
+                                   <span class="s">&#39;DVIV&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                                   <span class="s">&#39;XDVI&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                                   <span class="p">})</span>
+
+<span class="n">set_char_description</span> <span class="o">=</span> <span class="s">&#39;typeset a character and move right&#39;</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="OpcodeParser_set_char"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.OpcodeParser_set_char">[docs]</a><span class="k">class</span> <span class="nc">OpcodeParser_set_char</span><span class="p">(</span><span class="n">OpcodeParser</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class parse the ``set_char`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opcode</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">OpcodeParser_set_char</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">opcode</span><span class="p">,</span>
+                                                    <span class="s">&#39;set&#39;</span><span class="p">,</span> <span class="n">set_char_description</span><span class="p">,</span>
+                                                    <span class="n">opcode_class</span><span class="o">=</span><span class="n">Opcode_set_char</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="OpcodeParser_set_char.read_parameters"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.OpcodeParser_set_char.read_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">read_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_parser</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">opcode</span><span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="OpcodeParser_font"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.OpcodeParser_font">[docs]</a><span class="k">class</span> <span class="nc">OpcodeParser_font</span><span class="p">(</span><span class="n">OpcodeParser</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class parse the ``font`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opcode</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">OpcodeParser_font</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">opcode</span><span class="p">,</span>
+                                                <span class="s">&#39;fnt num&#39;</span><span class="p">,</span> <span class="s">&#39;set current font to i&#39;</span><span class="p">,</span>
+                                                <span class="n">opcode_class</span><span class="o">=</span><span class="n">Opcode_font</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="OpcodeParser_font.read_parameters"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.OpcodeParser_font.read_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">read_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_parser</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">opcode</span> <span class="o">-</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">FONT_00</span><span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="OpcodeParser_xxx"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.OpcodeParser_xxx">[docs]</a><span class="k">class</span> <span class="nc">OpcodeParser_xxx</span><span class="p">(</span><span class="n">OpcodeParser</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class parse the ``xxx`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="n">base_opcode</span> <span class="o">=</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">XXX1</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opcode</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">OpcodeParser_xxx</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">opcode</span><span class="p">,</span>
+                                               <span class="s">&#39;xxx&#39;</span><span class="p">,</span> <span class="s">&#39;extension to DVI primitives&#39;</span><span class="p">,</span>
+                                               <span class="n">opcode_class</span><span class="o">=</span><span class="n">Opcode_xxx</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_unsigned_byten</span> <span class="o">=</span> <span class="n">AbstractStream</span><span class="o">.</span><span class="n">read_unsigned_byten</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">opcode</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_opcode</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="OpcodeParser_xxx.read_parameters"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.OpcodeParser_xxx.read_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">read_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_parser</span><span class="p">):</span>
+
+        <span class="n">stream</span> <span class="o">=</span> <span class="n">dvi_parser</span><span class="o">.</span><span class="n">stream</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_unsigned_byten</span><span class="p">(</span><span class="n">stream</span><span class="p">)))]</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="OpcodeParser_fnt_def"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.OpcodeParser_fnt_def">[docs]</a><span class="k">class</span> <span class="nc">OpcodeParser_fnt_def</span><span class="p">(</span><span class="n">OpcodeParser</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class parse the ``fnt_def`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="n">base_opcode</span> <span class="o">=</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">FNT_DEF1</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opcode</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">OpcodeParser_fnt_def</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">opcode</span><span class="p">,</span>
+                                                   <span class="s">&#39;fnt def&#39;</span><span class="p">,</span> <span class="s">&#39;define the meaning of a font number&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_unsigned_byten</span> <span class="o">=</span> <span class="n">AbstractStream</span><span class="o">.</span><span class="n">read_unsigned_byten</span><span class="p">[</span><span class="n">opcode</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_opcode</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="OpcodeParser_fnt_def.read_parameters"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.OpcodeParser_fnt_def.read_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">read_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_parser</span><span class="p">):</span>
+
+        <span class="n">stream</span> <span class="o">=</span> <span class="n">dvi_parser</span><span class="o">.</span><span class="n">stream</span>
+
+        <span class="n">font_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_unsigned_byten</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+        <span class="n">font_checksum</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span>
+        <span class="n">font_scale_factor</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span>
+        <span class="n">font_design_size</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span>
+        <span class="n">font_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()</span> <span class="o">+</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()))</span>
+
+        <span class="n">font</span> <span class="o">=</span> <span class="n">DviFont</span><span class="p">(</span><span class="n">font_id</span><span class="p">,</span> <span class="n">font_name</span><span class="p">,</span> <span class="n">font_checksum</span><span class="p">,</span> <span class="n">font_scale_factor</span><span class="p">,</span> <span class="n">font_design_size</span><span class="p">)</span>
+        <span class="n">dvi_parser</span><span class="o">.</span><span class="n">dvi_program</span><span class="o">.</span><span class="n">register_font</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<span class="n">BadDviStream</span> <span class="o">=</span> <span class="ne">NameError</span><span class="p">(</span><span class="s">&#39;Bad DVI stream&#39;</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="DviParser"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.DviParser">[docs]</a><span class="k">class</span> <span class="nc">DviParser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements a DVI Stream Parser.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">opcode_definitions</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span> <span class="p">[</span><span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">SETC_000</span><span class="p">,</span>
+           <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">SETC_127</span><span class="p">],</span> <span class="n">OpcodeParser_set_char</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">SET1</span><span class="p">,</span> <span class="s">&#39;set&#39;</span><span class="p">,</span> <span class="n">set_char_description</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">Opcode_set_char</span> <span class="p">),</span>
+        <span class="c"># ... to SET4</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">SET_RULE</span><span class="p">,</span> <span class="s">&#39;set rule&#39;</span><span class="p">,</span> <span class="s">&#39;typeset a rule and move right&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">Opcode_set_rule</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">PUT1</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">,</span> <span class="s">&#39;typeset a character&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">Opcode_put_char</span> <span class="p">),</span>
+        <span class="c"># ... to PUT4</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">PUT_RULE</span><span class="p">,</span> <span class="s">&#39;put rule&#39;</span><span class="p">,</span> <span class="s">&#39;typeset a rule&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span> <span class="n">Opcode_put_rule</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">NOP</span><span class="p">,</span> <span class="s">&#39;nop&#39;</span><span class="p">,</span> <span class="s">&#39;no operation&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">BOP</span><span class="p">,</span> <span class="s">&#39;bop&#39;</span><span class="p">,</span> <span class="s">&#39;beginning of page&#39;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">([</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="mi">9</span> <span class="o">+</span> <span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">]),</span> <span class="bp">None</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">EOP</span><span class="p">,</span> <span class="s">&#39;eop&#39;</span><span class="p">,</span> <span class="s">&#39;ending of page&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">PUSH</span><span class="p">,</span> <span class="s">&#39;push&#39;</span><span class="p">,</span> <span class="s">&#39;save the current positions&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Opcode_push</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">POP</span><span class="p">,</span> <span class="s">&#39;pop&#39;</span><span class="p">,</span> <span class="s">&#39;restore previous positions&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Opcode_pop</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">RIGHT1</span><span class="p">,</span> <span class="s">&#39;right&#39;</span><span class="p">,</span> <span class="s">&#39;move right&#39;</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">4</span><span class="p">],</span> <span class="n">Opcode_right</span> <span class="p">),</span>
+        <span class="c"># ... to RIGHT4</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">W0</span><span class="p">,</span> <span class="s">&#39;w0&#39;</span><span class="p">,</span> <span class="s">&#39;move right by w&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Opcode_w0</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">W1</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">,</span> <span class="s">&#39;move right and set w&#39;</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">4</span><span class="p">],</span> <span class="n">Opcode_w</span> <span class="p">),</span>
+        <span class="c"># ... to W4</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">X0</span><span class="p">,</span> <span class="s">&#39;x0&#39;</span><span class="p">,</span> <span class="s">&#39;move right by x&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Opcode_x0</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">X1</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="s">&#39;move right and set x&#39;</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">4</span><span class="p">],</span> <span class="n">Opcode_x</span> <span class="p">),</span>
+        <span class="c"># ... to X4</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">DOWN1</span><span class="p">,</span> <span class="s">&#39;down&#39;</span><span class="p">,</span> <span class="s">&#39;move down&#39;</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">4</span><span class="p">],</span> <span class="n">Opcode_down</span> <span class="p">),</span>
+        <span class="c"># ... to DOWN4</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">Y0</span><span class="p">,</span> <span class="s">&#39;y0&#39;</span><span class="p">,</span> <span class="s">&#39;move down by y&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Opcode_y0</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">Y1</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">,</span> <span class="s">&#39;move down and set y&#39;</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">4</span><span class="p">],</span> <span class="n">Opcode_y</span> <span class="p">),</span>
+        <span class="c"># ... to Y4</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">Z0</span><span class="p">,</span> <span class="s">&#39;z0&#39;</span><span class="p">,</span> <span class="s">&#39;move down by z&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">Opcode_z0</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">Z1</span><span class="p">,</span> <span class="s">&#39;z&#39;</span><span class="p">,</span> <span class="s">&#39;move down and set z&#39;</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">4</span><span class="p">],</span> <span class="n">Opcode_z</span> <span class="p">),</span>
+        <span class="c"># ... to Z4</span>
+        <span class="p">(</span> <span class="p">[</span><span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">FONT_00</span><span class="p">,</span>
+           <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">FONT_63</span><span class="p">],</span> <span class="n">OpcodeParser_font</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">FNT1</span><span class="p">,</span> <span class="s">&#39;fnt&#39;</span><span class="p">,</span> <span class="s">&#39;set current font&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">Opcode_font</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="p">[</span><span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">XXX1</span><span class="p">,</span>
+           <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">XXX4</span><span class="p">],</span> <span class="n">OpcodeParser_xxx</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="p">[</span><span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">FNT_DEF1</span><span class="p">,</span>
+           <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">FNT_DEF4</span><span class="p">],</span> <span class="n">OpcodeParser_fnt_def</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">PRE</span><span class="p">,</span> <span class="s">&#39;pre&#39;</span><span class="p">,</span> <span class="s">&#39;preamble&#39;</span><span class="p">,</span> <span class="p">(),</span> <span class="bp">None</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="s">&#39;post&#39;</span><span class="p">,</span> <span class="s">&#39;postamble beginning&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span> <span class="p">),</span>
+        <span class="p">(</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">POST_POST</span><span class="p">,</span> <span class="s">&#39;post post&#39;</span><span class="p">,</span> <span class="s">&#39;postamble ending&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span> <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="n">opcode_parser_set</span> <span class="o">=</span> <span class="n">OpcodeParserSet</span><span class="p">(</span><span class="n">opcode_definitions</span><span class="p">)</span>
+   
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="DviParser._reset"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.DviParser._reset">[docs]</a>    <span class="k">def</span> <span class="nf">_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Reset the DVI parser. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span> <span class="o">=</span> <span class="n">DviProgam</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">post_pointer</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">page_number</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bop_pointer_stack</span> <span class="o">=</span> <span class="p">[]</span>
+     
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviParser.process_stream"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.DviParser.process_stream">[docs]</a>    <span class="k">def</span> <span class="nf">process_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Process a DVI stream and return a :class:`DviProgam` instance. &quot;&quot;&quot;</span>
+
+        <span class="c"># Fixme: read pages before postamble</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="o">=</span> <span class="n">stream</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_preambule</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_postambule</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_pages_backward</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviParser._process_preambule"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.DviParser._process_preambule">[docs]</a>    <span class="k">def</span> <span class="nf">_process_preambule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Process the preamble. &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Process the preamble&#39;</span><span class="p">)</span>
+
+        <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span>
+
+        <span class="n">stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()</span> <span class="o">!=</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">PRE</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s">&quot;DVI stream don&#39;t start by PRE&quot;</span><span class="p">)</span>
+
+        <span class="n">dvi_format</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">dvi_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dvi_formats</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s">&#39;Unknown DVI Format&#39;</span><span class="p">)</span>
+
+        <span class="n">numerator</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span>
+        <span class="n">denominator</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span>
+        <span class="n">magnification</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span>
+        <span class="n">comment</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span><span class="o">.</span><span class="n">set_preambule_data</span><span class="p">(</span><span class="n">comment</span><span class="p">,</span>
+                                            <span class="n">dvi_format</span><span class="p">,</span>
+                                            <span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span><span class="p">,</span> <span class="n">magnification</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Preamble end at </span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviParser._process_postambule"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.DviParser._process_postambule">[docs]</a>    <span class="k">def</span> <span class="nf">_process_postambule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Process the postamble. &quot;&quot;&quot;</span>
+
+        <span class="c"># DVI postamble format:</span>
+        <span class="c">#   postamble: post opcode</span>
+        <span class="c">#   &lt;font definitions&gt;</span>
+        <span class="c">#   post post opcode</span>
+        <span class="c">#     post pointer</span>
+        <span class="c">#     dvi format</span>
+        <span class="c">#   EOF_SIGNATURE [at least 4 times]</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Process the postamble&#39;</span><span class="p">)</span>
+
+        <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span>
+
+        <span class="c"># DVI file end with at least four EOF_SIGNATURE</span>
+        <span class="c"># Read stream[-5] and move backward until opcode != EOF_SIGNATURE</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_END</span><span class="p">)</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">opcode</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">opcode</span> <span class="o">!=</span> <span class="n">DVI_EOF_SIGNATURE</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># seek to previous byte</span>
+                <span class="n">stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+        <span class="c"># We read the dvi format</span>
+        <span class="n">dvi_format</span> <span class="o">=</span> <span class="n">opcode</span>
+
+        <span class="c"># Move backward and read post pointer</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">post_pointer</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span>
+
+        <span class="c"># Move to Postamble</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">post_pointer</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Postamble start at </span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">tell</span><span class="p">()))</span>
+
+        <span class="k">if</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()</span> <span class="o">!=</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">POST</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">BadDviStream</span>
+
+        <span class="c"># Push pointer to the last page</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bop_pointer_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">read_signed_byte4</span><span class="p">())</span>
+
+        <span class="n">numerator</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span>
+        <span class="n">denominator</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span>
+        <span class="n">magnification</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span>
+        <span class="n">max_height</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span>
+        <span class="n">max_width</span>  <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span>
+        <span class="n">stack_depth</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte2</span><span class="p">()</span>
+        <span class="n">number_of_pages</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte2</span><span class="p">()</span>
+                                             
+        <span class="c"># Read Font definitions</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">opcode</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">FNT_DEF1</span> <span class="o">&lt;=</span> <span class="n">opcode</span> <span class="o">&lt;=</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">FNT_DEF4</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">opcode_parser_set</span><span class="p">[</span><span class="n">opcode</span><span class="p">]</span><span class="o">.</span><span class="n">read_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">opcode</span> <span class="o">!=</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">NOP</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="c"># Fixme: else</span>
+
+        <span class="c"># We must reach POST POST</span>
+        <span class="k">if</span> <span class="n">opcode</span> <span class="o">!=</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">POST_POST</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">BadDviStream</span>
+
+        <span class="c"># post_pointer = stream.read_unsigned_byte4()</span>
+        <span class="c"># dvi_format = stream.read_unsigned_byte1()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_pages</span> <span class="o">=</span> <span class="n">number_of_pages</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span><span class="o">.</span><span class="n">set_postambule_data</span><span class="p">(</span><span class="n">max_height</span><span class="p">,</span> <span class="n">max_width</span><span class="p">,</span> <span class="n">stack_depth</span><span class="p">,</span> <span class="n">number_of_pages</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Number of pages: </span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">number_of_pages</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Stack depth: </span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stack_depth</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviParser._process_pages_backward"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.DviParser._process_pages_backward">[docs]</a>    <span class="k">def</span> <span class="nf">_process_pages_backward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Process the pages in backward order.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Process the pages in backward order.&#39;</span><span class="p">)</span>
+
+        <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">page_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_pages</span>
+
+        <span class="c"># Get pointer to the last page</span>
+        <span class="n">bop_pointer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bop_pointer_stack</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c"># Move backward from page to page and process the pages</span>
+        <span class="k">while</span> <span class="n">bop_pointer</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">bop_pointer</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">page_number</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;BOP at </span><span class="si">%u</span><span class="s">, page # </span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">tell</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">page_number</span><span class="p">))</span>
+
+            <span class="n">opcode</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">opcode</span> <span class="o">!=</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">BOP</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">BadDviStream</span>
+
+            <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+
+            <span class="n">bop_pointer</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_signed_byte4</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bop_pointer_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bop_pointer</span><span class="p">)</span>
+
+            <span class="c"># Fixme: page?</span>
+            <span class="n">page</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_page</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviParser.process_page_forward"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.DviParser.process_page_forward">[docs]</a>    <span class="k">def</span> <span class="nf">process_page_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">page_number</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">page_number</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">page_number</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span><span class="o">.</span><span class="n">append_page</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">page_number</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;BOP at </span><span class="si">%u</span><span class="s">, page # </span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">tell</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">page_number</span><span class="p">))</span>
+
+        <span class="n">opcode</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">opcode</span> <span class="o">!=</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">BOP</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">BadDviStream</span>
+
+        <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+
+        <span class="n">bop_pointer</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_signed_byte4</span><span class="p">()</span>
+        <span class="c">#? forward # self.bop_pointer_stack.append(bop_pointer)</span>
+
+        <span class="c"># Fixme: page?</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_page</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviParser.process_page"><a class="viewcode-back" href="../../api/PyDVI/DviParser.html#PyDVI.DviParser.DviParser.process_page">[docs]</a>    <span class="k">def</span> <span class="nf">process_page</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span>
+        <span class="n">opcode_program</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span><span class="o">.</span><span class="n">get_page</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">page_number</span><span class="p">)</span>
+        
+        <span class="n">previous_opcode_obj</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">opcode</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">opcode</span> <span class="o">==</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">EOP</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">opcode_parser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opcode_parser_set</span><span class="p">[</span><span class="n">opcode</span><span class="p">]</span>
+                <span class="n">parameters</span> <span class="o">=</span> <span class="n">opcode_parser</span><span class="o">.</span><span class="n">read_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Opcode </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">opcode</span><span class="p">,</span> <span class="n">opcode_parser</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">parameters</span><span class="p">))</span>
+
+                <span class="c"># If the current and the previous opcode correspond to set char then the new char is</span>
+                <span class="c"># concatenated</span>
+                <span class="n">is_set_char</span> <span class="o">=</span> <span class="n">opcode</span> <span class="o">&lt;=</span> <span class="n">dvi_opcodes</span><span class="o">.</span><span class="n">SET4</span>
+                <span class="k">if</span> <span class="n">is_set_char</span> <span class="ow">and</span> <span class="n">previous_opcode_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">previous_opcode_obj</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">opcode_obj</span> <span class="o">=</span> <span class="n">opcode_parser</span><span class="o">.</span><span class="n">to_opcode</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> 
+                    <span class="k">if</span> <span class="n">opcode_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">opcode_program</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">opcode_obj</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">is_set_char</span><span class="p">:</span>
+                        <span class="n">previous_opcode_obj</span> <span class="o">=</span> <span class="n">opcode_obj</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">previous_opcode_obj</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

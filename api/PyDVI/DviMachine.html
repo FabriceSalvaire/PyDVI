@@ -1,0 +1,629 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2.1. DviMachine &mdash; PyDVI 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="PyDVI 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="2. PyDVI" href="../PyDVI.html" />
+    <link rel="next" title="2.2. DviParser" href="DviParser.html" />
+    <link rel="prev" title="2. PyDVI" href="../PyDVI.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="DviParser.html" title="2.2. DviParser"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../PyDVI.html" title="2. PyDVI"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../PyDVI.html" accesskey="U">2. <tt class="docutils literal docutils literal docutils literal"><span class="pre">PyDVI</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-PyDVI.DviMachine">
+<span id="dvimachine"></span><h1>2.1. <tt class="xref py py-mod docutils literal"><span class="pre">DviMachine</span></tt><a class="headerlink" href="#module-PyDVI.DviMachine" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_set_char">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_set_char</tt><big>(</big><em>char_code</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_set_char"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_set_char" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.Opcode_putset_char</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">set_char</span></tt> opcode.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_put_char">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_put_char</tt><big>(</big><em>char_code</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_put_char"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_put_char" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.Opcode_putset_char</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">put_char</span></tt> opcode.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_set_rule">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_set_rule</tt><big>(</big><em>height</em>, <em>width</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_set_rule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_set_rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.Opcode_putset_rule</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">set_rule</span></tt> opcode.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_put_rule">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_put_rule</tt><big>(</big><em>height</em>, <em>width</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_put_rule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_put_rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.Opcode_putset_rule</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">put_rule</span></tt> opcode.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_push">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_push</tt><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_push"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_push" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.Opcode</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">push</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_push.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_push.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_push.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_pop">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_pop</tt><big>(</big><em>n=1</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_pop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.Opcode</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">pop</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_pop.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_pop.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_pop.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_push_colour">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_push_colour</tt><big>(</big><em>colour</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_push_colour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_push_colour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.Opcode</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">push_colour</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_push_colour.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_push_colour.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_push_colour.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_pop_colour">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_pop_colour</tt><big>(</big><em>n=1</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_pop_colour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_pop_colour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.Opcode</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">pop_colour</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_pop_colour.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_pop_colour.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_pop_colour.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_right">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_right</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_right"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_right" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.OpcodeX</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">right</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_right.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_right.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_right.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_w0">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_w0</tt><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_w0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_w0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.Opcode</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">w0</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_w0.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_w0.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_w0.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_w">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_w</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_w"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_w" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.OpcodeX</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">w</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_w.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_w.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_w.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_x0">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_x0</tt><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_x0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_x0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.Opcode</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">x0</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_x0.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_x0.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_x0.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_x">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_x</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_x"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.OpcodeX</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">x</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_x.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_x.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_x.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_down">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_down</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_down"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_down" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.OpcodeX</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">down</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_down.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_down.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_down.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_y0">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_y0</tt><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_y0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_y0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.Opcode</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">y0</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_y0.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_y0.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_y0.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_y">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_y</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_y"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.OpcodeX</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">y</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_y.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_y.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_y.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_z0">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_z0</tt><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_z0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_z0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.Opcode</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">z0</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_z0.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_z0.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_z0.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_z">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_z</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.OpcodeX</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">z</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_z.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_z.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_z.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_font">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_font</tt><big>(</big><em>font_id</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_font"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_font" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.Opcode</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">font</span></tt> opcode.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.Opcode_font.run">
+<tt class="descname">run</tt><big>(</big><em>dvi_machine</em>, <em>compute_bounding_box=False</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_font.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_font.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.Opcode_xxx">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">Opcode_xxx</tt><big>(</big><em>code</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#Opcode_xxx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.Opcode_xxx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.Opcode</span></tt></p>
+<p>This class implements the <tt class="docutils literal"><span class="pre">xxx</span></tt> opcode.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.DviFont">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">DviFont</tt><big>(</big><em>font_id</em>, <em>name</em>, <em>checksum</em>, <em>scale_factor</em>, <em>design_size</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviFont"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviFont" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>This class implements a DVI Font.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviFont.char_scaled_depth">
+<tt class="descname">char_scaled_depth</tt><big>(</big><em>tfm_char</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviFont.char_scaled_depth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviFont.char_scaled_depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the scale depth for the <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.TfmChar</span></tt> instance.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviFont.char_scaled_height">
+<tt class="descname">char_scaled_height</tt><big>(</big><em>tfm_char</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviFont.char_scaled_height"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviFont.char_scaled_height" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the scale height for the <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.TfmChar</span></tt> instance.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviFont.char_scaled_width">
+<tt class="descname">char_scaled_width</tt><big>(</big><em>tfm_char</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviFont.char_scaled_width"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviFont.char_scaled_width" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the scale width for the <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.TfmChar</span></tt> instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.DviColorBlack">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">DviColorBlack</tt><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviColorBlack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviColorBlack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.DviColor</span></tt></p>
+<p>This class implements the black colour.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.DviColorGray">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">DviColorGray</tt><big>(</big><em>gray_level</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviColorGray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviColorGray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.DviColor</span></tt></p>
+<p>This class implements gray colour.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.DviColorRGB">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">DviColorRGB</tt><big>(</big><em>red</em>, <em>green</em>, <em>blue</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviColorRGB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviColorRGB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.DviColor</span></tt></p>
+<p>This class implements RGB colour.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.DviColorCMYK">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">DviColorCMYK</tt><big>(</big><em>cyan</em>, <em>magenta</em>, <em>yellow</em>, <em>dark</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviColorCMYK"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviColorCMYK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.DviColor</span></tt></p>
+<p>This class implements CMYK colour.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.DviProgam">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">DviProgam</tt><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviProgam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviProgam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>This class implements a DVI program.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviProgam.append_page">
+<tt class="descname">append_page</tt><big>(</big><em>i</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviProgam.append_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviProgam.append_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviProgam.dvi_font_iterator">
+<tt class="descname">dvi_font_iterator</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviProgam.dvi_font_iterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviProgam.dvi_font_iterator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviProgam.get_font">
+<tt class="descname">get_font</tt><big>(</big><em>i</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviProgam.get_font"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviProgam.get_font" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviProgam.get_page">
+<tt class="descname">get_page</tt><big>(</big><em>i</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviProgam.get_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviProgam.get_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviProgam.print_summary">
+<tt class="descname">print_summary</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviProgam.print_summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviProgam.print_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviProgam.register_font">
+<tt class="descname">register_font</tt><big>(</big><em>font</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviProgam.register_font"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviProgam.register_font" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a <a class="reference internal" href="#PyDVI.DviMachine.DviFont" title="PyDVI.DviMachine.DviFont"><tt class="xref py py-class docutils literal"><span class="pre">DviFont</span></tt></a> instance.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviProgam.set_postambule_data">
+<tt class="descname">set_postambule_data</tt><big>(</big><em>max_height</em>, <em>max_width</em>, <em>stack_depth</em>, <em>number_of_pages</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviProgam.set_postambule_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviProgam.set_postambule_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the postamble data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviProgam.set_preambule_data">
+<tt class="descname">set_preambule_data</tt><big>(</big><em>comment</em>, <em>dvi_format</em>, <em>numerator</em>, <em>denominator</em>, <em>magnification</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviProgam.set_preambule_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviProgam.set_preambule_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the preambule data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.DviProgramPage">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">DviProgramPage</tt><big>(</big><em>page_number</em>, <em>height=0</em>, <em>width=0</em>, <em>paper_orientation=0</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviProgramPage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviProgramPage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">list</span></tt></p>
+<p>This class defines a page.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviProgramPage.print_program">
+<tt class="descname">print_program</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviProgramPage.print_program"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviProgramPage.print_program" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the program.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviProgramPage.set_paper_size">
+<tt class="descname">set_paper_size</tt><big>(</big><em>height</em>, <em>width</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviProgramPage.set_paper_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviProgramPage.set_paper_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the paper size.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.DviMachine">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">DviMachine</tt><big>(</big><em>font_manager</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>This class implements a DVI Machine.</p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine._get_current_dvi_font">
+<tt class="descname">_get_current_dvi_font</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine._get_current_dvi_font"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine._get_current_dvi_font" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current dvi font.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine._get_current_font">
+<tt class="descname">_get_current_font</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine._get_current_font"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine._get_current_font" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current font.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine._get_registers">
+<tt class="descname">_get_registers</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine._get_registers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine._get_registers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current register set.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine._load_dvi_fonts">
+<tt class="descname">_load_dvi_fonts</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine._load_dvi_fonts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine._load_dvi_fonts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the fonts used by the DVI program.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine.compute_page_bounding_box">
+<tt class="descname">compute_page_bounding_box</tt><big>(</big><em>page</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine.compute_page_bounding_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine.compute_page_bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="PyDVI.DviMachine.DviMachine.current_dvi_font">
+<tt class="descname">current_dvi_font</tt><a class="headerlink" href="#PyDVI.DviMachine.DviMachine.current_dvi_font" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current dvi font</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="PyDVI.DviMachine.DviMachine.current_font">
+<tt class="descname">current_font</tt><a class="headerlink" href="#PyDVI.DviMachine.DviMachine.current_font" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current font</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine.load_dvi_program">
+<tt class="descname">load_dvi_program</tt><big>(</big><em>dvi_program</em>, <em>load_fonts=True</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine.load_dvi_program"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine.load_dvi_program" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a <a class="reference internal" href="#PyDVI.DviMachine.DviProgam" title="PyDVI.DviMachine.DviProgam"><tt class="xref py py-class docutils literal"><span class="pre">DviProgam</span></tt></a> instance.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine.paint_char">
+<tt class="descname">paint_char</tt><big>(</big><em>x</em>, <em>y</em>, <em>char_bounding_box</em>, <em>font</em>, <em>char_code</em>, <em>magnification</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine.paint_char"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine.paint_char" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine.paint_rule">
+<tt class="descname">paint_rule</tt><big>(</big><em>x</em>, <em>y</em>, <em>width</em>, <em>height</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine.paint_rule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine.paint_rule" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine.pop_colour">
+<tt class="descname">pop_colour</tt><big>(</big><em>n=1</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine.pop_colour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine.pop_colour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pop <em>n</em> level in the colour stack.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine.pop_registers">
+<tt class="descname">pop_registers</tt><big>(</big><em>n=1</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine.pop_registers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine.pop_registers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pop <em>n</em> level in the register set stack.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine.push_colour">
+<tt class="descname">push_colour</tt><big>(</big><em>colour</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine.push_colour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine.push_colour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Push the current colour.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine.push_registers">
+<tt class="descname">push_registers</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine.push_registers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine.push_registers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Push the register set.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="PyDVI.DviMachine.DviMachine.registers">
+<tt class="descname">registers</tt><a class="headerlink" href="#PyDVI.DviMachine.DviMachine.registers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register set</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine.reset">
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the machine.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine.run_page">
+<tt class="descname">run_page</tt><big>(</big><em>page</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine.run_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine.run_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviMachine.simplify_dvi_program">
+<tt class="descname">simplify_dvi_program</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviMachine.simplify_dvi_program"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviMachine.simplify_dvi_program" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simplify the DVI program.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDVI.DviMachine.DviSimplifyMachine">
+<em class="property">class </em><tt class="descclassname">PyDVI.DviMachine.</tt><tt class="descname">DviSimplifyMachine</tt><big>(</big><em>font_manager</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviSimplifyMachine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviSimplifyMachine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PyDVI.DviMachine.DviMachine" title="PyDVI.DviMachine.DviMachine"><tt class="xref py py-class docutils literal"><span class="pre">PyDVI.DviMachine.DviMachine</span></tt></a></p>
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviSimplifyMachine.process_page_xxx_opcodes">
+<tt class="descname">process_page_xxx_opcodes</tt><big>(</big><em>program_page</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviSimplifyMachine.process_page_xxx_opcodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviSimplifyMachine.process_page_xxx_opcodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the xxx opcodes in the page program.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviSimplifyMachine.simplify">
+<tt class="descname">simplify</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviSimplifyMachine.simplify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviSimplifyMachine.simplify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simplify the program.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviSimplifyMachine.simplify_page">
+<tt class="descname">simplify_page</tt><big>(</big><em>program_page</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviSimplifyMachine.simplify_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviSimplifyMachine.simplify_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simplify the page.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviSimplifyMachine.transform_xxx_colour">
+<tt class="descname">transform_xxx_colour</tt><big>(</big><em>program_page</em>, <em>xxx_code</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviSimplifyMachine.transform_xxx_colour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviSimplifyMachine.transform_xxx_colour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a xxx colour opcode.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviSimplifyMachine.transform_xxx_paper_orientation">
+<tt class="descname">transform_xxx_paper_orientation</tt><big>(</big><em>program_page</em>, <em>xxx_code</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviSimplifyMachine.transform_xxx_paper_orientation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviSimplifyMachine.transform_xxx_paper_orientation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a xxx paper orientation opcode.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.DviMachine.DviSimplifyMachine.transform_xxx_paper_size">
+<tt class="descname">transform_xxx_paper_size</tt><big>(</big><em>program_page</em>, <em>xxx_code</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/DviMachine.html#DviSimplifyMachine.transform_xxx_paper_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.DviMachine.DviSimplifyMachine.transform_xxx_paper_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a xxx paper size opcode.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="PyDVI.DviMachine.DviSimplifyMachine.xxx_colour">
+<tt class="descname">xxx_colour</tt><em class="property"> = 'color '</em><a class="headerlink" href="#PyDVI.DviMachine.DviSimplifyMachine.xxx_colour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines colour special</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="PyDVI.DviMachine.DviSimplifyMachine.xxx_landscape">
+<tt class="descname">xxx_landscape</tt><em class="property"> = '! /landplus90 true store'</em><a class="headerlink" href="#PyDVI.DviMachine.DviSimplifyMachine.xxx_landscape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines landscape special</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="PyDVI.DviMachine.DviSimplifyMachine.xxx_papersize">
+<tt class="descname">xxx_papersize</tt><em class="property"> = 'papersize='</em><a class="headerlink" href="#PyDVI.DviMachine.DviSimplifyMachine.xxx_papersize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines papersize special</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../PyDVI.html"
+                        title="previous chapter">2. <tt class="docutils literal docutils literal"><span class="pre">PyDVI</span></tt></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="DviParser.html"
+                        title="next chapter">2.2. <tt class="docutils literal"><span class="pre">DviParser</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api/PyDVI/DviMachine.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="DviParser.html" title="2.2. DviParser"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../PyDVI.html" title="2. PyDVI"
+             >previous</a> |</li>
+        <li><a href="../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../PyDVI.html" >2. <tt class="docutils literal docutils literal docutils literal"><span class="pre">PyDVI</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

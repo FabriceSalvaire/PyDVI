@@ -1,0 +1,273 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDVI.Encoding &mdash; PyDVI 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="PyDVI 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDVI.Encoding</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># PyDVI - A Python Library to Process DVI Stream.</span>
+<span class="c"># Copyright (C) 2009 Salvaire Fabrice</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># Audit</span>
+<span class="c">#</span>
+<span class="c">#  - 10/10/2011 Fabrice</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module handles TeX encoding file.</span>
+
+<span class="sd">An encoding file map the glyph index with its symbolic name. It uses the ``.enc`` extension.</span>
+
+<span class="sd">For example, the content of :file:`cork.enc` is::</span>
+
+<span class="sd">  /CorkEncoding [ % now 256 chars follow</span>
+<span class="sd">  % 0x00</span>
+<span class="sd">    /grave /acute /circumflex /tilde /dieresis /hungarumlaut /ring /caron</span>
+<span class="sd">    /breve /macron /dotaccent /cedilla</span>
+<span class="sd">    /ogonek /quotesinglbase /guilsinglleft /guilsinglright</span>
+<span class="sd">  ...</span>
+<span class="sd">  % 0xF0</span>
+<span class="sd">    /eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /oe</span>
+<span class="sd">    /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /germandbls</span>
+<span class="sd">  ] def</span>
+
+<span class="sd">The percent character is used for comment as for TeX.</span>
+
+<span class="sd">The content of this file can be parsed using::</span>
+
+<span class="sd">  cork_encoding = Encoding(&#39;/usr/share/texmf/fonts/enc/dvips/base/cork.enc&#39;)</span>
+
+<span class="sd">The encoding&#39;s name can be retrieved using::</span>
+
+<span class="sd">  &gt;&gt;&gt; cork_encoding.name</span>
+<span class="sd">  &#39;CorkEncoding&#39;</span>
+
+<span class="sd">The number of glyphes can be obtained using the function :func:`len`::</span>
+
+<span class="sd">  &gt;&gt;&gt; len(cork_encoding)</span>
+<span class="sd">  256</span>
+
+<span class="sd">The index of the glyph ``eth`` can be retrieved using::</span>
+
+<span class="sd">  &gt;&gt;&gt; cork_encoding[&#39;eth&#39;]</span>
+<span class="sd">  0xF0</span>
+
+<span class="sd">and reciprocally::</span>
+
+<span class="sd">  &gt;&gt;&gt; cork_encoding[0xF0]</span>
+<span class="sd">  &#39;eth&#39;</span>
+
+<span class="sd">The methods :meth:`to_index` and :meth:`to_name` are used internally for this purpose.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Encoding&#39;</span><span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">PyDVI.Tools.Logging</span> <span class="kn">import</span> <span class="n">print_card</span>
+<span class="kn">from</span> <span class="nn">PyDVI.Tools.TexCommentedFile</span> <span class="kn">import</span> <span class="n">TexCommentedFile</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="Encoding"><a class="viewcode-back" href="../../api/PyDVI/Encoding.html#PyDVI.Encoding.Encoding">[docs]</a><span class="k">class</span> <span class="nc">Encoding</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse an encoding file and store the association between the index and the glyph&#39;s name.</span>
+
+<span class="sd">    Public attributes are:</span>
+
+<span class="sd">      ``name``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_glyph_indexes</span> <span class="o">=</span> <span class="p">[]</span> <span class="c"># Map glyph index to glyph name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_glyph_names</span> <span class="o">=</span> <span class="p">{}</span> <span class="c"># Map glyph name  to glyph index</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">TexCommentedFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">encoding_file</span><span class="p">:</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="n">encoding_file</span><span class="o">.</span><span class="n">concatenate_lines</span><span class="p">()</span>
+                <span class="n">open_braket_index</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&#39;[&#39;</span><span class="p">)</span>
+                <span class="n">close_braket_index</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&#39;]&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parse_name</span><span class="p">(</span><span class="n">content</span><span class="p">[:</span><span class="n">open_braket_index</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parse_glyph_names</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="n">open_braket_index</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">close_braket_index</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s">&#39;Bad encoding file&#39;</span><span class="p">)</span>
+
+        <span class="c"># Init glyph_names dict</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_glyph_indexes</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_glyph_names</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_glyph_indexes</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">i</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the number of glyphes. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_glyph_indexes</span><span class="p">)</span>        
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; If *index* is a glyph index then return the corresponding symbolic name else try to</span>
+<span class="sd">        return the glyph index corresponding to the symbolic name *index*.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_name</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_index</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Encoding._parse_name"><a class="viewcode-back" href="../../api/PyDVI/Encoding.html#PyDVI.Encoding.Encoding._parse_name">[docs]</a>    <span class="k">def</span> <span class="nf">_parse_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Find the encoding name at the left of the line, as &#39;/CorkEncoding&#39;. &quot;&quot;&quot;</span>
+
+        <span class="c"># try</span>
+        <span class="n">name_start_index</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">name_start_index</span> <span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Encoding._parse_glyph_names"><a class="viewcode-back" href="../../api/PyDVI/Encoding.html#PyDVI.Encoding.Encoding._parse_glyph_names">[docs]</a>    <span class="k">def</span> <span class="nf">_parse_glyph_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Find glyph names in *line*, as &#39;/grave /acute /circumflex ...&#39;. &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">):</span>
+            <span class="n">word</span> <span class="o">=</span> <span class="n">word</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">word</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_glyph_indexes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Encoding.to_name"><a class="viewcode-back" href="../../api/PyDVI/Encoding.html#PyDVI.Encoding.Encoding.to_name">[docs]</a>    <span class="k">def</span> <span class="nf">to_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the symbolic name corresponding to the glyph index *i*. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_glyph_indexes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Encoding.to_index"><a class="viewcode-back" href="../../api/PyDVI/Encoding.html#PyDVI.Encoding.Encoding.to_index">[docs]</a>    <span class="k">def</span> <span class="nf">to_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the glyph index corresponding to the symbolic name. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_glyph_names</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Encoding.print_summary"><a class="viewcode-back" href="../../api/PyDVI/Encoding.html#PyDVI.Encoding.Encoding.print_summary">[docs]</a>    <span class="k">def</span> <span class="nf">print_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;Encoding </span><span class="si">%s</span><span class="s">:</span><span class="se">\n\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+            <span class="n">message</span> <span class="o">+=</span> <span class="s">&#39;| </span><span class="si">%3i</span><span class="s"> | </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_name</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+        <span class="n">print_card</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,228 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDVI.Tools.Logging &mdash; PyDVI 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDVI 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDVI.Tools.Logging</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># PyDVI - A Python Library to Process DVI Stream.</span>
+<span class="c"># Copyright (C) 2009 Salvaire Fabrice</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># Audit</span>
+<span class="c">#</span>
+<span class="c">#  - 10/01/2010 fabrice</span>
+<span class="c">#  - 13/05/2010 fabrice</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">__ALL__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;remove_enclosing_new_line&#39;</span><span class="p">,</span> <span class="s">&#39;format_card&#39;</span><span class="p">,</span> <span class="s">&#39;print_card&#39;</span><span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="remove_enclosing_new_line"><a class="viewcode-back" href="../../../api/PyDVI/Tools/Logging.html#PyDVI.Tools.Logging.remove_enclosing_new_line">[docs]</a><span class="k">def</span> <span class="nf">remove_enclosing_new_line</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; Return a copy of the string *text* with leading and trailing newline removed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">i_min</span> <span class="o">=</span>  <span class="mi">1</span> <span class="k">if</span> <span class="n">text</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="o">==</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">i_max</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">text</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="k">else</span> <span class="bp">None</span>
+
+    <span class="k">return</span> <span class="n">text</span><span class="p">[</span><span class="n">i_min</span><span class="p">:</span><span class="n">i_max</span><span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="format_card"><a class="viewcode-back" href="../../../api/PyDVI/Tools/Logging.html#PyDVI.Tools.Logging.format_card">[docs]</a><span class="k">def</span> <span class="nf">format_card</span><span class="p">(</span><span class="n">text</span><span class="p">,</span>
+               <span class="n">centered</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+               <span class="n">width</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span>
+               <span class="n">rule_char</span><span class="o">=</span><span class="s">&#39;#&#39;</span><span class="p">,</span>
+               <span class="n">newline</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+               <span class="n">border</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+               <span class="n">bottom_rule</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; Format the string *text* as a card::</span>
+
+<span class="sd">***************************************************</span>
+<span class="sd">*</span>
+<span class="sd">*                      Title</span>
+<span class="sd">*</span>
+<span class="sd">* xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx</span>
+<span class="sd">* xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx</span>
+<span class="sd">* xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx</span>
+<span class="sd">* xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx</span>
+<span class="sd">*</span>
+<span class="sd">***************************************************</span>
+
+<span class="sd">    *centered*</span>
+<span class="sd">      center the text in the card</span>
+
+<span class="sd">    *width*</span>
+<span class="sd">      width of the card</span>
+
+<span class="sd">    *rule_char*</span>
+<span class="sd">      character used to draw the rule</span>
+
+<span class="sd">    *newline*</span>
+<span class="sd">      insert a new line before the card</span>
+
+<span class="sd">    *border*</span>
+<span class="sd">      draw a left vertical rule</span>
+
+<span class="sd">    *bottom_rule*</span>
+<span class="sd">      draw a bottom horizontal rule</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">formated_text</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+    <span class="n">rule_line</span> <span class="o">=</span> <span class="n">rule_char</span><span class="o">*</span><span class="n">width</span>
+
+    <span class="k">if</span> <span class="n">border</span><span class="p">:</span>
+        <span class="n">border_string</span> <span class="o">=</span> <span class="n">rule_char</span> <span class="o">+</span> <span class="s">&#39; &#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">border_string</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">format_lines</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+
+        <span class="n">formated_text</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">):</span>
+            <span class="n">formated_text</span> <span class="o">+=</span> <span class="n">format_line</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+
+        <span class="k">return</span> <span class="n">formated_text</span>
+
+    <span class="k">def</span> <span class="nf">format_line</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+
+        <span class="n">line</span> <span class="o">=</span> <span class="n">border_string</span>
+        <span class="k">if</span> <span class="n">centered</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">+=</span> <span class="n">text</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">+=</span> <span class="n">text</span>
+
+        <span class="k">return</span> <span class="n">line</span>
+
+    <span class="k">if</span> <span class="n">newline</span><span class="p">:</span>
+        <span class="n">formated_text</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+
+    <span class="n">formated_text</span> <span class="o">+=</span> <span class="n">rule_line</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">border_string</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+             
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">formated_text</span> <span class="o">+=</span> <span class="n">format_lines</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">formated_text</span> <span class="o">+=</span> <span class="n">format_lines</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+    <span class="n">formated_text</span> <span class="o">+=</span> <span class="n">border_string</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+
+    <span class="k">if</span> <span class="n">bottom_rule</span><span class="p">:</span>
+        <span class="n">formated_text</span> <span class="o">+=</span> <span class="n">rule_line</span>
+
+    <span class="k">return</span> <span class="n">formated_text</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="print_card"><a class="viewcode-back" href="../../../api/PyDVI/Tools/Logging.html#PyDVI.Tools.Logging.print_card">[docs]</a><span class="k">def</span> <span class="nf">print_card</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; Print the string *text* formated by :meth:`format_card`.  The remaining keyword arguments</span>
+<span class="sd">    *kwargs* are passed to :meth:`format_card`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">print</span> <span class="n">format_card</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

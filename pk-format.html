@@ -1,0 +1,345 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1.2. Packet Font File Format &mdash; PyDVI 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="static/default.css" type="text/css" />
+    <link rel="stylesheet" href="static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="static/jquery.js"></script>
+    <script type="text/javascript" src="static/underscore.js"></script>
+    <script type="text/javascript" src="static/doctools.js"></script>
+    <link rel="top" title="PyDVI 0.1.0 documentation" href="index.html" />
+    <link rel="up" title="1. Reference Documentation" href="reference-documentation.html" />
+    <link rel="next" title="1.3. Relevant Softwares" href="reference-links.html" />
+    <link rel="prev" title="1.1. Device-Independent File Format" href="dvi-format.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="reference-links.html" title="1.3. Relevant Softwares"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dvi-format.html" title="1.1. Device-Independent File Format"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="reference-documentation.html" accesskey="U">1. Reference Documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="packet-font-file-format">
+<h1>1.2. Packet Font File Format<a class="headerlink" href="#packet-font-file-format" title="Permalink to this headline">¶</a></h1>
+<p>The Packet Font file format in descriped in the <tt class="file docutils literal"><span class="pre">pktype.web</span></tt> file from Web2C.  Part of this
+documentation comes from this file.</p>
+<p>The packed file format is a compact representation of the data contained in a GF file.  The
+information content is the same, but packed (PK) files are almost always less than half the size of
+their GF counterparts.  They are also easier to convert into a raster representation because they do
+not have a profusion of <tt class="docutils literal"><span class="pre">paint</span></tt>, <tt class="docutils literal"><span class="pre">skip</span></tt>, and <tt class="docutils literal"><span class="pre">new_row</span></tt> commands to be separately interpreted.
+In addition, the PK format expressly forbids <tt class="docutils literal"><span class="pre">special</span></tt> commands within a character.  The minimum
+bounding box for each character is explicit in the format, and does not need to be scanned for as in
+the GF format.  Finally, the width and escapement values are combined with the raster information
+into character &#8220;packets&#8221;, making it simpler in many cases to process a character.</p>
+<p>A PK file is organized as a stream of 8-bit bytes.  At times, these bytes might be split into 4-bit
+nybbles or single bits, or combined into multiple byte parameters.  When bytes are split into
+smaller pieces, the &#8220;first&#8221; piece is always the most significant of the byte.  For instance, the
+first bit of a byte is the bit with value 128; the first nybble can be found by dividing a byte by
+16.  Similarly, when bytes are combined into multiple byte parameters, the first byte is the most
+significant of the parameter.  If the parameter is signed, it is represented by two&#8217;s-complement
+notation.</p>
+<p>The set of possible eight-bit values is separated into two sets, those that introduce a character
+definition, and those that do not.  The values that introduce a character definition range from 0 to
+239; byte values above 239 are interpreted as commands.  Bytes that introduce character definitions
+are called flag bytes, and various fields within the byte indicate various things about how the
+character definition is encoded.  Command bytes have zero or more parameters, and can never appear
+within a character definition or between parameters of another command, where they would be
+interpeted as data.</p>
+<p>A PK file consists of a preamble, followed by a sequence of one or more character definitions,
+followed by a postamble.  The preamble command must be the first byte in the file, followed
+immediately by its parameters.  Any number of character definitions may follow, and any command but
+the preamble command and the postamble command may occur between character definitions.  The very
+last command in the file must be the postamble.</p>
+<p>The packed file format is intended to be easy to read and interpret by device drivers.  The small
+size of the file reduces the input/output overhead each time a font is loaded.  For those drivers
+that load and save each font file into memory, the small size also helps reduce the memory
+requirements.  The length of each character packet is specified, allowing the character raster data
+to be loaded into memory by simply counting bytes, rather than interpreting each command; then, each
+character can be interpreted on a demand basis.  This also makes it possible for a driver to skip a
+particular character quickly if it knows that the character is unused.</p>
+<p>First, the command bytes will be presented; then the format of the character definitions will be
+defined.  Eight of the possible sixteen commands (values 240 through 255) are currently defined; the
+others are reserved for future extensions.  The commands are listed below.  Each command is
+specified by its symbolic name (e.g., <tt class="docutils literal"><span class="pre">pk_no_op</span></tt>), its opcode byte, and any parameters.  The
+parameters are followed by a bracketed number telling how many bytes they occupy, with the number
+preceded by a plus sign if it is a signed quantity.  (Four byte quantities are always signed,
+however.)</p>
+<p><tt class="docutils literal"><span class="pre">pk_xxx1</span> <span class="pre">240</span> <span class="pre">k[1]</span> <span class="pre">x[k]</span></tt>. This command is undefined in general; it functions as a <tt class="docutils literal"><span class="pre">(k</span> <span class="pre">+</span> <span class="pre">2)-byte</span>
+<span class="pre">no_op</span></tt> unless special PK-reading programs are being used.  METAFONT generates <tt class="docutils literal"><span class="pre">xxx</span></tt> commands when
+encountering a special string.  It is recommended that <tt class="docutils literal"><span class="pre">x</span></tt> be a string having the form of a
+keyword followed by possible parameters relevant to that keyword.</p>
+<p><tt class="docutils literal"><span class="pre">pk_xxx2</span> <span class="pre">241</span> <span class="pre">k[2]</span> <span class="pre">x[k]</span></tt>.  Like <tt class="docutils literal"><span class="pre">pk_xxx1</span></tt>, but <tt class="docutils literal"><span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">k</span> <span class="pre">&lt;</span> <span class="pre">65536</span></tt>.</p>
+<p><tt class="docutils literal"><span class="pre">pk_xxx3</span> <span class="pre">242</span> <span class="pre">k[3]</span> <span class="pre">x[k]</span></tt>.  Like <tt class="docutils literal"><span class="pre">pk_xxx1</span></tt>, but <tt class="docutils literal"><span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">k</span> <span class="pre">&lt;</span> <span class="pre">224</span></tt>.  METAFONT uses this when sending
+a special string whose length exceeds 255.</p>
+<p><tt class="docutils literal"><span class="pre">pk_xxx4</span> <span class="pre">243</span> <span class="pre">k[4]</span> <span class="pre">x[k]</span></tt>.  Like <tt class="docutils literal"><span class="pre">pk_xxx1</span></tt>, but <tt class="docutils literal"><span class="pre">k</span></tt> can be ridiculously large; <tt class="docutils literal"><span class="pre">k</span></tt> musn&#8217;t be
+negative.</p>
+<p><tt class="docutils literal"><span class="pre">pk</span> <span class="pre">yyy</span> <span class="pre">244</span> <span class="pre">y[4]</span></tt>.  This command is undefined in general; it functions as a five-byte <tt class="docutils literal"><span class="pre">no_op</span></tt>
+unless special PK reading programs are being used.  METAFONT puts scaled numbers into <tt class="docutils literal"><span class="pre">yyy</span></tt>&#8216;s, as
+a result of <tt class="docutils literal"><span class="pre">numspecial</span></tt> commands; the intent is to provide numeric parameters to <tt class="docutils literal"><span class="pre">xxx</span></tt> commands
+that immediately precede.</p>
+<p><tt class="docutils literal"><span class="pre">pk</span> <span class="pre">post</span> <span class="pre">245</span></tt>.  Beginning of the postamble.  This command is followed by enough <tt class="docutils literal"><span class="pre">pk_no_op</span></tt>
+commands to make the file a multiple of four bytes long.  Zero through three bytes are usual, but
+any number is allowed.  This should make the file easy to read on machines that pack four bytes to a
+word.</p>
+<p><tt class="docutils literal"><span class="pre">pk_no_op</span> <span class="pre">246</span></tt>.  No operation, do nothing.  Any number of <tt class="docutils literal"><span class="pre">pk_no_op</span></tt>&#8216;s may appear between PK
+commands, but a <tt class="docutils literal"><span class="pre">pk_no_op</span></tt> cannot be inserted between a command and its parameters, between two
+parameters, or inside a character definition.</p>
+<p><tt class="docutils literal"><span class="pre">pk_pre</span> <span class="pre">247</span> <span class="pre">i[1]</span> <span class="pre">k[1]</span> <span class="pre">x[k]</span> <span class="pre">ds</span> <span class="pre">[4]</span> <span class="pre">cs</span> <span class="pre">[4]</span> <span class="pre">hppp[4]</span> <span class="pre">vppp[4]</span></tt>.  Preamble command.  Here, <tt class="docutils literal"><span class="pre">i</span></tt> is the
+identification byte of the file, currently equal to 89.  The string <tt class="docutils literal"><span class="pre">x</span></tt> is merely a comment,
+usually indicating the source of the PK file.  The parameters <tt class="docutils literal"><span class="pre">ds</span></tt> and <tt class="docutils literal"><span class="pre">cs</span></tt> are the design size
+of the file in 1/2**20 points, and the checksum of the file, respectively.  The checksum should
+match the TFM file and the GF files for this font.  Parameters <tt class="docutils literal"><span class="pre">hppp</span></tt> and <tt class="docutils literal"><span class="pre">vppp</span></tt> are the ratios
+of pixels per point, horizontally and vertically, multiplied by 2**16; they can be used to correlate
+the font with specific device resolutions, magnifications, and &#8220;at sizes&#8221;.  Usually, the name of the
+PK file is formed by concatenating the font name (e.g., cmr10) with the resolution at which the font
+is prepared in pixels per inch multiplied by the magnification factor, and the letters <tt class="docutils literal"><span class="pre">pk</span></tt>.  For
+instance, cmr10 at 300 dots per inch should be named <tt class="docutils literal"><span class="pre">cmr10.300pk</span></tt>; at one thousand dots per inch
+and magstephalf, it should be named <tt class="docutils literal"><span class="pre">cmr10.1095pk</span></tt>.</p>
+<p>The PK format has two conflicting goals: to pack character raster and size information as compactly
+as possible, while retaining ease of translation into raster and other forms.  A suitable compromise
+was found in the use of run-encoding of the raster information.  Instead of packing the individual
+bits of the character, we instead count the number of consecutive &#8220;black&#8221; or &#8220;white&#8221; pixels in a
+horizontal raster row, and then encode this number.  Run counts are found for each row from left to
+right, traversing rows from the top to bottom.  This is essentially the way the GF format works.
+Instead of presenting each row individually, however, we concatenate all of the horizontal raster
+rows into one long string of pixels, and encode this row.  With knowledge of the width of the
+bit-map, the original character glyph can easily be reconstructed.  In addition, we do not need
+special commands to mark the end of one row and the beginning of the next.</p>
+<p>Next, we place the burden of finding the minimum bounding box on the part of the font generator,
+since the characters will usually be used much more often than they are generated.  The minimum
+bounding box is the smallest rectangle that encloses all &#8220;black&#8221; pixels of a character. We also
+eliminate the need for a special end of character marker, by supplying exactly as many bits as are
+required to fill the minimum bounding box, from which the end of the character is implicit.</p>
+<p>Let us next consider the distribution of the run counts.  Analysis of several dozen pixel files at
+300 dots per inch yields a distribution peaking at four, falling off slowly until ten, then a bit
+more steeply until twenty, and then asymptotically approaching the horizontal.  Thus, the great
+majority of our run counts will fit in a four-bit nybble.  The eight-bit byte is attractive for our
+run-counts, as it is the standard on many systems; however, the wasted four bits in the majority of
+cases seem a high price to pay.  Another possibility is to use a Huffman-type encoding scheme with a
+variable number of bits for each run-count; this was rejected because of the overhead in fetching
+and examining individual bits in the file.  Thus, the character raster definitions in the PK file
+format are based on the four-bit nybble.</p>
+<p>An analysis of typical pixel files yielded another interesting statistic: Fully 37% of the raster
+rows were duplicates of the previous row.  Thus, the PK format allows the specification of repeat
+counts, which indicate how many times a horizontal raster row is to be repeated.  These repeated
+rows are taken out of the character glyph before individual rows are concatenated into the long
+string of pixels.</p>
+<p>For elegance, we disallow a run count of zero.  The case of a null raster description should be
+gleaned from the character width and height being equal to zero, and no raster data should be read.
+No other zero counts are ever necessary.  Also, in the absence of repeat counts, the repeat value is
+set to be zero (only the original row is sent.)  If a repeat count is seen, it takes effect on the
+current row.  The current row is defined as the row on which the first pixel of the next run count
+will lie.  The repeat count is set back to zero when the last pixel in the current row is seen, and
+the row is sent out.</p>
+<p>This poses a problem for entirely black and entirely white rows, however.  Let us say that the
+current row ends with four white pixels, and then we have five entirely empty rows, followed by a
+black pixel at the beginning of the next row, and the character width is ten pixels.  We would like
+to use a repeat count, but there is no legal place to put it.  If we put it before the white run
+count, it will apply to the current row.  If we put it after, it applies to the row with the black
+pixel at the beginning.  Thus, entirely white or entirely black repeated rows are always packed as
+large run counts (in this case, a white run count of 54) rather than repeat counts.</p>
+<p>Now we turn our attention to the actual packing of the run counts and repeat counts into nybbles.
+There are only sixteen possible nybble values.  We need to indicate run counts and repeat counts.
+Since the run counts are much more common, we will devote the majority of the nybble values to them.
+We therefore indicate a repeat count by a nybble of 14 followed by a packed number, where a packed
+number will be explained later.  Since the repeat count value of one is so common, we indicate a
+repeat one command by a single nybble of 15.  A 14 followed by the packed number 1 is still legal
+for a repeat one count.  The run counts are coded directly as packed numbers.</p>
+<p>For packed numbers, therefore, we have the nybble values 0 through 13.  We need to represent the
+positive integers up to, say, 2**31 - 1.  We would like the more common smaller numbers to take only
+one or two nybbles, and the infrequent large numbers to take three or more.  We could therefore
+allocate one nybble value to indicate a large run count taking three or more nybbles.  We do this
+with the value 0.</p>
+<p>We are left with the values 1 through 13.  We can allocate some of these, say <tt class="docutils literal"><span class="pre">dyn_f</span></tt>, to be
+one-nybble run counts.  These will work for the run counts 1 .. <tt class="docutils literal"><span class="pre">dyn_f</span></tt>.  For subsequent run
+counts, we will use a nybble greater than <tt class="docutils literal"><span class="pre">dyn_f</span></tt>, followed by a second nybble, whose value can
+run from 0 through 15.  Thus, the two-nybble values will run from <tt class="docutils literal"><span class="pre">dyn_f</span> <span class="pre">+1</span> <span class="pre">..</span> <span class="pre">(13</span> <span class="pre">-</span> <span class="pre">dyn_f)</span> <span class="pre">*</span> <span class="pre">16</span> <span class="pre">+</span>
+<span class="pre">dyn_f</span></tt>.  We have our definition of large run count values now, being all counts greater than <tt class="docutils literal"><span class="pre">(13</span>
+<span class="pre">-</span> <span class="pre">dyn_f)</span> <span class="pre">*</span> <span class="pre">16</span> <span class="pre">+</span> <span class="pre">dyn_f</span></tt>.</p>
+<p>We can analyze our several dozen pixel files and determine an optimal value of <tt class="docutils literal"><span class="pre">dyn_f</span></tt>, and use
+this value for all of the characters.  Unfortunately, values of <tt class="docutils literal"><span class="pre">dyn_f</span></tt> that pack small characters
+well tend to pack the large characters poorly, and values that pack large characters well are not
+efficient for the smaller characters.  Thus, we choose the optimal <tt class="docutils literal"><span class="pre">dyn_f</span></tt> on a character basis,
+picking the value that will pack each individual character in the smallest number of nybbles.  Legal
+values of <tt class="docutils literal"><span class="pre">dyn_f</span></tt> run from 0 (with no one-nybble run counts) to 13 (with no two-nybble run
+counts).</p>
+<p>Our only remaining task in the coding of packed numbers is the large run counts.  We use a scheme
+suggested by D. E. Knuth that simply and elegantly represents arbitrarily large values. The general
+scheme to represent an integer <tt class="docutils literal"><span class="pre">i</span></tt> is to write its hexadecimal representation, with leading zeros
+removed.  Then we count the number of digits, and prepend one less than that many zeros before the
+hexadecimal representation.  Thus, the values from one to fifteen occupy one nybble; the values
+sixteen through 255 occupy three, the values 256 through 4095 require five, etc.</p>
+<p>For our purposes, however, we have already represented the numbers one through <tt class="docutils literal"><span class="pre">(13</span> <span class="pre">-</span> <span class="pre">dyn_f</span> <span class="pre">)</span> <span class="pre">*</span> <span class="pre">16</span>
+<span class="pre">+</span> <span class="pre">dyn_f</span> <span class="pre">``.</span>&nbsp; <span class="pre">In</span> <span class="pre">addition,</span> <span class="pre">the</span> <span class="pre">one-nybble</span> <span class="pre">values</span> <span class="pre">have</span> <span class="pre">already</span> <span class="pre">been</span> <span class="pre">taken</span> <span class="pre">by</span> <span class="pre">our</span> <span class="pre">other</span> <span class="pre">commands,</span> <span class="pre">which</span>
+<span class="pre">means</span> <span class="pre">that</span> <span class="pre">only</span> <span class="pre">the</span> <span class="pre">values</span> <span class="pre">from</span> <span class="pre">sixteen</span> <span class="pre">up</span> <span class="pre">are</span> <span class="pre">available</span> <span class="pre">to</span> <span class="pre">us</span> <span class="pre">for</span> <span class="pre">long</span> <span class="pre">run</span> <span class="pre">counts.</span>&nbsp; <span class="pre">Thus,</span> <span class="pre">we</span> <span class="pre">simply</span>
+<span class="pre">normalize</span> <span class="pre">our</span> <span class="pre">long</span> <span class="pre">run</span> <span class="pre">counts,</span> <span class="pre">by</span> <span class="pre">subtracting</span> <span class="pre">``(13</span> <span class="pre">-</span> <span class="pre">dyn_f</span> <span class="pre">)</span> <span class="pre">*</span> <span class="pre">16</span> <span class="pre">+</span> <span class="pre">dyn_f</span> <span class="pre">+1</span></tt> and adding 16, and
+then we represent the result according to the scheme above.</p>
+<p>The final algorithm for decoding the run counts based on the above scheme looks like this, assuming
+that a procedure called <tt class="docutils literal"><span class="pre">get_nyb</span></tt> is available to get the next nybble from the file, and assuming that
+the global repeat count indicates whether a row needs to be repeated.  Note that this routine is
+recursive, but since a repeat count can never directly follow another repeat count, it can only be
+recursive to one level:</p>
+<div class="highlight-python"><pre>function pk packed num: integer ;
+  var i; j: integer;
+  begin i &lt;- get nyb;
+    if i = 0 then
+      begin repeat j &lt;- get_nyb; incr(i);
+      until j != 0;
+      while i &gt; 0 do
+        begin j &lt;- j * 16 + get_nyb; decr(i);
+        end;
+      pk_packed_num &lt;- j - 15 + (13 - dyn_f ) * 16 + dyn_f;
+      end
+     else if i &lt;= dyn_f then pk_packed_num &lt;- i
+       else if i &lt; 14 then pk_packed_num &lt;- (i - dyn_f - 1) * 16 + get_nyb + dyn_f + 1
+         else begin if repeat count != 0 then abort('Second repeat count for this row!');
+           repeat_count &lt;- 1; { prevent recursion more than one level }
+           if i = 14 then repeat_count &lt;- pk_packed_num;
+           send_out(true, repeat count); pk_packed_num &lt;- pk_packed_num;
+           end;
+  end;</pre>
+</div>
+<p>For low resolution fonts, or characters with &#8220;gray&#8221; areas, run encoding can often make the character
+many times larger.  Therefore, for those characters that cannot be encoded efficiently with run
+counts, the PK format allows bit-mapping of the characters.  This is indicated by a <tt class="docutils literal"><span class="pre">dyn_f</span></tt> value
+of 14.  The bits are packed tightly, by concatenating all of the horizontal raster rows into one
+long string, and then packing this string eight bits to a byte.  The number of bytes required can be
+calculated by (<tt class="docutils literal"><span class="pre">width</span> <span class="pre">*</span> <span class="pre">height</span> <span class="pre">+</span> <span class="pre">7)</span> <span class="pre">div</span> <span class="pre">8</span></tt>.  This format should only be used when packing the
+character by run counts takes more bytes than this, although, of course, it is legal for any
+character.  Any extra bits in the last byte should be set to zero.</p>
+<p>At this point, we are ready to introduce the format for a character descriptor.  It consists of
+three parts: a flag byte, a character preamble, and the raster data.  The most significant four bits
+of the flag byte yield the <tt class="docutils literal"><span class="pre">dyn_f</span></tt> value for that character.  (Notice that only values of 0
+through 14 are legal for <tt class="docutils literal"><span class="pre">dyn_f</span></tt>, with 14 indicating a bit mapped character; thus, the flag bytes
+do not conflict with the command bytes, whose upper nybble is always 15.)  The next bit (with weight
+8) indicates whether the first run count is a black count or a white count, with a one indicating a
+black count.  For bit-mapped characters, this bit should be set to a zero.  The next bit (with
+weight 4) indicates whether certain later parameters (referred to as size parameters) are given in
+one-byte or two-byte quantities, with a one indicating that they are in two-byte quantities.  The
+last two bits are concatenated on to the beginning of the packet-length parameter in the character
+preamble, which will be explained below.</p>
+<p>However, if the last three bits of the flag byte are all set (normally indicating that the size
+parameters are two-byte values and that a 3 should be prepended to the length parameter), then a
+long format of the character preamble should be used instead of one of the short forms.</p>
+<p>Therefore, there are three formats for the character preamble; the one that is used depends on the
+least significant three bits of the flag byte.  If the least significant three bits are in the range
+zero through three, the short format is used.  If they are in the range four through six, the
+extended short format is used.  Otherwise, if the least significant bits are all set, then the long
+form of the character preamble is used.  The preamble formats are explained below.</p>
+<p>Short form: <tt class="docutils literal"><span class="pre">flag</span> <span class="pre">[1]</span> <span class="pre">pl</span> <span class="pre">[1]</span> <span class="pre">cc[1]</span> <span class="pre">tfm</span> <span class="pre">[3]</span> <span class="pre">dm[1]</span> <span class="pre">w[1]</span> <span class="pre">h[1]</span> <span class="pre">hoff</span> <span class="pre">[+1]</span> <span class="pre">voff</span> <span class="pre">[+1]</span></tt>. If this format of
+the character preamble is used, the above parameters must all fit in the indicated number of bytes,
+signed or unsigned as indicated.  Almost all of the standard TEX font characters fit; the few
+exceptions are fonts such as cminch.</p>
+<p>Extended short form: <tt class="docutils literal"><span class="pre">flag</span> <span class="pre">[1]</span> <span class="pre">pl</span> <span class="pre">[2]</span> <span class="pre">cc[1]</span> <span class="pre">tfm</span> <span class="pre">[3]</span> <span class="pre">dm[2]</span> <span class="pre">w[2]</span> <span class="pre">h[2]</span> <span class="pre">hoff</span> <span class="pre">[+2]</span> <span class="pre">voff</span> <span class="pre">[+2]</span></tt>. Larger
+characters use this extended format.</p>
+<p>Long form: <tt class="docutils literal"><span class="pre">flag</span> <span class="pre">[1]</span> <span class="pre">pl</span> <span class="pre">[4]</span> <span class="pre">cc[4]</span> <span class="pre">tfm</span> <span class="pre">[4]</span> <span class="pre">dx</span> <span class="pre">[4]</span> <span class="pre">dy</span> <span class="pre">[4]</span> <span class="pre">w[4]</span> <span class="pre">h[4]</span> <span class="pre">hoff</span> <span class="pre">[4]</span> <span class="pre">voff</span> <span class="pre">[4]</span></tt>. This is the
+general format that allows all of the parameters of the GF file format, including vertical
+escapement.</p>
+<p>The flag parameter is the flag byte.  The parameter <tt class="docutils literal"><span class="pre">pl</span></tt> (packet length) contains the offset of
+the byte following this character descriptor, with respect to the beginning of the tfm width
+parameter.  This is given so a PK reading program can, once it has read the flag byte, packet
+length, and character code (<tt class="docutils literal"><span class="pre">cc</span></tt>), skip over the character by simply reading this many more bytes.
+For the two short forms of the character preamble, the last two bits of the flag byte should be
+considered the two most-significant bits of the packet length.  For the short format, the true
+packet length might be calculated as <tt class="docutils literal"><span class="pre">(flag</span> <span class="pre">mod</span> <span class="pre">4)</span> <span class="pre">*</span> <span class="pre">256</span> <span class="pre">+</span> <span class="pre">pl</span></tt>; for the short extended format, it
+might be calculated as <tt class="docutils literal"><span class="pre">(flag</span> <span class="pre">mod</span> <span class="pre">4)</span> <span class="pre">*</span> <span class="pre">65536</span> <span class="pre">+</span> <span class="pre">pl</span></tt>.</p>
+<p>The <tt class="docutils literal"><span class="pre">w</span></tt> parameter is the width and the <tt class="docutils literal"><span class="pre">h</span></tt> parameter is the height in pixels of the minimum
+bounding box.  The <tt class="docutils literal"><span class="pre">dx</span></tt> and <tt class="docutils literal"><span class="pre">dy</span></tt> parameters are the horizontal and vertical escapements,
+respectively.  In the short formats, <tt class="docutils literal"><span class="pre">dy</span></tt> is assumed to be zero and <tt class="docutils literal"><span class="pre">dm</span></tt> is <tt class="docutils literal"><span class="pre">dx</span></tt> but in
+pixels; in the long format, <tt class="docutils literal"><span class="pre">dx</span></tt> and <tt class="docutils literal"><span class="pre">dy</span></tt> are both in pixels multiplied by 2**16. The <tt class="docutils literal"><span class="pre">hoff</span></tt>
+is the horizontal offset from the upper left pixel to the reference pixel; the <tt class="docutils literal"><span class="pre">voff</span></tt> is the
+vertical offset.  They are both given in pixels, with right and down being positive.  The reference
+pixel is the pixel that occupies the unit square in METAFONT; the METAFONT reference point is the
+lower left hand corner of this pixel.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dvi-format.html"
+                        title="previous chapter">1.1. Device-Independent File Format</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference-links.html"
+                        title="next chapter">1.3. Relevant Softwares</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/pk-format.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="reference-links.html" title="1.3. Relevant Softwares"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dvi-format.html" title="1.1. Device-Independent File Format"
+             >previous</a> |</li>
+        <li><a href="index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="reference-documentation.html" >1. Reference Documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

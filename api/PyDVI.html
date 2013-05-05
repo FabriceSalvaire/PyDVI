@@ -1,0 +1,150 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2. PyDVI &mdash; PyDVI 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../static/jquery.js"></script>
+    <script type="text/javascript" src="../static/underscore.js"></script>
+    <script type="text/javascript" src="../static/doctools.js"></script>
+    <link rel="top" title="PyDVI 0.1.0 documentation" href="../index.html" />
+    <link rel="next" title="2.1. DviMachine" href="PyDVI/DviMachine.html" />
+    <link rel="prev" title="1.3. Relevant Softwares" href="../reference-links.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="PyDVI/DviMachine.html" title="2.1. DviMachine"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../reference-links.html" title="1.3. Relevant Softwares"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="pydvi">
+<h1>2. <tt class="xref py py-mod docutils literal"><span class="pre">PyDVI</span></tt><a class="headerlink" href="#pydvi" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/DviMachine.html">2.1. <tt class="docutils literal"><span class="pre">DviMachine</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/DviParser.html">2.2. <tt class="docutils literal"><span class="pre">DviParser</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/Encoding.html">2.3. <tt class="docutils literal"><span class="pre">Encoding</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/Font.html">2.4. <tt class="docutils literal"><span class="pre">Font</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/FontManager.html">2.5. <tt class="docutils literal"><span class="pre">FontManager</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/FontMap.html">2.6. <tt class="docutils literal"><span class="pre">FontMap</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/Kpathsea.html">2.7. <tt class="docutils literal"><span class="pre">Kpathsea</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/OpcodeParser.html">2.8. <tt class="docutils literal"><span class="pre">OpcodeParser</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/PkFont.html">2.9. <tt class="docutils literal"><span class="pre">PkFont</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/PkFontParser.html">2.10. <tt class="docutils literal"><span class="pre">PkFontParser</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/PkGlyph.html">2.11. <tt class="docutils literal"><span class="pre">PkGlyph</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/PyDviVersion.html">2.12. <tt class="docutils literal"><span class="pre">PyDviVersion</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/TeXUnit.html">2.13. <tt class="docutils literal"><span class="pre">TeXUnit</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/TexDaemon.html">2.14. <tt class="docutils literal"><span class="pre">TexDaemon</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/Tfm.html">2.15. <tt class="docutils literal"><span class="pre">Tfm</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/TfmParser.html">2.16. <tt class="docutils literal"><span class="pre">TfmParser</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/Tools.html">2.17. <tt class="docutils literal"><span class="pre">Tools</span></tt></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="PyDVI/Tools/DaemonSubprocess.html">2.17.1. <tt class="docutils literal"><span class="pre">DaemonSubprocess</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="PyDVI/Tools/EnumFactory.html">2.17.2. <tt class="docutils literal"><span class="pre">EnumFactory</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="PyDVI/Tools/FuncTools.html">2.17.3. <tt class="docutils literal"><span class="pre">FuncTools</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="PyDVI/Tools/Interval.html">2.17.4. <tt class="docutils literal"><span class="pre">Interval</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="PyDVI/Tools/Logging.html">2.17.5. <tt class="docutils literal"><span class="pre">Logging</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="PyDVI/Tools/RevisionVersion.html">2.17.6. <tt class="docutils literal"><span class="pre">RevisionVersion</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="PyDVI/Tools/Stream.html">2.17.7. <tt class="docutils literal"><span class="pre">Stream</span></tt></a></li>
+<li class="toctree-l2"><a class="reference internal" href="PyDVI/Tools/TexCommentedFile.html">2.17.8. <tt class="docutils literal"><span class="pre">TexCommentedFile</span></tt></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="PyDVI/Type1Font.html">2.18. <tt class="docutils literal"><span class="pre">Type1Font</span></tt></a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../reference-links.html"
+                        title="previous chapter">1.3. Relevant Softwares</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="PyDVI/DviMachine.html"
+                        title="next chapter">2.1. <tt class="docutils literal"><span class="pre">DviMachine</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/PyDVI.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="PyDVI/DviMachine.html" title="2.1. DviMachine"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../reference-links.html" title="1.3. Relevant Softwares"
+             >previous</a> |</li>
+        <li><a href="../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

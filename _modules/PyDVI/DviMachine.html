@@ -1,0 +1,1379 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDVI.DviMachine &mdash; PyDVI 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="PyDVI 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDVI.DviMachine</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># PyDVI - A Python Library to Process DVI Stream.</span>
+<span class="c"># Copyright (C) 2009 Salvaire Fabrice</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># Audit</span>
+<span class="c">#</span>
+<span class="c"># - 17/12/2011 fabrice</span>
+<span class="c">#   - __init__</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Opcode_set_char&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_put_char&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_set_rule&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_put_rule&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_push&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_pop&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_push_colour&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_pop_colour&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_right&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_w0&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_w&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_x0&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_x&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_down&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_y0&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_y&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_z0&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_z&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_font&#39;</span><span class="p">,</span>
+           <span class="s">&#39;Opcode_xxx&#39;</span><span class="p">,</span>
+           <span class="s">&#39;DviFont&#39;</span><span class="p">,</span>
+           <span class="s">&#39;DviColorBlack&#39;</span><span class="p">,</span>
+           <span class="s">&#39;DviColorGray&#39;</span><span class="p">,</span>
+           <span class="s">&#39;DviColorRGB&#39;</span><span class="p">,</span>
+           <span class="s">&#39;DviColorCMYK&#39;</span><span class="p">,</span>
+           <span class="s">&#39;DviProgam&#39;</span><span class="p">,</span>
+           <span class="s">&#39;DviProgramPage&#39;</span><span class="p">,</span>
+           <span class="s">&#39;DviMachine&#39;</span><span class="p">,</span>
+           <span class="s">&#39;DviSimplifyMachine&#39;</span><span class="p">,</span>
+           <span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">fractions</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">PyDVI.TeXUnit</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">PyDVI.Tools.EnumFactory</span> <span class="kn">import</span> <span class="n">EnumFactory</span>
+<span class="kn">from</span> <span class="nn">PyDVI.Tools.Interval</span> <span class="kn">import</span> <span class="n">Interval2D</span>
+<span class="kn">from</span> <span class="nn">PyDVI.Tools.Logging</span> <span class="kn">import</span> <span class="n">print_card</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="c">#: Defines Paper Orientation</span>
+<span class="n">paper_orientation_enum</span> <span class="o">=</span> <span class="n">EnumFactory</span><span class="p">(</span><span class="s">&#39;PaperOrientation&#39;</span><span class="p">,</span>
+                                     <span class="p">(</span><span class="s">&#39;portrait&#39;</span><span class="p">,</span> <span class="s">&#39;landscape&#39;</span><span class="p">))</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="k">class</span> <span class="nc">Opcode</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="k">pass</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="k">class</span> <span class="nc">OpcodeX</span><span class="p">(</span><span class="n">Opcode</span><span class="p">):</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="k">class</span> <span class="nc">Opcode_putset_char</span><span class="p">(</span><span class="n">Opcode</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``set_char`` and &#39;&#39;put_char`` opcodes. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">char_code</span><span class="p">,</span> <span class="n">set_char</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">characters</span> <span class="o">=</span> <span class="p">[</span><span class="n">char_code</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_char</span> <span class="o">=</span> <span class="n">set_char</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> char &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opcode_name</span><span class="p">,</span>
+                                 <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">chr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">characters</span><span class="p">]))</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">char_code</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Append the char code. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">characters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char_code</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">registers</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">registers</span>
+        <span class="n">current_font</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">current_font</span>
+        <span class="n">dvi_font</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">current_dvi_font</span>
+
+        <span class="n">bounding_box</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="n">char_code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">characters</span><span class="p">:</span>
+            <span class="n">tfm_char</span> <span class="o">=</span> <span class="n">current_font</span><span class="o">.</span><span class="n">tfm</span><span class="p">[</span><span class="n">char_code</span><span class="p">]</span>
+            <span class="n">char_width</span>  <span class="o">=</span> <span class="n">dvi_font</span><span class="o">.</span><span class="n">char_scaled_width</span><span class="p">(</span><span class="n">tfm_char</span><span class="p">)</span>
+            <span class="n">char_depth</span>  <span class="o">=</span> <span class="n">dvi_font</span><span class="o">.</span><span class="n">char_scaled_depth</span><span class="p">(</span><span class="n">tfm_char</span><span class="p">)</span>
+            <span class="n">char_height</span> <span class="o">=</span> <span class="n">dvi_font</span><span class="o">.</span><span class="n">char_scaled_height</span><span class="p">(</span><span class="n">tfm_char</span><span class="p">)</span>
+            
+            <span class="n">char_bounding_box</span> <span class="o">=</span> <span class="n">Interval2D</span><span class="p">([</span><span class="n">registers</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">registers</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="n">char_width</span><span class="p">],</span>
+                                           <span class="p">[</span><span class="n">registers</span><span class="o">.</span><span class="n">v</span> <span class="o">-</span> <span class="n">char_height</span><span class="p">,</span> <span class="n">registers</span><span class="o">.</span><span class="n">v</span> <span class="o">+</span> <span class="n">char_depth</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">compute_bounding_box</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&#39;Char bounding box&#39;</span><span class="p">,</span> <span class="n">char_bounding_box</span>
+                <span class="k">if</span> <span class="n">bounding_box</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">bounding_box</span> <span class="o">=</span> <span class="n">char_bounding_box</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">bounding_box</span> <span class="o">|=</span> <span class="n">char_bounding_box</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dvi_machine</span><span class="o">.</span><span class="n">paint_char</span><span class="p">(</span><span class="n">registers</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">registers</span><span class="o">.</span><span class="n">v</span><span class="p">,</span>
+                                       <span class="n">char_bounding_box</span><span class="p">,</span>
+                                       <span class="n">current_font</span><span class="p">,</span>
+                                       <span class="n">char_code</span><span class="p">,</span>
+                                       <span class="n">dvi_font</span><span class="o">.</span><span class="n">magnification</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_char</span><span class="p">:</span>
+                <span class="n">registers</span><span class="o">.</span><span class="n">h</span> <span class="o">+=</span> <span class="n">char_width</span>
+
+            <span class="k">print</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> char </span><span class="si">%3u</span><span class="s"> &quot;</span><span class="si">%s</span><span class="s">&quot; width </span><span class="si">%8u</span><span class="s"> h </span><span class="si">%10u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opcode_name</span><span class="p">,</span>
+                                                         <span class="n">char_code</span><span class="p">,</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_code</span><span class="p">),</span>
+                                                         <span class="n">char_width</span><span class="p">,</span> <span class="n">registers</span><span class="o">.</span><span class="n">h</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="n">compute_bounding_box</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">bounding_box</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="Opcode_set_char"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_set_char">[docs]</a><span class="k">class</span> <span class="nc">Opcode_set_char</span><span class="p">(</span><span class="n">Opcode_putset_char</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``set_char`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">char_code</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Opcode_set_char</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">char_code</span><span class="p">,</span> <span class="n">set_char</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">opcode_name</span> <span class="o">=</span> <span class="s">&#39;set&#39;</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="Opcode_put_char"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_put_char">[docs]</a><span class="k">class</span> <span class="nc">Opcode_put_char</span><span class="p">(</span><span class="n">Opcode_putset_char</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``put_char`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">char_code</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Opcode_put_char</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">char_code</span><span class="p">,</span> <span class="n">set_char</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">opcode_name</span> <span class="o">=</span> <span class="s">&#39;put&#39;</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<span class="k">class</span> <span class="nc">Opcode_putset_rule</span><span class="p">(</span><span class="n">Opcode</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``set_rule`` and ``put_rule`` opcodes. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">set_rule</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_rule</span> <span class="o">=</span> <span class="n">set_rule</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">registers</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">registers</span>
+
+        <span class="k">if</span> <span class="n">compute_bounding_box</span><span class="p">:</span>
+            <span class="c"># Fixme: check</span>
+            <span class="n">bounding_box</span> <span class="o">=</span> <span class="n">Interval2D</span><span class="p">([</span><span class="n">registers</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">registers</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">],</span>
+                                      <span class="p">[</span><span class="n">registers</span><span class="o">.</span><span class="n">v</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">registers</span><span class="o">.</span><span class="n">v</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dvi_machine</span><span class="o">.</span><span class="n">paint_rule</span><span class="p">(</span><span class="n">registers</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">registers</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_rule</span><span class="p">:</span>
+            <span class="n">registers</span><span class="o">.</span><span class="n">h</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span>
+
+        <span class="k">if</span> <span class="n">compute_bounding_box</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">bounding_box</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="Opcode_set_rule"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_set_rule">[docs]</a><span class="k">class</span> <span class="nc">Opcode_set_rule</span><span class="p">(</span><span class="n">Opcode_putset_rule</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``set_rule`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Opcode_set_rule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">set_rule</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;set rule height </span><span class="si">%u</span><span class="s"> width </span><span class="si">%u</span><span class="s">, h += width&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="Opcode_put_rule"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_put_rule">[docs]</a><span class="k">class</span> <span class="nc">Opcode_put_rule</span><span class="p">(</span><span class="n">Opcode_putset_rule</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``put_rule`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Opcode_put_rule</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">set_rule</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="k">return</span> <span class="s">&#39;put rule height </span><span class="si">%u</span><span class="s"> width </span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="Opcode_push"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_push">[docs]</a><span class="k">class</span> <span class="nc">Opcode_push</span><span class="p">(</span><span class="n">Opcode</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``push`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;push register&#39;</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_push.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_push.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">dvi_machine</span><span class="o">.</span><span class="n">push_registers</span><span class="p">()</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Opcode_pop"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_pop">[docs]</a><span class="k">class</span> <span class="nc">Opcode_pop</span><span class="p">(</span><span class="n">Opcode</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``pop`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;pop register *</span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_pop.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_pop.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">dvi_machine</span><span class="o">.</span><span class="n">pop_registers</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Opcode_push_colour"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_push_colour">[docs]</a><span class="k">class</span> <span class="nc">Opcode_push_colour</span><span class="p">(</span><span class="n">Opcode</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``push_colour`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">colour</span> <span class="o">=</span> <span class="n">colour</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;push colour&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">colour</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_push_colour.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_push_colour.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">dvi_machine</span><span class="o">.</span><span class="n">push_colour</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">colour</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Opcode_pop_colour"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_pop_colour">[docs]</a><span class="k">class</span> <span class="nc">Opcode_pop_colour</span><span class="p">(</span><span class="n">Opcode</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``pop_colour`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">n</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;pop colour *</span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_pop_colour.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_pop_colour.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">dvi_machine</span><span class="o">.</span><span class="n">pop_colour</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Opcode_right"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_right">[docs]</a><span class="k">class</span> <span class="nc">Opcode_right</span><span class="p">(</span><span class="n">OpcodeX</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``right`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># Fixme: -&gt; function</span>
+
+        <span class="k">return</span> <span class="s">&#39;h += </span><span class="si">%+u</span><span class="s"> sp </span><span class="si">%+.2f</span><span class="s"> mm&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_right.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_right.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">registers</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">registers</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">h</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Opcode_w0"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_w0">[docs]</a><span class="k">class</span> <span class="nc">Opcode_w0</span><span class="p">(</span><span class="n">Opcode</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``w0`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;h += w&#39;</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_w0.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_w0.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">registers</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">registers</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">h</span> <span class="o">+=</span> <span class="n">registers</span><span class="o">.</span><span class="n">w</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Opcode_w"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_w">[docs]</a><span class="k">class</span> <span class="nc">Opcode_w</span><span class="p">(</span><span class="n">OpcodeX</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``w`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;w = </span><span class="si">%+u</span><span class="s"> sp </span><span class="si">%+.2f</span><span class="s"> mm, h += w&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_w.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_w.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">registers</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">registers</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">w</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">h</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Opcode_x0"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_x0">[docs]</a><span class="k">class</span> <span class="nc">Opcode_x0</span><span class="p">(</span><span class="n">Opcode</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``x0`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;h += x&#39;</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_x0.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_x0.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">registers</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">registers</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">h</span> <span class="o">+=</span> <span class="n">registers</span><span class="o">.</span><span class="n">x</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Opcode_x"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_x">[docs]</a><span class="k">class</span> <span class="nc">Opcode_x</span><span class="p">(</span><span class="n">OpcodeX</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``x`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;x = </span><span class="si">%+u</span><span class="s"> sp </span><span class="si">%+.2f</span><span class="s"> mm, h += x&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_x.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_x.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">registers</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">registers</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">x</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">h</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Opcode_down"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_down">[docs]</a><span class="k">class</span> <span class="nc">Opcode_down</span><span class="p">(</span><span class="n">OpcodeX</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``down`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;v += </span><span class="si">%+u</span><span class="s"> sp </span><span class="si">%+.2f</span><span class="s"> mm&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_down.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_down.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">registers</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">registers</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">v</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Opcode_y0"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_y0">[docs]</a><span class="k">class</span> <span class="nc">Opcode_y0</span><span class="p">(</span><span class="n">Opcode</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``y0`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;v += y&#39;</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_y0.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_y0.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">registers</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">registers</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">v</span> <span class="o">+=</span> <span class="n">registers</span><span class="o">.</span><span class="n">y</span>
+
+<span class="c">####################################################################################################</span>
+ </div></div>
+<div class="viewcode-block" id="Opcode_y"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_y">[docs]</a><span class="k">class</span> <span class="nc">Opcode_y</span><span class="p">(</span><span class="n">OpcodeX</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``y`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;y = </span><span class="si">%+u</span><span class="s"> sp </span><span class="si">%+.2f</span><span class="s"> mm, v += y&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_y.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_y.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">registers</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">registers</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">y</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">v</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Opcode_z0"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_z0">[docs]</a><span class="k">class</span> <span class="nc">Opcode_z0</span><span class="p">(</span><span class="n">Opcode</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``z0`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;v += z&#39;</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_z0.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_z0.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">registers</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">registers</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">v</span> <span class="o">+=</span> <span class="n">registers</span><span class="o">.</span><span class="n">z</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Opcode_z"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_z">[docs]</a><span class="k">class</span> <span class="nc">Opcode_z</span><span class="p">(</span><span class="n">OpcodeX</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``z`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;z = </span><span class="si">%+u</span><span class="s"> sp </span><span class="si">%+.2f</span><span class="s"> mm, v += z&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_z.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_z.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">registers</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">registers</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">z</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">v</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Opcode_font"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_font">[docs]</a><span class="k">class</span> <span class="nc">Opcode_font</span><span class="p">(</span><span class="n">Opcode</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``font`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_id</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">font_id</span> <span class="o">=</span> <span class="n">font_id</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;font </span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">font_id</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Opcode_font.run"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_font.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="n">dvi_machine</span><span class="o">.</span><span class="n">current_font_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_id</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Opcode_xxx"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.Opcode_xxx">[docs]</a><span class="k">class</span> <span class="nc">Opcode_xxx</span><span class="p">(</span><span class="n">Opcode</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the ``xxx`` opcode. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;xxx [</span><span class="si">%s</span><span class="s">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="DviFont"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviFont">[docs]</a><span class="k">class</span> <span class="nc">DviFont</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements a DVI Font. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_id</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">checksum</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">,</span> <span class="n">design_size</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">font_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checksum</span> <span class="o">=</span> <span class="n">checksum</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale_factor</span> <span class="o">=</span> <span class="n">scale_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design_size</span> <span class="o">=</span> <span class="n">design_size</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">magnification</span> <span class="o">=</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="n">scale_factor</span><span class="p">,</span> <span class="n">design_size</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">string_format</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;Font ID </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - Name          </span><span class="si">%s</span><span class="s"></span>
+<span class="s"> - Checksum      </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - Design size   </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - Scale factor  </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - Magnification </span><span class="si">%u</span><span class="s"> </span><span class="si">%%</span><span class="s"></span>
+<span class="s">&#39;&#39;&#39;</span>
+        
+        <span class="k">return</span> <span class="n">string_format</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scale_factor</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">design_size</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">magnification</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="DviFont.char_scaled_width"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviFont.char_scaled_width">[docs]</a>    <span class="k">def</span> <span class="nf">char_scaled_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tfm_char</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the scale width for the :class:`PyDVI.TfmChar` instance. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">tfm_char</span><span class="o">.</span><span class="n">scaled_width</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_factor</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviFont.char_scaled_height"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviFont.char_scaled_height">[docs]</a>    <span class="k">def</span> <span class="nf">char_scaled_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tfm_char</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the scale height for the :class:`PyDVI.TfmChar` instance. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">tfm_char</span><span class="o">.</span><span class="n">scaled_height</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_factor</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviFont.char_scaled_depth"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviFont.char_scaled_depth">[docs]</a>    <span class="k">def</span> <span class="nf">char_scaled_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tfm_char</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the scale depth for the :class:`PyDVI.TfmChar` instance. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">tfm_char</span><span class="o">.</span><span class="n">scaled_depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale_factor</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<span class="k">class</span> <span class="nc">DviColor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">pass</span>
+ 
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="DviColorBlack"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviColorBlack">[docs]</a><span class="k">class</span> <span class="nc">DviColorBlack</span><span class="p">(</span><span class="n">DviColor</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements the black colour. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;Colour Black&#39;</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="DviColorGray"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviColorGray">[docs]</a><span class="k">class</span> <span class="nc">DviColorGray</span><span class="p">(</span><span class="n">DviColor</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements gray colour. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gray_level</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">gray_level</span> <span class="o">=</span> <span class="n">gray_level</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;Colour Gray </span><span class="si">%.1f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gray_level</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="DviColorRGB"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviColorRGB">[docs]</a><span class="k">class</span> <span class="nc">DviColorRGB</span><span class="p">(</span><span class="n">DviColor</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements RGB colour. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">red</span><span class="p">,</span> <span class="n">green</span><span class="p">,</span> <span class="n">blue</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">red</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">green</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blue</span> <span class="o">=</span> <span class="n">red</span><span class="p">,</span> <span class="n">green</span><span class="p">,</span> <span class="n">blue</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;Colour RGB (</span><span class="si">%.1f</span><span class="s">, </span><span class="si">%.1f</span><span class="s">, </span><span class="si">%.1f</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">red</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">green</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blue</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="DviColorCMYK"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviColorCMYK">[docs]</a><span class="k">class</span> <span class="nc">DviColorCMYK</span><span class="p">(</span><span class="n">DviColor</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements CMYK colour. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cyan</span><span class="p">,</span> <span class="n">magenta</span><span class="p">,</span> <span class="n">yellow</span><span class="p">,</span> <span class="n">dark</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cyan</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">magenta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yellow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dark</span> <span class="o">=</span> <span class="n">cyan</span><span class="p">,</span> <span class="n">magenta</span><span class="p">,</span> <span class="n">yellow</span><span class="p">,</span> <span class="n">dark</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;Colour CMYK (</span><span class="si">%.1f</span><span class="s">, </span><span class="si">%.1f</span><span class="s">, </span><span class="si">%.1f</span><span class="s">, </span><span class="si">%.1f</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cyan</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">magenta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yellow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dark</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="DviProgramPage"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviProgramPage">[docs]</a><span class="k">class</span> <span class="nc">DviProgramPage</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class defines a page. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">page_number</span><span class="p">,</span>
+                 <span class="n">height</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">paper_orientation</span><span class="o">=</span><span class="n">paper_orientation_enum</span><span class="o">.</span><span class="n">portrait</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">page_number</span> <span class="o">=</span> <span class="n">page_number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_paper_size</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paper_orientation</span> <span class="o">=</span> <span class="n">paper_orientation</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="DviProgramPage.set_paper_size"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviProgramPage.set_paper_size">[docs]</a>    <span class="k">def</span> <span class="nf">set_paper_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Set the paper size. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">height</span><span class="p">,</span> <span class="n">width</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviProgramPage.print_program"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviProgramPage.print_program">[docs]</a>    <span class="k">def</span> <span class="nf">print_program</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Print the program. &quot;&quot;&quot;</span>
+
+        <span class="n">string_format</span> <span class="o">=</span> \
+<span class="sd">&#39;&#39;&#39;Page Program</span>
+<span class="sd"> - Paper Size: height = %.3f pt width = %.3f pt</span>
+<span class="sd"> - Paper Orientation: %s</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+        <span class="n">message</span> <span class="o">=</span> <span class="n">string_format</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">paper_orientation</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">print</span> <span class="n">message</span>
+        <span class="k">for</span> <span class="n">opcode</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">opcode</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="DviProgam"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviProgam">[docs]</a><span class="k">class</span> <span class="nc">DviProgam</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements a DVI program. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span> <span class="o">=</span> <span class="p">{}</span> <span class="c"># dict of DviFont</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pages</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c"># Fixme: default parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_width</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack_depth</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_pages</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">for</span> <span class="n">opcode_program</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">opcode_program</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="DviProgam.dvi_font_iterator"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviProgam.dvi_font_iterator">[docs]</a>    <span class="k">def</span> <span class="nf">dvi_font_iterator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviProgam.set_preambule_data"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviProgam.set_preambule_data">[docs]</a>    <span class="k">def</span> <span class="nf">set_preambule_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                           <span class="n">comment</span><span class="p">,</span>
+                           <span class="n">dvi_format</span><span class="p">,</span>
+                           <span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span><span class="p">,</span> <span class="n">magnification</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Set the preambule data. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dvi_format</span> <span class="o">=</span> <span class="n">dvi_format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numerator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">denominator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">magnification</span> <span class="o">=</span> <span class="n">numerator</span><span class="p">,</span> <span class="n">denominator</span><span class="p">,</span> <span class="n">magnification</span>
+
+        <span class="c"># Fixme: use it to convert</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dvi_unit</span> <span class="o">=</span> <span class="n">fractions</span><span class="o">.</span><span class="n">Fraction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">magnification</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerator</span><span class="p">,</span>
+                                           <span class="mi">1000</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">denominator</span><span class="p">)</span> <span class="c"># 1e-7 m</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviProgam.set_postambule_data"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviProgam.set_postambule_data">[docs]</a>    <span class="k">def</span> <span class="nf">set_postambule_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                            <span class="n">max_height</span><span class="p">,</span> <span class="n">max_width</span><span class="p">,</span>
+                            <span class="n">stack_depth</span><span class="p">,</span>
+                            <span class="n">number_of_pages</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Set the postamble data. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_width</span> <span class="o">=</span> <span class="n">max_height</span><span class="p">,</span> <span class="n">max_width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stack_depth</span> <span class="o">=</span> <span class="n">stack_depth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_pages</span> <span class="o">=</span> <span class="n">number_of_pages</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_pages</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DviProgramPage</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviProgam.append_page"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviProgam.append_page">[docs]</a>    <span class="k">def</span> <span class="nf">append_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DviProgramPage</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+        </div>
+<div class="viewcode-block" id="DviProgam.register_font"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviProgam.register_font">[docs]</a>    <span class="k">def</span> <span class="nf">register_font</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Register a :class:`DviFont` instance. &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">font</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span><span class="p">[</span><span class="n">font</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">font</span>
+        <span class="c"># else:</span>
+        <span class="c">#     print &#39;Font ID %u already registered&#39; % (font.id)</span>
+            
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviProgam.get_font"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviProgam.get_font">[docs]</a>    <span class="k">def</span> <span class="nf">get_font</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviProgam.get_page"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviProgam.get_page">[docs]</a>    <span class="k">def</span> <span class="nf">get_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pages</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviProgam.print_summary"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviProgam.print_summary">[docs]</a>    <span class="k">def</span> <span class="nf">print_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">string_format</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;DVI Program</span>
+
+<span class="s">Preambule</span>
+<span class="s">  - Comment       &#39;</span><span class="si">%s</span><span class="s">&#39;</span>
+<span class="s">  - DVI format    </span><span class="si">%u</span><span class="s"></span>
+<span class="s">  - Numerator     </span><span class="si">%u</span><span class="s"></span>
+<span class="s">  - Denominator   </span><span class="si">%u</span><span class="s"></span>
+<span class="s">  - Magnification </span><span class="si">%u</span><span class="s"></span>
+<span class="s">  - DVI unit      </span><span class="si">%.1f</span><span class="s"> nm</span>
+
+<span class="s">Postamble</span>
+<span class="s">  - Number of Pages </span><span class="si">%u</span><span class="s"></span>
+<span class="s">  - Stack Depth     </span><span class="si">%u</span><span class="s"></span>
+<span class="s">  - Max Height      </span><span class="si">%u</span><span class="s"> sp </span><span class="si">%.1f</span><span class="s"> mm</span>
+<span class="s">  - Max Width       </span><span class="si">%u</span><span class="s"> sp </span><span class="si">%.1f</span><span class="s"> mm</span>
+<span class="s">&#39;&#39;&#39;</span>
+
+        <span class="k">print</span> <span class="n">string_format</span>  <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comment</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dvi_format</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">numerator</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">denominator</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">magnification</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dvi_unit</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_pages</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stack_depth</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_height</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_height</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_width</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_width</span><span class="p">),</span>
+       <span class="p">)</span>
+        
+        <span class="k">print</span> <span class="s">&#39;List of fonts:&#39;</span>
+        <span class="k">for</span> <span class="n">font</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dvi_font_iterator</span><span class="p">():</span>
+            <span class="k">print</span> <span class="n">font</span>
+
+        <span class="c"># for i in xrange(self.number_of_pages):</span>
+        <span class="c">#     print &#39;\nPage&#39;, i</span>
+        <span class="c">#     self.pages[i].print_program()</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<span class="n">one_in_sp</span> <span class="o">=</span> <span class="n">in2sp</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">DviMachineRegisters</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements a set of registers. &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">one_in_sp</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">one_in_sp</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">h</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="n">string_format</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">(h=+</span><span class="si">%10u</span><span class="s"> sp </span><span class="si">%+10.2f</span><span class="s"> mm v=+</span><span class="si">%10u</span><span class="s"> sp </span><span class="si">%+10.2f</span><span class="s"> mm</span>
+<span class="s"> w=+</span><span class="si">%10u</span><span class="s"> sp </span><span class="si">%+10.2f</span><span class="s"> mm x=+</span><span class="si">%10u</span><span class="s"> sp </span><span class="si">%+10.2f</span><span class="s"> mm</span>
+<span class="s"> y=+</span><span class="si">%10u</span><span class="s"> sp </span><span class="si">%+10.2f</span><span class="s"> mm z=+</span><span class="si">%10u</span><span class="s"> sp </span><span class="si">%+10.2f</span><span class="s"> mm)</span>
+<span class="s">&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">string_format</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">),</span>
+            <span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Clone the set of registers. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">DviMachineRegisters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="DviMachine"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine">[docs]</a><span class="k">class</span> <span class="nc">DviMachine</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements a DVI Machine. &quot;&quot;&quot;</span>
+    
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_manager</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">font_manager</span> <span class="o">=</span> <span class="n">font_manager</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="DviMachine.reset"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Reset the machine. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_font_id</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">registers_stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">DviMachineRegisters</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colour_stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">DviColorBlack</span><span class="p">()]</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviMachine._get_registers"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine._get_registers">[docs]</a>    <span class="k">def</span> <span class="nf">_get_registers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the current register set. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">registers_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</div>
+    <span class="n">registers</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_registers</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;Register set&#39;</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="DviMachine.push_registers"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine.push_registers">[docs]</a>    <span class="k">def</span> <span class="nf">push_registers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Push the register set. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">registers_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">registers</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviMachine.pop_registers"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine.pop_registers">[docs]</a>    <span class="k">def</span> <span class="nf">pop_registers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Pop *n* level in the register set stack. &quot;&quot;&quot;</span>
+
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">registers_stack</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviMachine.push_colour"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine.push_colour">[docs]</a>    <span class="k">def</span> <span class="nf">push_colour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Push the current colour. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">colour_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colour</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviMachine.pop_colour"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine.pop_colour">[docs]</a>    <span class="k">def</span> <span class="nf">pop_colour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Pop *n* level in the colour stack. &quot;&quot;&quot;</span>
+
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">registers_stack</span><span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviMachine._get_current_font"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine._get_current_font">[docs]</a>    <span class="k">def</span> <span class="nf">_get_current_font</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the current font. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_font_id</span><span class="p">]</span>
+</div>
+    <span class="n">current_font</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_current_font</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;Current font&#39;</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="DviMachine._get_current_dvi_font"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine._get_current_dvi_font">[docs]</a>    <span class="k">def</span> <span class="nf">_get_current_dvi_font</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the current dvi font. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span><span class="o">.</span><span class="n">get_font</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_font_id</span><span class="p">)</span>
+</div>
+    <span class="n">current_dvi_font</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_current_dvi_font</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;Current dvi font&#39;</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="DviMachine.load_dvi_program"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine.load_dvi_program">[docs]</a>    <span class="k">def</span> <span class="nf">load_dvi_program</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_program</span><span class="p">,</span> <span class="n">load_fonts</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Load a :class:`DviProgam` instance. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span> <span class="o">=</span> <span class="n">dvi_program</span>
+
+        <span class="k">if</span> <span class="n">load_fonts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_dvi_fonts</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviMachine._load_dvi_fonts"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine._load_dvi_fonts">[docs]</a>    <span class="k">def</span> <span class="nf">_load_dvi_fonts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Load the fonts used by the DVI program. &quot;&quot;&quot;</span>
+
+        <span class="c"># Load the Fonts</span>
+        <span class="k">for</span> <span class="n">dvi_font</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span><span class="o">.</span><span class="n">dvi_font_iterator</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span><span class="p">[</span><span class="n">dvi_font</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_manager</span><span class="p">[</span><span class="n">dvi_font</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviMachine.simplify_dvi_program"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine.simplify_dvi_program">[docs]</a>    <span class="k">def</span> <span class="nf">simplify_dvi_program</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Simplify the DVI program. &quot;&quot;&quot;</span>
+
+        <span class="n">dvi_simplify_machine</span> <span class="o">=</span> <span class="n">DviSimplifyMachine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">font_manager</span><span class="p">)</span>
+        <span class="n">dvi_simplify_machine</span><span class="o">.</span><span class="n">load_dvi_program</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span><span class="p">,</span> <span class="n">load_fonts</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">dvi_simplify_machine</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviMachine.run_page"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine.run_page">[docs]</a>    <span class="k">def</span> <span class="nf">run_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">page</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+        <span class="n">opcode_program</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span><span class="o">.</span><span class="n">get_page</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+
+        <span class="k">print</span> <span class="s">&#39;Program Length:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">opcode_program</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">opcode</span> <span class="ow">in</span> <span class="n">opcode_program</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">opcode</span>
+            <span class="n">opcode</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">&#39;level </span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">registers_stack</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">registers</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviMachine.compute_page_bounding_box"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine.compute_page_bounding_box">[docs]</a>    <span class="k">def</span> <span class="nf">compute_page_bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">page</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+        <span class="n">opcode_program</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span><span class="o">.</span><span class="n">get_page</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+
+        <span class="n">bounding_box</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="n">opcode</span> <span class="ow">in</span> <span class="n">opcode_program</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">opcode</span>
+            <span class="n">opcode_bounding_box</span> <span class="o">=</span> <span class="n">opcode</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">&#39;Register Stack level </span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">registers_stack</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">registers</span>
+            <span class="k">if</span> <span class="n">opcode_bounding_box</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&#39;Opcode bounding box&#39;</span><span class="p">,</span> <span class="n">opcode_bounding_box</span>
+                <span class="k">if</span> <span class="n">bounding_box</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">bounding_box</span> <span class="o">=</span> <span class="n">opcode_bounding_box</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">bounding_box</span> <span class="o">|=</span> <span class="n">opcode_bounding_box</span>
+                <span class="k">print</span> <span class="s">&#39;Current page bounding box&#39;</span><span class="p">,</span> <span class="n">bounding_box</span>
+
+        <span class="k">print</span> <span class="s">&#39;Page bounding box</span><span class="se">\n</span><span class="s"> &#39;</span><span class="p">,</span> <span class="n">bounding_box</span><span class="p">,</span> <span class="s">&#39;sp&#39;</span>
+        <span class="p">(</span><span class="n">x_min_mm</span><span class="p">,</span> <span class="n">x_max_mm</span><span class="p">,</span>
+         <span class="n">y_min_mm</span><span class="p">,</span> <span class="n">y_max_mm</span><span class="p">)</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp2mm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">bounding_box</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">bounding_box</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">sup</span><span class="p">,</span>
+                                                   <span class="n">bounding_box</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">bounding_box</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">sup</span><span class="p">)]</span>
+        <span class="k">print</span> <span class="s">&#39;  [</span><span class="si">%.2f</span><span class="s">, </span><span class="si">%.2f</span><span class="s">]*[</span><span class="si">%.2f</span><span class="s">, </span><span class="si">%.2f</span><span class="s">] mm&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x_min_mm</span><span class="p">,</span> <span class="n">x_max_mm</span><span class="p">,</span> <span class="n">y_min_mm</span><span class="p">,</span> <span class="n">y_max_mm</span><span class="p">)</span> 
+
+        <span class="k">return</span> <span class="n">bounding_box</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviMachine.paint_rule"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine.paint_rule">[docs]</a>    <span class="k">def</span> <span class="nf">paint_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+
+        <span class="k">pass</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviMachine.paint_char"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviMachine.paint_char">[docs]</a>    <span class="k">def</span> <span class="nf">paint_char</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">char_bounding_box</span><span class="p">,</span> <span class="n">font</span><span class="p">,</span> <span class="n">char_code</span><span class="p">,</span> <span class="n">magnification</span><span class="p">):</span> <span class="c">#!# , glyph</span>
+
+        <span class="k">pass</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="DviSimplifyMachine"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviSimplifyMachine">[docs]</a><span class="k">class</span> <span class="nc">DviSimplifyMachine</span><span class="p">(</span><span class="n">DviMachine</span><span class="p">):</span>
+
+    <span class="c">#: Defines papersize special</span>
+    <span class="n">xxx_papersize</span> <span class="o">=</span> <span class="s">&#39;papersize=&#39;</span>
+
+    <span class="c">#: Defines landscape special</span>
+    <span class="n">xxx_landscape</span> <span class="o">=</span> <span class="s">&#39;! /landplus90 true store&#39;</span>
+
+    <span class="c">#: Defines colour special</span>
+    <span class="n">xxx_colour</span> <span class="o">=</span> <span class="s">&#39;color &#39;</span>
+    
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="DviSimplifyMachine.simplify"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviSimplifyMachine.simplify">[docs]</a>    <span class="k">def</span> <span class="nf">simplify</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Simplify the program. &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Process the xxx opcodes in the program&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">program_page</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simplify_page</span><span class="p">(</span><span class="n">program_page</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_page_xxx_opcodes</span><span class="p">(</span><span class="n">program_page</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviSimplifyMachine.process_page_xxx_opcodes"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviSimplifyMachine.process_page_xxx_opcodes">[docs]</a>    <span class="k">def</span> <span class="nf">process_page_xxx_opcodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program_page</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Process the xxx opcodes in the page program. &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Process the xxx opcodes in the page program #</span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">program_page</span><span class="o">.</span><span class="n">page_number</span><span class="p">)</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">program_page</span><span class="p">):</span>
+            <span class="n">opcode</span> <span class="o">=</span> <span class="n">program_page</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">opcode</span><span class="p">,</span> <span class="n">Opcode_xxx</span><span class="p">):</span>
+                <span class="n">xxx_code</span> <span class="o">=</span> <span class="n">opcode</span><span class="o">.</span><span class="n">code</span>
+                <span class="k">if</span> <span class="n">xxx_code</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xxx_papersize</span><span class="p">):</span>
+                    <span class="n">new_opcode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_xxx_paper_size</span><span class="p">(</span><span class="n">program_page</span><span class="p">,</span> <span class="n">xxx_code</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">xxx_code</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">xxx_landscape</span><span class="p">:</span>
+                    <span class="n">new_opcode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_xxx_paper_orientation</span><span class="p">(</span><span class="n">program_page</span><span class="p">,</span> <span class="n">xxx_code</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">xxx_code</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xxx_colour</span><span class="p">):</span>
+                    <span class="n">new_opcode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_xxx_colour</span><span class="p">(</span><span class="n">program_page</span><span class="p">,</span> <span class="n">xxx_code</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_opcode</span> <span class="o">=</span> <span class="bp">None</span>
+
+                <span class="k">if</span> <span class="n">new_opcode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">program_page</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_opcode</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">program_page</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviSimplifyMachine.transform_xxx_colour"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviSimplifyMachine.transform_xxx_colour">[docs]</a>    <span class="k">def</span> <span class="nf">transform_xxx_colour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program_page</span><span class="p">,</span> <span class="n">xxx_code</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Transform a xxx colour opcode. &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Transform the xxx colour opcode: &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">xxx_code</span><span class="p">)</span>
+
+        <span class="n">words</span> <span class="o">=</span> <span class="n">xxx_code</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">operation</span> <span class="o">=</span> <span class="n">words</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s">&#39;pop&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">Opcode_pop_colour</span><span class="p">()</span>
+
+            <span class="k">elif</span> <span class="n">operation</span> <span class="o">==</span> <span class="s">&#39;push&#39;</span><span class="p">:</span>
+                <span class="n">colour_class</span> <span class="o">=</span> <span class="n">words</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">colour_class</span> <span class="o">==</span> <span class="s">&#39;Black&#39;</span><span class="p">:</span>
+                    <span class="n">colour</span> <span class="o">=</span> <span class="n">DviColorBlack</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="n">colour_class</span> <span class="o">==</span> <span class="s">&#39;gray&#39;</span><span class="p">:</span>
+                    <span class="n">colour</span> <span class="o">=</span> <span class="n">DviColorGray</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">words</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+                <span class="k">elif</span> <span class="n">colour_class</span> <span class="o">==</span> <span class="s">&#39;rgb&#39;</span><span class="p">:</span>
+                    <span class="n">colour</span> <span class="o">=</span> <span class="n">DviColorRGB</span><span class="p">(</span><span class="o">*</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">words</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]])</span>
+                <span class="k">elif</span> <span class="n">colour_class</span> <span class="o">==</span> <span class="s">&#39;cmyk&#39;</span><span class="p">:</span>
+                    <span class="n">colour</span> <span class="o">=</span> <span class="n">DviColorCMYK</span><span class="p">(</span><span class="o">*</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">words</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">7</span><span class="p">]])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Unknown colour type&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">Opcode_push_colour</span><span class="p">(</span><span class="n">colour</span><span class="p">)</span>
+
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c"># Fixme: ValueError</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviSimplifyMachine.transform_xxx_paper_size"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviSimplifyMachine.transform_xxx_paper_size">[docs]</a>    <span class="k">def</span> <span class="nf">transform_xxx_paper_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program_page</span><span class="p">,</span> <span class="n">xxx_code</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Transform a xxx paper size opcode. &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Transform the xxx paper size opcode: &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">xxx_code</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">xxx_code</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s">&#39;=&#39;</span><span class="p">)</span> <span class="o">+</span><span class="mi">1</span>
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="n">xxx_code</span><span class="p">[</span><span class="n">start</span><span class="p">:]</span>
+        <span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">dimensions</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)]</span>
+
+        <span class="n">program_page</span><span class="o">.</span><span class="n">set_paper_size</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviSimplifyMachine.transform_xxx_paper_orientation"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviSimplifyMachine.transform_xxx_paper_orientation">[docs]</a>    <span class="k">def</span> <span class="nf">transform_xxx_paper_orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program_page</span><span class="p">,</span> <span class="n">xxx_code</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Transform a xxx paper orientation opcode. &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Transform the paper orientation opcode: &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span> <span class="n">xxx_code</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">xxx_code</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">xxx_landscape</span><span class="p">:</span>
+            <span class="n">program_page</span><span class="o">.</span><span class="n">set_paper_orientation</span> <span class="o">=</span> <span class="n">paper_orientation_enum</span><span class="o">.</span><span class="n">landscape</span>
+ 
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="DviSimplifyMachine.simplify_page"><a class="viewcode-back" href="../../api/PyDVI/DviMachine.html#PyDVI.DviMachine.DviSimplifyMachine.simplify_page">[docs]</a>    <span class="k">def</span> <span class="nf">simplify_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program_page</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Simplify the page. &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Simplify the program page #</span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">program_page</span><span class="o">.</span><span class="n">page_number</span><span class="p">)</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">previous_opcode</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">program_page</span><span class="p">):</span>
+            <span class="n">opcode</span> <span class="o">=</span> <span class="n">program_page</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">delete_opcode</span> <span class="o">=</span> <span class="bp">False</span>
+
+            <span class="k">if</span> <span class="n">previous_opcode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">opcode</span><span class="o">.</span><span class="n">__class__</span> <span class="o">==</span> <span class="n">previous_opcode</span><span class="o">.</span><span class="n">__class__</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Same opcode </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">opcode</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">opcode</span><span class="p">,</span> <span class="p">(</span><span class="n">Opcode_pop</span><span class="p">,</span> <span class="n">Opcode_pop_colour</span><span class="p">)):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Merge pop opcode&quot;</span><span class="p">)</span>
+                    <span class="n">previous_opcode</span><span class="o">.</span><span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">delete_opcode</span> <span class="o">=</span> <span class="bp">True</span>
+
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">opcode</span><span class="p">,</span> <span class="n">OpcodeX</span><span class="p">):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Merge OpcodeX&quot;</span><span class="p">)</span>
+                    <span class="n">previous_opcode</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="n">opcode</span><span class="o">.</span><span class="n">x</span>
+                    <span class="n">delete_opcode</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="k">if</span> <span class="n">previous_opcode</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="c"># delete also previous opcode</span>
+                        <span class="k">del</span> <span class="n">program_page</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">i</span> <span class="o">-=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">delete_opcode</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">program_page</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">previous_opcode</span> <span class="o">=</span> <span class="n">opcode</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,369 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDVI.PkFontParser &mdash; PyDVI 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="PyDVI 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDVI.PkFontParser</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># PyDVI - A Python Library to Process DVI Stream.</span>
+<span class="c"># Copyright (C) 2009 Salvaire Fabrice</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># Audit</span>
+<span class="c">#</span>
+<span class="c">#  - 17/01/2010 fabrice</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The PkFontParser module provides a tool to parse Packet Font files.  PK files contain device</span>
+<span class="sd">dependent bitmap fonts.  They have the &quot;.pk&quot; extension.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;PkFontParser&#39;</span><span class="p">,</span> <span class="s">&#39;OpcodeParser_xxx&#39;</span><span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">PyDVI.OpcodeParser</span> <span class="kn">import</span> <span class="n">OpcodeParserSet</span><span class="p">,</span> <span class="n">OpcodeParser</span>
+<span class="kn">from</span> <span class="nn">PyDVI.PkGlyph</span> <span class="kn">import</span> <span class="n">PkGlyph</span>
+<span class="kn">from</span> <span class="nn">PyDVI.TeXUnit</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">PyDVI.Tools.EnumFactory</span> <span class="kn">import</span> <span class="n">ExplicitEnumFactory</span>
+<span class="kn">from</span> <span class="nn">PyDVI.Tools.Logging</span> <span class="kn">import</span> <span class="n">print_card</span>
+<span class="kn">from</span> <span class="nn">PyDVI.Tools.Stream</span> <span class="kn">import</span> <span class="n">to_fix_word</span><span class="p">,</span> <span class="n">AbstractStream</span><span class="p">,</span> <span class="n">FileStream</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="k">def</span> <span class="nf">repeat</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">number_of_times</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">func</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">number_of_times</span><span class="p">)]</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">pk_opcodes</span> <span class="o">=</span> <span class="n">ExplicitEnumFactory</span><span class="p">(</span><span class="s">&#39;PkOpcodes&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s">&#39;XXX1&#39;</span><span class="p">:</span><span class="mi">240</span><span class="p">,</span>
+        <span class="s">&#39;XXX2&#39;</span><span class="p">:</span><span class="mi">241</span><span class="p">,</span>
+        <span class="s">&#39;XXX3&#39;</span><span class="p">:</span><span class="mi">242</span><span class="p">,</span>
+        <span class="s">&#39;XXX4&#39;</span><span class="p">:</span><span class="mi">243</span><span class="p">,</span>
+        <span class="s">&#39;YYY&#39;</span><span class="p">:</span><span class="mi">244</span><span class="p">,</span>
+        <span class="s">&#39;POST&#39;</span><span class="p">:</span><span class="mi">245</span><span class="p">,</span>
+        <span class="s">&#39;NOP&#39;</span><span class="p">:</span><span class="mi">246</span><span class="p">,</span>
+        <span class="s">&#39;PRE&#39;</span><span class="p">:</span><span class="mi">247</span>
+        <span class="p">})</span>
+
+<span class="n">PK_ID</span> <span class="o">=</span> <span class="mi">89</span>
+           
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="OpcodeParser_xxx"><a class="viewcode-back" href="../../api/PyDVI/PkFontParser.html#PyDVI.PkFontParser.OpcodeParser_xxx">[docs]</a><span class="k">class</span> <span class="nc">OpcodeParser_xxx</span><span class="p">(</span><span class="n">OpcodeParser</span><span class="p">):</span>
+
+    <span class="n">base_opcode</span> <span class="o">=</span> <span class="n">pk_opcodes</span><span class="o">.</span><span class="n">XXX1</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opcode</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">OpcodeParser_xxx</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">opcode</span><span class="p">,</span> <span class="s">&#39;xxx&#39;</span><span class="p">,</span> <span class="s">&#39;special&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_unsigned_byten</span> <span class="o">=</span> <span class="n">AbstractStream</span><span class="o">.</span><span class="n">read_unsigned_byten</span><span class="p">[</span><span class="n">opcode</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_opcode</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="OpcodeParser_xxx.read_parameters"><a class="viewcode-back" href="../../api/PyDVI/PkFontParser.html#PyDVI.PkFontParser.OpcodeParser_xxx.read_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">read_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pk_font_parser</span><span class="p">):</span>
+
+        <span class="n">stream</span> <span class="o">=</span> <span class="n">pk_font_parser</span><span class="o">.</span><span class="n">stream</span>
+
+        <span class="k">return</span> <span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_unsigned_byten</span><span class="p">(</span><span class="n">stream</span><span class="p">))</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<span class="n">opcode_definitions</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="p">(</span> <span class="n">pk_opcodes</span><span class="o">.</span><span class="n">NOP</span><span class="p">,</span> <span class="s">&#39;nop&#39;</span><span class="p">,</span> <span class="s">&#39;no operation&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span> <span class="p">),</span>
+    <span class="p">(</span> <span class="p">[</span><span class="n">pk_opcodes</span><span class="o">.</span><span class="n">XXX1</span><span class="p">,</span>
+       <span class="n">pk_opcodes</span><span class="o">.</span><span class="n">XXX4</span><span class="p">],</span> <span class="n">OpcodeParser_xxx</span> <span class="p">),</span>
+    <span class="p">(</span> <span class="n">pk_opcodes</span><span class="o">.</span><span class="n">YYY</span><span class="p">,</span> <span class="s">&#39;yyy&#39;</span><span class="p">,</span> <span class="s">&#39;numspecial&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">4</span><span class="p">,),</span> <span class="bp">None</span> <span class="p">),</span>
+    <span class="p">(</span> <span class="n">pk_opcodes</span><span class="o">.</span><span class="n">PRE</span><span class="p">,</span> <span class="s">&#39;pre&#39;</span><span class="p">,</span> <span class="s">&#39;preamble&#39;</span><span class="p">,</span> <span class="p">(),</span> <span class="bp">None</span> <span class="p">),</span> <span class="c"># Fixme: pre is not used in the loop</span>
+    <span class="p">(</span> <span class="n">pk_opcodes</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="s">&#39;post&#39;</span><span class="p">,</span> <span class="s">&#39;postamble&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span> <span class="p">),</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="PkFontParser"><a class="viewcode-back" href="../../api/PyDVI/PkFontParser.html#PyDVI.PkFontParser.PkFontParser">[docs]</a><span class="k">class</span> <span class="nc">PkFontParser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">opcode_parser_set</span> <span class="o">=</span> <span class="n">OpcodeParserSet</span><span class="p">(</span><span class="n">opcode_definitions</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="PkFontParser.parse"><a class="viewcode-back" href="../../api/PyDVI/PkFontParser.html#PyDVI.PkFontParser.PkFontParser.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">pk_font</span><span class="p">):</span>
+
+        <span class="n">PkFontParser</span><span class="p">(</span><span class="n">pk_font</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pk_font</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pk_font</span> <span class="o">=</span> <span class="n">pk_font</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream</span> <span class="o">=</span> <span class="n">FileStream</span><span class="p">(</span><span class="n">pk_font</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_preambule</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_file</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="PkFontParser._process_preambule"><a class="viewcode-back" href="../../api/PyDVI/PkFontParser.html#PyDVI.PkFontParser.PkFontParser._process_preambule">[docs]</a>    <span class="k">def</span> <span class="nf">_process_preambule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Process the preamble. &quot;&quot;&quot;</span>
+
+        <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span>
+
+        <span class="n">stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()</span> <span class="o">!=</span> <span class="n">pk_opcodes</span><span class="o">.</span><span class="n">PRE</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s">&quot;PK file don&#39;t start by PRE opcode&quot;</span><span class="p">)</span>
+
+        <span class="n">pk_id</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">pk_id</span> <span class="o">!=</span> <span class="n">PK_ID</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s">&quot;Unknown PK ID&quot;</span><span class="p">)</span>
+
+        <span class="n">comment</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">())</span>
+        <span class="n">design_font_size</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_fix_word</span><span class="p">()</span>
+        <span class="n">checksum</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_signed_byte4</span><span class="p">()</span>
+        <span class="n">horizontal_dpi</span> <span class="o">=</span> <span class="n">sp2dpi</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">read_signed_byte4</span><span class="p">())</span>
+        <span class="n">vertical_dpi</span> <span class="o">=</span> <span class="n">sp2dpi</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">read_signed_byte4</span><span class="p">())</span>
+
+<span class="c">#         string_template = &#39;&#39;&#39;</span>
+<span class="c"># Preambule</span>
+<span class="c">#   - PK ID        %u</span>
+<span class="c">#   - Comment      &#39;%s&#39;</span>
+<span class="c">#   - Design size  %.1f pt</span>
+<span class="c">#   - Checksum     %u</span>
+<span class="c">#   - Resolution</span>
+<span class="c">#    - Horizontal  %.1f dpi</span>
+<span class="c">#    - Vertical    %.1f dpi &#39;&#39;&#39;</span>
+<span class="c"># </span>
+<span class="c">#         print string_template % (</span>
+<span class="c">#             pk_id,</span>
+<span class="c">#             comment,</span>
+<span class="c">#             design_font_size,</span>
+<span class="c">#             checksum,</span>
+<span class="c">#             horizontal_dpi,</span>
+<span class="c">#             vertical_dpi,</span>
+<span class="c">#             )</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">pk_font</span><span class="o">.</span><span class="n">_set_preambule_data</span><span class="p">(</span><span class="n">pk_id</span><span class="p">,</span> <span class="n">comment</span><span class="p">,</span> <span class="n">design_font_size</span><span class="p">,</span> <span class="n">checksum</span><span class="p">,</span>
+                                         <span class="n">horizontal_dpi</span><span class="p">,</span> <span class="n">vertical_dpi</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="PkFontParser._process_file"><a class="viewcode-back" href="../../api/PyDVI/PkFontParser.html#PyDVI.PkFontParser.PkFontParser._process_file">[docs]</a>    <span class="k">def</span> <span class="nf">_process_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Process the characters. &quot;&quot;&quot;</span>
+        
+        <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span>
+
+        <span class="c"># Fixme: to incorporate pre, check here pre is the first code</span>
+
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">byte</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">byte</span> <span class="o">==</span> <span class="n">pk_opcodes</span><span class="o">.</span><span class="n">POST</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">byte</span> <span class="o">&gt;=</span> <span class="n">pk_opcodes</span><span class="o">.</span><span class="n">XXX1</span><span class="p">:</span>
+                <span class="c"># Fixme: self.opcode_parsers[byte]()</span>
+                <span class="n">opcode_parser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opcode_parser_set</span><span class="p">[</span><span class="n">byte</span><span class="p">]</span>
+                <span class="n">opcode_parser</span><span class="o">.</span><span class="n">read_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="c"># Fixme: return where</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_read_char_definition</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="PkFontParser._read_char_definition"><a class="viewcode-back" href="../../api/PyDVI/PkFontParser.html#PyDVI.PkFontParser.PkFontParser._read_char_definition">[docs]</a>    <span class="k">def</span> <span class="nf">_read_char_definition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
+
+        <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span>
+
+        <span class="n">dyn_f</span> <span class="o">=</span> <span class="n">flag</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="n">first_pixel_is_black</span> <span class="o">=</span> <span class="p">(</span><span class="n">flag</span> <span class="o">&amp;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
+        <span class="n">two_bytes</span> <span class="o">=</span> <span class="p">(</span><span class="n">flag</span> <span class="o">&amp;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
+
+        <span class="n">three_least_significant</span> <span class="o">=</span> <span class="n">flag</span> <span class="o">&amp;</span> <span class="mi">7</span>
+        <span class="n">two_least_significant</span> <span class="o">=</span> <span class="n">flag</span> <span class="o">&amp;</span> <span class="mi">3</span>
+
+        <span class="k">if</span> <span class="n">three_least_significant</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">:</span> <span class="c"># bit 2**3 is not set</span>
+            <span class="n">format</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># short form</span>
+        <span class="k">elif</span> <span class="n">three_least_significant</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span> <span class="c"># all 3-bit are set</span>
+            <span class="n">format</span> <span class="o">=</span> <span class="mi">3</span> <span class="c"># long form</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c"># 3 &lt; 3-bit &lt; 7, bit 2**3 is set</span>
+            <span class="n">format</span> <span class="o">=</span> <span class="mi">2</span> <span class="c"># extended form</span>
+
+        <span class="c"># preambule_length is counted next to packed_length</span>
+
+        <span class="k">if</span> <span class="n">format</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c"># (flag mod 4)*256 + pl</span>
+            <span class="n">packet_length</span> <span class="o">=</span> <span class="p">(</span><span class="n">two_least_significant</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()</span>
+            <span class="n">preambule_length</span> <span class="o">=</span> <span class="mi">8</span> <span class="c"># 3 + 1*5</span>
+        <span class="k">elif</span> <span class="n">format</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">packet_length</span> <span class="o">=</span> <span class="p">(</span><span class="n">two_least_significant</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">+</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte2</span><span class="p">()</span>
+            <span class="n">preambule_length</span> <span class="o">=</span> <span class="mi">13</span> <span class="c"># 3 + 2*5</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">packet_length</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">()</span>
+            <span class="n">preambule_length</span> <span class="o">=</span> <span class="mi">28</span> <span class="c"># 4*7</span>
+
+        <span class="k">if</span> <span class="n">format</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">char_code</span><span class="p">,</span> <span class="n">tfm</span><span class="p">,</span>
+             <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span>
+             <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span>
+             <span class="n">horizontal_offset</span><span class="p">,</span> <span class="n">vertical_offset</span><span class="p">)</span> <span class="o">=</span> <span class="n">repeat</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte4</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+            <span class="n">dm</span> <span class="o">=</span> <span class="bp">None</span>
+ 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">format</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">read_unsigned_byte</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span>
+                <span class="n">read_signed_byte</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_signed_byte1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">read_unsigned_byte</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte2</span>
+                <span class="n">read_signed_byte</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_signed_byte2</span>
+
+            <span class="n">char_code</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte1</span><span class="p">()</span>
+            <span class="n">tfm</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read_unsigned_byte3</span><span class="p">()</span>
+            <span class="p">(</span><span class="n">dm</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span> <span class="o">=</span> <span class="n">repeat</span><span class="p">(</span><span class="n">read_unsigned_byte</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">horizontal_offset</span><span class="p">,</span> <span class="n">vertical_offset</span><span class="p">)</span> <span class="o">=</span> <span class="n">repeat</span><span class="p">(</span><span class="n">read_signed_byte</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">dm</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">tfm</span> <span class="o">=</span> <span class="n">to_fix_word</span><span class="p">(</span><span class="n">tfm</span><span class="p">)</span>
+
+        <span class="n">nybbles</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">packet_length</span> <span class="o">-</span> <span class="n">preambule_length</span><span class="p">)</span>
+
+        <span class="n">PkGlyph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pk_font</span><span class="p">,</span>
+                <span class="n">char_code</span><span class="p">,</span>
+                <span class="n">tfm</span><span class="p">,</span> <span class="n">dm</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span>
+                <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span>
+                <span class="n">horizontal_offset</span><span class="p">,</span> <span class="n">vertical_offset</span><span class="p">,</span>
+                <span class="n">nybbles</span><span class="p">,</span> <span class="n">dyn_f</span><span class="p">,</span> <span class="n">first_pixel_is_black</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">string_template</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;Char </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - Flag: </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - Dynamic Packing Variable: </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - First pixel is black: </span><span class="si">%s</span><span class="s"></span>
+<span class="s"> - Two Bytes: </span><span class="si">%s</span><span class="s"></span>
+<span class="s"> - Format: </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - Packet Length: </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - TFM width: </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - dm: </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - dx: </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - dy: </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - Height: </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - Width: </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - Horizontal Offset: </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - Vertical Offset: </span><span class="si">%u</span><span class="s"></span>
+<span class="s">&#39;&#39;&#39;</span>
+
+            <span class="n">print_card</span><span class="p">(</span><span class="n">string_template</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">char_code</span><span class="p">,</span>
+                    <span class="n">flag</span><span class="p">,</span> <span class="n">dyn_f</span><span class="p">,</span> <span class="n">first_pixel_is_black</span><span class="p">,</span> <span class="n">two_bytes</span><span class="p">,</span> <span class="n">format</span><span class="p">,</span> <span class="n">packet_length</span><span class="p">,</span>
+                    <span class="n">tfm</span><span class="p">,</span> <span class="n">dm</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span>
+                    <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span>
+                    <span class="n">horizontal_offset</span><span class="p">,</span> <span class="n">vertical_offset</span><span class="p">,</span>
+                    <span class="p">))</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

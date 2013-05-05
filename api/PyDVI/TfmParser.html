@@ -1,0 +1,441 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2.16. TfmParser &mdash; PyDVI 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="PyDVI 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="2. PyDVI" href="../PyDVI.html" />
+    <link rel="next" title="2.17. Tools" href="Tools.html" />
+    <link rel="prev" title="2.15. Tfm" href="Tfm.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Tools.html" title="2.17. Tools"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Tfm.html" title="2.15. Tfm"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../PyDVI.html" accesskey="U">2. <tt class="docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal"><span class="pre">PyDVI</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-PyDVI.TfmParser">
+<span id="tfmparser"></span><h1>2.16. <tt class="xref py py-mod docutils literal"><span class="pre">TfmParser</span></tt><a class="headerlink" href="#module-PyDVI.TfmParser" title="Permalink to this headline">¶</a></h1>
+<p>The <tt class="xref py py-mod docutils literal"><span class="pre">TfmParser</span></tt> module provides a tool to parse TeX Font Metric file.  TFM files contain the
+metrics for TeX fonts.  They have the &#8221;.tfm&#8221; extension.</p>
+<p>To parse a TFM file and get a <a class="reference internal" href="Tfm.html#module-PyDVI.Tfm" title="PyDVI.Tfm"><tt class="xref py py-class docutils literal"><span class="pre">PyDVI.Tfm</span></tt></a> instance, use the static method
+<a class="reference internal" href="#PyDVI.TfmParser.TfmParser.parse" title="PyDVI.TfmParser.TfmParser.parse"><tt class="xref py py-meth docutils literal"><span class="pre">TfmParser.parse()</span></tt></a>.  For example use this code for the font &#8220;cmr10&#8221;:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tfm</span> <span class="o">=</span> <span class="n">TfmParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&#39;cmr10&#39;</span><span class="p">,</span> <span class="s">&#39;/usr/share/texmf/fonts/tfm/public/cm/cmr10.tfm&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The TFM file format in descriped in the <tt class="file docutils literal"><span class="pre">tftopl.web</span></tt> file from Web2C.  Part of this
+documentation comes from this file.</p>
+<p>The information in a TFM file appears in a sequence of 8-bit bytes. Since the number of bytes is
+always a multiple of 4, we could also regard the file as a sequence of 32-bit words. Note that the
+bytes are considered to be unsigned numbers.</p>
+<dl class="class">
+<dt id="PyDVI.TfmParser.TfmParser">
+<em class="property">class </em><tt class="descclassname">PyDVI.TfmParser.</tt><tt class="descname">TfmParser</tt><big>(</big><em>font_name</em>, <em>filename</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>This class parse a TFM file.</p>
+<dl class="method">
+<dt id="PyDVI.TfmParser.TfmParser._position_in_table">
+<tt class="descname">_position_in_table</tt><big>(</big><em>table</em>, <em>index</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser._position_in_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser._position_in_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a pointer to the word element at <em>index</em> in the table <em>table</em>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.TfmParser.TfmParser._print_summary">
+<tt class="descname">_print_summary</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser._print_summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser._print_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.TfmParser.TfmParser._process_char">
+<tt class="descname">_process_char</tt><big>(</big><em>c</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser._process_char"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser._process_char" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the character code <em>c</em> in the character information table.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.TfmParser.TfmParser._read_char_info">
+<tt class="descname">_read_char_info</tt><big>(</big><em>c</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser._read_char_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser._read_char_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the character code <em>c</em> data in the character information table.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.TfmParser.TfmParser._read_characters">
+<tt class="descname">_read_characters</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser._read_characters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser._read_characters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Next comes the char info array, which contains one char info word per character.  Each
+char info word contains six fields packed into four bytes as follows.</p>
+<ul class="simple">
+<li>first byte: <tt class="docutils literal"><span class="pre">width_index</span></tt> (8 bits)</li>
+<li>second byte: <tt class="docutils literal"><span class="pre">height_index</span></tt> (4 bits) times 16, plus depth index (4 bits)</li>
+<li>third byte: <tt class="docutils literal"><span class="pre">italic_index</span></tt> (6 bits) times 4, plus tag (2 bits)</li>
+<li>fourth byte: <tt class="docutils literal"><span class="pre">remainder</span></tt> (8 bits)</li>
+</ul>
+<p>The actual width of a character is <tt class="docutils literal"><span class="pre">width[width_index]</span></tt>, in design-size units; this is a
+device for compressing information, since many characters have the same width.  Since it is
+quite common for many characters to have the same height, depth, or italic correction, the
+TFM format imposes a limit of 16 different heights, 16 different depths, and 64 different
+italic corrections.</p>
+<p>Incidentally, the relation <tt class="docutils literal"><span class="pre">width[0]</span> <span class="pre">=</span> <span class="pre">height[0]</span> <span class="pre">=</span> <span class="pre">depth[0]</span> <span class="pre">=</span> <span class="pre">italic[0]</span> <span class="pre">=</span> <span class="pre">0</span></tt> should
+always hold, so that an index of zero implies a value of zero.  The width index should never
+be zero unless the character does not exist in the font, since a character is valid if and
+only if it lies between <tt class="docutils literal"><span class="pre">bc</span></tt> and <tt class="docutils literal"><span class="pre">ec</span></tt> and has a nonzero width index.</p>
+<p>The tag field in a char info word has four values that explain how to interpret the remainder field.</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">tag</span> <span class="pre">=</span> <span class="pre">0</span></tt> (<tt class="docutils literal"><span class="pre">no_tag</span></tt>) means that remainder is unused.</li>
+<li><tt class="docutils literal"><span class="pre">tag</span> <span class="pre">=</span> <span class="pre">1</span></tt> (<tt class="docutils literal"><span class="pre">lig_tag</span></tt>) means that this character has a ligature/kerning program
+starting at <tt class="docutils literal"><span class="pre">lig_kern[remainder]</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">tag</span> <span class="pre">=</span> <span class="pre">2</span></tt> (<tt class="docutils literal"><span class="pre">list_tag</span></tt>) means that this character is part of a chain of characters of
+ascending sizes, and not the largest in the chain.  The remainder field gives the
+character code of the next larger character.</li>
+<li><tt class="docutils literal"><span class="pre">tag</span> <span class="pre">=</span> <span class="pre">3</span></tt> (<tt class="docutils literal"><span class="pre">ext_tag</span></tt>) means that this character code represents an extensible
+character, i.e., a character that is built up of smaller pieces so that it can be made
+arbitrarily large.  The pieces are specified in <tt class="docutils literal"><span class="pre">exten[remainder]</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">no_tag</span> <span class="pre">=</span> <span class="pre">0</span></tt> vanilla character</li>
+<li><tt class="docutils literal"><span class="pre">lig_tag</span> <span class="pre">=</span> <span class="pre">1</span></tt> character has a ligature/kerning program</li>
+<li><tt class="docutils literal"><span class="pre">list_tag</span> <span class="pre">=</span> <span class="pre">2</span></tt> character has a successor in a charlist</li>
+<li><tt class="docutils literal"><span class="pre">ext_tag</span> <span class="pre">=</span> <span class="pre">3</span></tt> character is extensible</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.TfmParser.TfmParser._read_extensible_recipe">
+<tt class="descname">_read_extensible_recipe</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser._read_extensible_recipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser._read_extensible_recipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the extensible recipe, four numbers, at index <em>index</em>.</p>
+<p>Extensible characters are specified by an extensible recipe, which consists of four bytes
+called top, mid, bot, and rep (in this order). These bytes are the character codes of
+individual pieces used to build up a large symbol. If top, mid, or bot are zero, they are
+not present in the built-up result. For example, an extensible vertical line is like an
+extensible bracket, except that the top and bottom pieces are missing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.TfmParser.TfmParser._read_fix_word_in_table">
+<tt class="descname">_read_fix_word_in_table</tt><big>(</big><em>table</em>, <em>index</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser._read_fix_word_in_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser._read_fix_word_in_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the fix word in table <em>table</em> at index <em>index</em>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.TfmParser.TfmParser._read_font_parameters">
+<tt class="descname">_read_font_parameters</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser._read_font_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser._read_font_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>The final portion of a TFM fie is the param array, which is another sequence of fix word
+values.</p>
+<ul class="simple">
+<li>param[1] = <tt class="docutils literal"><span class="pre">slant</span></tt> is the amount of italic slant, which is used to help position
+accents.  For example, slant = .25 means that when you go up one unit, you also go .25
+units to the right.  The slant is a pure number; it&#8217;s the only fix word other than the
+design size itself that is not scaled by the design size.</li>
+<li>param[2] = <tt class="docutils literal"><span class="pre">space</span></tt> is the normal spacing between words in text. Note that character &#8221; &#8221;
+in the font need not have anything to do with blank spaces.</li>
+<li>param[3] = <tt class="docutils literal"><span class="pre">space_stretch</span></tt> is the amount of glue stretching between words.</li>
+<li>param[4] = <tt class="docutils literal"><span class="pre">space_shrink</span></tt> is the amount of glue shrinking between words.</li>
+<li>param[5] = <tt class="docutils literal"><span class="pre">x_height</span></tt> is the height of letters for which accents don&#8217;t have to be
+raised or lowered.</li>
+<li>param[6] = <tt class="docutils literal"><span class="pre">quad</span></tt> is the size of one em in the font.</li>
+<li>param[7] = <tt class="docutils literal"><span class="pre">extra_space</span></tt> is the amount added to param[2] at the ends of sentences.</li>
+</ul>
+<p>When the character coding scheme is <tt class="docutils literal"><span class="pre">TeX</span> <span class="pre">math</span> <span class="pre">symbols</span></tt>, the font is supposed to have 15
+additional parameters called <tt class="docutils literal"><span class="pre">num1</span></tt>, <tt class="docutils literal"><span class="pre">num2</span></tt>, <tt class="docutils literal"><span class="pre">num3</span></tt>, <tt class="docutils literal"><span class="pre">denom1</span></tt>, <tt class="docutils literal"><span class="pre">denom2</span></tt>, <tt class="docutils literal"><span class="pre">sup1</span></tt>,
+<tt class="docutils literal"><span class="pre">sup2</span></tt>, <tt class="docutils literal"><span class="pre">sup3</span></tt>, <tt class="docutils literal"><span class="pre">sub1</span></tt>, <tt class="docutils literal"><span class="pre">sub2</span></tt>, <tt class="docutils literal"><span class="pre">supdrop</span></tt>, <tt class="docutils literal"><span class="pre">subdrop</span></tt>, <tt class="docutils literal"><span class="pre">delim1</span></tt>, <tt class="docutils literal"><span class="pre">delim2</span></tt>,
+and <tt class="docutils literal"><span class="pre">axis_height</span></tt>, respectively.  When the character coding scheme is <tt class="docutils literal"><span class="pre">TeX</span> <span class="pre">math</span>
+<span class="pre">extension</span></tt>, the font is supposed to have six additional parameters called
+<tt class="docutils literal"><span class="pre">defaul_rule_thickness</span></tt> and <tt class="docutils literal"><span class="pre">big_op_spacing1</span></tt> through <tt class="docutils literal"><span class="pre">big_op_spacing5</span></tt>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.TfmParser.TfmParser._read_four_byte_numbers_in_table">
+<tt class="descname">_read_four_byte_numbers_in_table</tt><big>(</big><em>table</em>, <em>index</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser._read_four_byte_numbers_in_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser._read_four_byte_numbers_in_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the four numbers in table <em>table</em> at index <em>index</em>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.TfmParser.TfmParser._read_header">
+<tt class="descname">_read_header</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser._read_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser._read_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>The first data array is a block of header information, which contains general facts
+about the font.  The header must contain at least two words, and for TFM files to be used
+with Xerox printing software it must contain at least 18 words, allocated as described
+below.</p>
+<p><tt class="docutils literal"><span class="pre">header[0]</span></tt> is a 32-bit check sum that TEX will copy into the DVI output file whenever it
+uses the font.  Later on when the DVI file is printed, possibly on another computer, the
+actual font that gets used is supposed to have a check sum that agrees with the one in the
+TFM file used by TEX.  In this way, users will be warned about potential incompatibilities.
+(However, if the check sum is zero in either the font file or the TFM file, no check is
+made.)  The actual relation between this check sum and the rest of the TFM file is not
+important; the check sum is simply an identification number with the property that
+incompatible fonts almost always have distinct check sums.</p>
+<p><tt class="docutils literal"><span class="pre">header[1]</span></tt> is a fix word containing the design size of the font, in units of TEX points
+(7227 TEX points = 254 cm).  This number must be at least 1.0; it is fairly arbitrary, but
+usually the design size is 10.0 for a &#8220;10 point&#8221; font, i.e., a font that was designed to
+look best at a 10-point size, whatever that really means.  When a TEX user asks for a font
+&#8220;at delta pt&#8221;, the effect is to override the design size and replace it by delta, and to
+multiply the x and y coordinates of the points in the font image by a factor of delta
+divided by the design size.  All other dimensions in the TFM file are fix word numbers in
+design-size units.  Thus, for example, the value of <tt class="docutils literal"><span class="pre">param[6]</span></tt>, one em or <tt class="docutils literal"><span class="pre">\quad</span></tt>, is
+often the fix word value <tt class="docutils literal"><span class="pre">2**20</span> <span class="pre">=</span> <span class="pre">1.0</span></tt>, since many fonts have a design size equal to one
+em.  The other dimensions must be less than 16 design-size units in absolute value; thus,
+<tt class="docutils literal"><span class="pre">header[1]</span></tt> and <tt class="docutils literal"><span class="pre">param[1]</span></tt> are the only fix word entries in the whole TFM file whose
+first byte might be something besides 0 or 255.</p>
+<p><tt class="docutils literal"><span class="pre">header[2</span> <span class="pre">...</span> <span class="pre">11]</span></tt>, if present, contains 40 bytes that identify the character coding
+scheme.  The first byte, which must be between 0 and 39, is the number of subsequent ASCII
+bytes actually relevant in this string, which is intended to specify what
+character-code-to-symbol convention is present in the font.  Examples are ASCII for standard
+ASCII, TeX text for fonts like cmr10 and cmti9, TeX math extension for cmex10, XEROX text
+for Xerox fonts, GRAPHIC for special-purpose non- alphabetic fonts, UNSPECIFIED for the
+default case when there is no information.  Parentheses should not appear in this name.
+(Such a string is said to be in BCPL format.)</p>
+<p><tt class="docutils literal"><span class="pre">header[12</span> <span class="pre">...</span> <span class="pre">16]</span></tt>, if present, contains 20 bytes that name the font family (e.g., CMR or
+HELVETICA), in BCPL format.  This field is also known as the &#8220;font identifier.&#8221;</p>
+<p><tt class="docutils literal"><span class="pre">header[17]</span></tt>, if present, contains a first byte called the <tt class="docutils literal"><span class="pre">seven_bit_safe_flag</span></tt>, then
+two bytes that are ignored, and a fourth byte called the <em>face</em>.  If the value of the fourth
+byte is less than 18, it has the following interpretation as a &#8220;weight, slope, and
+expansion&#8221;: Add 0 or 2 or 4 (for medium or bold or light) to 0 or 1 (for roman or italic) to
+0 or 6 or 12 (for regular or condensed or extended).  For example, 13 is <tt class="docutils literal"><span class="pre">0+1+12</span></tt>, so it
+represents medium italic extended.  A three-letter code (e.g., MIE) can be used for such
+face data.</p>
+<p><tt class="docutils literal"><span class="pre">header[18</span> <span class="pre">...</span> <span class="pre">whatever]</span></tt> might also be present; the individual words are simply called
+<tt class="docutils literal"><span class="pre">header[18]</span></tt>, <tt class="docutils literal"><span class="pre">header[19]</span></tt>, etc., at the moment.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.TfmParser.TfmParser._read_lengths">
+<tt class="descname">_read_lengths</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser._read_lengths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser._read_lengths" title="Permalink to this definition">¶</a></dt>
+<dd><p>The fist 24 bytes (6 words) of a TFM file contain twelve 16-bit integers that give the
+lengths of the various subsequent portions of the file. These twelve integers are, in order:</p>
+<ul class="simple">
+<li>lf = length of the entire file, in words;</li>
+<li>lh = length of the header data, in words;</li>
+<li>bc = smallest character code in the font;</li>
+<li>ec = largest character code in the font;</li>
+<li>nw = number of words in the width table;</li>
+<li>nh = number of words in the height table;</li>
+<li>nd = number of words in the depth table;</li>
+<li>ni = number of words in the italic correction table;</li>
+<li>nl = number of words in the lig/kern table;</li>
+<li>nk = number of words in the kern table;</li>
+<li>ne = number of words in the extensible character table;</li>
+<li>np = number of font parameter words.</li>
+</ul>
+<p>They are all nonnegative and less than 2**15. We must have <tt class="docutils literal"><span class="pre">bc</span> <span class="pre">-</span> <span class="pre">1</span> <span class="pre">&lt;=</span> <span class="pre">ec</span> <span class="pre">&lt;=</span> <span class="pre">255</span></tt>, <tt class="docutils literal"><span class="pre">ne</span> <span class="pre">&lt;=</span>
+<span class="pre">256</span></tt>, and</p>
+<blockquote>
+<div><tt class="docutils literal"><span class="pre">lf</span> <span class="pre">=</span> <span class="pre">6</span> <span class="pre">+</span> <span class="pre">lh</span> <span class="pre">+</span> <span class="pre">(ec</span> <span class="pre">-</span> <span class="pre">bc</span> <span class="pre">+</span> <span class="pre">1)</span> <span class="pre">+</span> <span class="pre">nw</span> <span class="pre">+</span> <span class="pre">nh</span> <span class="pre">+</span> <span class="pre">nd</span> <span class="pre">+</span> <span class="pre">ni</span> <span class="pre">+</span> <span class="pre">nl</span> <span class="pre">+</span> <span class="pre">nk</span> <span class="pre">+</span> <span class="pre">ne</span> <span class="pre">+</span> <span class="pre">np</span></tt>.</div></blockquote>
+<p>Note that a font may contain as many as 256 characters (if <tt class="docutils literal"><span class="pre">bc</span> <span class="pre">=</span> <span class="pre">0</span></tt> and <tt class="docutils literal"><span class="pre">ec</span> <span class="pre">=</span> <span class="pre">255</span></tt>), and
+as few as 0 characters (if <tt class="docutils literal"><span class="pre">bc</span> <span class="pre">=</span> <span class="pre">ec</span> <span class="pre">+</span> <span class="pre">1</span></tt>).</p>
+<p>The rest of the TFM file may be regarded as a sequence of ten data arrays having the
+informal specification:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="20%" />
+<col width="41%" />
+<col width="39%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>header</td>
+<td>array [0  ... lh - 1]</td>
+<td>of stuff</td>
+</tr>
+<tr class="row-even"><td>char info</td>
+<td>array [bc ... ec    ]</td>
+<td>of char info word</td>
+</tr>
+<tr class="row-odd"><td>width</td>
+<td>array [0  ... nw - 1]</td>
+<td>of fix word</td>
+</tr>
+<tr class="row-even"><td>height</td>
+<td>array [0  ... nh - 1]</td>
+<td>of fix word</td>
+</tr>
+<tr class="row-odd"><td>depth</td>
+<td>array [0  ... nd - 1]</td>
+<td>of fix word</td>
+</tr>
+<tr class="row-even"><td>italic</td>
+<td>array [0  ... ni - 1]</td>
+<td>of fix word</td>
+</tr>
+<tr class="row-odd"><td>lig kern</td>
+<td>array [0  ... nl - 1]</td>
+<td>of lig kern command</td>
+</tr>
+<tr class="row-even"><td>kern</td>
+<td>array [0  ... nk - 1]</td>
+<td>of fix word</td>
+</tr>
+<tr class="row-odd"><td>exten</td>
+<td>array [0  ... ne - 1]</td>
+<td>of extensible recipe</td>
+</tr>
+<tr class="row-even"><td>param</td>
+<td>array [1  ... np    ]</td>
+<td>of fix word</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.TfmParser.TfmParser._read_lig_kern_programs">
+<tt class="descname">_read_lig_kern_programs</tt><big>(</big><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser._read_lig_kern_programs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser._read_lig_kern_programs" title="Permalink to this definition">¶</a></dt>
+<dd><p>The lig kern array contains instructions in a simple programming language that explains
+what to do for special letter pairs. Each word is a lig kern command of four bytes.</p>
+<ul class="simple">
+<li>first byte: <tt class="docutils literal"><span class="pre">skip_byte</span></tt>, indicates that this is the final program step if the byte is
+128 or more, otherwise the next step is obtained by skipping this number of intervening
+steps.</li>
+<li>second byte: <tt class="docutils literal"><span class="pre">next_char</span></tt>, &#8220;if <tt class="docutils literal"><span class="pre">next_char</span></tt> follows the current character, then perform
+the operation and stop, otherwise continue.&#8221;</li>
+<li>third byte: <tt class="docutils literal"><span class="pre">op_byte</span></tt>, indicates a ligature step if less than 128, a kern step otherwise.</li>
+<li>fourth byte: <tt class="docutils literal"><span class="pre">remainder</span></tt>.</li>
+</ul>
+<p>In a kern step, an additional space equal to <tt class="docutils literal"><span class="pre">kern[256</span> <span class="pre">*</span> <span class="pre">(op_byte</span> <span class="pre">+</span> <span class="pre">128)</span> <span class="pre">+</span> <span class="pre">remainder]</span></tt> is
+inserted between the current character and next char.  This amount is often negative, so
+that the characters are brought closer together by kerning; but it might be positive.</p>
+<p>There are eight kinds of ligature steps, having <tt class="docutils literal"><span class="pre">op_byte</span></tt> codes <tt class="docutils literal"><span class="pre">4a+2b+c</span></tt> where <tt class="docutils literal"><span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">a</span>
+<span class="pre">&lt;=</span> <span class="pre">b+c</span></tt> and <tt class="docutils literal"><span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">b;</span> <span class="pre">c</span> <span class="pre">&lt;=</span> <span class="pre">1</span></tt>.  The character whose code is remainder is inserted between
+the current character and next char; then the current character is deleted if <tt class="docutils literal"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">0</span></tt>, and
+next char is deleted if <tt class="docutils literal"><span class="pre">c</span> <span class="pre">=</span> <span class="pre">0</span></tt>; then we pass over a characters to reach the next current
+character (which may have a ligature/kerning program of its own).</p>
+<p>Notice that if <tt class="docutils literal"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">0</span></tt> and <tt class="docutils literal"><span class="pre">b</span> <span class="pre">=</span> <span class="pre">1</span></tt>, the current character is unchanged; if <tt class="docutils literal"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span></tt> and
+<tt class="docutils literal"><span class="pre">c</span> <span class="pre">=</span> <span class="pre">1</span></tt>, the current character is changed but the next character is unchanged.</p>
+<p>If the very first instruction of the lig kern array has <tt class="docutils literal"><span class="pre">skip_byte</span> <span class="pre">=</span> <span class="pre">255</span></tt>, the
+<tt class="docutils literal"><span class="pre">next_char</span></tt> byte is the so-called right boundary character of this font; the value of
+<tt class="docutils literal"><span class="pre">next_char</span></tt> need not lie between <tt class="docutils literal"><span class="pre">bc</span></tt> and <tt class="docutils literal"><span class="pre">ec</span></tt>. If the very last instruction of the
+lig kern array has <tt class="docutils literal"><span class="pre">skip_byte</span> <span class="pre">=</span> <span class="pre">255</span></tt>, there is a special ligature/kerning program for a
+left boundary character, beginning at location <tt class="docutils literal"><span class="pre">256</span> <span class="pre">*</span> <span class="pre">op_byte</span> <span class="pre">+</span> <span class="pre">remainder</span></tt>.  The
+interpretation is that TEX puts implicit boundary characters before and after each
+consecutive string of characters from the same font.  These implicit characters do not
+appear in the output, but they can affect ligatures and kerning.</p>
+<p>If the very first instruction of a character&#8217;s <tt class="docutils literal"><span class="pre">lig_kern</span></tt> program has <tt class="docutils literal"><span class="pre">skip_byte</span> <span class="pre">&gt;</span> <span class="pre">128</span></tt>,
+the program actually begins in location <tt class="docutils literal"><span class="pre">256</span> <span class="pre">*</span> <span class="pre">op_byte</span> <span class="pre">+</span> <span class="pre">remainder</span></tt>.  This feature allows
+access to large lig kern arrays, because the first instruction must otherwise appear in a
+location <tt class="docutils literal"><span class="pre">&lt;=</span> <span class="pre">255</span></tt>.</p>
+<p>Any instruction with <tt class="docutils literal"><span class="pre">skip_byte</span> <span class="pre">&gt;</span> <span class="pre">128</span></tt> in the lig kern array must have <tt class="docutils literal"><span class="pre">256</span> <span class="pre">*</span> <span class="pre">op_byte</span> <span class="pre">+</span>
+<span class="pre">remainder</span> <span class="pre">&lt;</span> <span class="pre">nl</span></tt>.  If such an instruction is encountered during normal program execution, it
+denotes an unconditional halt; no ligature command is performed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDVI.TfmParser.TfmParser._seek_to_table">
+<tt class="descname">_seek_to_table</tt><big>(</big><em>table</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser._seek_to_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser._seek_to_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Seek to the table <em>table</em>.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="PyDVI.TfmParser.TfmParser.parse">
+<em class="property">static </em><tt class="descname">parse</tt><big>(</big><em>font_name</em>, <em>filename</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the TFM <tt class="file docutils literal"><span class="pre">filename</span></tt> for the font <em>font_name</em> and return a <a class="reference internal" href="Tfm.html#module-PyDVI.Tfm" title="PyDVI.Tfm"><tt class="xref py py-class docutils literal"><span class="pre">PyDVI.Tfm</span></tt></a>
+instance.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="PyDVI.TfmParser.TfmParser.word_ptr">
+<em class="property">static </em><tt class="descname">word_ptr</tt><big>(</big><em>base</em>, <em>index</em><big>)</big><a class="reference internal" href="../../_modules/PyDVI/TfmParser.html#TfmParser.word_ptr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDVI.TfmParser.TfmParser.word_ptr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the pointer to the word element index <em>index</em> from the base <em>base</em>.  A word
+element has a size of 32-bit.</p>
+<p><tt class="docutils literal"><span class="pre">prt</span> <span class="pre">=</span> <span class="pre">base</span> <span class="pre">+</span> <span class="pre">4*index</span></tt></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Tfm.html"
+                        title="previous chapter">2.15. <tt class="docutils literal docutils literal docutils literal"><span class="pre">Tfm</span></tt></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Tools.html"
+                        title="next chapter">2.17. <tt class="docutils literal"><span class="pre">Tools</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api/PyDVI/TfmParser.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Tools.html" title="2.17. Tools"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Tfm.html" title="2.15. Tfm"
+             >previous</a> |</li>
+        <li><a href="../../index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../PyDVI.html" >2. <tt class="docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal"><span class="pre">PyDVI</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
