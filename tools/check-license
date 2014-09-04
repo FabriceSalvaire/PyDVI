@@ -128,7 +128,7 @@ class LicenseChecker(object):
                     if line.startswith('#'*10):
                         line_slice_stop = line_index
                         break
-                    elif line.startswith('# '):
+                    elif line.startswith('#'):
                         if 'Copyright' in line:
                             copyright_found = True
                     else:
