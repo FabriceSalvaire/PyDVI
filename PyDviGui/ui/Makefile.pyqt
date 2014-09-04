@@ -6,12 +6,11 @@
 
 py_files := $(patsubst %.ui, %_ui.py, $(wildcard *.ui))
 
-all: $(py_files)
-
-# pydvi_rc.py
+all: $(py_files) pydvi_rc.py
 
 pydvi_rc.py : pydvi.qrc
-	pyrcc4 pydvi.qrc -o pydvi_rc.py
+	touch pydvi_rc.py
+#	pyrcc4 pydvi.qrc -o pydvi_rc.py
 
 %_ui.py : %.ui
 	pyuic4 -o $@ $<

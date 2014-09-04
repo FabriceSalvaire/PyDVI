@@ -228,7 +228,7 @@
   <customwidget>
    <class>GlyphGraphicsView</class>
    <extends>QGraphicsView</extends>
-   <header>GlyphGraphicsView.h</header>
+   <header>PyDviGui/FontViewer/GlyphGraphicsView.h</header>
   </customwidget>
  </customwidgets>
  <resources>

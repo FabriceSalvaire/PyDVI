@@ -1,8 +1,7 @@
 .git
 .gitignore
 auto
-gui/profile.txt
-gui/ui/*_ui.py
+PyDviGui/ui/*_ui.py
 tex-samples/*.aux
 tex-samples/*.dvi
 tex-samples/*.log

@@ -9,24 +9,32 @@
 ####################################################################################################
 
 ####################################################################################################
-#
-# Audit
-#
-# - 10/12/2011 fabrice
-#
-####################################################################################################
-
-####################################################################################################
 
 import argparse
 import sys
-import time
 
 from PyQt4 import QtGui, QtCore
 
 ####################################################################################################
 
-from FontViewerMainWindow import MainWindow
+import PyDVI.Logging.Logging as Logging
+logger = Logging.setup_logging()
+
+####################################################################################################
+
+from PyDviGui.FontViewer.MainWindow import MainWindow
+
+####################################################################################################
+#
+# Options
+#
+
+parser = argparse.ArgumentParser(description='TeX Font Viewer')
+
+parser.add_argument('font_name', metavar='FontName',
+                    help='Font Name')
+
+args = parser.parse_args()
 
 ####################################################################################################
 
@@ -38,20 +46,8 @@ class Application(QtGui.QApplication):
 
         super(Application, self).__init__(sys.argv)
 
-        self.main_window = MainWindow(self, args)
-        self.main_window.show()
-
-####################################################################################################
-#
-# Options
-#
-
-parser = argparse.ArgumentParser(description='TeX Font Viewer.')
-
-parser.add_argument('font_name', metavar='font_name',
-                    help='Font Name')
-
-args = parser.parse_args()
+        self._main_window = MainWindow(self, args)
+        self._main_window.show()
 
 ####################################################################################################
 
