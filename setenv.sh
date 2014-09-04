@@ -4,16 +4,9 @@
 #
 ####################################################################################################
 
-append_to_python_path_if_not \
-  $PWD/gui \
-  $PWD/gui/ui \
-  $PWD/etc \
-  $PWD \
-  $PWD/../local
+source ${HOME}/python-virtual-env/standard/bin/activate
 
-# $PWD/PyDVI \
-
-view_python 
+append_to_python_path_if_not $PWD
 
 ####################################################################################################
 #

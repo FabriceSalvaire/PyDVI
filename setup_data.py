@@ -39,15 +39,15 @@ def read(file_name):
 ####################################################################################################
 
 setup_dict = dict(
-    name='@project@',
+    name='PyDvi',
     version='0.1.0',
     author='Fabrice Salvaire',
     author_email='fabrice.salvaire@orange.fr',
     description='A Python Library to Process DVI Stream.',
     license = "GPLv3",
-    keywords = "...",
-    url='http://fabrice-salvaire.pagesperso-orange.fr/software/index.html',
-    scripts=['bin/@project@'],
+    keywords = "TeX, LaTeX, DVI",
+    url='https://github.com/FabriceSalvaire/PyDVI',
+    scripts=[''],
     packages=['PyDVI'],
     data_files = [('share/PyDVI/icons',['share/icons/@project@.svg']),
                   ('share/applications', ['spec/@project@.desktop']),
