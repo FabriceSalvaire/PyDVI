@@ -7,7 +7,7 @@
   :numbered:
 
   reference-documentation.rst
-  api/PyDVI.rst
+  api/PyDvi.rst
 
 =========
  Indexes

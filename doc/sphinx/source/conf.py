@@ -2,7 +2,7 @@
 
 ####################################################################################################
 #
-# PyDVI documentation build configuration file, created by
+# PyDvi documentation build configuration file, created by
 # sphinx-quickstart on Fri Apr  8 16:54:03 2011.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -60,7 +60,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'PyDVI'
+project = u'PyDvi'
 copyright = u'2011, Fabrice Salvaire'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -202,7 +202,7 @@ html_static_path = ['_static']
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'PyDVIdoc'
+htmlhelp_basename = 'PyDvidoc'
 
 ####################################################################################################
 #
@@ -218,7 +218,7 @@ latex_font_size = '10pt'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'PyDVI.tex', u'PyDVI Documentation', u'Fabrice Salvaire', 'manual'),
+  ('index', 'PyDvi.tex', u'PyDvi Documentation', u'Fabrice Salvaire', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -252,7 +252,7 @@ latex_logo = None
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'PyDVI', u'PyDVI Documentation', [u'Fabrice Salvaire'], 1)
+    ('index', 'PyDvi', u'PyDvi Documentation', [u'Fabrice Salvaire'], 1)
 ]
 
 # Example configuration for intersphinx: refer to the Python standard library.
