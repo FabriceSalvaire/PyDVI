@@ -2,7 +2,7 @@
 
 ####################################################################################################
 # 
-# PyDVI - A Python Library to Process DVI Stream
+# PyDvi - A Python Library to Process DVI Stream
 # Copyright (C) 2014 Fabrice Salvaire
 #
 # This program is free software: you can redistribute it and/or modify
@@ -34,7 +34,11 @@ from PyQt4 import QtGui, QtCore
 
 ####################################################################################################
 
-from PyDVI.TeXUnit import *
+from PyDvi.TeXUnit import *
+
+####################################################################################################
+
+_module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
@@ -44,11 +48,8 @@ def array_to_qimage(np_array):
         
     if len(np_array.shape) != 2:
         raise ValueError("array_to_qimage can only convert 2D arrays")
-
     height, width = np_array.shape
-
     _np_array = np.require(np_array, np.uint8, 'C')
-    
     image = QtGui.QImage(_np_array.data, width, height, QtGui.QImage.Format_Indexed8)
     
     return image
@@ -80,7 +81,6 @@ def init_gray_index(image):
 def init_pixels(np_array, image):
 
     height, width = np_array.shape
-    
     for y in xrange(height):
         for x in xrange(width):
             image.setPixel(x, y, int(np_array[y, x]))
@@ -93,7 +93,6 @@ def bitmap_array_to_qimage(np_array):
     dimension represents the vertical image axis."""
 
     # image = array_to_qimage(np_array)
-    
     image = create_indexed_qimage(* np_array.shape)
     init_bitmap_index(image)
     init_pixels(np_array, image)
@@ -119,40 +118,30 @@ def gray_array_to_qimage(np_array):
 
 class QtFtGlyph(object):
 
+    _logger = _module_logger.getChild('QtFtGlyph')
+
     ##############################################
 
     def __init__(self, font, glyph_index, magnification):
 
-        # print 'QtFtGlyph', font.name, glyph_index, magnification
+        self._logger.info("font {} glyph[{}] @mag {}".format(font.name, glyph_index, magnification))
 
         size = magnification * font.tfm.design_font_size # pt
-        size = 100 # Fixme
         resolution = 300 # dpi
 
         glyph = font.get_glyph(glyph_index, size, resolution)
+        glyph_bitmap = glyph.glyph_bitmap
 
-        np_bitmap = glyph.glyph_bitmap
-        #!# np_bitmap = np.fromstring(glyph_bitmap.bitmap, dtype=np.uint8)
-        #!# np_bitmap.shape = glyph_bitmap.rows, glyph_bitmap.width
-        glyph_image = gray_array_to_qimage(np_bitmap)
+        glyph_image = gray_array_to_qimage(glyph_bitmap)
         glyph_pixmap = QtGui.QPixmap.fromImage(glyph_image)
-        #!# glyph_pixmap.loadFromData(QtCore.QByteArray(np_bitmap))
-
-        # print 'size:', size
-        # print 'resolution:', resolution
-        # print 'width:', glyph_bitmap.width
-        # print 'height:', glyph_bitmap.rows
-        # print 'left:', glyph_bitmap.left
-        # print 'top:', glyph_bitmap.top
-
         self.pixmap = glyph_pixmap
 
         #!# self.width  = glyph_bitmap.width
         #!# self.height = glyph_bitmap.rows
         #!# self.horizontal_offset = glyph_bitmap.left
         #!# self.vertical_offset = - glyph_bitmap.top
-        self.width  = np_bitmap.shape[1]
-        self.height = np_bitmap.shape[0]
+        self.width = glyph_bitmap.shape[1]
+        self.height = glyph_bitmap.shape[0]
         self.horizontal_offset = 0
         self.vertical_offset = 0
 
@@ -160,18 +149,26 @@ class QtFtGlyph(object):
         self.h_scale = magnification*dpi2mm(resolution)
         self.v_scale = magnification*dpi2mm(resolution)
 
+        template = "size: {} {}  offset: {} {} scale: {:4.3f} {:4.3f}"
+        self._logger.info(template.format(self.width, self.height,
+                                          self.horizontal_offset, self.vertical_offset, 
+                                          self.h_scale, self.v_scale))
+
 ####################################################################################################
 
 class QtPkGlyph(object):
+
+    _logger = _module_logger.getChild('QtPkGlyph')
 
     ##############################################
 
     def __init__(self, font, glyph_index, magnification):
 
-        # print 'QtPkGlyph', font.name, glyph_index, magnification
+        self._logger.info("font {} glyph[{}] @mag {}".format(font.name, glyph_index, magnification))
 
         glyph = font[glyph_index]
         glyph_bitmap = glyph.get_glyph_bitmap()
+
         glyph_image = bitmap_array_to_qimage(glyph_bitmap)
         glyph_pixmap = QtGui.QPixmap.fromImage(glyph_image)
         self.pixmap = glyph_pixmap
@@ -182,22 +179,27 @@ class QtPkGlyph(object):
         # | (-h,v)
         # |    +-----+
         # |    |     |
-        # |    |     |
-        # |    |     |
         # +----+-----+---
         # |    |     |
         # |    +-----+
         # |  
         #
 
-        self.width  = glyph.width
+        self.width = glyph.width
         self.height = glyph.height
         self.horizontal_offset = -glyph.horizontal_offset
-        self.vertical_offset   = -glyph.vertical_offset
+        self.vertical_offset = -glyph.vertical_offset
 
         # Fixme: Compute once?
         self.h_scale = magnification*dpi2mm(glyph.pk_font.horizontal_dpi)
         self.v_scale = magnification*dpi2mm(glyph.pk_font.vertical_dpi)
+
+        # font cmr10 glyph[0] @mag 1
+        # size: 45 57  offset: 3 -56 scale: 0.042 0.042
+        template = "size: {} {}  offset: {} {} scale: {:4.3f} {:4.3f}"
+        self._logger.info(template.format(self.width, self.height,
+                                          self.horizontal_offset, self.vertical_offset, 
+                                          self.h_scale, self.v_scale))
 
 ####################################################################################################
 #

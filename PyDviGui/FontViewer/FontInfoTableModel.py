@@ -2,7 +2,7 @@
 
 ####################################################################################################
 # 
-# PyDVI - A Python Library to Process DVI Stream
+# PyDvi - A Python Library to Process DVI Stream
 # Copyright (C) 2014 Fabrice Salvaire
 #
 # This program is free software: you can redistribute it and/or modify
@@ -26,9 +26,9 @@ __ALL__ = ['FontInfoTableModel']
 
 ####################################################################################################
 
-from PyDVI.PkFont import PkFont
-from PyDVI.TeXUnit import *
-from PyDVI.Type1Font import Type1Font
+from PyDvi.Font.PkFont import PkFont
+from PyDvi.Font.Type1Font import Type1Font
+from PyDvi.TeXUnit import *
 
 from .InfoTableModel import InfoTableModel
 

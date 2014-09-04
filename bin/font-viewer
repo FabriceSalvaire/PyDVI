@@ -3,7 +3,7 @@
 
 ####################################################################################################
 #
-# PyDVI - A Python Library to Process DVI Stream.
+# PyDvi - A Python Library to Process DVI Stream.
 # Copyright (C) 2009 Salvaire Fabrice
 #
 ####################################################################################################
@@ -17,7 +17,7 @@ from PyQt4 import QtGui, QtCore
 
 ####################################################################################################
 
-import PyDVI.Logging.Logging as Logging
+import PyDvi.Logging.Logging as Logging
 logger = Logging.setup_logging()
 
 ####################################################################################################

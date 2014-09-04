@@ -189,10 +189,10 @@
   </widget>
   <action name="about_pydvi_action">
    <property name="text">
-    <string>About PyDVI</string>
+    <string>About PyDvi</string>
    </property>
    <property name="toolTip">
-    <string>About PyDVI</string>
+    <string>About PyDvi</string>
    </property>
   </action>
   <action name="about_qt_action">
@@ -205,7 +205,7 @@
     <string>About</string>
    </property>
    <property name="toolTip">
-    <string>About PyDVI Font Viewer</string>
+    <string>About PyDvi Font Viewer</string>
    </property>
   </action>
   <action name="help_action">

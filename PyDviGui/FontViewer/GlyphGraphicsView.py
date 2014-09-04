@@ -2,7 +2,7 @@
 
 ####################################################################################################
 # 
-# PyDVI - A Python Library to Process DVI Stream
+# PyDvi - A Python Library to Process DVI Stream
 # Copyright (C) 2014 Fabrice Salvaire
 #
 # This program is free software: you can redistribute it and/or modify
@@ -28,10 +28,11 @@ from PyQt4 import QtGui, QtCore
 
 ####################################################################################################
 
+from PyDvi.Font.PkFont import PkFont
+from PyDvi.Font.Type1Font import Type1Font
+from PyDvi.TeXUnit import *
+
 from ..QtGlyph import QtPkGlyph, QtFtGlyph
-from PyDVI.PkFont import PkFont
-from PyDVI.TeXUnit import *
-from PyDVI.Type1Font import Type1Font
 
 ####################################################################################################
 
@@ -82,6 +83,7 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
         self.add_glyph_box()
 
         self.scene.update()
+        self.fitInView(self.sceneRect(), QtCore.Qt.KeepAspectRatio)
 
     ##############################################
 
@@ -136,7 +138,7 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
 
         self._logger.info('')
 
-        self.qt_glyph = qt_glyph = QtFtGlyph(font, glyph_index, magnification=1)
+        self.qt_glyph = qt_glyph = QtFtGlyph(font, glyph_index, magnification=10) # Fixme
 
         char_pixmap_item = self.scene.addPixmap(qt_glyph.pixmap)
         char_pixmap_item.setOffset(qt_glyph.horizontal_offset, qt_glyph.vertical_offset)
@@ -146,9 +148,11 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
 
     def add_pk_char(self, font, glyph_index):
 
+        # Fixme: duplicated code
+
         self._logger.info('')
 
-        self.qt_glyph = qt_glyph = QtPkGlyph(font, glyph_index, magnification = 1)
+        self.qt_glyph = qt_glyph = QtPkGlyph(font, glyph_index, magnification=1)
 
         char_pixmap_item = self.scene.addPixmap(qt_glyph.pixmap)
         char_pixmap_item.setOffset(qt_glyph.horizontal_offset, qt_glyph.vertical_offset)
@@ -158,30 +162,21 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
 
     def keyPressEvent(self, event):
 
-        key = event.key()
-
         dx = 10
 
-        # print 'keyPressEvent', key
-
+        key = event.key()
         if key == QtCore.Qt.Key_Up:
             self.translate(0, -dx)
-
         elif key == QtCore.Qt.Key_Down:
             self.translate(0, dx)
-
         elif key == QtCore.Qt.Key_Left:
             self.translate(-dx, 0)
-
         elif key == QtCore.Qt.Key_Right:
             self.translate(dx, 0)
-
         elif key == QtCore.Qt.Key_Plus:
             self.scale_view(2)
-
         elif key == QtCore.Qt.Key_Minus:
             self.scale_view(.5)
-
         else:
             QtGui.QGraphicsView.keyPressEvent(self, event)
 
@@ -190,7 +185,6 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
     def wheelEvent(self, event):
 
         delta = event.delta()
-
         if delta > 0:
             self.scale_view(2)
         else:
@@ -201,12 +195,9 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
     def scale_view(self, scale_factor):
 
         transformation = self.matrix().scale(scale_factor, scale_factor)
-
         factor = transformation.mapRect(QtCore.QRectF(0, 0, 1, 1)).width()
-
         if factor < 0.1 or factor > 1000:
             return
-
         self.scale(scale_factor, scale_factor)
 
 ####################################################################################################

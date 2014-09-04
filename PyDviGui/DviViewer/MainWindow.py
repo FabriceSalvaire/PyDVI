@@ -2,7 +2,7 @@
 
 ####################################################################################################
 # 
-# PyDVI - A Python Library to Process DVI Stream
+# PyDvi - A Python Library to Process DVI Stream
 # Copyright (C) 2014 Fabrice Salvaire
 #
 # This program is free software: you can redistribute it and/or modify
@@ -37,15 +37,15 @@ import numpy as np
 
 ####################################################################################################
 
-from PyDVI.DviMachine import DviMachine
-from PyDVI.DviParser import DviParser 
-from PyDVI.FontManager import FontManager
-from PyDVI.PkFont import PkFont
-from PyDVI.TeXUnit import *
-from PyDVI.Tools.Stream import FileStream
-from PyDVI.Type1Font import Type1Font
+from PyDvi.Dvi.DviMachine import DviMachine
+from PyDvi.Dvi.DviParser import DviParser 
+from PyDvi.Font.FontManager import FontManager
+from PyDvi.Font.PkFont import PkFont
+from PyDvi.Font.Type1Font import Type1Font
+from PyDvi.TeXUnit import *
+from PyDvi.Tools.Stream import FileStream
 
-from QtGlyph import *
+from ..QtGlyph import *
 
 ####################################################################################################
 

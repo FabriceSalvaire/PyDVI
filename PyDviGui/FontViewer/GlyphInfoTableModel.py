@@ -2,7 +2,7 @@
 
 ####################################################################################################
 # 
-# PyDVI - A Python Library to Process DVI Stream
+# PyDvi - A Python Library to Process DVI Stream
 # Copyright (C) 2014 Fabrice Salvaire
 #
 # This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ __all__ = ['GlyphInfoTableModel']
 
 ####################################################################################################
 
-from PyDVI.TeXUnit import *
+from PyDvi.TeXUnit import *
 
 from .InfoTableModel import InfoTableModel
 

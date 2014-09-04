@@ -2,7 +2,7 @@
 
 ####################################################################################################
 # 
-# PyDVI - A Python Library to Process DVI Stream
+# PyDvi - A Python Library to Process DVI Stream
 # Copyright (C) 2014 Fabrice Salvaire
 #
 # This program is free software: you can redistribute it and/or modify
@@ -31,7 +31,7 @@ from PyQt4.QtCore import Qt, QVariant, QModelIndex
 
 ####################################################################################################
 
-from PyDVI.Tools.EnumFactory import EnumFactory
+from PyDvi.Tools.EnumFactory import EnumFactory
 
 ####################################################################################################
 
