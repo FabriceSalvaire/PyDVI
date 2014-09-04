@@ -9,6 +9,8 @@
 
 ####################################################################################################
 
+import logging
+
 from PyQt4 import QtGui, QtCore
 
 ####################################################################################################
@@ -20,7 +22,13 @@ from PyDVI.Type1Font import Type1Font
 
 ####################################################################################################
 
+_module_logger = logging.getLogger(__name__)
+
+####################################################################################################
+
 class GlyphGraphicsView(QtGui.QGraphicsView):
+
+    _logger = _module_logger.getChild('GlyphGraphicsView')
 
     ##############################################
 
@@ -113,6 +121,8 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
 
     def add_type1_char(self, font, glyph_index):
 
+        self._logger.info('')
+
         self.qt_glyph = qt_glyph = QtFtGlyph(font, glyph_index, magnification = 1)
 
         char_pixmap_item = self.scene.addPixmap(qt_glyph.pixmap)
@@ -122,6 +132,8 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
     ##############################################
 
     def add_pk_char(self, font, glyph_index):
+
+        self._logger.info('')
 
         self.qt_glyph = qt_glyph = QtPkGlyph(font, glyph_index, magnification = 1)
 
@@ -137,7 +149,7 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
 
         dx = 10
 
-        print 'keyPressEvent', key
+        # print 'keyPressEvent', key
 
         if key == QtCore.Qt.Key_Up:
             self.translate(0, -dx)

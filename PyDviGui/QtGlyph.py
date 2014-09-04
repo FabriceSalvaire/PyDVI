@@ -13,9 +13,11 @@ __all__= ['QtFtGlyph', 'QtPkGlyph']
 
 ####################################################################################################
 
-from PyQt4 import QtGui, QtCore
+import logging
 
 import numpy as np
+
+from PyQt4 import QtGui, QtCore
 
 ####################################################################################################
 
@@ -108,7 +110,7 @@ class QtFtGlyph(object):
 
     def __init__(self, font, glyph_index, magnification):
 
-        print 'QtFtGlyph', font.name, glyph_index, magnification
+        # print 'QtFtGlyph', font.name, glyph_index, magnification
 
         size = magnification * font.tfm.design_font_size # pt
         resolution = 300 # dpi
@@ -126,12 +128,12 @@ class QtFtGlyph(object):
 
         glyph_pixmap.loadFromData(QtCore.QByteArray(glyph_bitmap.bitmap))
 
-        print 'size:', size
-        print 'resolution:', resolution
-        print 'width:', glyph_bitmap.width
-        print 'height:', glyph_bitmap.rows
-        print 'left:', glyph_bitmap.left
-        print 'top:', glyph_bitmap.top
+        # print 'size:', size
+        # print 'resolution:', resolution
+        # print 'width:', glyph_bitmap.width
+        # print 'height:', glyph_bitmap.rows
+        # print 'left:', glyph_bitmap.left
+        # print 'top:', glyph_bitmap.top
 
         self.pixmap = glyph_pixmap
 
@@ -152,7 +154,7 @@ class QtPkGlyph(object):
 
     def __init__(self, font, glyph_index, magnification):
 
-        print 'QtPkGlyph', font.name, glyph_index, magnification
+        # print 'QtPkGlyph', font.name, glyph_index, magnification
 
         glyph = font[glyph_index]
 
