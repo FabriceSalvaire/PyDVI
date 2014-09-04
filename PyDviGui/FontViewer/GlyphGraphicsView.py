@@ -136,7 +136,7 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
 
         self._logger.info('')
 
-        self.qt_glyph = qt_glyph = QtFtGlyph(font, glyph_index, magnification = 1)
+        self.qt_glyph = qt_glyph = QtFtGlyph(font, glyph_index, magnification=1)
 
         char_pixmap_item = self.scene.addPixmap(qt_glyph.pixmap)
         char_pixmap_item.setOffset(qt_glyph.horizontal_offset, qt_glyph.vertical_offset)

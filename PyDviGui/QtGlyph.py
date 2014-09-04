@@ -126,20 +126,17 @@ class QtFtGlyph(object):
         # print 'QtFtGlyph', font.name, glyph_index, magnification
 
         size = magnification * font.tfm.design_font_size # pt
+        size = 100 # Fixme
         resolution = 300 # dpi
 
         glyph = font.get_glyph(glyph_index, size, resolution)
 
-        glyph_bitmap = glyph.glyph_bitmap
-
-        np_bitmap = np.fromstring(glyph_bitmap.bitmap, dtype=np.uint8)
-        np_bitmap.shape = glyph_bitmap.rows, glyph_bitmap.width
-
+        np_bitmap = glyph.glyph_bitmap
+        #!# np_bitmap = np.fromstring(glyph_bitmap.bitmap, dtype=np.uint8)
+        #!# np_bitmap.shape = glyph_bitmap.rows, glyph_bitmap.width
         glyph_image = gray_array_to_qimage(np_bitmap)
-        
         glyph_pixmap = QtGui.QPixmap.fromImage(glyph_image)
-
-        glyph_pixmap.loadFromData(QtCore.QByteArray(glyph_bitmap.bitmap))
+        #!# glyph_pixmap.loadFromData(QtCore.QByteArray(np_bitmap))
 
         # print 'size:', size
         # print 'resolution:', resolution
@@ -150,10 +147,14 @@ class QtFtGlyph(object):
 
         self.pixmap = glyph_pixmap
 
-        self.width  = glyph_bitmap.width
-        self.height = glyph_bitmap.rows
-        self.horizontal_offset = glyph_bitmap.left
-        self.vertical_offset = - glyph_bitmap.top
+        #!# self.width  = glyph_bitmap.width
+        #!# self.height = glyph_bitmap.rows
+        #!# self.horizontal_offset = glyph_bitmap.left
+        #!# self.vertical_offset = - glyph_bitmap.top
+        self.width  = np_bitmap.shape[1]
+        self.height = np_bitmap.shape[0]
+        self.horizontal_offset = 0
+        self.vertical_offset = 0
 
         # Fixme: Compute once?
         self.h_scale = magnification*dpi2mm(resolution)
@@ -170,13 +171,9 @@ class QtPkGlyph(object):
         # print 'QtPkGlyph', font.name, glyph_index, magnification
 
         glyph = font[glyph_index]
-
         glyph_bitmap = glyph.get_glyph_bitmap()
-        
         glyph_image = bitmap_array_to_qimage(glyph_bitmap)
-       
         glyph_pixmap = QtGui.QPixmap.fromImage(glyph_image)
-
         self.pixmap = glyph_pixmap
 
         #

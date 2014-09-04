@@ -76,7 +76,8 @@ class MainWindow(MainWindowBase):
 
         form = self.main_window_ui
 
-        self.font_manager = FontManager(font_map='pdftex', use_pk=form.pk_radio_button.isChecked())
+        use_pk = form.pk_radio_button.isChecked()
+        self.font_manager = FontManager(font_map='pdftex', use_pk=use_pk)
         form.font_information_table_view.resizeColumnsToContents()
         self.load_font()
 
@@ -98,7 +99,7 @@ class MainWindow(MainWindowBase):
         form.font_information_table_view.resizeColumnsToContents()
         form.char_code_spin_box.setMaximum(len(self.font) -1)
         # self.font.print_summary()
-        self.show_glyph(0)
+        self.show_glyph(form.char_code_spin_box.value())
 
         #except:
             #pass
