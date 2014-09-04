@@ -1,18 +1,18 @@
 ===================
-PyDVI V0.1.0
+PyDvi V0.1.0
 ===================
 
-PyDVI is a Python library that provides tools to read TeX DVI file, Packed Font and TeX Font Metric,
+PyDvi is a Python library that provides tools to read TeX DVI file, Packed Font and TeX Font Metric,
 Font Map and Font Encoding. The library provides a DVI Machine base class hat can be plugged to a
 TeX Daemon instance in order to render on-the-fly TeX inputs.
 
-:Info: The home page of PyDVI is located at http://fabricesalvaire.github.com/PyDVI
+:Info: The home page of PyDvi is located at http://fabricesalvaire.github.com/PyDvi
 
 Source Repository
 -----------------
 
-The PyDVI project is hosted at github
-http://github.com/FabriceSalvaire/PyDVI
+The PyDvi project is hosted at github
+http://github.com/FabriceSalvaire/PyDvi
 
 Requirements
 ------------
@@ -53,7 +53,7 @@ To run the test programs do::
 To Go Further
 -------------
 
-:Warning: The development of PyDVI is on standby since several years now.
+:Warning: The development of PyDvi is on standby since several years now.
 
 Some idea to go further:
 

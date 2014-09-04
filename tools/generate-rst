@@ -3,7 +3,7 @@
 
 ####################################################################################################
 #
-# PyDVI - A Python Library to Process DVI Stream.
+# PyDvi - A Python Library to Process DVI Stream.
 # Copyright (C) 2009 Salvaire Fabrice
 #
 ####################################################################################################
@@ -21,7 +21,7 @@
 #
 # ./generate-rst --root-path=...
 #
-# ./tools/generate-rst --root-path=$PWD --module-path=$PWD/PyDVI/Tools --file-per-module --dst-path=./doc/sphinx/source/api/modules
+# ./tools/generate-rst --root-path=$PWD --module-path=$PWD/PyDvi/Tools --file-per-module --dst-path=./doc/sphinx/source/api/modules
 #
 ####################################################################################################
 

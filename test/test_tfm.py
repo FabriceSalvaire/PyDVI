@@ -1,6 +1,6 @@
 ####################################################################################################
 #
-# PyDVI - A Python Library to Process DVI Stream.
+# PyDvi - A Python Library to Process DVI Stream.
 # Copyright (C) 2009 Salvaire Fabrice
 #
 ####################################################################################################
@@ -18,8 +18,8 @@ import sys
 
 ####################################################################################################
 
-from PyDVI.Kpathsea import kpsewhich
-from PyDVI.TfmParser import TfmParser
+from PyDvi.Font.TfmParser import TfmParser
+from PyDvi.Kpathsea import kpsewhich
 
 ####################################################################################################
 

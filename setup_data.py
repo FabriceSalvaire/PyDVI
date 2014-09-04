@@ -1,6 +1,6 @@
 ####################################################################################################
 # 
-# PyDVI - A Python Library to Process DVI Stream..
+# PyDvi - A Python Library to Process DVI Stream..
 # Copyright (C) 2012 Salvaire Fabrice
 #
 # This program is free software: you can redistribute it and/or modify
@@ -46,10 +46,10 @@ setup_dict = dict(
     description='A Python Library to Process DVI Stream.',
     license = "GPLv3",
     keywords = "TeX, LaTeX, DVI",
-    url='https://github.com/FabriceSalvaire/PyDVI',
+    url='https://github.com/FabriceSalvaire/PyDvi',
     scripts=[''],
-    packages=['PyDVI'],
-    data_files = [('share/PyDVI/icons',['share/icons/@project@.svg']),
+    packages=['PyDvi'],
+    data_files = [('share/PyDvi/icons',['share/icons/@project@.svg']),
                   ('share/applications', ['spec/@project@.desktop']),
                   ],
     long_description=read('README.pypi'),
