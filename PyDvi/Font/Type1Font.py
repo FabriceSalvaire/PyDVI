@@ -63,59 +63,6 @@ def test_bit(flags, mask):
 
 ####################################################################################################
 
-# # 1/64th of pixels
-
-# def convert_26_6(x):
-#     return float(x)/2**6
-
-# # 1/65536th of pixels
-
-# def convert_16_16(x):
-#     return float(x)/2**16
-
-####################################################################################################
-
-# class FtGlyph(object):
-
-#     ##############################################
-
-#     def __init__(self, font, glyph_index, size, resolution):
-
-#         self.font = font
-#         self.glyph_index = glyph_index
-#         self.size = size
-#         self.resolution = resolution
-
-#         face = self.font._face
-
-#         # The character widths and heights are specified in 1/64th of points. A point is a physical
-#         # distance, equaling 1/72th of an inch.
-
-#         size *= 64
-#         # Fixme ....
-#         f.set_char_size(self, width=0, height=0, hres=72, vres=72)
-#         face.set_char_size()
-
-#         self.glyph = face.load_glyph(glyph_index, flags=4)
-
-#         # print 'Char Box:', map(convert_26_6, self.glyph.getCBox(ft2.ft_glyph_bbox_subpixels))
-#         # print 'Advance:', map(convert_16_16, self.glyph.advance)
-
-#         posx, posy = 0, 0
-#         self.glyph_bitmap = ft2.Bitmap(self.glyph, ft2.FT_RENDER_MODE_NORMAL, posx, posy)
-
-#         # bitmap = np.fromstring(glyph_bitmap.bitmap, dtype=np.uint8)
-#         # bitmap.shape = glyph_bitmap.rows, glyph_bitmap.width
-#         # print 'Bitmap shape:', bitmap.shape
-
-#         # print 'Left:', self.glyph_bitmap.left
-#         # print 'Top:', self.glyph_bitmap.top
-#         # print 'Number of grays:', self.glyph_bitmap.num_grays
-#         # print 'Pixel Mode:', self.glyph_bitmap.pixel_mode
-#         # print 'Palette Mode:', self.glyph_bitmap.palette_mode
-
-####################################################################################################
-
 class Type1Font(Font):
 
     _logger = _module_logger.getChild('Type1Font')
@@ -176,55 +123,20 @@ class Type1Font(Font):
 
     ##############################################
 
-    def font_size(self, font_size):
+    def font_size(self, font_size, resolution=600):
 
+        key = "{}@{}".format(font_size, resolution)
         if font_size not in self._font_size:
-            self._font_size[font_size] = FontSize(self, font_size)
-        return self._font_size[font_size]
-
-    # ##############################################
-
-    # def get_char_index(self, char_code):
-
-    #     '''
-    #     Return the glyph index of a given character code. This function uses a charmap object to do
-    #     the mapping.
-    #     '''
-
-    #     return self._face.get_char_index[char_code]
-
-    # ##############################################
-
-    # def get_glyph_index(self, glyph_name):
-
-    #     '''
-    #     Return the glyph index of a given glyph name. This function uses driver specific objects to
-    #     do the translation.
-    #     '''
-
-    #     return self._face.get_name_index(glyph_name)
-
-    # ##############################################
-
-    # @staticmethod
-    # def hash_glyph(glyph_index, size, resolution):
-
-    #     return hex(glyph_index)[2:] + hex(int(640*size))[1:] + hex(resolution)[1:]
+            self._font_size[key] = FontSize(self, font_size, resolution)
+        return self._font_size[key]
 
     ##############################################
 
-    def get_glyph(self, glyph_index, size, resolution):
+    def get_glyph(self, glyph_index, size, resolution=600):
 
         self._logger.info("glyph[{}] @size {} @resolution {} dpi".format(glyph_index, size, resolution))
 
-        font_size = self.font_size(size)
-
-        # glyph_hash_key = self.hash_glyph(glyph_index, size, resolution)
-
-        # if glyph_hash_key in self._glyphs:
-        #     glyph = self._glyphs[glyph_hash_key]
-        # else:
-        #     glyph = self._glyphs[glyph_hash_key] = FtGlyph(self, glyph_index, size, resolution)
+        font_size = self.font_size(size, resolution)
 
         glyph_index += 1 # Fixme: ???
         charcode, name = self._index_to_charcode[glyph_index]
@@ -310,9 +222,9 @@ is scalable:         %s
             except ValueError:
                 name = '<unknown character>'
             message += "  [%d] 0x%04lx %s %s\n" % (glyph_index,
-                                                 charcode,
-                                                 unicode_character,
-                                                 name)
+                                                   charcode,
+                                                   unicode_character,
+                                                   name)
             # face.get_glyph_name(glyph_index) # is not available
             charcode, glyph_index = face.get_next_char(charcode, glyph_index)
 
@@ -324,10 +236,11 @@ class FontSize(object):
 
     ##############################################
 
-    def __init__(self, font, font_size):
+    def __init__(self, font, font_size, resolution=600):
 
         self._font = font
         self._size = font_size
+        self._resolution = resolution
 
         self._metrics = FontMetrics(self)
         self._glyphs = {}
@@ -346,6 +259,10 @@ class FontSize(object):
     def metrics(self):
         return self._metrics
 
+    @property
+    def resolution(self):
+        return self._resolution
+
     ##############################################
 
     def __getitem__(self, charcode): #!# in fact glyph_index
@@ -360,8 +277,6 @@ class FontSize(object):
 
     def load_all_glyphs(self):
 
-        # self.load_from_string(string.printable)
-
         face = self._font._face
         charcode, glyph_index = face.get_first_char()
         while glyph_index:
@@ -370,18 +285,11 @@ class FontSize(object):
 
     ##############################################
  
-    def load_from_string(self, charcodes):
-
-        for charcode in charcodes:
-            self.load_glyph(charcode)
-
-    ##############################################
- 
     def _set_face_transfrom(self):
 
         face = self._font._face
         horizontal_scale = 100
-        resolution = 72 # dpi
+        resolution = self._resolution # dpi
         face.set_char_size(int(to_64th_point(self._size)), 0,
                            horizontal_scale*resolution, resolution)
         # Matrix cooeficients are expressed in 16.16 fixed-point units.
@@ -407,11 +315,9 @@ class FontSize(object):
         self.dirty = True
 
         face = self._font._face
-        #!# atlas = self._font._atlas
 
         flags = freetype.FT_LOAD_RENDER | freetype.FT_LOAD_FORCE_AUTOHINT
-        #!# if atlas.depth == 3:
-        #!# flags |= freetype.FT_LOAD_TARGET_LCD
+        # flags |= freetype.FT_LOAD_TARGET_LCD
 
         #!# face.load_char(charcode, flags)
         glyph_index = charcode
@@ -424,41 +330,20 @@ class FontSize(object):
         rows = face.glyph.bitmap.rows
         pitch = face.glyph.bitmap.pitch # stride / number of bytes taken by one bitmap row
 
-        # Glyphes are separated by a margin
-        # margin = 1 # px
-        # dimension are given in pixel thus we correct the bitmap width
-        #!# x, y, w, h = atlas.get_region(width/atlas.depth +2, rows +2)
-        #!# if x == -1:
-        #!#     raise NameError("Cannot allocate glyph in atlas")
-        #!# x, y = x+1, y+1
-        #!# w, h = w-2, h-2 # = width/depth, rows
-
         # Remove padding
         data = np.array(bitmap.buffer).reshape(rows, pitch)
         data = data[:,:width].astype(np.ubyte)
-        #!# data = data.reshape(rows, width/atlas.depth, atlas.depth)
         
         # Gamma correction
         # gamma = 1.5
         # Z = (data/255.0)**gamma
         # data = Z*255
 
-        #!# atlas.set_region((x, y, w, h), data)
-
-        # Compute texture coordinates
-        #!# u0 = x / float(atlas.width)
-        #!# v0 = y / float(atlas.height)
-        #!# u1 = (x + w) / float(atlas.width)
-        #!# v1 = (y + h) / float(atlas.height)
-        #!# texture_coordinate = (u0, v0, u1, v1)
-        texture_coordinate = (0, 0, 0, 0)
-
         # Build glyph
-        #!# size = w, h
-        size = 0, 0
+        size = data.shape[1], data.shape[0]
         offset = left, top
         advance = face.glyph.advance.x, face.glyph.advance.y
-        glyph = Glyph(charcode, size, offset, advance, texture_coordinate)
+        glyph = Glyph(self, charcode, size, offset, advance)
         glyph.glyph_bitmap = data # Fixme:
         self._glyphs[charcode] = glyph
 
@@ -506,7 +391,7 @@ class Glyph(object):
     of a single character. It is generally built automatically by a Font.
     """
 
-    def __init__(self, charcode, size, offset, advance, texture_coordinates):
+    def __init__(self, font_size, charcode, size, offset, advance):
 
         """
         Build a new glyph
@@ -525,16 +410,13 @@ class Glyph(object):
 
         advance: tuple of 2 floats
             Glyph advance
-
-        texture_coordinates: tuple of 4 floats
-            Texture coordinates of bottom-left and top-right corner
         """
 
+        self.font_size = font_size
         self.charcode = charcode
         self.size = size
         self.offset = offset
         self.advance = advance
-        self.texture_coordinates = texture_coordinates
 
         self._kerning = {}
 

@@ -100,6 +100,7 @@ class MainWindow(MainWindowBase):
         form.char_code_spin_box.setMaximum(len(self.font) -1)
         # self.font.print_summary()
         self.show_glyph(form.char_code_spin_box.value())
+        form.glyph_graphics_view.fit_view()
 
         #except:
             #pass

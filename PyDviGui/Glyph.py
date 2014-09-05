@@ -22,7 +22,7 @@
 
 ####################################################################################################
 
-__all__= ['QtFtGlyph', 'QtPkGlyph']
+__all__= ['FtGlyph', 'PkGlyph']
 
 ####################################################################################################
 
@@ -116,9 +116,9 @@ def gray_array_to_qimage(np_array):
 
 ####################################################################################################
 
-class QtFtGlyph(object):
+class FtGlyph(object):
 
-    _logger = _module_logger.getChild('QtFtGlyph')
+    _logger = _module_logger.getChild('FtGlyph')
 
     ##############################################
 
@@ -126,26 +126,26 @@ class QtFtGlyph(object):
 
         self._logger.info("font {} glyph[{}] @mag {}".format(font.name, glyph_index, magnification))
 
+        # size: 47 57  offset: -2 -56 scale: 0.042 0.042
+        # versus Pk
+        # size: 45 57  offset: 3 -56 scale: 0.042 0.042
+        #  25.4 mm / 600 dpi * 50 px = 2.12 mm versus 2.11 mm 
         size = magnification * font.tfm.design_font_size # pt
-        resolution = 300 # dpi
 
-        glyph = font.get_glyph(glyph_index, size, resolution)
+        glyph = font.get_glyph(glyph_index, size)
         glyph_bitmap = glyph.glyph_bitmap
 
         glyph_image = gray_array_to_qimage(glyph_bitmap)
         glyph_pixmap = QtGui.QPixmap.fromImage(glyph_image)
         self.pixmap = glyph_pixmap
 
-        #!# self.width  = glyph_bitmap.width
-        #!# self.height = glyph_bitmap.rows
-        #!# self.horizontal_offset = glyph_bitmap.left
-        #!# self.vertical_offset = - glyph_bitmap.top
         self.width = glyph_bitmap.shape[1]
         self.height = glyph_bitmap.shape[0]
-        self.horizontal_offset = 0
-        self.vertical_offset = 0
+        self.horizontal_offset = -glyph.offset[0]
+        self.vertical_offset = -glyph.offset[1]
 
         # Fixme: Compute once?
+        resolution = glyph.font_size.resolution
         self.h_scale = magnification*dpi2mm(resolution)
         self.v_scale = magnification*dpi2mm(resolution)
 
@@ -156,9 +156,9 @@ class QtFtGlyph(object):
 
 ####################################################################################################
 
-class QtPkGlyph(object):
+class PkGlyph(object):
 
-    _logger = _module_logger.getChild('QtPkGlyph')
+    _logger = _module_logger.getChild('PkGlyph')
 
     ##############################################
 
@@ -196,6 +196,7 @@ class QtPkGlyph(object):
 
         # font cmr10 glyph[0] @mag 1
         # size: 45 57  offset: 3 -56 scale: 0.042 0.042
+        #  25.4 mm / 600 dpi * 50 px = 2.12 mm versus 2.11 mm 
         template = "size: {} {}  offset: {} {} scale: {:4.3f} {:4.3f}"
         self._logger.info(template.format(self.width, self.height,
                                           self.horizontal_offset, self.vertical_offset, 

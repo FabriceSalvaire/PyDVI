@@ -32,7 +32,7 @@ from PyDvi.Font.PkFont import PkFont
 from PyDvi.Font.Type1Font import Type1Font
 from PyDvi.TeXUnit import *
 
-from ..QtGlyph import QtPkGlyph, QtFtGlyph
+from ..Glyph import PkGlyph, FtGlyph
 
 ####################################################################################################
 
@@ -70,6 +70,12 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
 
     ##############################################
 
+    def fit_view(self):
+
+        self.fitInView(self.sceneRect(), QtCore.Qt.KeepAspectRatio)
+
+    ##############################################
+
     def show_glyph(self, font, glyph_index):
    
         self.scene.clear()
@@ -83,21 +89,20 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
         self.add_glyph_box()
 
         self.scene.update()
-        self.fitInView(self.sceneRect(), QtCore.Qt.KeepAspectRatio)
 
     ##############################################
 
     def add_glyph_box(self):
 
-        qt_glyph = self.qt_glyph
+        glyph = self._glyph
 
         pen = QtGui.QPen(QtCore.Qt.red, .5)
 
-        char_box = QtCore.QRectF(qt_glyph.horizontal_offset, qt_glyph.vertical_offset,
-                                 qt_glyph.width, qt_glyph.height)
+        char_box = QtCore.QRectF(glyph.horizontal_offset, glyph.vertical_offset,
+                                 glyph.width, glyph.height)
 
         char_box_item = self.scene.addRect(char_box, pen)
-        char_box_item.scale(qt_glyph.h_scale, qt_glyph.v_scale)
+        char_box_item.scale(glyph.h_scale, glyph.v_scale)
 
     ##############################################
 
@@ -134,29 +139,24 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
 
     ##############################################
 
+    def _add_glyph(self, glyph):
+
+        self._glyph = glyph
+        char_pixmap_item = self.scene.addPixmap(glyph.pixmap)
+        char_pixmap_item.setOffset(glyph.horizontal_offset, glyph.vertical_offset)
+        char_pixmap_item.scale(glyph.h_scale, glyph.v_scale)
+
+    ##############################################
+
     def add_type1_char(self, font, glyph_index):
 
-        self._logger.info('')
-
-        self.qt_glyph = qt_glyph = QtFtGlyph(font, glyph_index, magnification=10) # Fixme
-
-        char_pixmap_item = self.scene.addPixmap(qt_glyph.pixmap)
-        char_pixmap_item.setOffset(qt_glyph.horizontal_offset, qt_glyph.vertical_offset)
-        char_pixmap_item.scale(qt_glyph.h_scale, qt_glyph.v_scale)
+        self._add_glyph(FtGlyph(font, glyph_index, magnification=1))
 
     ##############################################
 
     def add_pk_char(self, font, glyph_index):
 
-        # Fixme: duplicated code
-
-        self._logger.info('')
-
-        self.qt_glyph = qt_glyph = QtPkGlyph(font, glyph_index, magnification=1)
-
-        char_pixmap_item = self.scene.addPixmap(qt_glyph.pixmap)
-        char_pixmap_item.setOffset(qt_glyph.horizontal_offset, qt_glyph.vertical_offset)
-        char_pixmap_item.scale(qt_glyph.h_scale, qt_glyph.v_scale)
+        self._add_glyph(PkGlyph(font, glyph_index, magnification=1))
 
     ##############################################
 
