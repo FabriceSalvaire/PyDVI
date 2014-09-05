@@ -32,7 +32,7 @@ from PyDvi.Font.PkFont import PkFont
 from PyDvi.Font.Type1Font import Type1Font
 from PyDvi.TeXUnit import *
 
-from ..Glyph import PkGlyph, FtGlyph
+from .Glyph import PkGlyph, FtGlyph
 
 ####################################################################################################
 
