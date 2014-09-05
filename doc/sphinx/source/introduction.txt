@@ -1,0 +1,15 @@
+.. -*- Mode: rst -*-
+
+.. include:: abbreviation.txt
+
+==============
+ Introduction
+==============
+
+PyDvi is a |Python|_ library that provides tools to read TeX DVI file, Packed Font and TeX Font
+Metric, Font Map and Font Encoding. The library provides a DVI Machine base class hat can be plugged
+to a TeX Daemon instance in order to render on-the-fly TeX inputs.
+
+.. include:: features.txt
+
+.. End

@@ -1,0 +1,42 @@
+.. -*- Mode: rst -*-
+
+..
+   |PyDviUrl|
+   |PyDviHomePage|_
+   |PyDviDoc|_
+   |PyDvi@github|_
+   |PyDvi@readthedocs|_
+   |PyDvi@readthedocs-badge|
+   |PyDvi@pypi|_
+
+.. |ohloh| image:: https://www.openhub.net/accounts/230426/widgets/account_tiny.gif
+   :target: https://www.openhub.net/accounts/fabricesalvaire
+   :alt: Fabrice Salvaire's Ohloh profile
+   :height: 15px
+   :width:  80px
+
+.. |PyDviUrl| replace:: http://fabricesalvaire.github.io/PyDVI
+
+.. |PyDviHomePage| replace:: PyDvi Home Page
+.. _PyDviHomePage: http://fabricesalvaire.github.io/PyDVI
+
+.. |PyDviDoc| replace:: PyDvi Documentation
+.. _PyDviDoc: http://pydvi.readthedocs.org/en/latest
+
+.. |PyDvi@readthedocs-badge| image:: https://readthedocs.org/projects/pydvi/badge/?version=latest
+   :target: http://pydvi.readthedocs.org/en/latest
+
+.. |PyDvi@github| replace:: https://github.com/FabriceSalvaire/PyDVI
+.. .. _PyDvi@github: https://github.com/FabriceSalvaire/PyDVI
+
+.. |PyDvi@readthedocs| replace:: http://pydvi.readthedocs.org
+.. .. _PyDvi@readthedocs: http://pydvi.readthedocs.org
+
+.. |PyDvi@pypi| replace:: https://pypi.python.org/pypi/PyDVI
+.. .. _PyDvi@pypi: https://pypi.python.org/pypi/PyDVI
+
+.. |Build Status| image:: https://travis-ci.org/FabriceSalvaire/PyDVI.svg?branch=master
+   :target: https://travis-ci.org/FabriceSalvaire/PyDVI
+   :alt: PyDvi build status @travis-ci.org
+
+.. End

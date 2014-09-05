@@ -1,6 +1,8 @@
-=========================
- Reference Documentation
-=========================
+.. _bibliography-page:
+
+==============
+ Bibliography
+==============
 
 This software was designed according to the official TeX Web2C documentation
 (http://www.tug.org/web2c/).
