@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1.6. OpcodeParser &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="3.1. PyDvi" href="../PyDvi.html" />
+    <link rel="next" title="3.1.7. PyDviVersion" href="PyDviVersion.html" />
+    <link rel="prev" title="3.1.5.1. Logging" href="Logging/Logging.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="PyDviVersion.html" title="3.1.7. PyDviVersion"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Logging/Logging.html" title="3.1.5.1. Logging"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../PyDvi.html" accesskey="U">3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-PyDvi.OpcodeParser">
+<span id="opcodeparser"></span><h1>3.1.6. <tt class="xref py py-mod docutils literal"><span class="pre">OpcodeParser</span></tt><a class="headerlink" href="#module-PyDvi.OpcodeParser" title="Permalink to this headline">¶</a></h1>
+<p>This modules provides tools to parse TeX stream like DVI file and PK Font.</p>
+<dl class="class">
+<dt id="PyDvi.OpcodeParser.OpcodeParserSet">
+<em class="property">class </em><tt class="descclassname">PyDvi.OpcodeParser.</tt><tt class="descname">OpcodeParserSet</tt><big>(</big><em>opcode_definitions</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/OpcodeParser.html#OpcodeParserSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.OpcodeParser.OpcodeParserSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">list</span></tt></p>
+<p>This class defines an opcode parser set.</p>
+<p>The parameter <em>opcode_definitions</em> is a tuple of &#8216;opcode definition&#8217;.</p>
+<p>An opcode definition is a tuple that corresponds to the parameters of the
+<a class="reference internal" href="#PyDvi.OpcodeParser.OpcodeParser" title="PyDvi.OpcodeParser.OpcodeParser"><tt class="xref py py-class docutils literal"><span class="pre">OpcodeParser</span></tt></a> constructor.  Except that the opcode byte can be a list that defines a
+range of opcode bytes.  In this case the opcode is duplicated in the opcode range.  Moreover
+the parameter&#8217;s definition can be a list that defines a range for a mono parameter set of
+opcodes.  For example <tt class="docutils literal"><span class="pre">[1,4]</span></tt> will create successively an opcode with 1 to 4-byte unsigned
+parameter with an incremental opcode byte starting from the one specified.</p>
+<p>Usage summary:</p>
+<div class="highlight-python"><div class="highlight"><pre>opcode_definitions : (opcode_definition, ...)
+
+opcode_definition : 
+  (opcode_indexes, opcode_name, opcode_description, opcode_parameters=(), opcode_class=None) |
+  (opcode_indexes, opcode_parser_class),
+
+opcode_indexes :
+  index |
+  [lower_index, upper_index] # duplicate the opcode in the range
+
+opcode_parameters :
+  (p0, p1, ...) |
+  ([lower_n, upper_n]) # opcode at [index + i] has parameter p[i]
+</pre></div>
+</div>
+<dl class="method">
+<dt id="PyDvi.OpcodeParser.OpcodeParserSet._init_opcode_parser">
+<tt class="descname">_init_opcode_parser</tt><big>(</big><em>opcode_definition</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/OpcodeParser.html#OpcodeParserSet._init_opcode_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.OpcodeParser.OpcodeParserSet._init_opcode_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build the set.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDvi.OpcodeParser.OpcodeParser">
+<em class="property">class </em><tt class="descclassname">PyDvi.OpcodeParser.</tt><tt class="descname">OpcodeParser</tt><big>(</big><em>opcode</em>, <em>name</em>, <em>description</em>, <em>parameters=()</em>, <em>opcode_class=None</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/OpcodeParser.html#OpcodeParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.OpcodeParser.OpcodeParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>This class implements an opcode parser.</p>
+<p>The argument <em>opcode</em> defines the opcode byte.</p>
+<p>The argument <em>name</em> and <em>description</em> defines the name and a description string, respectively.</p>
+<p>The argument <em>parameters</em> is a tuple that defines the parameters of the opcode.  Each item
+is an integer that gives the number of bytes of the parameter.  If this number is negative
+then the parameter is a signed integer.  For example <tt class="docutils literal"><span class="pre">(2,</span> <span class="pre">-3)</span></tt> defines an opcode having as
+parameters a 2-byte unsigned integer followed by a 3-byte signed integer.</p>
+<p>The optional <em>opcode_class</em> defines an <tt class="xref py py-class docutils literal"><span class="pre">PyDvi.DviMachine.Opcode</span></tt> subclass for the
+opcode.</p>
+<dl class="method">
+<dt id="PyDvi.OpcodeParser.OpcodeParser._init_parameter_readers">
+<tt class="descname">_init_parameter_readers</tt><big>(</big><em>parameters</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/OpcodeParser.html#OpcodeParser._init_parameter_readers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.OpcodeParser.OpcodeParser._init_parameter_readers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.OpcodeParser.OpcodeParser.read_parameters">
+<tt class="descname">read_parameters</tt><big>(</big><em>opcode_parser</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/OpcodeParser.html#OpcodeParser.read_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.OpcodeParser.OpcodeParser.read_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the opcode parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.OpcodeParser.OpcodeParser.to_opcode">
+<tt class="descname">to_opcode</tt><big>(</big><em>args</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/OpcodeParser.html#OpcodeParser.to_opcode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.OpcodeParser.OpcodeParser.to_opcode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an an <tt class="xref py py-class docutils literal"><span class="pre">PyDvi.DviMachine.Opcode</span></tt> subclass isntance.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Logging/Logging.html"
+                        title="previous chapter">3.1.5.1. <tt class="docutils literal"><span class="pre">Logging</span></tt></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="PyDviVersion.html"
+                        title="next chapter">3.1.7. <tt class="docutils literal"><span class="pre">PyDviVersion</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api/PyDvi/OpcodeParser.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="PyDviVersion.html" title="3.1.7. PyDviVersion"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Logging/Logging.html" title="3.1.5.1. Logging"
+             >previous</a> |</li>
+        <li><a href="../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

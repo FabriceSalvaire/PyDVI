@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1.3.1. Encoding &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="3.1.3. Font" href="../Font.html" />
+    <link rel="next" title="3.1.3.2. Font" href="Font.html" />
+    <link rel="prev" title="3.1.3. Font" href="../Font.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Font.html" title="3.1.3.2. Font"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../Font.html" title="3.1.3. Font"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li>
+          <li><a href="../Font.html" accesskey="U">3.1.3. <tt class="docutils literal"><span class="pre">Font</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-PyDvi.Font.Encoding">
+<span id="encoding"></span><h1>3.1.3.1. <tt class="xref py py-mod docutils literal"><span class="pre">Encoding</span></tt><a class="headerlink" href="#module-PyDvi.Font.Encoding" title="Permalink to this headline">¶</a></h1>
+<p>This module handles TeX encoding file.</p>
+<p>An encoding file map the glyph index with its symbolic name. It uses the <tt class="docutils literal"><span class="pre">.enc</span></tt> extension.</p>
+<p>For example, the content of <tt class="file docutils literal"><span class="pre">cork.enc</span></tt> is:</p>
+<div class="highlight-python"><div class="highlight"><pre>/CorkEncoding [ % now 256 chars follow
+% 0x00
+  /grave /acute /circumflex /tilde /dieresis /hungarumlaut /ring /caron
+  /breve /macron /dotaccent /cedilla
+  /ogonek /quotesinglbase /guilsinglleft /guilsinglright
+...
+% 0xF0
+  /eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /oe
+  /oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /germandbls
+] def
+</pre></div>
+</div>
+<p>The percent character is used for comment as for TeX.</p>
+<p>The content of this file can be parsed using:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cork_encoding</span> <span class="o">=</span> <span class="n">Encoding</span><span class="p">(</span><span class="s">&#39;/usr/share/texmf/fonts/enc/dvips/base/cork.enc&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The encoding&#8217;s name can be retrieved using:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cork_encoding</span><span class="o">.</span><span class="n">name</span>
+<span class="go">&#39;CorkEncoding&#39;</span>
+</pre></div>
+</div>
+<p>The number of glyphes can be obtained using the function <a class="reference external" href="http://docs.python.org/library/functions.html#len" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">len()</span></tt></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">cork_encoding</span><span class="p">)</span>
+<span class="go">256</span>
+</pre></div>
+</div>
+<p>The index of the glyph <tt class="docutils literal"><span class="pre">eth</span></tt> can be retrieved using:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cork_encoding</span><span class="p">[</span><span class="s">&#39;eth&#39;</span><span class="p">]</span>
+<span class="go">0xF0</span>
+</pre></div>
+</div>
+<p>and reciprocally:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cork_encoding</span><span class="p">[</span><span class="mh">0xF0</span><span class="p">]</span>
+<span class="go">&#39;eth&#39;</span>
+</pre></div>
+</div>
+<p>The methods <tt class="xref py py-meth docutils literal"><span class="pre">to_index()</span></tt> and <tt class="xref py py-meth docutils literal"><span class="pre">to_name()</span></tt> are used internally for this purpose.</p>
+<dl class="class">
+<dt id="PyDvi.Font.Encoding.Encoding">
+<em class="property">class </em><tt class="descclassname">PyDvi.Font.Encoding.</tt><tt class="descname">Encoding</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/Encoding.html#Encoding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.Encoding.Encoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Parse an encoding file and store the association between the index and the glyph&#8217;s name.</p>
+<p>Public attributes are:</p>
+<blockquote>
+<div><tt class="docutils literal"><span class="pre">name</span></tt></div></blockquote>
+<dl class="method">
+<dt id="PyDvi.Font.Encoding.Encoding._parse_glyph_names">
+<tt class="descname">_parse_glyph_names</tt><big>(</big><em>line</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/Encoding.html#Encoding._parse_glyph_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.Encoding.Encoding._parse_glyph_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find glyph names in <em>line</em>, as &#8216;/grave /acute /circumflex ...&#8217;.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Font.Encoding.Encoding._parse_name">
+<tt class="descname">_parse_name</tt><big>(</big><em>line</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/Encoding.html#Encoding._parse_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.Encoding.Encoding._parse_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the encoding name at the left of the line, as &#8216;/CorkEncoding&#8217;.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Font.Encoding.Encoding.print_summary">
+<tt class="descname">print_summary</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/Encoding.html#Encoding.print_summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.Encoding.Encoding.print_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Font.Encoding.Encoding.to_index">
+<tt class="descname">to_index</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/Encoding.html#Encoding.to_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.Encoding.Encoding.to_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the glyph index corresponding to the symbolic name.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Font.Encoding.Encoding.to_name">
+<tt class="descname">to_name</tt><big>(</big><em>i</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/Encoding.html#Encoding.to_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.Encoding.Encoding.to_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the symbolic name corresponding to the glyph index <em>i</em>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../Font.html"
+                        title="previous chapter">3.1.3. <tt class="docutils literal"><span class="pre">Font</span></tt></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Font.html"
+                        title="next chapter">3.1.3.2. <tt class="docutils literal"><span class="pre">Font</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api/PyDvi/Font/Encoding.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Font.html" title="3.1.3.2. Font"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../Font.html" title="3.1.3. Font"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li>
+          <li><a href="../Font.html" >3.1.3. <tt class="docutils literal"><span class="pre">Font</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

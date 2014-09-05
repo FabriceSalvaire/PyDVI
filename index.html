@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,14 +6,14 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Overview &mdash; PyDVI 0.1.0 documentation</title>
+    <title>Introduction &mdash; PyDvi 0.1.0 documentation</title>
     
     <link rel="stylesheet" href="static/default.css" type="text/css" />
     <link rel="stylesheet" href="static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '0.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -25,8 +23,8 @@
     <script type="text/javascript" src="static/jquery.js"></script>
     <script type="text/javascript" src="static/underscore.js"></script>
     <script type="text/javascript" src="static/doctools.js"></script>
-    <link rel="top" title="PyDVI 0.1.0 documentation" href="#" />
-    <link rel="next" title="1. Reference Documentation" href="reference-documentation.html" /> 
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="#" />
+    <link rel="next" title="1. Installation" href="installation.html" /> 
   </head>
   <body>
     <div class="related">
@@ -39,9 +37,9 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="reference-documentation.html" title="1. Reference Documentation"
+          <a href="installation.html" title="1. Installation"
              accesskey="N">next</a> |</li>
-        <li><a href="#">PyDVI 0.1.0 documentation</a> &raquo;</li> 
+        <li><a href="#">PyDvi 0.1.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -50,49 +48,104 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="overview">
+  <br/><p>Welcome to the PyDvi documentation!</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The official Home Page of PyDvi is located at <a class="reference external" href="http://fabricesalvaire.github.io/PyDVI">http://fabricesalvaire.github.io/PyDVI</a></p>
+<p>If you are at <a class="reference external" href="http://readthedocs.org">http://readthedocs.org</a> then you are reading the so called <em>latest documentation</em>.</p>
+<p>The <em>latest documentation</em> <a class="reference external" href="http://pydvi.readthedocs.org/en/latest"><img alt="PyDvi&#64;readthedocs-badge" src="https://readthedocs.org/projects/pydvi/badge/?version=latest" /></a> is automatically built from the
+git repository after each commit.</p>
+<p class="last">As opposite the <a class="reference external" href="http://fabricesalvaire.github.io/PyDVI">PyDvi Home Page</a> is built manually and is thus less prone to errors.</p>
+</div>
+<div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>PyDvi is a <a class="reference external" href="http://python.org">Python</a> library that provides tools to read TeX DVI file, Packed Font and TeX Font
+Metric, Font Map and Font Encoding. The library provides a DVI Machine base class hat can be plugged
+to a TeX Daemon instance in order to render on-the-fly TeX inputs.</p>
+<div class="section" id="to-go-further">
+<h2>To Go Further<a class="headerlink" href="#to-go-further" title="Permalink to this headline">¶</a></h2>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Warning:</th><td class="field-body">The development of PyDvi is on standby since several years now.</td>
+</tr>
+</tbody>
+</table>
+<p>Some idea to go further:</p>
+<ul class="simple">
+<li>implement an OpenGL based viewer, actual Qt rendering is inefficient</li>
+<li>use Freetype to render the glyph, cf. <a class="reference external" href="http://code.google.com/p/freetype-gl">http://code.google.com/p/freetype-gl</a> and distance field
+rendering technique</li>
+<li>review the font manager</li>
+<li>review the DVI machine</li>
+<li>review everything</li>
+<li>try pypy</li>
+</ul>
+</div>
+</div>
+<div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>The procedure to install PyDvi is described in the <a class="reference internal" href="installation.html#installation-page"><em>Installation Manual</em></a>.</p>
+</div>
+<div class="section" id="testing">
+<h1>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h1>
+<p>Some examples are provided with PyDvi, see the <a class="reference internal" href="examples.html#examples-page"><em>example section</em></a>.</p>
+</div>
+<div class="section" id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="reference-manual.html#reference-manual-page"><em>PyDvi Reference Manual</em></a></li>
+<li><a class="reference internal" href="bibliography.html#bibliography-page"><em>Bibliography</em></a></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="overview">
 <h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="reference-documentation.html">1. Reference Documentation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="dvi-format.html">1.1. Device-Independent File Format</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pk-format.html">1.2. Packet Font File Format</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reference-links.html">1.3. Relevant Softwares</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#dependencies">1.1. Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-from-pypi-repository">1.2. Installation from PyPi Repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-from-source">1.3. Installation from Source</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api/PyDVI.html">2. <tt class="docutils literal"><span class="pre">PyDVI</span></tt></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/DviMachine.html">2.1. <tt class="docutils literal"><span class="pre">DviMachine</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/DviParser.html">2.2. <tt class="docutils literal"><span class="pre">DviParser</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/Encoding.html">2.3. <tt class="docutils literal"><span class="pre">Encoding</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/Font.html">2.4. <tt class="docutils literal"><span class="pre">Font</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/FontManager.html">2.5. <tt class="docutils literal"><span class="pre">FontManager</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/FontMap.html">2.6. <tt class="docutils literal"><span class="pre">FontMap</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/Kpathsea.html">2.7. <tt class="docutils literal"><span class="pre">Kpathsea</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/OpcodeParser.html">2.8. <tt class="docutils literal"><span class="pre">OpcodeParser</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/PkFont.html">2.9. <tt class="docutils literal"><span class="pre">PkFont</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/PkFontParser.html">2.10. <tt class="docutils literal"><span class="pre">PkFontParser</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/PkGlyph.html">2.11. <tt class="docutils literal"><span class="pre">PkGlyph</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/PyDviVersion.html">2.12. <tt class="docutils literal"><span class="pre">PyDviVersion</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/TeXUnit.html">2.13. <tt class="docutils literal"><span class="pre">TeXUnit</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/TexDaemon.html">2.14. <tt class="docutils literal"><span class="pre">TexDaemon</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/Tfm.html">2.15. <tt class="docutils literal"><span class="pre">Tfm</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/TfmParser.html">2.16. <tt class="docutils literal"><span class="pre">TfmParser</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/Tools.html">2.17. <tt class="docutils literal"><span class="pre">Tools</span></tt></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/PyDVI/Type1Font.html">2.18. <tt class="docutils literal"><span class="pre">Type1Font</span></tt></a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">2. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference-manual.html">3. API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/PyDvi.html">3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/Config.html">3.1.1. <tt class="docutils literal"><span class="pre">Config</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/Dvi.html">3.1.2. <tt class="docutils literal"><span class="pre">Dvi</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/Font.html">3.1.3. <tt class="docutils literal"><span class="pre">Font</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/Kpathsea.html">3.1.4. <tt class="docutils literal"><span class="pre">Kpathsea</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/Logging.html">3.1.5. <tt class="docutils literal"><span class="pre">Logging</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/OpcodeParser.html">3.1.6. <tt class="docutils literal"><span class="pre">OpcodeParser</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/PyDviVersion.html">3.1.7. <tt class="docutils literal"><span class="pre">PyDviVersion</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/TeXUnit.html">3.1.8. <tt class="docutils literal"><span class="pre">TeXUnit</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/TexDaemon.html">3.1.9. <tt class="docutils literal"><span class="pre">TexDaemon</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/Tools.html">3.1.10. <tt class="docutils literal"><span class="pre">Tools</span></tt></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="reference-manual.html#indexes">3.2. Indexes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bibliography.html">4. Bibliography</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dvi-format.html">4.1. Device-Independent File Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pk-format.html">4.2. Packet Font File Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference-links.html">4.3. Relevant Softwares</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="reference-links.html#tex-engine">4.3.1. TeX Engine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference-links.html#scientific-plotting">4.3.2. Scientific Plotting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference-links.html#dvi-to-image-converter">4.3.3. DVI to Image Converter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference-links.html#dvi-viewer">4.3.4. DVI Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference-links.html#dvi-tools">4.3.5. DVI Tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference-links.html#tex-fonts">4.3.6. TeX Fonts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference-links.html#font-viewer">4.3.7. Font Viewer</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 </div>
-</div>
-<div class="section" id="indexes">
-<h1>Indexes<a class="headerlink" href="#indexes" title="Permalink to this headline">¶</a></h1>
-<blockquote>
-<div><ul class="simple">
-<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
-<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
-</ul>
-</div></blockquote>
 </div>
 
 
@@ -103,15 +156,19 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Overview</a><ul>
+<li><a class="reference internal" href="#">Introduction</a><ul>
+<li><a class="reference internal" href="#to-go-further">To Go Further</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#indexes">Indexes</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+<li><a class="reference internal" href="#overview">Overview</a></li>
 </ul>
 
   <h4>Next topic</h4>
-  <p class="topless"><a href="reference-documentation.html"
-                        title="next chapter">1. Reference Documentation</a></p>
+  <p class="topless"><a href="installation.html"
+                        title="next chapter">1. Installation</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/index.txt"
@@ -144,14 +201,14 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="reference-documentation.html" title="1. Reference Documentation"
+          <a href="installation.html" title="1. Installation"
              >next</a> |</li>
-        <li><a href="#">PyDVI 0.1.0 documentation</a> &raquo;</li> 
+        <li><a href="#">PyDvi 0.1.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2011, Fabrice Salvaire.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

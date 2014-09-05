@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1.10.8. Stream &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="3.1.10. Tools" href="../Tools.html" />
+    <link rel="next" title="3.1.10.9. TexCommentedFile" href="TexCommentedFile.html" />
+    <link rel="prev" title="3.1.10.7. RevisionVersion" href="RevisionVersion.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="TexCommentedFile.html" title="3.1.10.9. TexCommentedFile"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="RevisionVersion.html" title="3.1.10.7. RevisionVersion"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li>
+          <li><a href="../Tools.html" accesskey="U">3.1.10. <tt class="docutils literal"><span class="pre">Tools</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-PyDvi.Tools.Stream">
+<span id="stream"></span><h1>3.1.10.8. <tt class="xref py py-mod docutils literal"><span class="pre">Stream</span></tt><a class="headerlink" href="#module-PyDvi.Tools.Stream" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="PyDvi.Tools.Stream.AbstractStream">
+<em class="property">class </em><tt class="descclassname">PyDvi.Tools.Stream.</tt><tt class="descname">AbstractStream</tt><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Abstract class to read DVI, PK, TFM and VF streams.</p>
+<p>The followings methods are abstracts:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read" title="PyDvi.Tools.Stream.AbstractStream.read"><tt class="xref py py-meth docutils literal"><span class="pre">read()</span></tt></a></li>
+<li><a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.seek" title="PyDvi.Tools.Stream.AbstractStream.seek"><tt class="xref py py-meth docutils literal"><span class="pre">seek()</span></tt></a></li>
+<li><a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.tell" title="PyDvi.Tools.Stream.AbstractStream.tell"><tt class="xref py py-meth docutils literal"><span class="pre">tell()</span></tt></a></li>
+</ul>
+</div></blockquote>
+<p>and must be implemented in subclass.</p>
+<p>In the followings methods, the <em>position</em> argument is used to specify a position in the stream
+for the read operation.  If <em>position</em> is not <a class="reference external" href="http://docs.python.org/library/constants.html#None" title="(in Python v2.7)"><tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt></a>, it seeks to the specified position
+before to read the stream else it reads from the current position.  See also <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read_bytes" title="PyDvi.Tools.Stream.AbstractStream.read_bytes"><tt class="xref py py-meth docutils literal"><span class="pre">read_bytes()</span></tt></a>.</p>
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read">
+<tt class="descname">read</tt><big>(</big><em>number_of_bytes</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read <em>n</em> bytes from the current position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_bcpl">
+<tt class="descname">read_bcpl</tt><big>(</big><em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_bcpl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_bcpl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a BCPL string.</p>
+<p>The BCPL string format comes from the Basic Combined Programming Language.  The length of
+the string is given by the first byte, thus its length is limited to 256 characters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_big_endian_number">
+<tt class="descname">read_big_endian_number</tt><big>(</big><em>number_of_bytes</em>, <em>signed=False</em>, <em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_big_endian_number"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_big_endian_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a signed or an unsigned integer encoded in big endian order with <em>number_of_bytes</em>
+bytes, cf. <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read_bytes" title="PyDvi.Tools.Stream.AbstractStream.read_bytes"><tt class="xref py py-meth docutils literal"><span class="pre">read_bytes()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_byte_numbers">
+<tt class="descname">read_byte_numbers</tt><big>(</big><em>number_of_bytes</em>, <em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_byte_numbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_byte_numbers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read <em>number_of_bytes</em> times 8-bit unsigned integers, cf. <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read_bytes" title="PyDvi.Tools.Stream.AbstractStream.read_bytes"><tt class="xref py py-meth docutils literal"><span class="pre">read_bytes()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_bytes">
+<tt class="descname">read_bytes</tt><big>(</big><em>number_of_bytes</em>, <em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_bytes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read <em>number_of_bytes</em> bytes from the optional position or the current position. If
+<em>position</em>, it seeks to the specified position and thus change the current position in the
+stream.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_fix_word">
+<tt class="descname">read_fix_word</tt><big>(</big><em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_fix_word"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_fix_word" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a fix word.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_four_byte_numbers">
+<tt class="descname">read_four_byte_numbers</tt><big>(</big><em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_four_byte_numbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_four_byte_numbers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read four 8-bit unsigned integers, cf. <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read_bytes" title="PyDvi.Tools.Stream.AbstractStream.read_bytes"><tt class="xref py py-meth docutils literal"><span class="pre">read_bytes()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_signed_byte1">
+<tt class="descname">read_signed_byte1</tt><big>(</big><em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_signed_byte1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_signed_byte1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a 1-byte signed integer, cf. <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read_big_endian_number" title="PyDvi.Tools.Stream.AbstractStream.read_big_endian_number"><tt class="xref py py-meth docutils literal"><span class="pre">read_big_endian_number()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_signed_byte2">
+<tt class="descname">read_signed_byte2</tt><big>(</big><em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_signed_byte2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_signed_byte2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a 2-byte signed integer, cf. <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read_big_endian_number" title="PyDvi.Tools.Stream.AbstractStream.read_big_endian_number"><tt class="xref py py-meth docutils literal"><span class="pre">read_big_endian_number()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_signed_byte3">
+<tt class="descname">read_signed_byte3</tt><big>(</big><em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_signed_byte3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_signed_byte3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a 3-byte signed integer, cf. <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read_big_endian_number" title="PyDvi.Tools.Stream.AbstractStream.read_big_endian_number"><tt class="xref py py-meth docutils literal"><span class="pre">read_big_endian_number()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_signed_byte4">
+<tt class="descname">read_signed_byte4</tt><big>(</big><em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_signed_byte4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_signed_byte4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a 4-byte signed integer, cf. <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read_big_endian_number" title="PyDvi.Tools.Stream.AbstractStream.read_big_endian_number"><tt class="xref py py-meth docutils literal"><span class="pre">read_big_endian_number()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_signed_byten">
+<tt class="descname">read_signed_byten</tt><em class="property"> = (&lt;function read_signed_byte1 at 0x3fb9b18&gt;, &lt;function read_signed_byte2 at 0x3fb9b90&gt;, &lt;function read_signed_byte3 at 0x3fb9c08&gt;, &lt;function read_signed_byte4 at 0x3fb9c80&gt;)</em><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_signed_byten" title="Permalink to this definition">¶</a></dt>
+<dd><p>This tuple permits to get the <em>read_signed_byte</em> method with the number of bytes as index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_three_byte_numbers">
+<tt class="descname">read_three_byte_numbers</tt><big>(</big><em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_three_byte_numbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_three_byte_numbers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read three 8-bit unsigned integers, cf. <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read_bytes" title="PyDvi.Tools.Stream.AbstractStream.read_bytes"><tt class="xref py py-meth docutils literal"><span class="pre">read_bytes()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_unsigned_byte1">
+<tt class="descname">read_unsigned_byte1</tt><big>(</big><em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_unsigned_byte1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_unsigned_byte1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a 1-byte unsigned integer, cf. <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read_big_endian_number" title="PyDvi.Tools.Stream.AbstractStream.read_big_endian_number"><tt class="xref py py-meth docutils literal"><span class="pre">read_big_endian_number()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_unsigned_byte2">
+<tt class="descname">read_unsigned_byte2</tt><big>(</big><em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_unsigned_byte2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_unsigned_byte2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a 2-byte unsigned integer, cf. <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read_big_endian_number" title="PyDvi.Tools.Stream.AbstractStream.read_big_endian_number"><tt class="xref py py-meth docutils literal"><span class="pre">read_big_endian_number()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_unsigned_byte3">
+<tt class="descname">read_unsigned_byte3</tt><big>(</big><em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_unsigned_byte3"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_unsigned_byte3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a 3-byte unsigned integer, cf. <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read_big_endian_number" title="PyDvi.Tools.Stream.AbstractStream.read_big_endian_number"><tt class="xref py py-meth docutils literal"><span class="pre">read_big_endian_number()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_unsigned_byte4">
+<tt class="descname">read_unsigned_byte4</tt><big>(</big><em>position=None</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.read_unsigned_byte4"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_unsigned_byte4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a 4-byte unsigned integer, cf. <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read_big_endian_number" title="PyDvi.Tools.Stream.AbstractStream.read_big_endian_number"><tt class="xref py py-meth docutils literal"><span class="pre">read_big_endian_number()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="PyDvi.Tools.Stream.AbstractStream.read_unsigned_byten">
+<tt class="descname">read_unsigned_byten</tt><em class="property"> = (&lt;function read_unsigned_byte1 at 0x3fb9cf8&gt;, &lt;function read_unsigned_byte2 at 0x3fb9d70&gt;, &lt;function read_unsigned_byte3 at 0x3fb9de8&gt;, &lt;function read_unsigned_byte4 at 0x3fb9e60&gt;)</em><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_unsigned_byten" title="Permalink to this definition">¶</a></dt>
+<dd><p>This tuple permits to get the read_unsigned_byte method with the number of bytes as index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.seek">
+<tt class="descname">seek</tt><big>(</big><em>postion</em>, <em>whence</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.seek"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.seek" title="Permalink to this definition">¶</a></dt>
+<dd><p>Seek to position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.AbstractStream.tell">
+<tt class="descname">tell</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream.tell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.tell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tell the current position.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDvi.Tools.Stream.StandardStream">
+<em class="property">class </em><tt class="descclassname">PyDvi.Tools.Stream.</tt><tt class="descname">StandardStream</tt><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#StandardStream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.StandardStream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream" title="PyDvi.Tools.Stream.AbstractStream"><tt class="xref py py-class docutils literal"><span class="pre">PyDvi.Tools.Stream.AbstractStream</span></tt></a></p>
+<p>Abstract stream class.</p>
+<p>The attribute <tt class="xref py py-attr docutils literal"><span class="pre">stream</span></tt> must be defined in subclass.</p>
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.StandardStream.read">
+<tt class="descname">read</tt><big>(</big><em>number_of_bytes</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#StandardStream.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.StandardStream.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read <em>n</em> bytes from the current position and return a <a class="reference external" href="http://docs.python.org/library/functions.html#bytearray" title="(in Python v2.7)"><tt class="xref py py-obj docutils literal"><span class="pre">bytearray</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.StandardStream.seek">
+<tt class="descname">seek</tt><big>(</big><em>postion</em>, <em>whence=0</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#StandardStream.seek"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.StandardStream.seek" title="Permalink to this definition">¶</a></dt>
+<dd><p>Seek to position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Stream.StandardStream.tell">
+<tt class="descname">tell</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#StandardStream.tell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.StandardStream.tell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tell the current position.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDvi.Tools.Stream.FileStream">
+<em class="property">class </em><tt class="descclassname">PyDvi.Tools.Stream.</tt><tt class="descname">FileStream</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#FileStream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.FileStream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PyDvi.Tools.Stream.StandardStream" title="PyDvi.Tools.Stream.StandardStream"><tt class="xref py py-class docutils literal"><span class="pre">PyDvi.Tools.Stream.StandardStream</span></tt></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDvi.Tools.Stream.ByteStream">
+<em class="property">class </em><tt class="descclassname">PyDvi.Tools.Stream.</tt><tt class="descname">ByteStream</tt><big>(</big><em>string_bytes</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#ByteStream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.ByteStream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PyDvi.Tools.Stream.StandardStream" title="PyDvi.Tools.Stream.StandardStream"><tt class="xref py py-class docutils literal"><span class="pre">PyDvi.Tools.Stream.StandardStream</span></tt></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDvi.Tools.Stream.to_fix_word">
+<tt class="descclassname">PyDvi.Tools.Stream.</tt><tt class="descname">to_fix_word</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#to_fix_word"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.to_fix_word" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert <em>x</em> to a fix word.</p>
+<p>A fix word is a 32-bit representation of a binary fraction.  A fix word is a signed quantity,
+with the two&#8217;s complement of the entire word used to represent negation.  Of the 32 bits in a
+fix word, exactly 12 are to the left of the binary point; thus, the largest fix word value is
+2048 - 2**-20, and the smallest is -2048.</p>
+<p><tt class="docutils literal"><span class="pre">fix</span> <span class="pre">word</span> <span class="pre">=</span> <span class="pre">x</span> <span class="pre">/</span> <span class="pre">2**20</span></tt></p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="RevisionVersion.html"
+                        title="previous chapter">3.1.10.7. <tt class="docutils literal"><span class="pre">RevisionVersion</span></tt></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="TexCommentedFile.html"
+                        title="next chapter">3.1.10.9. <tt class="docutils literal"><span class="pre">TexCommentedFile</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api/PyDvi/Tools/Stream.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="TexCommentedFile.html" title="3.1.10.9. TexCommentedFile"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="RevisionVersion.html" title="3.1.10.7. RevisionVersion"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li>
+          <li><a href="../Tools.html" >3.1.10. <tt class="docutils literal"><span class="pre">Tools</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

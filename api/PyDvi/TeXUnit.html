@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1.8. TeXUnit &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="3.1. PyDvi" href="../PyDvi.html" />
+    <link rel="next" title="3.1.9. TexDaemon" href="TexDaemon.html" />
+    <link rel="prev" title="3.1.7. PyDviVersion" href="PyDviVersion.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="TexDaemon.html" title="3.1.9. TexDaemon"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="PyDviVersion.html" title="3.1.7. PyDviVersion"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../PyDvi.html" accesskey="U">3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-PyDvi.TeXUnit">
+<span id="texunit"></span><h1>3.1.8. <tt class="xref py py-mod docutils literal"><span class="pre">TeXUnit</span></tt><a class="headerlink" href="#module-PyDvi.TeXUnit" title="Permalink to this headline">¶</a></h1>
+<p>This module provides functions to convert units used in the TeX world:</p>
+<ul class="simple">
+<li><strong>mm</strong> stands for milimetre,</li>
+<li><strong>in</strong> stands for inch which corresponds to 25.4 mm,</li>
+<li><strong>pt</strong> stands for TeX point, there is 72.27 pt in one inch,</li>
+<li><strong>sp</strong> stands for scale point, there is 2**16 sp in one pt,</li>
+<li><strong>dpi</strong> stands for dot per inch.</li>
+</ul>
+<p>The DVI format uses the measure 100 nm as base unit. A scaled point is defined as a fraction:</p>
+<ul class="simple">
+<li>num = 2.54 * 1e7 = 25400000</li>
+<li>den = 7227 * 2**16 = 473628672</li>
+<li>1 sp = num/den = 5.4 nm</li>
+</ul>
+<p>For a resolution of 1200 dpi, a pixel measures 21 um.</p>
+<dl class="function">
+<dt id="PyDvi.TeXUnit.dpi2mm">
+<tt class="descclassname">PyDvi.TeXUnit.</tt><tt class="descname">dpi2mm</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/TeXUnit.html#dpi2mm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.TeXUnit.dpi2mm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert dpi to mm</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDvi.TeXUnit.in2mm">
+<tt class="descclassname">PyDvi.TeXUnit.</tt><tt class="descname">in2mm</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/TeXUnit.html#in2mm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.TeXUnit.in2mm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert in to mm</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDvi.TeXUnit.in2pt">
+<tt class="descclassname">PyDvi.TeXUnit.</tt><tt class="descname">in2pt</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/TeXUnit.html#in2pt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.TeXUnit.in2pt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert in to pt</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDvi.TeXUnit.in2sp">
+<tt class="descclassname">PyDvi.TeXUnit.</tt><tt class="descname">in2sp</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/TeXUnit.html#in2sp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.TeXUnit.in2sp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert in to sp</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDvi.TeXUnit.mm2in">
+<tt class="descclassname">PyDvi.TeXUnit.</tt><tt class="descname">mm2in</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/TeXUnit.html#mm2in"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.TeXUnit.mm2in" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert mm to in</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDvi.TeXUnit.pt2in">
+<tt class="descclassname">PyDvi.TeXUnit.</tt><tt class="descname">pt2in</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/TeXUnit.html#pt2in"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.TeXUnit.pt2in" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert in to pt</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDvi.TeXUnit.pt2mm">
+<tt class="descclassname">PyDvi.TeXUnit.</tt><tt class="descname">pt2mm</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/TeXUnit.html#pt2mm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.TeXUnit.pt2mm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert pt to mm</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDvi.TeXUnit.pt2sp">
+<tt class="descclassname">PyDvi.TeXUnit.</tt><tt class="descname">pt2sp</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/TeXUnit.html#pt2sp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.TeXUnit.pt2sp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert pt to sp</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDvi.TeXUnit.sp2in">
+<tt class="descclassname">PyDvi.TeXUnit.</tt><tt class="descname">sp2in</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/TeXUnit.html#sp2in"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.TeXUnit.sp2in" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert sp to in</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDvi.TeXUnit.sp2mm">
+<tt class="descclassname">PyDvi.TeXUnit.</tt><tt class="descname">sp2mm</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/TeXUnit.html#sp2mm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.TeXUnit.sp2mm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert sp to mm</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDvi.TeXUnit.sp2pt">
+<tt class="descclassname">PyDvi.TeXUnit.</tt><tt class="descname">sp2pt</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/TeXUnit.html#sp2pt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.TeXUnit.sp2pt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert sp to pt</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDvi.TeXUnit.sp2dpi">
+<tt class="descclassname">PyDvi.TeXUnit.</tt><tt class="descname">sp2dpi</tt><big>(</big><em>x</em><big>)</big><a class="reference internal" href="../../_modules/PyDvi/TeXUnit.html#sp2dpi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.TeXUnit.sp2dpi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert sp to dpi</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="PyDviVersion.html"
+                        title="previous chapter">3.1.7. <tt class="docutils literal"><span class="pre">PyDviVersion</span></tt></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="TexDaemon.html"
+                        title="next chapter">3.1.9. <tt class="docutils literal"><span class="pre">TexDaemon</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api/PyDvi/TeXUnit.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="TexDaemon.html" title="3.1.9. TexDaemon"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="PyDviVersion.html" title="3.1.7. PyDviVersion"
+             >previous</a> |</li>
+        <li><a href="../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

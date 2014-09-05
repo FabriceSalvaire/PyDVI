@@ -1,0 +1,302 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1.10.4. Interval &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="3.1.10. Tools" href="../Tools.html" />
+    <link rel="next" title="3.1.10.5. Logging" href="Logging.html" />
+    <link rel="prev" title="3.1.10.3. FuncTools" href="FuncTools.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Logging.html" title="3.1.10.5. Logging"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="FuncTools.html" title="3.1.10.3. FuncTools"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li>
+          <li><a href="../Tools.html" accesskey="U">3.1.10. <tt class="docutils literal"><span class="pre">Tools</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-PyDvi.Tools.Interval">
+<span id="interval"></span><h1>3.1.10.4. <tt class="xref py py-mod docutils literal"><span class="pre">Interval</span></tt><a class="headerlink" href="#module-PyDvi.Tools.Interval" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="PyDvi.Tools.Interval.Interval">
+<em class="property">class </em><tt class="descclassname">PyDvi.Tools.Interval.</tt><tt class="descname">Interval</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>One-dimension Interval</p>
+<p>Initialise an interval</p>
+<ul class="simple">
+<li>Interval(inf, sup)</li>
+<li>else args must support the __getitem__ interface, e.g.:</li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li>Interval((inf, sup))</li>
+<li>Interval([inf, sup])</li>
+<li>Interval(interval_instance)</li>
+</ul>
+</div></blockquote>
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval._check_arguments">
+<tt class="descname">_check_arguments</tt><big>(</big><em>args</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval._check_arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval._check_arguments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="PyDvi.Tools.Interval.Interval._intersection">
+<em class="property">static </em><tt class="descname">_intersection</tt><big>(</big><em>i1</em>, <em>i2</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval._intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval._intersection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="PyDvi.Tools.Interval.Interval._union">
+<em class="property">static </em><tt class="descname">_union</tt><big>(</big><em>i1</em>, <em>i2</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval._union"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval._union" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval.copy">
+<tt class="descname">copy</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a clone of the interval</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval.enlarge">
+<tt class="descname">enlarge</tt><big>(</big><em>dx</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval.enlarge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval.enlarge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enlarge the interval of dx</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval.intersect">
+<tt class="descname">intersect</tt><big>(</big><em>i1</em>, <em>i2</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval.intersect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval.intersect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does the interval intersect with i2?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval.is_empty">
+<tt class="descname">is_empty</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval.is_empty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval.is_empty" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval.is_included_in">
+<tt class="descname">is_included_in</tt><big>(</big><em>i1</em>, <em>i2</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval.is_included_in"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval.is_included_in" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is the interval included in i1?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval.length">
+<tt class="descname">length</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval.length"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval.length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return sup - inf</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval.middle">
+<tt class="descname">middle</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval.middle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval.middle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return interval middle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval.print_object">
+<tt class="descname">print_object</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval.print_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval.print_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the interval</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval.zero_length">
+<tt class="descname">zero_length</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval.zero_length"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval.zero_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return sup == inf</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDvi.Tools.Interval.IntervalInt">
+<em class="property">class </em><tt class="descclassname">PyDvi.Tools.Interval.</tt><tt class="descname">IntervalInt</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#IntervalInt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.IntervalInt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PyDvi.Tools.Interval.Interval" title="PyDvi.Tools.Interval.Interval"><tt class="xref py py-class docutils literal"><span class="pre">PyDvi.Tools.Interval.Interval</span></tt></a></p>
+<p>One-dimension Integer Interval</p>
+<p>Initialise an interval</p>
+<p>array must support the __getitem__ interface</p>
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.IntervalInt.length">
+<tt class="descname">length</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#IntervalInt.length"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.IntervalInt.length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return sup - inf +1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDvi.Tools.Interval.Interval2D">
+<em class="property">class </em><tt class="descclassname">PyDvi.Tools.Interval.</tt><tt class="descname">Interval2D</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Two-dimension Interval</p>
+<p>Initialise a 2D interval</p>
+<p>x and y must support the __getitem__ interface</p>
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval2D.area">
+<tt class="descname">area</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval2D.area"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval2D.area" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the area</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval2D.bounding_box">
+<tt class="descname">bounding_box</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval2D.bounding_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval2D.bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the corresponding bounding box (x.inf, y.inf, x.sup, y.sup)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval2D.copy">
+<tt class="descname">copy</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval2D.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval2D.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a clone of the interval</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval2D.enlarge">
+<tt class="descname">enlarge</tt><big>(</big><em>dx</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval2D.enlarge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval2D.enlarge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enlarge the interval of dx</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval2D.intersect">
+<tt class="descname">intersect</tt><big>(</big><em>i2</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval2D.intersect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval2D.intersect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does the interval intersect with i2?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval2D.is_empty">
+<tt class="descname">is_empty</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval2D.is_empty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval2D.is_empty" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval2D.is_included_in">
+<tt class="descname">is_included_in</tt><big>(</big><em>i2</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval2D.is_included_in"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval2D.is_included_in" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is the interval included in i2?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval2D.middle">
+<tt class="descname">middle</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval2D.middle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval2D.middle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return interval middle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval2D.print_object">
+<tt class="descname">print_object</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval2D.print_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval2D.print_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the interval</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Tools.Interval.Interval2D.size">
+<tt class="descname">size</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#Interval2D.size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.Interval2D.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the horizontal and vertical size</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDvi.Tools.Interval.IntervalInt2D">
+<em class="property">class </em><tt class="descclassname">PyDvi.Tools.Interval.</tt><tt class="descname">IntervalInt2D</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Interval.html#IntervalInt2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Interval.IntervalInt2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PyDvi.Tools.Interval.Interval2D" title="PyDvi.Tools.Interval.Interval2D"><tt class="xref py py-class docutils literal"><span class="pre">PyDvi.Tools.Interval.Interval2D</span></tt></a></p>
+<p>Two-dimension Integer Interval</p>
+<p>Initialise a 2D Integer interval</p>
+<p>x and y must support the __getitem__ interface</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="FuncTools.html"
+                        title="previous chapter">3.1.10.3. <tt class="docutils literal"><span class="pre">FuncTools</span></tt></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Logging.html"
+                        title="next chapter">3.1.10.5. <tt class="docutils literal"><span class="pre">Logging</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api/PyDvi/Tools/Interval.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Logging.html" title="3.1.10.5. Logging"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="FuncTools.html" title="3.1.10.3. FuncTools"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li>
+          <li><a href="../Tools.html" >3.1.10. <tt class="docutils literal"><span class="pre">Tools</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

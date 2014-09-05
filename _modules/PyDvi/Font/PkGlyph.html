@@ -1,0 +1,519 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDvi.Font.PkGlyph &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDvi.Font.PkGlyph</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c"># </span>
+<span class="c"># PyDvi - A Python Library to Process DVI Stream</span>
+<span class="c"># Copyright (C) 2014 Fabrice Salvaire</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c"># </span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c"># </span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c"># </span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># Audit</span>
+<span class="c">#</span>
+<span class="c"># - 11/12/2011 fabrice</span>
+<span class="c">#  - check bitmap glyph</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="sd">&quot;&quot;&quot; This module provides functions to handle Packed Font Glyphs.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;PkGlyph&#39;</span><span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">..TeXUnit</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">..Tools.Logging</span> <span class="kn">import</span> <span class="n">print_card</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="PkGlyph"><a class="viewcode-back" href="../../../api/PyDvi/Font/PkGlyph.html#PyDvi.Font.PkGlyph.PkGlyph">[docs]</a><span class="k">class</span> <span class="nc">PkGlyph</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class contains the information stored in the Packed Font file for each glyph.  For</span>
+<span class="sd">    efficiency, the run count list is lazy decoded.</span>
+
+<span class="sd">    The glyph bitmap can be printed using the method :meth:`print_glyph`.  For example the output</span>
+<span class="sd">    for the letter &quot;A&quot; of the font &quot;cmr10&quot; at 600 dpi is::</span>
+
+<span class="sd">          0000000000111111111122222222223333333333444444444455555</span>
+<span class="sd">          0123456789012345678901234567890123456789012345678901234</span>
+<span class="sd">         +-------------------------------------------------------+</span>
+<span class="sd">       0 |                          xxx                          |</span>
+<span class="sd">       1 |                          xxx                          |</span>
+<span class="sd">       2 |                          xxx                          |</span>
+<span class="sd">       3 |                         xxxxx                         |</span>
+<span class="sd">       4 |                         xxxxx                         |</span>
+<span class="sd">       5 |                         xxxxx                         |</span>
+<span class="sd">       6 |                        xxxxxxx                        |</span>
+<span class="sd">       7 |                        xxxxxxx                        |</span>
+<span class="sd">       8 |                        xxxxxxx                        |</span>
+<span class="sd">       9 |                       xxxxxxxxx                       |</span>
+<span class="sd">      10 |                       xxxxxxxxx                       |</span>
+<span class="sd">      11 |                       xxxxxxxxx                       |</span>
+<span class="sd">      12 |                      xx xxxxxxxx                      |</span>
+<span class="sd">      13 |                      xx xxxxxxxx                      |</span>
+<span class="sd">      14 |                     xxx xxxxxxxxx                     |</span>
+<span class="sd">      15 |                     xx   xxxxxxxx                     |</span>
+<span class="sd">      16 |                     xx   xxxxxxxx                     |</span>
+<span class="sd">      17 |                    xxx   xxxxxxxxx                    |</span>
+<span class="sd">      18 |                    xx     xxxxxxxx                    |</span>
+<span class="sd">      19 |                    xx     xxxxxxxx                    |</span>
+<span class="sd">      20 |                   xxx     xxxxxxxxx                   |</span>
+<span class="sd">      21 |                   xx       xxxxxxxx                   |</span>
+<span class="sd">      22 |                   xx       xxxxxxxx                   |</span>
+<span class="sd">      23 |                  xxx       xxxxxxxxx                  |</span>
+<span class="sd">      24 |                  xx         xxxxxxxx                  |</span>
+<span class="sd">      25 |                  xx         xxxxxxxx                  |</span>
+<span class="sd">      26 |                 xxx         xxxxxxxxx                 |</span>
+<span class="sd">      27 |                 xx           xxxxxxxx                 |</span>
+<span class="sd">      28 |                 xx           xxxxxxxx                 |</span>
+<span class="sd">      29 |                xx            xxxxxxxxx                |</span>
+<span class="sd">      30 |                xx             xxxxxxxx                |</span>
+<span class="sd">      31 |                xx             xxxxxxxx                |</span>
+<span class="sd">      32 |               xx              xxxxxxxxx               |</span>
+<span class="sd">      33 |               xx               xxxxxxxx               |</span>
+<span class="sd">      34 |               xx               xxxxxxxx               |</span>
+<span class="sd">      35 |              xx                xxxxxxxxx              |</span>
+<span class="sd">      36 |              xx                 xxxxxxxx              |</span>
+<span class="sd">      37 |              xx                 xxxxxxxx              |</span>
+<span class="sd">      38 |             xx                  xxxxxxxxx             |</span>
+<span class="sd">      39 |             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx             |</span>
+<span class="sd">      40 |             xxxxxxxxxxxxxxxxxxxxxxxxxxxxx             |</span>
+<span class="sd">      41 |            xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx            |</span>
+<span class="sd">      42 |            xx                     xxxxxxxx            |</span>
+<span class="sd">      43 |            xx                     xxxxxxxx            |</span>
+<span class="sd">      44 |           xx                       xxxxxxxx           |</span>
+<span class="sd">      45 |           xx                       xxxxxxxx           |</span>
+<span class="sd">      46 |           xx                       xxxxxxxx           |</span>
+<span class="sd">      47 |          xx                         xxxxxxxx          |</span>
+<span class="sd">      48 |          xx                         xxxxxxxx          |</span>
+<span class="sd">      49 |          xx                         xxxxxxxx          |</span>
+<span class="sd">      50 |         xx                           xxxxxxxx         |</span>
+<span class="sd">      51 |         xx                           xxxxxxxx         |</span>
+<span class="sd">      52 |        xxx                           xxxxxxxx         |</span>
+<span class="sd">      53 |        xxx                            xxxxxxxx        |</span>
+<span class="sd">      54 |       xxxx                            xxxxxxxx        |</span>
+<span class="sd">      55 |      xxxxxx                           xxxxxxxxx       |</span>
+<span class="sd">      56 |    xxxxxxxxxx                       xxxxxxxxxxxx      |</span>
+<span class="sd">      57 |xxxxxxxxxxxxxxxxx               xxxxxxxxxxxxxxxxxxxxxxx|</span>
+<span class="sd">      58 |xxxxxxxxxxxxxxxxx               xxxxxxxxxxxxxxxxxxxxxxx|</span>
+<span class="sd">      59 |xxxxxxxxxxxxxxxxx               xxxxxxxxxxxxxxxxxxxxxxx|</span>
+<span class="sd">         +-------------------------------------------------------+</span>
+<span class="sd">          0000000000111111111122222222223333333333444444444455555</span>
+<span class="sd">          0123456789012345678901234567890123456789012345678901234</span>
+<span class="sd">    </span>
+<span class="sd">    Moreover the method :meth:`count_list` return a run count list string equivalent at the output of</span>
+<span class="sd">    the command :command:`pktype`.  For example the output for the previous glyph is::</span>
+<span class="sd">    </span>
+<span class="sd">      (26)[2]3(51)[2]5(49)[2]7(47)[2]9(45)[1]2(1)8(43)3(1)9(42)[1]2(3)8(41)3(3)9 </span>
+<span class="sd">      (40)[1]2(5)8(39)3(5)9(38)[1]2(7)8(37)3(7)9(36)[1]2(9)8(35)3(9)9(34)[1]2(11)8 </span>
+<span class="sd">      (33)2(12)9(32)[1]2(13)8(31)2(14)9(30)[1]2(15)8(29)2(16)9(28)[1]2(17)8(27)2 </span>
+<span class="sd">      (18)9(26)[1]29(25)31(24)[1]2(21)8(23)[2]2(23)8(21)[2]2(25)8(19)[1]2(27)8(17) </span>
+<span class="sd">      3(27)8(17)3(28)8(15)4(28)8(14)6(27)9(11)10(23)12(6)[2]17(15)23 </span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">pk_font</span><span class="p">,</span>
+                 <span class="n">char_code</span><span class="p">,</span>
+                 <span class="n">tfm</span><span class="p">,</span> <span class="n">dm</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span>
+                 <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span>
+                 <span class="n">horizontal_offset</span><span class="p">,</span> <span class="n">vertical_offset</span><span class="p">,</span>
+                 <span class="n">nybbles</span><span class="p">,</span> <span class="n">dyn_f</span><span class="p">,</span> <span class="n">first_pixel_is_black</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pk_font</span> <span class="o">=</span> <span class="n">pk_font</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">char_code</span> <span class="o">=</span> <span class="n">char_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tfm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">=</span> <span class="n">tfm</span><span class="p">,</span> <span class="n">dm</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">height</span><span class="p">,</span> <span class="n">width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontal_offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical_offset</span> <span class="o">=</span> <span class="n">horizontal_offset</span><span class="p">,</span> <span class="n">vertical_offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nybbles</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dyn_f</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_pixel_is_black</span> <span class="o">=</span> <span class="n">nybbles</span><span class="p">,</span> <span class="n">dyn_f</span><span class="p">,</span> <span class="n">first_pixel_is_black</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">glyph_bitmap</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pk_font</span><span class="o">.</span><span class="n">register_glyph</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="PkGlyph._init_packed_number_decoder"><a class="viewcode-back" href="../../../api/PyDvi/Font/PkGlyph.html#PyDvi.Font.PkGlyph.PkGlyph._init_packed_number_decoder">[docs]</a>    <span class="k">def</span> <span class="nf">_init_packed_number_decoder</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Init the packed number decoder. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nybble_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upper_nybble</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_repeat_row_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="PkGlyph._next_nybble"><a class="viewcode-back" href="../../../api/PyDvi/Font/PkGlyph.html#PyDvi.Font.PkGlyph.PkGlyph._next_nybble">[docs]</a>    <span class="k">def</span> <span class="nf">_next_nybble</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the next nybble from the byte array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nybbles</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_nybble_index</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upper_nybble</span><span class="p">:</span>
+            <span class="n">nybble</span> <span class="o">=</span> <span class="n">byte</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nybble</span> <span class="o">=</span> <span class="n">byte</span> <span class="o">&amp;</span> <span class="mh">0xF</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nybble_index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upper_nybble</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upper_nybble</span>
+
+        <span class="k">return</span> <span class="n">nybble</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="PkGlyph._next_packed_number"><a class="viewcode-back" href="../../../api/PyDvi/Font/PkGlyph.html#PyDvi.Font.PkGlyph.PkGlyph._next_packed_number">[docs]</a>    <span class="k">def</span> <span class="nf">_next_packed_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Decode a packed number from the byte array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_nybble</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># large run count</span>
+            <span class="c"># count the number of zeros, coding the number of nybbles and read the first nybble</span>
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span> 
+                <span class="n">j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_nybble</span><span class="p">()</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="k">break</span>
+            <span class="c"># then decode the large run count</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="n">j</span><span class="o">*</span><span class="mi">16</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_nybble</span><span class="p">()</span>
+                <span class="n">i</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="c"># and finally scale it</span>
+            <span class="c">#   for one zero: j = nybble_1*16 + nybble_2</span>
+            <span class="c">#   min(j) = 1*16 + 0 = 16</span>
+            <span class="c">#   thus j -16 + upper_2_nybble +1</span>
+            <span class="k">return</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">15</span> <span class="o">+</span> <span class="p">(</span><span class="mi">13</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">dyn_f</span><span class="p">)</span><span class="o">*</span><span class="mi">16</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dyn_f</span>
+
+        <span class="k">elif</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dyn_f</span><span class="p">:</span> <span class="c"># one-nybble packed number: [1, dyn_f]</span>
+            <span class="k">return</span> <span class="n">i</span>
+        <span class="k">elif</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">14</span><span class="p">:</span> <span class="c"># two-nybble packed number: [dyn_f +1, (13 - dyn_f)*16 + dyn_f]</span>
+            <span class="n">next_number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dyn_f</span> <span class="o">+</span><span class="mi">1</span>
+            <span class="c"># packed number = (nybble_1 - next_number)*16 + nybble_2 + next_number</span>
+            <span class="c"># upper number = (13 - (dyn_f +1))*16 + 15 + (dyn_f +1) = (13 - dyn_f)*16 + dyn_f</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">next_number</span><span class="p">)</span><span class="o">*</span><span class="mi">16</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_nybble</span><span class="p">()</span> <span class="o">+</span> <span class="n">next_number</span>
+
+        <span class="k">else</span><span class="p">:</span> <span class="c"># repeat row count</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">14</span><span class="p">:</span>
+                <span class="c"># decode the repeat row count</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_repeat_row_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_packed_number</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span> <span class="c"># i == 15</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_repeat_row_count</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_packed_number</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="PkGlyph._decode_bitmap_glyph"><a class="viewcode-back" href="../../../api/PyDvi/Font/PkGlyph.html#PyDvi.Font.PkGlyph.PkGlyph._decode_bitmap_glyph">[docs]</a>    <span class="k">def</span> <span class="nf">_decode_bitmap_glyph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Decode a bitmap glyph. &quot;&quot;&quot;</span>
+
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span>
+        <span class="n">glyph_bitmap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">glyph_bitmap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">byte</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nybbles</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="mi">128</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+                <span class="n">glyph_bitmap</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">byte</span> <span class="o">&amp;</span> <span class="n">mask</span><span class="p">)</span>
+                <span class="n">mask</span> <span class="o">&gt;&gt;=</span> <span class="mi">1</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">size</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="n">glyph_bitmap</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="PkGlyph._decode_packed_glyph"><a class="viewcode-back" href="../../../api/PyDvi/Font/PkGlyph.html#PyDvi.Font.PkGlyph.PkGlyph._decode_packed_glyph">[docs]</a>    <span class="k">def</span> <span class="nf">_decode_packed_glyph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Decode a packed glyph. &quot;&quot;&quot;</span>
+
+        <span class="c"># Fixme: try linear approach</span>
+        <span class="c">#  current i and row = int(i / width)</span>
+
+        <span class="c"># row 0 corresponds to the glyph&#39;s top</span>
+
+        <span class="n">glyph_bitmap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">glyph_bitmap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_packed_number_decoder</span><span class="p">()</span>
+        <span class="n">black_pixel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_pixel_is_black</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_packed_number</span><span class="p">()</span>
+            <span class="k">while</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">upper_x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">count</span>
+                <span class="c"># if upper_x is in the actual row then fill count pixels</span>
+                <span class="k">if</span> <span class="n">upper_x</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">black_pixel</span><span class="p">:</span>
+                        <span class="n">glyph_bitmap</span><span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span><span class="n">upper_x</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="n">upper_x</span>
+                <span class="c"># else split and repeat row if necessary</span>
+                <span class="k">else</span><span class="p">:</span> 
+                    <span class="k">if</span> <span class="n">black_pixel</span><span class="p">:</span> <span class="c"># fill the current row</span>
+                        <span class="n">glyph_bitmap</span><span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">:]</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">y_src</span> <span class="o">=</span> <span class="n">y</span>
+                    <span class="n">y</span> <span class="o">+=</span> <span class="mi">1</span> <span class="c"># goto next row</span>
+                    <span class="c">#!# if self._repeat_row_count:</span>
+                    <span class="c"># copy repeat_row_count times the current row and increment y</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_repeat_row_count</span><span class="p">):</span>
+                        <span class="n">glyph_bitmap</span><span class="p">[</span><span class="n">y</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">glyph_bitmap</span><span class="p">[</span><span class="n">y_src</span><span class="p">,:]</span>
+                        <span class="n">y</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_repeat_row_count</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">count</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">-</span> <span class="n">x</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c"># flip state</span>
+            <span class="n">black_pixel</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">black_pixel</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="PkGlyph._decode_glyph"><a class="viewcode-back" href="../../../api/PyDvi/Font/PkGlyph.html#PyDvi.Font.PkGlyph.PkGlyph._decode_glyph">[docs]</a>    <span class="k">def</span> <span class="nf">_decode_glyph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Decode the glyph. &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_bitmap</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_decode_bitmap_glyph</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_decode_packed_glyph</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="PkGlyph.count_list"><a class="viewcode-back" href="../../../api/PyDvi/Font/PkGlyph.html#PyDvi.Font.PkGlyph.PkGlyph.count_list">[docs]</a>    <span class="k">def</span> <span class="nf">count_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the count list as :command:`pktype`. &quot;&quot;&quot;</span>
+
+        <span class="c"># The count list start from the top-left corner of the glyph&#39;s bounding box and follows the</span>
+        <span class="c"># top-down and left-right raster order.</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_bitmap</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;bitmap glyph&#39;</span>
+
+        <span class="n">count_string</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_packed_number_decoder</span><span class="p">()</span>
+        <span class="n">black_pixel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_pixel_is_black</span>
+        <span class="n">transition</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next_packed_number</span><span class="p">()</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="n">count</span>
+            <span class="k">if</span> <span class="n">transition</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_repeat_row_count</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_repeat_row_count</span>
+                <span class="n">count_string</span> <span class="o">+=</span> <span class="s">&#39;[</span><span class="si">%u</span><span class="s">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_repeat_row_count</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_repeat_row_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">black_pixel</span><span class="p">:</span>
+                <span class="n">count_string</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">count</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">count_string</span> <span class="o">+=</span> <span class="s">&#39;(</span><span class="si">%u</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">count</span><span class="p">)</span>
+            <span class="n">black_pixel</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">black_pixel</span>
+            <span class="n">transition</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">transition</span>
+
+        <span class="k">return</span> <span class="n">count_string</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="PkGlyph.is_bitmap"><a class="viewcode-back" href="../../../api/PyDvi/Font/PkGlyph.html#PyDvi.Font.PkGlyph.PkGlyph.is_bitmap">[docs]</a>    <span class="k">def</span> <span class="nf">is_bitmap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return :obj:`True` is the glyph use the bitmap format. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dyn_f</span> <span class="o">==</span> <span class="mi">14</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="PkGlyph.get_scaled_width"><a class="viewcode-back" href="../../../api/PyDvi/Font/PkGlyph.html#PyDvi.Font.PkGlyph.PkGlyph.get_scaled_width">[docs]</a>    <span class="k">def</span> <span class="nf">get_scaled_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the width scaled by *scale_factor*. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tfm</span> <span class="o">*</span> <span class="n">scale_factor</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="PkGlyph.get_glyph_bitmap"><a class="viewcode-back" href="../../../api/PyDvi/Font/PkGlyph.html#PyDvi.Font.PkGlyph.PkGlyph.get_glyph_bitmap">[docs]</a>    <span class="k">def</span> <span class="nf">get_glyph_bitmap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the glyph bitmap as a Numpy array. &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">glyph_bitmap</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_decode_glyph</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">glyph_bitmap</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="PkGlyph.print_glyph"><a class="viewcode-back" href="../../../api/PyDvi/Font/PkGlyph.html#PyDvi.Font.PkGlyph.PkGlyph.print_glyph">[docs]</a>    <span class="k">def</span> <span class="nf">print_glyph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Print the glyph. &quot;&quot;&quot;</span>
+
+        <span class="n">glyph_bitmap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_glyph_bitmap</span><span class="p">()</span>
+
+        <span class="n">axis</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">*</span><span class="mi">4</span> <span class="o">+</span> <span class="s">&#39;+&#39;</span> <span class="o">+</span> <span class="s">&#39;-&#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">+</span> <span class="s">&#39;+&#39;</span>
+
+        <span class="k">def</span> <span class="nf">print_label_axis</span><span class="p">():</span>
+            <span class="n">number_of_digit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)))</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">number_of_digit</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">*</span><span class="mi">5</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">):</span>
+                    <span class="n">line</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">((</span><span class="n">x</span><span class="o">%</span><span class="mi">10</span><span class="o">**</span><span class="n">i</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+                <span class="k">print</span> <span class="n">line</span>
+
+        <span class="n">print_label_axis</span><span class="p">()</span>
+        <span class="k">print</span> <span class="n">axis</span>
+
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">glyph_bitmap</span><span class="p">[</span><span class="n">y</span><span class="p">,</span><span class="n">x</span><span class="p">]:</span>
+                    <span class="n">line</span> <span class="o">+=</span> <span class="s">&#39;x&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">line</span> <span class="o">+=</span> <span class="s">&#39; &#39;</span>
+            <span class="k">print</span> <span class="s">&#39;</span><span class="si">%3u</span><span class="s"> |</span><span class="si">%s</span><span class="s">|&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+
+        <span class="k">print</span> <span class="n">axis</span>
+        <span class="n">print_label_axis</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="PkGlyph.print_summary"><a class="viewcode-back" href="../../../api/PyDvi/Font/PkGlyph.html#PyDvi.Font.PkGlyph.PkGlyph.print_summary">[docs]</a>    <span class="k">def</span> <span class="nf">print_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">string_format</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39; Char </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - TFM width: </span><span class="si">%.3f</span><span class="s"> * design size</span>
+<span class="s">              </span><span class="si">%.1f</span><span class="s"> pt</span>
+<span class="s">              </span><span class="si">%.1f</span><span class="s"> mm</span>
+<span class="s"> - dm:                </span><span class="si">%3u</span><span class="s"> px</span>
+<span class="s"> - dx:                </span><span class="si">%3u</span><span class="s"> px</span>
+<span class="s"> - dy:                </span><span class="si">%3u</span><span class="s"> px</span>
+<span class="s"> - Height:            </span><span class="si">%3u</span><span class="s"> px</span>
+<span class="s"> - Width:             </span><span class="si">%3u</span><span class="s"> px</span>
+<span class="s"> - Horizontal Offset: </span><span class="si">%3u</span><span class="s"> px</span>
+<span class="s"> - Vertical Offset:   </span><span class="si">%3u</span><span class="s"> px</span>
+<span class="s">&#39;&#39;&#39;</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_scaled_width</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pk_font</span><span class="o">.</span><span class="n">design_font_size</span><span class="p">)</span>
+
+        <span class="n">print_card</span><span class="p">(</span><span class="n">string_format</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">char_code</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tfm</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">pt2mm</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">horizontal_offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical_offset</span><span class="p">))</span>
+        
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+</pre></div></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

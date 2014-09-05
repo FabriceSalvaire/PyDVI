@@ -1,0 +1,706 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDvi.Font.Tfm &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDvi.Font.Tfm</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c"># </span>
+<span class="c"># PyDvi - A Python Library to Process DVI Stream</span>
+<span class="c"># Copyright (C) 2014 Fabrice Salvaire</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c"># </span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c"># </span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c"># </span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># Audit</span>
+<span class="c">#</span>
+<span class="c"># - 11/12/2011 fabrice</span>
+<span class="c">#   - why ref Tfm, self registration</span>
+<span class="c">#</span>
+<span class="c">#   - why int is scaled_...</span>
+<span class="c">#   - TfmChar -&gt; Char</span>
+<span class="c">#   - Check and complete lig kern table and for special fonts</span>
+<span class="c">#   - add_lig_kern</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="sd">&quot;&quot;&quot; This module handles TeX Font Metric.</span>
+
+<span class="sd">The class :class:`PyDvi.Tfm` handles the font&#39;s metric.  To get a :class:`PyDvi.Tfm` instance for a</span>
+<span class="sd">particular font use the static method :meth:`PyDvi.TfmParser.TfmParser.parse`.  For example use this</span>
+<span class="sd">code for the font &quot;cmr10&quot;::</span>
+
+<span class="sd">  tfm = TfmParser.parse(&#39;cmr10&#39;, &#39;/usr/share/texmf/fonts/tfm/public/cm/cmr10.tfm&#39;)</span>
+
+<span class="sd">The number of characters in the font can be obtained using the function :func:`len`::</span>
+
+<span class="sd">  &gt;&gt;&gt; len(tfm)</span>
+<span class="sd">  128</span>
+
+<span class="sd">Each character&#39;s metric is stored in a :class:`TfmChar` instance that can be accessed using the char</span>
+<span class="sd">code as index on the :class:`Tfm` class instance.  For example to get the metric of the character</span>
+<span class="sd">&quot;A&quot; use::</span>
+
+<span class="sd">   tfm[ord(&#39;A&#39;)]</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Tfm&#39;</span><span class="p">,</span> <span class="s">&#39;TfmChar&#39;</span><span class="p">,</span> <span class="s">&#39;TfmExtensibleChar&#39;</span><span class="p">,</span> <span class="s">&#39;TfmKern&#39;</span><span class="p">,</span> <span class="s">&#39;TfmLigature&#39;</span><span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">string</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">..Tools.Logging</span> <span class="kn">import</span> <span class="n">print_card</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="TfmChar"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.TfmChar">[docs]</a><span class="k">class</span> <span class="nc">TfmChar</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class encapsulates a TeX Font Metric for a Glyph.</span>
+
+<span class="sd">    Public attributes:</span>
+
+<span class="sd">       :attr:`char_code`</span>
+
+<span class="sd">       :attr:`width`</span>
+
+<span class="sd">       :attr:`height`</span>
+
+<span class="sd">       :attr:`depth`</span>
+
+<span class="sd">       :attr:`italic_correction`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">#: List of the printable characters.</span>
+    <span class="n">printable</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">letters</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">punctuation</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">tfm</span><span class="p">,</span>
+                 <span class="n">char_code</span><span class="p">,</span>
+                 <span class="n">width</span><span class="p">,</span>
+                 <span class="n">height</span><span class="p">,</span>
+                 <span class="n">depth</span><span class="p">,</span>
+                 <span class="n">italic_correction</span><span class="p">,</span>
+                 <span class="n">lig_kern_program_index</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">next_larger_char</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tfm</span> <span class="o">=</span> <span class="n">tfm</span>
+        <span class="n">tfm</span><span class="p">[</span><span class="n">char_code</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">char_code</span> <span class="o">=</span> <span class="n">char_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">height</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">depth</span> <span class="o">=</span> <span class="n">depth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">italic_correction</span> <span class="o">=</span> <span class="n">italic_correction</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lig_kern_program_index</span> <span class="o">=</span> <span class="n">lig_kern_program_index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next_larger_char</span> <span class="o">=</span> <span class="n">next_larger_char</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="TfmChar.scaled_width"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.TfmChar.scaled_width">[docs]</a>    <span class="k">def</span> <span class="nf">scaled_width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the scaled width by *scale_factor*. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">*</span> <span class="n">scale_factor</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="TfmChar.scaled_height"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.TfmChar.scaled_height">[docs]</a>    <span class="k">def</span> <span class="nf">scaled_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the scaled height by *scale_factor*. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span> <span class="n">scale_factor</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="TfmChar.scaled_depth"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.TfmChar.scaled_depth">[docs]</a>    <span class="k">def</span> <span class="nf">scaled_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the scaled depth by *scale_factor*. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">depth</span> <span class="o">*</span> <span class="n">scale_factor</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="TfmChar.scaled_dimensions"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.TfmChar.scaled_dimensions">[docs]</a>    <span class="k">def</span> <span class="nf">scaled_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale_factor</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the 3-tuple made of the scaled width, height and depth by *scale_factor*. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">scale_factor</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="TfmChar.next_larger_tfm_char"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.TfmChar.next_larger_tfm_char">[docs]</a>    <span class="k">def</span> <span class="nf">next_larger_tfm_char</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the :class:`TfmChar` instance for the next larger char if it exists else return</span>
+<span class="sd">        :obj:`None`.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">next_larger_char</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tfm</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">next_larger_char</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="TfmChar.get_lig_kern_program"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.TfmChar.get_lig_kern_program">[docs]</a>    <span class="k">def</span> <span class="nf">get_lig_kern_program</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Get the ligature/kern program of the character. &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lig_kern_program_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tfm</span><span class="o">.</span><span class="n">get_lig_kern_program</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lig_kern_program_index</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="TfmChar.chr"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.TfmChar.chr">[docs]</a>    <span class="k">def</span> <span class="nf">chr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the character string from its char code if it is printable. &quot;&quot;&quot;</span>
+
+        <span class="n">char</span> <span class="o">=</span> <span class="nb">chr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">char_code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">char</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">printable</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">char</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">char_code</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="TfmChar.print_summary"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.TfmChar.print_summary">[docs]</a>    <span class="k">def</span> <span class="nf">print_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">string_format</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;TFM Char </span><span class="si">%u</span><span class="s"> </span><span class="si">%s</span><span class="s"></span>
+<span class="s"> - width             </span><span class="si">%.3f</span><span class="s"></span>
+<span class="s"> - height            </span><span class="si">%.3f</span><span class="s"></span>
+<span class="s"> - depth             </span><span class="si">%.3f</span><span class="s"></span>
+<span class="s"> - italic correction </span><span class="si">%.3f</span><span class="s"></span>
+<span class="s"> - lig kern program index </span><span class="si">%s</span><span class="s"></span>
+<span class="s"> - next larger char       </span><span class="si">%s</span><span class="s">&#39;&#39;&#39;</span>
+
+        <span class="n">message</span> <span class="o">=</span> <span class="n">string_format</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">char_code</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chr</span><span class="p">(),</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">italic_correction</span><span class="p">,</span>
+                                   <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lig_kern_program_index</span><span class="p">),</span>
+                                   <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">next_larger_char</span><span class="p">),</span>
+                                   <span class="p">)</span>
+
+        <span class="n">first_lig_kern</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lig_kern_program</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">first_lig_kern</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">lig_kern</span> <span class="ow">in</span> <span class="n">first_lig_kern</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">lig_kern</span><span class="p">)</span>
+
+        <span class="n">print_card</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="TfmExtensibleChar"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.TfmExtensibleChar">[docs]</a><span class="k">class</span> <span class="nc">TfmExtensibleChar</span><span class="p">(</span><span class="n">TfmChar</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class encapsulates a TeX Font Metric for an extensible Glyph.</span>
+
+<span class="sd">    Public attributes:</span>
+
+<span class="sd">      :attr:`top`</span>
+
+<span class="sd">      :attr:`mid`</span>
+
+<span class="sd">      :attr:`bot`</span>
+
+<span class="sd">      :attr:`rep`</span>
+<span class="sd">     &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">tfm</span><span class="p">,</span>
+                 <span class="n">char_code</span><span class="p">,</span>
+                 <span class="n">width</span><span class="p">,</span>
+                 <span class="n">height</span><span class="p">,</span>
+                 <span class="n">depth</span><span class="p">,</span>
+                 <span class="n">italic_correction</span><span class="p">,</span>
+                 <span class="n">extensible_recipe</span><span class="p">,</span>
+                 <span class="n">lig_kern_program_index</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">next_larger_char</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">TfmExtensibleChar</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">tfm</span><span class="p">,</span>
+                                                <span class="n">char_code</span><span class="p">,</span>
+                                                <span class="n">width</span><span class="p">,</span>
+                                                <span class="n">height</span><span class="p">,</span>
+                                                <span class="n">depth</span><span class="p">,</span>
+                                                <span class="n">italic_correction</span><span class="p">,</span>
+                                                <span class="n">lig_kern_program_index</span><span class="p">,</span>
+                                                <span class="n">next_larger_char</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep</span> <span class="o">=</span> <span class="n">extensible_recipe</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<span class="k">class</span> <span class="nc">TfmLigKern</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This classe serves of base class for ligature and kern program instruction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tfm</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">next_char</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tfm</span> <span class="o">=</span> <span class="n">tfm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="n">stop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next_char</span> <span class="o">=</span> <span class="n">next_char</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tfm</span><span class="o">.</span><span class="n">add_lig_kern</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Iterate of the ligature/kern program. &quot;&quot;&quot;</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">lig_kern</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tfm</span><span class="o">.</span><span class="n">get_lig_kern_program</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">lig_kern</span>
+            <span class="k">if</span> <span class="n">lig_kern</span><span class="o">.</span><span class="n">stop</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="TfmKern"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.TfmKern">[docs]</a><span class="k">class</span> <span class="nc">TfmKern</span><span class="p">(</span><span class="n">TfmLigKern</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class represents a Kerning Program Instruction.</span>
+
+<span class="sd">    Public Attributes:</span>
+
+<span class="sd">      :attr:`next_char`</span>
+<span class="sd">        next character</span>
+
+<span class="sd">      :attr:`kern`</span>
+<span class="sd">        kerning value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tfm</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">next_char</span><span class="p">,</span> <span class="n">kern</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">TfmKern</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">tfm</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">next_char</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">kern</span> <span class="o">=</span> <span class="n">kern</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;Kern char code </span><span class="si">%3u</span><span class="s"> </span><span class="si">%s</span><span class="s"> </span><span class="si">%0.6f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">next_char</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tfm</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">next_char</span><span class="p">]</span><span class="o">.</span><span class="n">chr</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kern</span><span class="p">,</span>
+            <span class="p">)</span>
+    
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="TfmLigature"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.TfmLigature">[docs]</a><span class="k">class</span> <span class="nc">TfmLigature</span><span class="p">(</span><span class="n">TfmLigKern</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class represents a Ligature Program Instruction.</span>
+
+<span class="sd">    Public Attributes:</span>
+
+<span class="sd">      :attr:`next_char`</span>
+<span class="sd">        next character</span>
+
+<span class="sd">      :attr:`ligature_char_code`</span>
+<span class="sd">        ligature character code</span>
+
+<span class="sd">      :attr:`current_char_is_deleted`</span>
+<span class="sd">        the current characters must be deleted of the stream</span>
+
+<span class="sd">      :attr:`next_char_is_deleted`</span>
+<span class="sd">        the next characters must be deleted of the stream</span>
+
+<span class="sd">      :attr:`number_of_chars_to_pass_over`</span>
+<span class="sd">        number of characters to pass over</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">tfm</span><span class="p">,</span>
+                 <span class="n">index</span><span class="p">,</span>
+                 <span class="n">stop</span><span class="p">,</span>
+                 <span class="n">next_char</span><span class="p">,</span>
+                 <span class="n">ligature_char_code</span><span class="p">,</span>
+                 <span class="n">number_of_chars_to_pass_over</span><span class="p">,</span>
+                 <span class="n">current_char_is_deleted</span><span class="p">,</span>
+                 <span class="n">next_char_is_deleted</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">TfmLigature</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">tfm</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">next_char</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ligature_char_code</span> <span class="o">=</span> <span class="n">ligature_char_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_chars_to_pass_over</span> <span class="o">=</span> <span class="n">number_of_chars_to_pass_over</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_char_is_deleted</span> <span class="o">=</span> <span class="n">current_char_is_deleted</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next_char_is_deleted</span> <span class="o">=</span> <span class="n">next_char_is_deleted</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&#39;Lig char code </span><span class="si">%3u</span><span class="s"> </span><span class="si">%s</span><span class="s"> ligature char code </span><span class="si">%3u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">next_char</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tfm</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">next_char</span><span class="p">]</span><span class="o">.</span><span class="n">chr</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ligature_char_code</span><span class="p">,</span>
+            <span class="p">)</span>
+    
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="Tfm"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.Tfm">[docs]</a><span class="k">class</span> <span class="nc">Tfm</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class encapsulates a TeX Font Metric for a font.</span>
+
+<span class="sd">    Public attributes:</span>
+
+<span class="sd">      :attr:`font_name`</span>
+<span class="sd">        font&#39;s name</span>
+
+<span class="sd">      :attr:`filename`</span>
+<span class="sd">        &quot;.tfm&quot; filename</span>
+
+<span class="sd">      :attr:`smallest_character_code`</span>
+<span class="sd">        smallest character code of the font</span>
+
+<span class="sd">      :attr:`largest_character_code`</span>
+<span class="sd">        largest character code of the font</span>
+
+<span class="sd">      :attr:`checksum`</span>
+<span class="sd">        checksum of the tfm file</span>
+
+<span class="sd">      :attr:`design_font_size`</span>
+<span class="sd">        design font size</span>
+
+<span class="sd">      :attr:`character_coding_scheme`</span>
+<span class="sd">        character coding scheme</span>
+
+<span class="sd">      :attr:`family`</span>
+<span class="sd">        font&#39;s family</span>
+
+<span class="sd">      :attr:`slant`</span>
+
+<span class="sd">      :attr:`spacing`</span>
+
+<span class="sd">      :attr:`space_stretch`</span>
+
+<span class="sd">      :attr:`space_shrink`</span>
+
+<span class="sd">      :attr:`x_height`</span>
+
+<span class="sd">      :attr:`quad`</span>
+
+<span class="sd">      :attr:`extra_space`</span>
+
+<span class="sd">    In addition for Math font, the following public attributes are available:</span>
+
+<span class="sd">      :attr:`um1`</span>
+
+<span class="sd">      :attr:`num2`</span>
+
+<span class="sd">      :attr:`num3`</span>
+
+<span class="sd">      :attr:`denom1`</span>
+
+<span class="sd">      :attr:`denom2`</span>
+
+<span class="sd">      :attr:`sup1`</span>
+
+<span class="sd">      :attr:`sup2`</span>
+
+<span class="sd">      :attr:`sup3`</span>
+
+<span class="sd">      :attr:`sub1`</span>
+
+<span class="sd">      :attr:`sub2`</span>
+
+<span class="sd">      :attr:`supdrop`</span>
+
+<span class="sd">      :attr:`subdrop`</span>
+
+<span class="sd">      :attr:`delim1`</span>
+
+<span class="sd">      :attr:`delim2`</span>
+
+<span class="sd">      :attr:`axis_height`</span>
+
+<span class="sd">      :attr:`default_rule_thickness`</span>
+
+<span class="sd">      :attr:`big_op_spacing`</span>
+
+<span class="sd">    The number of characters can be queried using :func:`len`. The :class:`TfmChar` instance for a</span>
+<span class="sd">    character code *char_code* can be set or get using the operator [].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">font_name</span><span class="p">,</span>
+                 <span class="n">filename</span><span class="p">,</span>
+                 <span class="n">smallest_character_code</span><span class="p">,</span>
+                 <span class="n">largest_character_code</span><span class="p">,</span>
+                 <span class="n">checksum</span><span class="p">,</span>
+                 <span class="n">design_font_size</span><span class="p">,</span>
+                 <span class="n">character_coding_scheme</span><span class="p">,</span>
+                 <span class="n">family</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">font_name</span> <span class="o">=</span> <span class="n">font_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smallest_character_code</span> <span class="o">=</span> <span class="n">smallest_character_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">largest_character_code</span> <span class="o">=</span> <span class="n">largest_character_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checksum</span> <span class="o">=</span> <span class="n">checksum</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design_font_size</span> <span class="o">=</span> <span class="n">design_font_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">character_coding_scheme</span> <span class="o">=</span> <span class="n">character_coding_scheme</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">family</span> <span class="o">=</span> <span class="n">family</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lig_kerns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chars</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">char_code</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Set the :class:`TfmChar` instance for the character code *char_code*. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chars</span><span class="p">[</span><span class="n">char_code</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">char_code</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the :class:`TfmChar` instance for the character code *char_code*. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chars</span><span class="p">[</span><span class="n">char_code</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the number of characters. &quot;&quot;&quot;</span> 
+
+        <span class="c"># return self.largest_character_code - self.smallest_character_code +1</span>
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_chars</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Tfm.set_font_parameters"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.Tfm.set_font_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_font_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Set the font parameters. &quot;&quot;&quot;</span>
+
+        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slant</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">space_stretch</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">space_shrink</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">x_height</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">quad</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">extra_space</span><span class="p">)</span> <span class="o">=</span> <span class="n">parameters</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Tfm.set_math_symbols_parameters"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.Tfm.set_math_symbols_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_math_symbols_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+          
+        <span class="sd">&quot;&quot;&quot; Set the math symbols parameters. &quot;&quot;&quot;</span>
+
+        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num1</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">num2</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">num3</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">denom1</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">denom2</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">sup1</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">sup2</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">sup3</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">sub1</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">sub2</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">supdrop</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">subdrop</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">delim1</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">delim2</span><span class="p">,</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">axis_height</span><span class="p">)</span> <span class="o">=</span> <span class="n">parameters</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Tfm.set_math_extension_parameters"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.Tfm.set_math_extension_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_math_extension_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Set the math extension parameters. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_rule_thickness</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">big_op_spacing</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Tfm.add_lig_kern"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.Tfm.add_lig_kern">[docs]</a>    <span class="k">def</span> <span class="nf">add_lig_kern</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Add a ligature/kern program *obj*. &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lig_kerns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Tfm.get_lig_kern_program"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.Tfm.get_lig_kern_program">[docs]</a>    <span class="k">def</span> <span class="nf">get_lig_kern_program</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the ligature/kern program at index *i*. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lig_kerns</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Tfm.print_summary"><a class="viewcode-back" href="../../../api/PyDvi/Font/Tfm.html#PyDvi.Font.Tfm.Tfm.print_summary">[docs]</a>    <span class="k">def</span> <span class="nf">print_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">string_format</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;TFM </span><span class="si">%s</span><span class="s"></span>
+
+<span class="s"> - Smallest character code in the font: </span><span class="si">%u</span><span class="s"> </span>
+<span class="s"> - Largest character code in the font:  </span><span class="si">%u</span><span class="s"> </span>
+
+<span class="s"> - Checksum: </span><span class="si">%u</span><span class="s"></span>
+<span class="s"> - Design Font Size: </span><span class="si">%f</span><span class="s"></span>
+<span class="s"> - Character coding scheme: &quot;</span><span class="si">%s</span><span class="s">&quot;</span>
+<span class="s"> - Family: &quot;</span><span class="si">%s</span><span class="s">&quot;</span>
+
+<span class="s">Font Parameters:</span>
+<span class="s"> - Slant: </span><span class="si">%f</span><span class="s"></span>
+<span class="s"> - Spacing: </span><span class="si">%f</span><span class="s"></span>
+<span class="s"> - Space Stretch: </span><span class="si">%f</span><span class="s"></span>
+<span class="s"> - Space Shrink: </span><span class="si">%f</span><span class="s"></span>
+<span class="s"> - X Height: </span><span class="si">%f</span><span class="s"></span>
+<span class="s"> - Quad: </span><span class="si">%f</span><span class="s"></span>
+<span class="s"> - Extra Space: </span><span class="si">%f</span><span class="s">&#39;&#39;&#39;</span>
+
+        <span class="n">message</span> <span class="o">=</span> <span class="n">string_format</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">font_name</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">smallest_character_code</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">largest_character_code</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">design_font_size</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">character_coding_scheme</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">family</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">slant</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">space_stretch</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">space_shrink</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">x_height</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">quad</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">extra_space</span><span class="p">,</span>
+                                   <span class="p">)</span>
+
+        <span class="n">print_card</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chars</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">char</span><span class="o">.</span><span class="n">print_summary</span><span class="p">()</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

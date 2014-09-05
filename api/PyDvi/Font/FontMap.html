@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1.3.4. FontMap &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="3.1.3. Font" href="../Font.html" />
+    <link rel="next" title="3.1.3.5. PkFont" href="PkFont.html" />
+    <link rel="prev" title="3.1.3.3. FontManager" href="FontManager.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="PkFont.html" title="3.1.3.5. PkFont"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="FontManager.html" title="3.1.3.3. FontManager"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li>
+          <li><a href="../Font.html" accesskey="U">3.1.3. <tt class="docutils literal"><span class="pre">Font</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-PyDvi.Font.FontMap">
+<span id="fontmap"></span><h1>3.1.3.4. <tt class="xref py py-mod docutils literal"><span class="pre">FontMap</span></tt><a class="headerlink" href="#module-PyDvi.Font.FontMap" title="Permalink to this headline">¶</a></h1>
+<p>This module handles font map file.</p>
+<p>A font map gives the correspondance between the TeX PK fonts and their PostScript equivalents. It
+uses the <tt class="docutils literal"><span class="pre">.map</span></tt> extension.</p>
+<p>For example, the file <tt class="file docutils literal"><span class="pre">pdftex.map</span></tt> contains lines like:</p>
+<div class="highlight-python"><div class="highlight"><pre>futbo8r Utopia-Bold &quot;.167 SlantFont TeXBase1Encoding ReEncodeFont&quot; &lt;8r.enc &lt;putb8a.pfb
+</pre></div>
+</div>
+<p>Each line describes a PK font using the following format:</p>
+<div class="highlight-python"><div class="highlight"><pre>PK_FONT_NAME PS_FONT_NAME &quot;PostScript snippet&quot; &lt;FILE_NAME1 &lt;FILE_NAME2
+</pre></div>
+</div>
+<p>The first word is the TeX font name and the second word is the PostScript font name. The PostScript
+font name can be omitted if it is the same than the TeX font name. The word starting by &#8220;&lt;&#8221; are
+filenames to be included in the PostScript file. A filename with the extension <tt class="docutils literal"><span class="pre">.enc</span></tt> is an
+encoding file and a filename with the extension <tt class="docutils literal"><span class="pre">.pfb</span></tt> is a Printer Font Binary file. The text
+enclosed by double quotes is optional and gives a PostScript snippet to be inserted in the
+PostScript file. It can be placed at the end of the line.</p>
+<p>The percent character is used for comment as for TeX.</p>
+<p>References:</p>
+<ul class="simple">
+<li>The Font Installation Guide Using Postscript fonts to their full potential with Latex. Originally
+written by Philipp Lehman. December 2004. Revision 2.14. cf. Creating map files Part.
+<a class="reference external" href="http://www.ctan.org/tex-archive/info/Type1fonts/fontinstallationguide">http://www.ctan.org/tex-archive/info/Type1fonts/fontinstallationguide</a></li>
+<li>updmap(1) - Update font map files for TeX output drivers.</li>
+<li>updmap.cfg(5) - Configuration of font mapping/inclusion for dvips and friends</li>
+</ul>
+<p>The font map <tt class="file docutils literal"><span class="pre">pdftex.map</span></tt> can be parsed using:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">font_map</span> <span class="o">=</span> <span class="n">FontMap</span><span class="p">(</span><span class="s">&#39;/usr/share/texmf/fonts/map/pdftex/updmap/pdftex.map&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Each entry is stored in a <a class="reference internal" href="#PyDvi.Font.FontMap.FontMapEntry" title="PyDvi.Font.FontMap.FontMapEntry"><tt class="xref py py-class docutils literal"><span class="pre">FontMapEntry</span></tt></a> instance and can be retrieved using its TeX name as
+key:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">font_map_entry</span> <span class="o">=</span> <span class="n">font_map</span><span class="p">[</span><span class="s">&#39;futbo8r&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Then the <tt class="docutils literal"><span class="pre">.pfb</span></tt> file name as well the other parameters can be queried as attribute:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">font_map_entry</span><span class="o">.</span><span class="n">pfb_filename</span>
+<span class="go">&#39;putb8a.pfb&#39;</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="PyDvi.Font.FontMap.FontMap">
+<em class="property">class </em><tt class="descclassname">PyDvi.Font.FontMap.</tt><tt class="descname">FontMap</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/FontMap.html#FontMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.FontMap.FontMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>This class parses a fontmap file.</p>
+<dl class="staticmethod">
+<dt id="PyDvi.Font.FontMap.FontMap._parse_effects">
+<em class="property">static </em><tt class="descname">_parse_effects</tt><big>(</big><em>ps_snippet</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/FontMap.html#FontMap._parse_effects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.FontMap.FontMap._parse_effects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the PostScript snippet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Font.FontMap.FontMap._parse_line">
+<tt class="descname">_parse_line</tt><big>(</big><em>line</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/FontMap.html#FontMap._parse_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.FontMap.FontMap._parse_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a line:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Font.FontMap.FontMap._register_entry">
+<tt class="descname">_register_entry</tt><big>(</big><em>font_map_entry</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/FontMap.html#FontMap._register_entry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.FontMap.FontMap._register_entry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a font map entry.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Font.FontMap.FontMap.print_summary">
+<tt class="descname">print_summary</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/FontMap.html#FontMap.print_summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.FontMap.FontMap.print_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PyDvi.Font.FontMap.FontMapEntry">
+<em class="property">class </em><tt class="descclassname">PyDvi.Font.FontMap.</tt><tt class="descname">FontMapEntry</tt><big>(</big><em>tex_name</em>, <em>ps_font_name</em>, <em>ps_snippet</em>, <em>effects</em>, <em>encoding</em>, <em>pfb_filename</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/FontMap.html#FontMapEntry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.FontMap.FontMapEntry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>This class encapsulates a font map entry.</p>
+<p>Public attributes are:</p>
+<blockquote>
+<div><p><tt class="xref py py-attr docutils literal"><span class="pre">tex_name</span></tt></p>
+<p><tt class="xref py py-attr docutils literal"><span class="pre">ps_font_name</span></tt></p>
+<p><tt class="xref py py-attr docutils literal"><span class="pre">ps_snippet</span></tt></p>
+<p><tt class="xref py py-attr docutils literal"><span class="pre">effects</span></tt></p>
+<p><tt class="xref py py-attr docutils literal"><span class="pre">encoding</span></tt></p>
+<p><tt class="xref py py-attr docutils literal"><span class="pre">pfb_filename</span></tt></p>
+</div></blockquote>
+<dl class="method">
+<dt id="PyDvi.Font.FontMap.FontMapEntry.print_summary">
+<tt class="descname">print_summary</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/FontMap.html#FontMapEntry.print_summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.FontMap.FontMapEntry.print_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="FontManager.html"
+                        title="previous chapter">3.1.3.3. <tt class="docutils literal"><span class="pre">FontManager</span></tt></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="PkFont.html"
+                        title="next chapter">3.1.3.5. <tt class="docutils literal"><span class="pre">PkFont</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api/PyDvi/Font/FontMap.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="PkFont.html" title="3.1.3.5. PkFont"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="FontManager.html" title="3.1.3.3. FontManager"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li>
+          <li><a href="../Font.html" >3.1.3. <tt class="docutils literal"><span class="pre">Font</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

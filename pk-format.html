@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,14 +6,14 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>1.2. Packet Font File Format &mdash; PyDVI 0.1.0 documentation</title>
+    <title>4.2. Packet Font File Format &mdash; PyDvi 0.1.0 documentation</title>
     
     <link rel="stylesheet" href="static/default.css" type="text/css" />
     <link rel="stylesheet" href="static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '0.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -25,10 +23,10 @@
     <script type="text/javascript" src="static/jquery.js"></script>
     <script type="text/javascript" src="static/underscore.js"></script>
     <script type="text/javascript" src="static/doctools.js"></script>
-    <link rel="top" title="PyDVI 0.1.0 documentation" href="index.html" />
-    <link rel="up" title="1. Reference Documentation" href="reference-documentation.html" />
-    <link rel="next" title="1.3. Relevant Softwares" href="reference-links.html" />
-    <link rel="prev" title="1.1. Device-Independent File Format" href="dvi-format.html" /> 
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="index.html" />
+    <link rel="up" title="4. Bibliography" href="bibliography.html" />
+    <link rel="next" title="4.3. Relevant Softwares" href="reference-links.html" />
+    <link rel="prev" title="4.1. Device-Independent File Format" href="dvi-format.html" /> 
   </head>
   <body>
     <div class="related">
@@ -38,13 +36,16 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="reference-links.html" title="1.3. Relevant Softwares"
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="reference-links.html" title="4.3. Relevant Softwares"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="dvi-format.html" title="1.1. Device-Independent File Format"
+          <a href="dvi-format.html" title="4.1. Device-Independent File Format"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
-          <li><a href="reference-documentation.html" accesskey="U">1. Reference Documentation</a> &raquo;</li> 
+        <li><a href="index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="bibliography.html" accesskey="U">4. Bibliography</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -54,7 +55,7 @@
           <div class="body">
             
   <div class="section" id="packet-font-file-format">
-<h1>1.2. Packet Font File Format<a class="headerlink" href="#packet-font-file-format" title="Permalink to this headline">¶</a></h1>
+<h1>4.2. Packet Font File Format<a class="headerlink" href="#packet-font-file-format" title="Permalink to this headline">¶</a></h1>
 <p>The Packet Font file format in descriped in the <tt class="file docutils literal"><span class="pre">pktype.web</span></tt> file from Web2C.  Part of this
 documentation comes from this file.</p>
 <p>The packed file format is a compact representation of the data contained in a GF file.  The
@@ -213,7 +214,7 @@ that a procedure called <tt class="docutils literal"><span class="pre">get_nyb</
 the global repeat count indicates whether a row needs to be repeated.  Note that this routine is
 recursive, but since a repeat count can never directly follow another repeat count, it can only be
 recursive to one level:</p>
-<div class="highlight-python"><pre>function pk packed num: integer ;
+<div class="highlight-python"><div class="highlight"><pre>function pk packed num: integer ;
   var i; j: integer;
   begin i &lt;- get nyb;
     if i = 0 then
@@ -226,12 +227,13 @@ recursive to one level:</p>
       end
      else if i &lt;= dyn_f then pk_packed_num &lt;- i
        else if i &lt; 14 then pk_packed_num &lt;- (i - dyn_f - 1) * 16 + get_nyb + dyn_f + 1
-         else begin if repeat count != 0 then abort('Second repeat count for this row!');
+         else begin if repeat count != 0 then abort(&#39;Second repeat count for this row!&#39;);
            repeat_count &lt;- 1; { prevent recursion more than one level }
            if i = 14 then repeat_count &lt;- pk_packed_num;
            send_out(true, repeat count); pk_packed_num &lt;- pk_packed_num;
            end;
-  end;</pre>
+  end;
+</pre></div>
 </div>
 <p>For low resolution fonts, or characters with &#8220;gray&#8221; areas, run encoding can often make the character
 many times larger.  Therefore, for those characters that cannot be encoded efficiently with run
@@ -295,10 +297,10 @@ lower left hand corner of this pixel.</p>
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="dvi-format.html"
-                        title="previous chapter">1.1. Device-Independent File Format</a></p>
+                        title="previous chapter">4.1. Device-Independent File Format</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="reference-links.html"
-                        title="next chapter">1.3. Relevant Softwares</a></p>
+                        title="next chapter">4.3. Relevant Softwares</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/pk-format.txt"
@@ -328,18 +330,21 @@ lower left hand corner of this pixel.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="reference-links.html" title="1.3. Relevant Softwares"
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="reference-links.html" title="4.3. Relevant Softwares"
              >next</a> |</li>
         <li class="right" >
-          <a href="dvi-format.html" title="1.1. Device-Independent File Format"
+          <a href="dvi-format.html" title="4.1. Device-Independent File Format"
              >previous</a> |</li>
-        <li><a href="index.html">PyDVI 0.1.0 documentation</a> &raquo;</li>
-          <li><a href="reference-documentation.html" >1. Reference Documentation</a> &raquo;</li> 
+        <li><a href="index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="bibliography.html" >4. Bibliography</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2011, Fabrice Salvaire.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

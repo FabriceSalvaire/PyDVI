@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDvi.Font.Font &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDvi.Font.Font</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c"># </span>
+<span class="c"># PyDvi - A Python Library to Process DVI Stream</span>
+<span class="c"># Copyright (C) 2014 Fabrice Salvaire</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c"># </span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c"># </span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c"># </span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># Audit</span>
+<span class="c">#</span>
+<span class="c"># - 11/12/2011 fabrice</span>
+<span class="c">#   - print_header ?</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="sd">&quot;&quot;&quot; This module provides a base class for font type managed by the font manager.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Font&#39;</span><span class="p">,</span> <span class="s">&#39;font_types&#39;</span><span class="p">,</span> <span class="s">&#39;sort_font_class&#39;</span><span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">..Kpathsea</span> <span class="kn">import</span> <span class="n">kpsewhich</span>
+<span class="kn">from</span> <span class="nn">..Tools.EnumFactory</span> <span class="kn">import</span> <span class="n">EnumFactory</span>
+<span class="kn">from</span> <span class="nn">..Tools.Logging</span> <span class="kn">import</span> <span class="n">print_card</span>
+<span class="kn">from</span> <span class="nn">.TfmParser</span> <span class="kn">import</span> <span class="n">TfmParser</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="c">#: Font Type Enumerate </span>
+<span class="n">font_types</span> <span class="o">=</span> <span class="n">EnumFactory</span><span class="p">(</span><span class="s">&#39;FontTypes&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;Pk&#39;</span><span class="p">,</span> <span class="s">&#39;Type1&#39;</span><span class="p">,</span> <span class="s">&#39;TrueType&#39;</span><span class="p">,</span> <span class="s">&#39;OpenType&#39;</span><span class="p">))</span>
+
+<div class="viewcode-block" id="sort_font_class"><a class="viewcode-back" href="../../../api/PyDvi/Font/Font.html#PyDvi.Font.Font.sort_font_class">[docs]</a><span class="k">def</span> <span class="nf">sort_font_class</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Sort a list of :class:`Font` instance by font type enumerate. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="nb">cmp</span><span class="o">=</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">cmp</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">font_type</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">font_type</span><span class="p">))</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="Font"><a class="viewcode-back" href="../../../api/PyDvi/Font/Font.html#PyDvi.Font.Font.Font">[docs]</a><span class="k">class</span> <span class="nc">Font</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class is a base class for font managed by the Font Manager.</span>
+
+<span class="sd">    Class attributes to be defined in subclass:</span>
+
+<span class="sd">      ``font_type``</span>
+<span class="sd">        Font Type Enumerate</span>
+
+<span class="sd">      ``font_type_string``</span>
+<span class="sd">        Description string of the font type</span>
+
+<span class="sd">      ``extension``</span>
+<span class="sd">        File extension</span>
+
+<span class="sd">    To create a :class:`Font` instance use::</span>
+
+<span class="sd">      font = Font(font_manager, font_id, name)</span>
+
+<span class="sd">    where *font_manager* is a :class:`PyDvi.FontManager.FontManager`, *font_id* is the font id</span>
+<span class="sd">    provided by the Font Manager and *name* is the font name, &quot;cmr10&quot; for example.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">font_type</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">font_type_string</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">extension</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_manager</span><span class="p">,</span> <span class="n">font_id</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">font_manager</span> <span class="o">=</span> <span class="n">font_manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">font_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">extension</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_find_font</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_find_tfm</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Font._find_font"><a class="viewcode-back" href="../../../api/PyDvi/Font/Font.html#PyDvi.Font.Font.Font._find_font">[docs]</a>    <span class="k">def</span> <span class="nf">_find_font</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kpsewhich_options</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Find the font file location in the system using Kpathsea. &quot;&quot;&quot;</span>
+
+        <span class="n">basename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basename</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">kpsewhich</span><span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">kpsewhich_options</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s">&quot;Font file </span><span class="si">%s</span><span class="s"> not found&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">basename</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Font._find_tfm"><a class="viewcode-back" href="../../../api/PyDvi/Font/Font.html#PyDvi.Font.Font.Font._find_tfm">[docs]</a>    <span class="k">def</span> <span class="nf">_find_tfm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Find the TFM file location in the system using Kpathsea and load it. &quot;&quot;&quot;</span>
+
+        <span class="n">tfm_file</span> <span class="o">=</span> <span class="n">kpsewhich</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">file_format</span><span class="o">=</span><span class="s">&#39;tfm&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tfm_file</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s">&quot;TFM file </span><span class="si">%s</span><span class="s"> not found&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tfm</span> <span class="o">=</span> <span class="n">TfmParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">tfm_file</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Font.basename"><a class="viewcode-back" href="../../../api/PyDvi/Font/Font.html#PyDvi.Font.Font.Font.basename">[docs]</a>    <span class="k">def</span> <span class="nf">basename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the basename. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">extension</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Font.print_header"><a class="viewcode-back" href="../../../api/PyDvi/Font/Font.html#PyDvi.Font.Font.Font.print_header">[docs]</a>    <span class="k">def</span> <span class="nf">print_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">string_format</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"></span>
+
+<span class="s"> - font file: </span><span class="si">%s</span><span class="s"></span>
+<span class="s"> - tfm  file: </span><span class="si">%s</span><span class="s"></span>
+<span class="s">&quot;&quot;&quot;</span>
+        
+        <span class="k">return</span>  <span class="n">string_format</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">font_type_string</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
+                                 <span class="bp">self</span><span class="o">.</span><span class="n">tfm</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
+                                 <span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Font.print_summary"><a class="viewcode-back" href="../../../api/PyDvi/Font/Font.html#PyDvi.Font.Font.Font.print_summary">[docs]</a>    <span class="k">def</span> <span class="nf">print_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">print_card</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">print_header</span><span class="p">())</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

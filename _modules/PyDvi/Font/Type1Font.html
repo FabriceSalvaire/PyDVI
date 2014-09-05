@@ -1,0 +1,491 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDvi.Font.Type1Font &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDvi.Font.Type1Font</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c"># </span>
+<span class="c"># PyDvi - A Python Library to Process DVI Stream</span>
+<span class="c"># Copyright (C) 2014 Fabrice Salvaire</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c"># </span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c"># </span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c"># </span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># Audit</span>
+<span class="c">#</span>
+<span class="c"># - 18/12/2011 fabrice</span>
+<span class="c">#    char code 0 -&gt; 127 + 1 = 128</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Type1Font&#39;</span><span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">unicodedata</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">freetype</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">.Font</span> <span class="kn">import</span> <span class="n">Font</span><span class="p">,</span> <span class="n">font_types</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">_module_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="k">def</span> <span class="nf">from_64th_point</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">/</span><span class="mf">64.</span>
+
+<span class="k">def</span> <span class="nf">to_64th_point</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">*</span><span class="mi">64</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="k">def</span> <span class="nf">test_bit</span><span class="p">(</span><span class="n">flags</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">flags</span> <span class="o">&amp;</span> <span class="n">mask</span> <span class="o">==</span> <span class="mi">1</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="Type1Font"><a class="viewcode-back" href="../../../api/PyDvi/Font/Type1Font.html#PyDvi.Font.Type1Font.Type1Font">[docs]</a><span class="k">class</span> <span class="nc">Type1Font</span><span class="p">(</span><span class="n">Font</span><span class="p">):</span>
+
+    <span class="n">_logger</span> <span class="o">=</span> <span class="n">_module_logger</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s">&#39;Type1Font&#39;</span><span class="p">)</span>
+
+    <span class="n">font_type</span> <span class="o">=</span> <span class="n">font_types</span><span class="o">.</span><span class="n">Pk</span>
+    <span class="n">font_type_string</span> <span class="o">=</span> <span class="s">&#39;PostScript Type1 Font&#39;</span>
+    <span class="n">extension</span> <span class="o">=</span> <span class="s">&#39;pfb&#39;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_manager</span><span class="p">,</span> <span class="n">font_id</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Type1Font</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">font_manager</span><span class="p">,</span> <span class="n">font_id</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="c"># self._glyphs = {}</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_face</span> <span class="o">=</span> <span class="n">freetype</span><span class="o">.</span><span class="n">Face</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s">&quot;Freetype can&#39;t open file </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># FT_ENCODING_UNICODE FT_ENCODING_ADOBE_CUSTOM</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_face</span><span class="o">.</span><span class="n">select_charmap</span><span class="p">(</span><span class="n">freetype</span><span class="o">.</span><span class="n">FT_ENCODING_ADOBE_CUSTOM</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s">&quot;Font </span><span class="si">%s</span><span class="s"> doesn&#39;t have an Unicode char map&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_index</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_face_information</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_glyph_table</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_font_size</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Type1Font._init_index"><a class="viewcode-back" href="../../../api/PyDvi/Font/Type1Font.html#PyDvi.Font.Type1Font.Type1Font._init_index">[docs]</a>    <span class="k">def</span> <span class="nf">_init_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index_to_charcode</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_charcode_to_index</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_face</span>
+
+        <span class="n">charcode</span><span class="p">,</span> <span class="n">glyph_index</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">get_first_char</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">glyph_index</span><span class="p">:</span>
+            <span class="n">unicode_character</span> <span class="o">=</span> <span class="nb">unichr</span><span class="p">(</span><span class="n">charcode</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="n">unicode_character</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;&lt;unknown character&gt;&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_index_to_charcode</span><span class="p">[</span><span class="n">glyph_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">charcode</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_charcode_to_index</span><span class="p">[</span><span class="n">charcode</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">glyph_index</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="c"># face.get_glyph_name(glyph_index) # is not available</span>
+            <span class="n">charcode</span><span class="p">,</span> <span class="n">glyph_index</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">get_next_char</span><span class="p">(</span><span class="n">charcode</span><span class="p">,</span> <span class="n">glyph_index</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_face</span><span class="o">.</span><span class="n">num_glyphs</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Type1Font.font_size"><a class="viewcode-back" href="../../../api/PyDvi/Font/Type1Font.html#PyDvi.Font.Type1Font.Type1Font.font_size">[docs]</a>    <span class="k">def</span> <span class="nf">font_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_size</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">600</span><span class="p">):</span>
+
+        <span class="n">key</span> <span class="o">=</span> <span class="s">&quot;{}@{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">font_size</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">font_size</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_font_size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_font_size</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">FontSize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_size</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_font_size</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Type1Font.get_glyph"><a class="viewcode-back" href="../../../api/PyDvi/Font/Type1Font.html#PyDvi.Font.Type1Font.Type1Font.get_glyph">[docs]</a>    <span class="k">def</span> <span class="nf">get_glyph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tex_glyph_index</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">600</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;glyph[{}] @size {} @resolution {} dpi&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tex_glyph_index</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">resolution</span><span class="p">))</span>
+
+        <span class="n">font_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+
+        <span class="n">glyph_index</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_charcode_to_index</span><span class="p">[</span><span class="n">tex_glyph_index</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;retrieve glyph {} {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">glyph_index</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+        <span class="n">glyph</span> <span class="o">=</span> <span class="n">font_size</span><span class="p">[</span><span class="n">glyph_index</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">glyph</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Type1Font._log_face_information"><a class="viewcode-back" href="../../../api/PyDvi/Font/Type1Font.html#PyDvi.Font.Type1Font.Type1Font._log_face_information">[docs]</a>    <span class="k">def</span> <span class="nf">_log_face_information</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_face</span>
+
+        <span class="n">string_template</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">postscript name:     </span><span class="si">%s</span><span class="s"></span>
+<span class="s">family name:         </span><span class="si">%s</span><span class="s"></span>
+<span class="s">style name:          </span><span class="si">%s</span><span class="s"></span>
+<span class="s">number of faces:     </span><span class="si">%u</span><span class="s"></span>
+<span class="s">number of glyphs:    </span><span class="si">%u</span><span class="s"></span>
+<span class="s">available sizes:     </span><span class="si">%s</span><span class="s"></span>
+<span class="s">char maps:           </span><span class="si">%s</span><span class="s"></span>
+<span class="s">units per em:        </span><span class="si">%s</span><span class="s"></span>
+<span class="s">flags:               </span><span class="si">%s</span><span class="s"></span>
+<span class="s">bold:                </span><span class="si">%s</span><span class="s"></span>
+<span class="s">italic:              </span><span class="si">%s</span><span class="s"></span>
+<span class="s">scalable:            </span><span class="si">%s</span><span class="s"></span>
+<span class="s">ascender:            </span><span class="si">%u</span><span class="s"></span>
+<span class="s">descender:           </span><span class="si">%u</span><span class="s"></span>
+<span class="s">height:              </span><span class="si">%u</span><span class="s"></span>
+<span class="s">max advance width:   </span><span class="si">%u</span><span class="s"></span>
+<span class="s">max advance height:  </span><span class="si">%u</span><span class="s"></span>
+<span class="s">underline position:  </span><span class="si">%u</span><span class="s"></span>
+<span class="s">underline thickness: </span><span class="si">%u</span><span class="s"></span>
+<span class="s">has horizontal:      </span><span class="si">%s</span><span class="s"></span>
+<span class="s">has vertical:        </span><span class="si">%s</span><span class="s"></span>
+<span class="s">has kerning:         </span><span class="si">%s</span><span class="s"></span>
+<span class="s">is fixed width:      </span><span class="si">%s</span><span class="s"></span>
+<span class="s">is scalable:         </span><span class="si">%s</span><span class="s"></span>
+<span class="s">&#39;&#39;&#39;</span>
+
+        <span class="n">text</span> <span class="o">=</span> <span class="n">string_template</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">postscript_name</span><span class="p">,</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">family_name</span><span class="p">,</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">style_name</span><span class="p">,</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">num_faces</span><span class="p">,</span>
+            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">face</span><span class="o">.</span><span class="n">available_sizes</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">([</span><span class="n">charmap</span><span class="o">.</span><span class="n">encoding_name</span> <span class="k">for</span> <span class="n">charmap</span> <span class="ow">in</span> <span class="n">face</span><span class="o">.</span><span class="n">charmaps</span><span class="p">]),</span>
+            <span class="nb">hex</span><span class="p">(</span><span class="n">face</span><span class="o">.</span><span class="n">style_flags</span><span class="p">),</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">units_per_EM</span><span class="p">,</span>
+            <span class="n">test_bit</span><span class="p">(</span><span class="n">face</span><span class="o">.</span><span class="n">style_flags</span><span class="p">,</span> <span class="n">freetype</span><span class="o">.</span><span class="n">FT_STYLE_FLAG_BOLD</span><span class="p">),</span>
+            <span class="n">test_bit</span><span class="p">(</span><span class="n">face</span><span class="o">.</span><span class="n">style_flags</span><span class="p">,</span> <span class="n">freetype</span><span class="o">.</span><span class="n">FT_STYLE_FLAG_ITALIC</span><span class="p">),</span>
+            <span class="n">test_bit</span><span class="p">(</span><span class="n">face</span><span class="o">.</span><span class="n">style_flags</span><span class="p">,</span> <span class="n">freetype</span><span class="o">.</span><span class="n">FT_FACE_FLAG_SCALABLE</span><span class="p">),</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">ascender</span><span class="p">,</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">descender</span><span class="p">,</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">height</span><span class="p">,</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">max_advance_width</span><span class="p">,</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">max_advance_height</span><span class="p">,</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">underline_position</span><span class="p">,</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">underline_thickness</span><span class="p">,</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">has_horizontal</span><span class="p">,</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">has_vertical</span><span class="p">,</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">has_kerning</span><span class="p">,</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">is_fixed_width</span><span class="p">,</span>
+            <span class="n">face</span><span class="o">.</span><span class="n">is_scalable</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Type1Font._log_glyph_table"><a class="viewcode-back" href="../../../api/PyDvi/Font/Type1Font.html#PyDvi.Font.Type1Font.Type1Font._log_glyph_table">[docs]</a>    <span class="k">def</span> <span class="nf">_log_glyph_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_face</span>
+
+        <span class="n">message</span> <span class="o">=</span> <span class="s">&#39;Glyph Table</span><span class="se">\n</span><span class="s">&#39;</span>
+        <span class="n">charcode</span><span class="p">,</span> <span class="n">glyph_index</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">get_first_char</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">glyph_index</span><span class="p">:</span>
+            <span class="n">unicode_character</span> <span class="o">=</span> <span class="nb">unichr</span><span class="p">(</span><span class="n">charcode</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="n">unicode_character</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;&lt;unknown character&gt;&#39;</span>
+            <span class="n">message</span> <span class="o">+=</span> <span class="s">u&quot;  [{}] TeX[{} {}] {} {}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">glyph_index</span><span class="p">,</span>
+                                                           <span class="n">charcode</span><span class="p">,</span>
+                                                           <span class="nb">hex</span><span class="p">(</span><span class="n">charcode</span><span class="p">),</span> <span class="c"># 0x%04lx</span>
+                                                           <span class="n">unicode_character</span><span class="p">,</span>
+                                                           <span class="n">name</span><span class="p">)</span>
+            <span class="c"># face.get_glyph_name(glyph_index) # is not available</span>
+            <span class="n">charcode</span><span class="p">,</span> <span class="n">glyph_index</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">get_next_char</span><span class="p">(</span><span class="n">charcode</span><span class="p">,</span> <span class="n">glyph_index</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<span class="k">class</span> <span class="nc">FontSize</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font</span><span class="p">,</span> <span class="n">font_size</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="mi">600</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_font</span> <span class="o">=</span> <span class="n">font</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">=</span> <span class="n">font_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resolution</span> <span class="o">=</span> <span class="n">resolution</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span> <span class="o">=</span> <span class="n">FontMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_glyphs</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">font</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_font</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">resolution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">glyph_index</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">glyph_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_glyphs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_glyph</span><span class="p">(</span><span class="n">glyph_index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_glyphs</span><span class="p">[</span><span class="n">glyph_index</span><span class="p">]</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">load_all_glyphs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_font</span><span class="o">.</span><span class="n">_face</span>
+        <span class="n">charcode</span><span class="p">,</span> <span class="n">glyph_index</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">get_first_char</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">glyph_index</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_glyph</span><span class="p">(</span><span class="n">glyph_index</span><span class="p">)</span>
+            <span class="n">charcode</span><span class="p">,</span> <span class="n">glyph_index</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">get_next_char</span><span class="p">(</span><span class="n">charcode</span><span class="p">,</span> <span class="n">glyph_index</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+ 
+    <span class="k">def</span> <span class="nf">_set_face_transfrom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_font</span><span class="o">.</span><span class="n">_face</span>
+        <span class="n">horizontal_scale</span> <span class="o">=</span> <span class="mi">100</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolution</span> <span class="c"># dpi</span>
+        <span class="n">face</span><span class="o">.</span><span class="n">set_char_size</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">to_64th_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_size</span><span class="p">)),</span> <span class="mi">0</span><span class="p">,</span>
+                           <span class="n">horizontal_scale</span><span class="o">*</span><span class="n">resolution</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+        <span class="c"># Matrix cooeficients are expressed in 16.16 fixed-point units.</span>
+        <span class="c"># 2**16 = 0x10000L = 65536</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">freetype</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">16</span><span class="o">/</span><span class="n">horizontal_scale</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                                 <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">16</span><span class="p">)</span>
+        <span class="c"># The vector coordinates are expressed in 1/64th of a pixel</span>
+        <span class="c"># (also known as 26.6 fixed-point numbers).</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">freetype</span><span class="o">.</span><span class="n">Vector</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">face</span><span class="o">.</span><span class="n">set_transform</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+
+        <span class="n">freetype</span><span class="o">.</span><span class="n">set_lcd_filter</span><span class="p">(</span><span class="n">freetype</span><span class="o">.</span><span class="n">FT_LCD_FILTER_LIGHT</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+ 
+    <span class="k">def</span> <span class="nf">load_glyph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">glyph_index</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">glyph_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_glyphs</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_face_transfrom</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dirty</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="n">face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_font</span><span class="o">.</span><span class="n">_face</span>
+
+        <span class="n">flags</span> <span class="o">=</span> <span class="n">freetype</span><span class="o">.</span><span class="n">FT_LOAD_RENDER</span> <span class="o">|</span> <span class="n">freetype</span><span class="o">.</span><span class="n">FT_LOAD_FORCE_AUTOHINT</span>
+        <span class="c"># flags |= freetype.FT_LOAD_TARGET_LCD</span>
+
+        <span class="n">face</span><span class="o">.</span><span class="n">load_glyph</span><span class="p">(</span><span class="n">glyph_index</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+
+        <span class="n">bitmap</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">glyph</span><span class="o">.</span><span class="n">bitmap</span> <span class="c"># a list</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">glyph</span><span class="o">.</span><span class="n">bitmap_left</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">glyph</span><span class="o">.</span><span class="n">bitmap_top</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">glyph</span><span class="o">.</span><span class="n">bitmap</span><span class="o">.</span><span class="n">width</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">glyph</span><span class="o">.</span><span class="n">bitmap</span><span class="o">.</span><span class="n">rows</span>
+        <span class="n">pitch</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">glyph</span><span class="o">.</span><span class="n">bitmap</span><span class="o">.</span><span class="n">pitch</span> <span class="c"># stride / number of bytes taken by one bitmap row</span>
+
+        <span class="c"># Remove padding</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bitmap</span><span class="o">.</span><span class="n">buffer</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">pitch</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,:</span><span class="n">width</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ubyte</span><span class="p">)</span>
+        
+        <span class="c"># Gamma correction</span>
+        <span class="c"># gamma = 1.5</span>
+        <span class="c"># Z = (data/255.0)**gamma</span>
+        <span class="c"># data = Z*255</span>
+
+        <span class="c"># Build glyph</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">left</span><span class="p">,</span> <span class="n">top</span>
+        <span class="n">advance</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">glyph</span><span class="o">.</span><span class="n">advance</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">face</span><span class="o">.</span><span class="n">glyph</span><span class="o">.</span><span class="n">advance</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">glyph</span> <span class="o">=</span> <span class="n">Glyph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">glyph_index</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">advance</span><span class="p">)</span>
+        <span class="n">glyph</span><span class="o">.</span><span class="n">glyph_bitmap</span> <span class="o">=</span> <span class="n">data</span> <span class="c"># Fixme:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_glyphs</span><span class="p">[</span><span class="n">glyph_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">glyph</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="k">class</span> <span class="nc">FontMetrics</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_size</span><span class="p">):</span>
+
+        <span class="n">face</span> <span class="o">=</span> <span class="n">font_size</span><span class="o">.</span><span class="n">_font</span><span class="o">.</span><span class="n">_face</span>
+        <span class="n">face</span><span class="o">.</span><span class="n">set_char_size</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">to_64th_point</span><span class="p">(</span><span class="n">font_size</span><span class="o">.</span><span class="n">size</span><span class="p">)))</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="n">face</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ascender</span> <span class="o">=</span> <span class="n">from_64th_point</span><span class="p">(</span><span class="n">metrics</span><span class="o">.</span><span class="n">ascender</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descender</span> <span class="o">=</span> <span class="n">from_64th_point</span><span class="p">(</span><span class="n">metrics</span><span class="o">.</span><span class="n">descender</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">from_64th_point</span><span class="p">(</span><span class="n">metrics</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linegap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">ascender</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">descender</span> <span class="c"># Fixme: check</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="k">class</span> <span class="nc">Glyph</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A glyph gathers information relative to the size/offset/advance and texture coordinates</span>
+<span class="sd">    of a single character. It is generally built automatically by a Font.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_size</span><span class="p">,</span> <span class="n">glyph_index</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">advance</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        size: tuple of 2 ints</span>
+<span class="sd">            Glyph size in pixels</span>
+
+<span class="sd">        offset: tuple of 2 floats</span>
+<span class="sd">            Glyph offset relatively to anchor point</span>
+
+<span class="sd">        advance: tuple of 2 floats</span>
+<span class="sd">            Glyph advance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">font_size</span> <span class="o">=</span> <span class="n">font_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">glyph_index</span> <span class="o">=</span> <span class="n">glyph_index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">advance</span> <span class="o">=</span> <span class="n">advance</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

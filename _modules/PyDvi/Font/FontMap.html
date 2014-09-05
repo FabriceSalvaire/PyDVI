@@ -1,0 +1,364 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDvi.Font.FontMap &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDvi.Font.FontMap</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c"># </span>
+<span class="c"># PyDvi - A Python Library to Process DVI Stream</span>
+<span class="c"># Copyright (C) 2014 Fabrice Salvaire</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c"># </span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c"># </span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c"># </span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># Audit</span>
+<span class="c">#</span>
+<span class="c"># - 01/11/2011 Fabrice</span>
+<span class="c">#   - check init definition</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module handles font map file.</span>
+
+<span class="sd">A font map gives the correspondance between the TeX PK fonts and their PostScript equivalents. It</span>
+<span class="sd">uses the ``.map`` extension.</span>
+
+<span class="sd">For example, the file :file:`pdftex.map` contains lines like::</span>
+
+<span class="sd">  futbo8r Utopia-Bold &quot;.167 SlantFont TeXBase1Encoding ReEncodeFont&quot; &lt;8r.enc &lt;putb8a.pfb</span>
+
+<span class="sd">Each line describes a PK font using the following format::</span>
+
+<span class="sd">  PK_FONT_NAME PS_FONT_NAME &quot;PostScript snippet&quot; &lt;FILE_NAME1 &lt;FILE_NAME2</span>
+
+<span class="sd">The first word is the TeX font name and the second word is the PostScript font name. The PostScript</span>
+<span class="sd">font name can be omitted if it is the same than the TeX font name. The word starting by &quot;&lt;&quot; are</span>
+<span class="sd">filenames to be included in the PostScript file. A filename with the extension ``.enc`` is an</span>
+<span class="sd">encoding file and a filename with the extension ``.pfb`` is a Printer Font Binary file. The text</span>
+<span class="sd">enclosed by double quotes is optional and gives a PostScript snippet to be inserted in the</span>
+<span class="sd">PostScript file. It can be placed at the end of the line.</span>
+
+<span class="sd">The percent character is used for comment as for TeX.</span>
+
+<span class="sd">.. What is the source of this:</span>
+<span class="sd">.. one or two &#39;&lt;&#39;</span>
+<span class="sd">.. This can be overridden with a left bracket: &#39;&lt;[encfile&#39; indicates an encoding file named encfile.</span>
+
+<span class="sd">References:</span>
+
+<span class="sd">* The Font Installation Guide Using Postscript fonts to their full potential with Latex. Originally</span>
+<span class="sd">  written by Philipp Lehman. December 2004. Revision 2.14. cf. Creating map files Part.</span>
+<span class="sd">  http://www.ctan.org/tex-archive/info/Type1fonts/fontinstallationguide</span>
+<span class="sd">* updmap(1) - Update font map files for TeX output drivers.</span>
+<span class="sd">* updmap.cfg(5) - Configuration of font mapping/inclusion for dvips and friends</span>
+
+<span class="sd">The font map :file:`pdftex.map` can be parsed using::</span>
+
+<span class="sd">  font_map = FontMap(&#39;/usr/share/texmf/fonts/map/pdftex/updmap/pdftex.map&#39;)</span>
+
+<span class="sd">Each entry is stored in a :class:`FontMapEntry` instance and can be retrieved using its TeX name as</span>
+<span class="sd">key::</span>
+
+<span class="sd">  font_map_entry = font_map[&#39;futbo8r&#39;]</span>
+
+<span class="sd">Then the ``.pfb`` file name as well the other parameters can be queried as attribute::</span>
+
+<span class="sd">  &gt;&gt;&gt; font_map_entry.pfb_filename</span>
+<span class="sd">  &#39;putb8a.pfb&#39;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;FontMap&#39;</span><span class="p">,</span> <span class="s">&#39;FontMapEntry&#39;</span><span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">..Tools.Logging</span> <span class="kn">import</span> <span class="n">print_card</span>
+<span class="kn">from</span> <span class="nn">..Tools.TexCommentedFile</span> <span class="kn">import</span> <span class="n">TexCommentedFile</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="FontMapEntry"><a class="viewcode-back" href="../../../api/PyDvi/Font/FontMap.html#PyDvi.Font.FontMap.FontMapEntry">[docs]</a><span class="k">class</span> <span class="nc">FontMapEntry</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class encapsulates a font map entry.</span>
+<span class="sd">    </span>
+<span class="sd">    Public attributes are:</span>
+
+<span class="sd">      :attr:`tex_name`</span>
+
+<span class="sd">      :attr:`ps_font_name`</span>
+
+<span class="sd">      :attr:`ps_snippet`</span>
+
+<span class="sd">      :attr:`effects`</span>
+
+<span class="sd">      :attr:`encoding`</span>
+
+<span class="sd">      :attr:`pfb_filename`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tex_name</span><span class="p">,</span> <span class="n">ps_font_name</span><span class="p">,</span> <span class="n">ps_snippet</span><span class="p">,</span> <span class="n">effects</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="n">pfb_filename</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tex_name</span> <span class="o">=</span> <span class="n">tex_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ps_font_name</span> <span class="o">=</span> <span class="n">ps_font_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ps_snippet</span> <span class="o">=</span> <span class="n">ps_snippet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">effects</span> <span class="o">=</span> <span class="n">effects</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">encoding</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pfb_filename</span> <span class="o">=</span> <span class="n">pfb_filename</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="FontMapEntry.print_summary"><a class="viewcode-back" href="../../../api/PyDvi/Font/FontMap.html#PyDvi.Font.FontMap.FontMapEntry.print_summary">[docs]</a>    <span class="k">def</span> <span class="nf">print_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">message_pattern</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;Font Map Entry </span><span class="si">%s</span><span class="s"></span>
+
+<span class="s"> - PS font name </span><span class="si">%s</span><span class="s"></span>
+<span class="s"> - ps snippet   &quot;</span><span class="si">%s</span><span class="s">&quot;</span>
+<span class="s"> - effects      </span><span class="si">%s</span><span class="s"></span>
+<span class="s"> - encoding     </span><span class="si">%s</span><span class="s"></span>
+<span class="s"> - pfb_filename </span><span class="si">%s</span><span class="s">&#39;&#39;&#39;</span> 
+
+        <span class="n">message</span> <span class="o">=</span> <span class="n">message_pattern</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tex_name</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ps_font_name</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ps_snippet</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">effects</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pfb_filename</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">print_card</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="FontMap"><a class="viewcode-back" href="../../../api/PyDvi/Font/FontMap.html#PyDvi.Font.FontMap.FontMap">[docs]</a><span class="k">class</span> <span class="nc">FontMap</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class parses a fontmap file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;.map&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># try:</span>
+        <span class="k">with</span> <span class="n">TexCommentedFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">font_map_file</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">font_map_file</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_parse_line</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+        <span class="c"># except:</span>
+        <span class="c">#     raise NameError(&#39;Bad fontmap file&#39;)</span>
+
+    <span class="c">##############################################</span>
+ 
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tex_name</span><span class="p">):</span>
+ 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map</span><span class="p">[</span><span class="n">tex_name</span><span class="p">]</span>
+ 
+    <span class="c">##############################################</span>
+ 
+<div class="viewcode-block" id="FontMap._register_entry"><a class="viewcode-back" href="../../../api/PyDvi/Font/FontMap.html#PyDvi.Font.FontMap.FontMap._register_entry">[docs]</a>    <span class="k">def</span> <span class="nf">_register_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_map_entry</span><span class="p">):</span>
+ 
+        <span class="sd">&quot;&quot;&quot; Register a font map entry.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_map</span><span class="p">[</span><span class="n">font_map_entry</span><span class="o">.</span><span class="n">tex_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">font_map_entry</span>
+
+    <span class="c">##############################################</span>
+ </div>
+<div class="viewcode-block" id="FontMap._parse_line"><a class="viewcode-back" href="../../../api/PyDvi/Font/FontMap.html#PyDvi.Font.FontMap.FontMap._parse_line">[docs]</a>    <span class="k">def</span> <span class="nf">_parse_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Parse a line:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># 1) Extract PostScript Snippet if there</span>
+        <span class="n">first_double_quote_index</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">first_double_quote_index</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">last_double_quote_index</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span><span class="p">,</span> <span class="n">first_double_quote_index</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ps_snippet</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">first_double_quote_index</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">last_double_quote_index</span><span class="p">]</span>
+            <span class="n">effects</span> <span class="o">=</span> <span class="n">FontMap</span><span class="o">.</span><span class="n">_parse_effects</span><span class="p">(</span><span class="n">ps_snippet</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="n">first_double_quote_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">line</span><span class="p">[</span><span class="n">last_double_quote_index</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ps_snippet</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="n">effects</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># Fixme:</span>
+        <span class="c"># pigpen &lt;&lt;pigpen.pfa</span>
+ 
+        <span class="n">sub_strings</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;&lt;&#39;</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sub_strings</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Font map entry has any &lt;FileNAME&quot;</span><span class="p">)</span>
+        <span class="n">right_part</span><span class="p">,</span> <span class="n">filenames</span> <span class="o">=</span> <span class="n">sub_strings</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sub_strings</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="n">font_names</span> <span class="o">=</span> <span class="n">right_part</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">font_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">tex_name</span><span class="p">,</span> <span class="n">ps_font_name</span> <span class="o">=</span> <span class="n">font_names</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tex_name</span> <span class="o">=</span> <span class="n">ps_font_name</span> <span class="o">=</span> <span class="n">font_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">encoding_filename</span><span class="p">,</span> <span class="n">pfb_filename</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;[&#39;</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="n">encoding_filename</span> <span class="ow">is</span> <span class="bp">None</span>
+                <span class="n">encoding_filename</span> <span class="o">=</span> <span class="n">filename</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">elif</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.enc&#39;</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="n">encoding_filename</span> <span class="ow">is</span> <span class="bp">None</span>
+                <span class="n">encoding_filename</span> <span class="o">=</span> <span class="n">filename</span>
+            <span class="k">elif</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.pfb&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.pfa&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.ttf&#39;</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="n">pfb_filename</span> <span class="ow">is</span> <span class="bp">None</span>
+                <span class="n">pfb_filename</span> <span class="o">=</span> <span class="n">filename</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Unknown file extension for file </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+        <span class="n">font_map_entry</span> <span class="o">=</span> <span class="n">FontMapEntry</span><span class="p">(</span><span class="n">tex_name</span><span class="p">,</span> <span class="n">ps_font_name</span><span class="p">,</span>
+                                      <span class="n">ps_snippet</span><span class="p">,</span> <span class="n">effects</span><span class="p">,</span>
+                                      <span class="n">encoding_filename</span><span class="p">,</span> <span class="n">pfb_filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_register_entry</span><span class="p">(</span><span class="n">font_map_entry</span><span class="p">)</span>
+    
+    <span class="c">##############################################</span>
+    </div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="FontMap._parse_effects"><a class="viewcode-back" href="../../../api/PyDvi/Font/FontMap.html#PyDvi.Font.FontMap.FontMap._parse_effects">[docs]</a>    <span class="k">def</span> <span class="nf">_parse_effects</span><span class="p">(</span><span class="n">ps_snippet</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Parse the PostScript snippet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+ 
+        <span class="n">effects_list</span> <span class="o">=</span> <span class="n">ps_snippet</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">effects</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key_word</span> <span class="ow">in</span> <span class="s">&#39;SlantFont&#39;</span><span class="p">,</span> <span class="s">&#39;ExtendFont&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c"># parameter is followed by the command</span>
+                <span class="n">parameter_index</span> <span class="o">=</span> <span class="n">effects_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key_word</span><span class="p">)</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="n">effects</span><span class="p">[</span><span class="n">key_word</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">effects_list</span><span class="p">[</span><span class="n">parameter_index</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span> <span class="c"># key word was not found</span>
+                <span class="k">pass</span>
+            
+        <span class="k">return</span> <span class="n">effects</span>
+    
+    <span class="c">##############################################</span>
+ </div>
+<div class="viewcode-block" id="FontMap.print_summary"><a class="viewcode-back" href="../../../api/PyDvi/Font/FontMap.html#PyDvi.Font.FontMap.FontMap.print_summary">[docs]</a>    <span class="k">def</span> <span class="nf">print_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+ 
+        <span class="n">print_card</span><span class="p">(</span><span class="s">&#39;Font Map </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+ 
+        <span class="k">for</span> <span class="n">font_map_entry</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">font_map_entry</span><span class="o">.</span><span class="n">print_summary</span><span class="p">()</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

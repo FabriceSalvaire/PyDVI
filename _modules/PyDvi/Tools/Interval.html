@@ -1,0 +1,746 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDvi.Tools.Interval &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDvi.Tools.Interval</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c"># </span>
+<span class="c"># PyDvi - A Python Library to Process DVI Stream</span>
+<span class="c"># Copyright (C) 2014 Fabrice Salvaire</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c"># </span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c"># </span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c"># </span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># Audit</span>
+<span class="c">#</span>
+<span class="c">#  - 13/05/2010 fabrice</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Interval&#39;</span><span class="p">,</span> <span class="s">&#39;IntervalInt&#39;</span><span class="p">,</span> <span class="s">&#39;Interval2D&#39;</span><span class="p">,</span> <span class="s">&#39;IntervalInt2D&#39;</span><span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">PyDvi.Tools.FuncTools</span> <span class="kn">import</span> <span class="n">middle</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">empty_interval_string</span> <span class="o">=</span> <span class="s">&#39;[empty]&#39;</span>
+
+<span class="c">####################################################################################################</span>
+    
+<div class="viewcode-block" id="Interval"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval">[docs]</a><span class="k">class</span> <span class="nc">Interval</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; One-dimension Interval</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="c"># Fixme: better name than array ?</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Initialise an interval</span>
+
+<span class="sd">        * Interval(inf, sup)</span>
+<span class="sd">        * else args must support the __getitem__ interface, e.g.:</span>
+
+<span class="sd">         * Interval((inf, sup))</span>
+<span class="sd">         * Interval([inf, sup])</span>
+<span class="sd">         * Interval(interval_instance)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_arguments</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inf</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sup</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span><span class="p">:</span> <span class="c"># None &gt; None = False</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;inf &lt;= sup condition is false [</span><span class="si">%u</span><span class="s">, </span><span class="si">%u</span><span class="s">]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+    
+<div class="viewcode-block" id="Interval._check_arguments"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval._check_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">_check_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Args size &gt; 2&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">array</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Interval.copy"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return a clone of the interval</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+    </div>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">start</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">lower</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lower</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">start</span>
+
+            <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">stop</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">upper</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">upper</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">stop</span> <span class="o">-</span><span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">lower</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">upper</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span>
+            <span class="k">elif</span> <span class="n">lower</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">upper</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> 
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span>
+            <span class="k">elif</span> <span class="n">lower</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">upper</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> 
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s">&quot;Wrong slice&quot;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span>
+        <span class="k">elif</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s">&quot;Index is out of range&quot;</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">empty_interval_string</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;[</span><span class="si">%f</span><span class="s">, </span><span class="si">%f</span><span class="s">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+    
+<div class="viewcode-block" id="Interval.print_object"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval.print_object">[docs]</a>    <span class="k">def</span> <span class="nf">print_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Print the interval</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Interval.is_empty"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval.is_empty">[docs]</a>    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span> <span class="ow">is</span> <span class="bp">None</span>
+
+    <span class="c">##############################################</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Interval._intersection"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval._intersection">[docs]</a>    <span class="k">def</span> <span class="nf">_intersection</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">i1</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">i2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span><span class="nb">max</span><span class="p">((</span><span class="n">i1</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">i2</span><span class="o">.</span><span class="n">inf</span><span class="p">)),</span>
+                    <span class="nb">min</span><span class="p">((</span><span class="n">i1</span><span class="o">.</span><span class="n">sup</span><span class="p">,</span> <span class="n">i2</span><span class="o">.</span><span class="n">sup</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+</div>
+    <span class="k">def</span> <span class="nf">__and__</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the intersection of i1 and i2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">i1</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">i1</span><span class="o">.</span><span class="n">_intersection</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__iand__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Update the interval with its intersection with i2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intersection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Interval._union"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval._union">[docs]</a>    <span class="k">def</span> <span class="nf">_union</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="nb">min</span><span class="p">((</span><span class="n">i1</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">i2</span><span class="o">.</span><span class="n">inf</span><span class="p">)),</span>
+                <span class="nb">max</span><span class="p">((</span><span class="n">i1</span><span class="o">.</span><span class="n">sup</span><span class="p">,</span> <span class="n">i2</span><span class="o">.</span><span class="n">sup</span><span class="p">)))</span>
+</div>
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the union of i1 and i2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">i1</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">i1</span><span class="o">.</span><span class="n">_union</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__ior__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Update the interval with its union with i2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Equality test</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">i1</span><span class="o">.</span><span class="n">inf</span> <span class="o">==</span> <span class="n">i2</span><span class="o">.</span><span class="n">inf</span> <span class="ow">and</span> <span class="n">i1</span><span class="o">.</span><span class="n">sup</span> <span class="o">==</span> <span class="n">i2</span><span class="o">.</span><span class="n">sup</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Test if i1.sup &lt; i2.inf</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">i1</span><span class="o">.</span><span class="n">sup</span> <span class="o">&lt;</span> <span class="n">i2</span><span class="o">.</span><span class="n">inf</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Test if i1.inf &gt; i2.sup</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">i1</span><span class="o">.</span><span class="n">inf</span> <span class="o">&gt;</span> <span class="n">i2</span><span class="o">.</span><span class="n">sup</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Shift the interval of dx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inf</span> <span class="o">+=</span> <span class="n">dx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sup</span> <span class="o">+=</span> <span class="n">dx</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Construct a new interval shifted of dx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span> <span class="o">+</span> <span class="n">dx</span><span class="p">,</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">sup</span> <span class="o">+</span> <span class="n">dx</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Construct a new interval scaled by scale</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">sup</span> <span class="o">*</span> <span class="n">scale</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__isub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Shift the interval of -dx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inf</span> <span class="o">-=</span> <span class="n">dx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sup</span> <span class="o">-=</span> <span class="n">dx</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">):</span>
+
+
+        <span class="sd">&quot;&quot;&quot; Construct a new interval shifted of -dx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span> <span class="o">-</span> <span class="n">dx</span><span class="p">,</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">sup</span> <span class="o">-</span> <span class="n">dx</span><span class="p">))</span>
+
+   <span class="c">###############################################</span>
+
+<div class="viewcode-block" id="Interval.intersect"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval.intersect">[docs]</a>    <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Does the interval intersect with i2?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">((</span><span class="n">i1</span><span class="o">.</span><span class="n">inf</span> <span class="o">&lt;=</span> <span class="n">i2</span><span class="o">.</span><span class="n">sup</span> <span class="ow">and</span> <span class="n">i2</span><span class="o">.</span><span class="n">inf</span> <span class="o">&lt;=</span> <span class="n">i1</span><span class="o">.</span><span class="n">sup</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="p">(</span><span class="n">i2</span><span class="o">.</span><span class="n">inf</span> <span class="o">&lt;=</span> <span class="n">i1</span><span class="o">.</span><span class="n">sup</span> <span class="ow">and</span> <span class="n">i1</span><span class="o">.</span><span class="n">inf</span> <span class="o">&lt;=</span> <span class="n">i2</span><span class="o">.</span><span class="n">sup</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+</div>
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Is *x* in the interval?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span>
+                
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Interval.is_included_in"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval.is_included_in">[docs]</a>    <span class="k">def</span> <span class="nf">is_included_in</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Is the interval included in i1?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># print &#39;(%f &lt;= %f and %f &lt;= %f)&#39; % (i2.inf, i1.inf, i1.sup, i2.sup)</span>
+        
+        <span class="k">return</span> <span class="n">i2</span><span class="o">.</span><span class="n">inf</span> <span class="o">&lt;=</span> <span class="n">i1</span><span class="o">.</span><span class="n">inf</span> <span class="ow">and</span> <span class="n">i1</span><span class="o">.</span><span class="n">sup</span> <span class="o">&lt;=</span> <span class="n">i2</span><span class="o">.</span><span class="n">sup</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="c"># Fixme: length -&gt; size ?</span>
+  </div>
+<div class="viewcode-block" id="Interval.length"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval.length">[docs]</a>    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return sup - inf</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Interval.zero_length"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval.zero_length">[docs]</a>    <span class="k">def</span> <span class="nf">zero_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return sup == inf</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Interval.middle"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval.middle">[docs]</a>    <span class="k">def</span> <span class="nf">middle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return interval middle</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">middle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Interval.enlarge"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval.enlarge">[docs]</a>    <span class="k">def</span> <span class="nf">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Enlarge the interval of dx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inf</span> <span class="o">-=</span> <span class="n">dx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sup</span> <span class="o">+=</span> <span class="n">dx</span>
+
+<span class="c">####################################################################################################</span>
+    </div></div>
+<div class="viewcode-block" id="IntervalInt"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.IntervalInt">[docs]</a><span class="k">class</span> <span class="nc">IntervalInt</span><span class="p">(</span><span class="n">Interval</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; One-dimension Integer Interval</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="c"># Fixme: better name than array ?</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Initialise an interval</span>
+
+<span class="sd">        array must support the __getitem__ interface</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_arguments</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">None</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">array</span><span class="p">:</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">array</span><span class="p">[:</span><span class="mi">2</span><span class="p">]]</span> <span class="c"># Fixme: rint ?</span>
+        <span class="c"># Fixme: else:</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">IntervalInt</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_empty</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">empty_interval_string</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;[</span><span class="si">%i</span><span class="s">, </span><span class="si">%i</span><span class="s">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span><span class="p">)</span>
+        
+    <span class="c">##############################################</span>
+  
+<div class="viewcode-block" id="IntervalInt.length"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.IntervalInt.length">[docs]</a>    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return sup - inf +1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sup</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span> <span class="o">+</span><span class="mi">1</span>
+
+<span class="c">#################################################################################</span>
+</div></div>
+<div class="viewcode-block" id="Interval2D"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval2D">[docs]</a><span class="k">class</span> <span class="nc">Interval2D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; Two-dimension Interval</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Initialise a 2D interval</span>
+
+<span class="sd">        x and y must support the __getitem__ interface</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">Interval</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">Interval</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Interval2D.copy"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval2D.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return a clone of the interval</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+    </div>
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">interval</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">interval</span>
+        <span class="k">elif</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">interval</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s">&quot;Index is out of range&quot;</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+    
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+        <span class="k">elif</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s">&quot;Index is out of range&quot;</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;*&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Interval2D.print_object"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval2D.print_object">[docs]</a>    <span class="k">def</span> <span class="nf">print_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Print the interval</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Interval2D.is_empty"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval2D.is_empty">[docs]</a>    <span class="k">def</span> <span class="nf">is_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">is_empty</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+    <span class="k">def</span> <span class="nf">__and__</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the intersection of i1 and i2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">i1</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">i1</span><span class="o">.</span><span class="n">x</span> <span class="o">&amp;</span> <span class="n">i2</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                            <span class="n">i1</span><span class="o">.</span><span class="n">y</span> <span class="o">&amp;</span> <span class="n">i2</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__iand__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Update the interval with its intersection with i2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">&amp;=</span> <span class="n">i2</span><span class="o">.</span><span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">&amp;=</span> <span class="n">i2</span><span class="o">.</span><span class="n">y</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="c"># Union</span>
+
+    <span class="k">def</span> <span class="nf">__or__</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the union of i1 and i2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">i1</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">i1</span><span class="o">.</span><span class="n">x</span> <span class="o">|</span> <span class="n">i2</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                            <span class="n">i1</span><span class="o">.</span><span class="n">y</span> <span class="o">|</span> <span class="n">i2</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__ior__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Update the interval with its union with i2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">|=</span> <span class="n">i2</span><span class="o">.</span><span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">|=</span> <span class="n">i2</span><span class="o">.</span><span class="n">y</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Equality test</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">i1</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="n">i2</span><span class="o">.</span><span class="n">x</span> <span class="ow">and</span> <span class="n">i1</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">i2</span><span class="o">.</span><span class="n">y</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dxy</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Shift the interval of *dxy*.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="n">dx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">+=</span> <span class="n">dy</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dxy</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Construct a new interval shifted by *dxy*.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">dxy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>  <span class="o">+</span> <span class="n">dxy</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Scale the interval by *scale*.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="n">scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">+=</span> <span class="n">scale</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Construct a new interval scaled by scale</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="n">scale</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">*</span> <span class="n">scale</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Interval2D.intersect"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval2D.intersect">[docs]</a>    <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Does the interval intersect with i2?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">i2</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">i2</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Interval2D.is_included_in"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval2D.is_included_in">[docs]</a>    <span class="k">def</span> <span class="nf">is_included_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i2</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Is the interval included in i2?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">is_included_in</span><span class="p">(</span><span class="n">i2</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">is_included_in</span><span class="p">(</span><span class="n">i2</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Interval2D.size"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval2D.size">[docs]</a>    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the horizontal and vertical size </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">length</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Interval2D.area"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval2D.area">[docs]</a>    <span class="k">def</span> <span class="nf">area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the area</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">length</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Interval2D.bounding_box"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval2D.bounding_box">[docs]</a>    <span class="k">def</span> <span class="nf">bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the corresponding bounding box (x.inf, y.inf, x.sup, y.sup)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">sup</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">sup</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Interval2D.middle"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval2D.middle">[docs]</a>    <span class="k">def</span> <span class="nf">middle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return interval middle</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">middle</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">middle</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Interval2D.enlarge"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.Interval2D.enlarge">[docs]</a>    <span class="k">def</span> <span class="nf">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Enlarge the interval of dx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">enlarge</span><span class="p">(</span><span class="n">dx</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">enlarge</span><span class="p">(</span><span class="n">dx</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+    </div></div>
+<div class="viewcode-block" id="IntervalInt2D"><a class="viewcode-back" href="../../../api/PyDvi/Tools/Interval.html#PyDvi.Tools.Interval.IntervalInt2D">[docs]</a><span class="k">class</span> <span class="nc">IntervalInt2D</span><span class="p">(</span><span class="n">Interval2D</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; Two-dimension Integer Interval</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Initialise a 2D Integer interval</span>
+
+<span class="sd">        x and y must support the __getitem__ interface</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">IntervalInt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">IntervalInt</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDvi.Font.FontManager &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDvi.Font.FontManager</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c"># </span>
+<span class="c"># PyDvi - A Python Library to Process DVI Stream</span>
+<span class="c"># Copyright (C) 2014 Fabrice Salvaire</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c"># </span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c"># </span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c"># </span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># Audit</span>
+<span class="c">#</span>
+<span class="c"># - 10/12/2011 fabrice</span>
+<span class="c">#   - singleton ?</span>
+<span class="c">#   - font plugin ?</span>
+<span class="c">#   - font cache</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="sd">&quot;&quot;&quot; This module provides a Font Manager for the DVI Machine.</span>
+
+<span class="sd">Each time a font is loaded, the Font Manager attributes to it an incremental identification number</span>
+<span class="sd">that corresponds to the font index in the DVI Machine.</span>
+
+<span class="sd">The different type of fonts (Packed, Type 1, etc.) are handled by a subclass of</span>
+<span class="sd">:class:`PyDvi.Font.Font` that provide a kind of plugin mechanism.  In order to manage the mapping</span>
+<span class="sd">between the TeX font name and the Type 1 font name, the Font Manager constructor takes a Font Map</span>
+<span class="sd">name as parameter.</span>
+
+<span class="sd">To create a Font Manager instance using the &quot;pdftex&quot; Font Map do::</span>
+
+<span class="sd">  font_manager = FontManager(&#39;pdftex&#39;)</span>
+
+<span class="sd">Then to load for example the font &quot;cmr10&quot; and get the font class instance do::</span>
+
+<span class="sd">  font = font_manager[&quot;cmr10&quot;]</span>
+
+<span class="sd">Latter the same piece of codes could be use to retrieve the font class instance.</span>
+
+<span class="sd">To get the number of fonts in the Font Manager use the :func:`len` function::</span>
+
+<span class="sd">  len(font_manager)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;FontManager&#39;</span><span class="p">]</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">..Kpathsea</span> <span class="kn">import</span> <span class="n">kpsewhich</span>
+<span class="kn">from</span> <span class="nn">..Tools.FuncTools</span> <span class="kn">import</span> <span class="n">get_filename_extension</span>
+<span class="kn">from</span> <span class="nn">.Font</span> <span class="kn">import</span> <span class="n">font_types</span><span class="p">,</span> <span class="n">sort_font_class</span>
+<span class="kn">from</span> <span class="nn">.FontMap</span> <span class="kn">import</span> <span class="n">FontMap</span>
+<span class="kn">from</span> <span class="nn">.PkFont</span> <span class="kn">import</span> <span class="n">PkFont</span>
+<span class="kn">from</span> <span class="nn">.Type1Font</span> <span class="kn">import</span> <span class="n">Type1Font</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">_module_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="FontManager"><a class="viewcode-back" href="../../../api/PyDvi/Font/FontManager.html#PyDvi.Font.FontManager.FontManager">[docs]</a><span class="k">class</span> <span class="nc">FontManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot; This class implements a Font Manager for the DVI Machine.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">font_classes</span> <span class="o">=</span> <span class="n">sort_font_class</span><span class="p">(</span><span class="n">PkFont</span><span class="p">,</span>
+                                   <span class="n">Type1Font</span><span class="p">,</span>
+                                   <span class="p">)</span>
+
+    <span class="n">extension_to_font_class</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="o">.</span><span class="n">extension</span><span class="p">:</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">font_classes</span><span class="p">}</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_map</span><span class="p">,</span> <span class="n">use_pk</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; The Font Map name is provided by *font_map*.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_pk</span> <span class="o">=</span> <span class="n">use_pk</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_font_id</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_font_map</span><span class="p">(</span><span class="n">font_map</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="FontManager._init_font_map"><a class="viewcode-back" href="../../../api/PyDvi/Font/FontManager.html#PyDvi.Font.FontManager.FontManager._init_font_map">[docs]</a>    <span class="k">def</span> <span class="nf">_init_font_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_map</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Load the font map.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">font_map_file</span> <span class="o">=</span> <span class="n">kpsewhich</span><span class="p">(</span><span class="n">font_map</span><span class="p">,</span> <span class="n">file_format</span><span class="o">=</span><span class="s">&#39;map&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">font_map_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">font_map</span> <span class="o">=</span> <span class="n">FontMap</span><span class="p">(</span><span class="n">font_map_file</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s">&quot;Font Map </span><span class="si">%s</span><span class="s"> not found&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">font_map</span><span class="p">))</span> 
+
+    <span class="c">##############################################</span>
+</div>
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_name</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return :obj:`True` if the Font Manager holds the font *font_name*. &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">font_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_name</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return the font *font_name* instance.  If the font is not in the Font Manager then load</span>
+<span class="sd">        it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">font_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">font</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span><span class="p">[</span><span class="n">font_name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_pk</span><span class="p">:</span>
+                <span class="n">font</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_font</span><span class="p">(</span><span class="n">font_types</span><span class="o">.</span><span class="n">Pk</span><span class="p">,</span> <span class="n">font_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">font</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span><span class="p">[</span><span class="n">font_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_mapped_font</span><span class="p">(</span><span class="n">font_name</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">font</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="FontManager._get_new_font_id"><a class="viewcode-back" href="../../../api/PyDvi/Font/FontManager.html#PyDvi.Font.FontManager.FontManager._get_new_font_id">[docs]</a>    <span class="k">def</span> <span class="nf">_get_new_font_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Return a new font id.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_font_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_font_id</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="FontManager._load_font"><a class="viewcode-back" href="../../../api/PyDvi/Font/FontManager.html#PyDvi.Font.FontManager.FontManager._load_font">[docs]</a>    <span class="k">def</span> <span class="nf">_load_font</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_type</span><span class="p">,</span> <span class="n">font_name</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot; Load the font *font_name* with the font type *font_type* plugin.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">font_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_classes</span><span class="p">[</span><span class="n">font_type</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">font_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_new_font_id</span><span class="p">(),</span> <span class="n">font_name</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+  </div>
+<div class="viewcode-block" id="FontManager.get_font_class_by_filename"><a class="viewcode-back" href="../../../api/PyDvi/Font/FontManager.html#PyDvi.Font.FontManager.FontManager.get_font_class_by_filename">[docs]</a>    <span class="k">def</span> <span class="nf">get_font_class_by_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+  
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">extension_to_font_class</span><span class="p">[</span><span class="n">get_filename_extension</span><span class="p">(</span><span class="n">filename</span><span class="p">)]</span>
+  
+    <span class="c">##############################################</span>
+  </div>
+<div class="viewcode-block" id="FontManager.load_mapped_font"><a class="viewcode-back" href="../../../api/PyDvi/Font/FontManager.html#PyDvi.Font.FontManager.FontManager.load_mapped_font">[docs]</a>    <span class="k">def</span> <span class="nf">load_mapped_font</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tex_font_name</span><span class="p">):</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">font_map_entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">font_map</span><span class="p">[</span><span class="n">tex_font_name</span><span class="p">]</span>
+            <span class="n">font_map_entry</span><span class="o">.</span><span class="n">print_summary</span><span class="p">()</span>
+            <span class="n">font_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_font_class_by_filename</span><span class="p">(</span><span class="n">font_map_entry</span><span class="o">.</span><span class="n">pfb_filename</span><span class="p">)</span>
+            <span class="n">_module_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Font </span><span class="si">%s</span><span class="s"> is mapped to </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tex_font_name</span><span class="p">,</span> <span class="n">font_map_entry</span><span class="o">.</span><span class="n">pfb_filename</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s">&quot;Could not found a mapped font for </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tex_font_name</span><span class="p">))</span>
+            <span class="c"># return self.load_font(font_types.Pk, tex_font_name)</span>
+
+        <span class="k">return</span> <span class="n">font_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_new_font_id</span><span class="p">(),</span> <span class="n">font_map_entry</span><span class="o">.</span><span class="n">pfb_filename</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1.10.5. Logging &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="3.1.10. Tools" href="../Tools.html" />
+    <link rel="next" title="3.1.10.6. Path" href="Path.html" />
+    <link rel="prev" title="3.1.10.4. Interval" href="Interval.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Path.html" title="3.1.10.6. Path"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Interval.html" title="3.1.10.4. Interval"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li>
+          <li><a href="../Tools.html" accesskey="U">3.1.10. <tt class="docutils literal"><span class="pre">Tools</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-PyDvi.Tools.Logging">
+<span id="logging"></span><h1>3.1.10.5. <tt class="xref py py-mod docutils literal"><span class="pre">Logging</span></tt><a class="headerlink" href="#module-PyDvi.Tools.Logging" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="PyDvi.Tools.Logging.format_card">
+<tt class="descclassname">PyDvi.Tools.Logging.</tt><tt class="descname">format_card</tt><big>(</big><em>text</em>, <em>centered=False</em>, <em>width=80</em>, <em>rule_char='#'</em>, <em>newline=False</em>, <em>border=False</em>, <em>bottom_rule=True</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Logging.html#format_card"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Logging.format_card" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format the string <em>text</em> as a card:</p>
+<div class="highlight-python"><div class="highlight"><pre>***************************************************
+*
+*                      Title
+*
+* xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx
+* xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx
+* xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx
+* xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx xxxxxxxxxx
+*
+***************************************************
+</pre></div>
+</div>
+<blockquote>
+<div><dl class="docutils">
+<dt><em>centered</em></dt>
+<dd>center the text in the card</dd>
+<dt><em>width</em></dt>
+<dd>width of the card</dd>
+<dt><em>rule_char</em></dt>
+<dd>character used to draw the rule</dd>
+<dt><em>newline</em></dt>
+<dd>insert a new line before the card</dd>
+<dt><em>border</em></dt>
+<dd>draw a left vertical rule</dd>
+<dt><em>bottom_rule</em></dt>
+<dd>draw a bottom horizontal rule</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDvi.Tools.Logging.print_card">
+<tt class="descclassname">PyDvi.Tools.Logging.</tt><tt class="descname">print_card</tt><big>(</big><em>text</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Logging.html#print_card"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Logging.print_card" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the string <em>text</em> formated by <a class="reference internal" href="#PyDvi.Tools.Logging.format_card" title="PyDvi.Tools.Logging.format_card"><tt class="xref py py-meth docutils literal"><span class="pre">format_card()</span></tt></a>.  The remaining keyword arguments
+<em>kwargs</em> are passed to <a class="reference internal" href="#PyDvi.Tools.Logging.format_card" title="PyDvi.Tools.Logging.format_card"><tt class="xref py py-meth docutils literal"><span class="pre">format_card()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="PyDvi.Tools.Logging.remove_enclosing_new_line">
+<tt class="descclassname">PyDvi.Tools.Logging.</tt><tt class="descname">remove_enclosing_new_line</tt><big>(</big><em>text</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Logging.html#remove_enclosing_new_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Logging.remove_enclosing_new_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a copy of the string <em>text</em> with leading and trailing newline removed.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Interval.html"
+                        title="previous chapter">3.1.10.4. <tt class="docutils literal"><span class="pre">Interval</span></tt></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Path.html"
+                        title="next chapter">3.1.10.6. <tt class="docutils literal"><span class="pre">Path</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api/PyDvi/Tools/Logging.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Path.html" title="3.1.10.6. Path"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Interval.html" title="3.1.10.4. Interval"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li>
+          <li><a href="../Tools.html" >3.1.10. <tt class="docutils literal"><span class="pre">Tools</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
