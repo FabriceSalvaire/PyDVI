@@ -85,7 +85,8 @@ class Type1Font(Font):
             raise NameError("Freetype can't open file %s" % (self.filename))
 
         try:
-            self._face.select_charmap(freetype.FT_ENCODING_UNICODE)
+            # FT_ENCODING_UNICODE FT_ENCODING_ADOBE_CUSTOM
+            self._face.select_charmap(freetype.FT_ENCODING_ADOBE_CUSTOM)
         except:
             raise NameError("Font %s doesn't have an Unicode char map" % (self.name))
 
@@ -101,6 +102,7 @@ class Type1Font(Font):
     def _init_index(self):
 
         self._index_to_charcode = {}
+        self._charcode_to_index = {}
 
         face = self._face
 
@@ -112,6 +114,7 @@ class Type1Font(Font):
             except ValueError:
                 name = '<unknown character>'
             self._index_to_charcode[glyph_index] = (charcode, name)
+            self._charcode_to_index[charcode] = (glyph_index, name)
             # face.get_glyph_name(glyph_index) # is not available
             charcode, glyph_index = face.get_next_char(charcode, glyph_index)
 
@@ -132,16 +135,15 @@ class Type1Font(Font):
 
     ##############################################
 
-    def get_glyph(self, glyph_index, size, resolution=600):
+    def get_glyph(self, tex_glyph_index, size, resolution=600):
 
-        self._logger.info("glyph[{}] @size {} @resolution {} dpi".format(glyph_index, size, resolution))
+        self._logger.info("glyph[{}] @size {} @resolution {} dpi".format(tex_glyph_index, size, resolution))
 
         font_size = self.font_size(size, resolution)
 
-        glyph_index += 1 # Fixme: ???
-        charcode, name = self._index_to_charcode[glyph_index]
-        self._logger.info("retrieve glyph {} {}".format(charcode, name))
-        glyph = font_size[glyph_index] #!# charcode
+        glyph_index, name = self._charcode_to_index[tex_glyph_index]
+        self._logger.info("retrieve glyph {} {}".format(glyph_index, name))
+        glyph = font_size[glyph_index]
 
         return glyph
 
@@ -221,10 +223,11 @@ is scalable:         %s
                 name = unicodedata.name(unicode_character)
             except ValueError:
                 name = '<unknown character>'
-            message += "  [%d] 0x%04lx %s %s\n" % (glyph_index,
-                                                   charcode,
-                                                   unicode_character,
-                                                   name)
+            message += u"  [{}] TeX[{} {}] {} {}\n".format(glyph_index,
+                                                           charcode,
+                                                           hex(charcode), # 0x%04lx
+                                                           unicode_character,
+                                                           name)
             # face.get_glyph_name(glyph_index) # is not available
             charcode, glyph_index = face.get_next_char(charcode, glyph_index)
 
@@ -265,13 +268,11 @@ class FontSize(object):
 
     ##############################################
 
-    def __getitem__(self, charcode): #!# in fact glyph_index
+    def __getitem__(self, glyph_index):
 
-        if charcode not in self._glyphs:
-            # Converts the integer to the corresponding unicode character before printing.
-            #!# self.load_glyph(u'%c' % charcode) # Fixme: %c ?
-            self.load_glyph(charcode)
-        return self._glyphs[charcode]
+        if glyph_index not in self._glyphs:
+            self.load_glyph(glyph_index)
+        return self._glyphs[glyph_index]
 
     ##############################################
 
@@ -280,7 +281,7 @@ class FontSize(object):
         face = self._font._face
         charcode, glyph_index = face.get_first_char()
         while glyph_index:
-            self.load_glyph(unichr(charcode))
+            self.load_glyph(glyph_index)
             charcode, glyph_index = face.get_next_char(charcode, glyph_index)
 
     ##############################################
@@ -305,9 +306,9 @@ class FontSize(object):
 
     ##############################################
  
-    def load_glyph(self, charcode): #!# in fact glyph_index
+    def load_glyph(self, glyph_index):
 
-        if charcode in self._glyphs:
+        if glyph_index in self._glyphs:
             return
 
         self._set_face_transfrom()
@@ -319,9 +320,7 @@ class FontSize(object):
         flags = freetype.FT_LOAD_RENDER | freetype.FT_LOAD_FORCE_AUTOHINT
         # flags |= freetype.FT_LOAD_TARGET_LCD
 
-        #!# face.load_char(charcode, flags)
-        glyph_index = charcode
-        face.load_glyph(glyph_index, flags) # Fixme: index using charcode
+        face.load_glyph(glyph_index, flags)
 
         bitmap = face.glyph.bitmap # a list
         left = face.glyph.bitmap_left
@@ -343,27 +342,9 @@ class FontSize(object):
         size = data.shape[1], data.shape[0]
         offset = left, top
         advance = face.glyph.advance.x, face.glyph.advance.y
-        glyph = Glyph(self, charcode, size, offset, advance)
+        glyph = Glyph(self, glyph_index, size, offset, advance)
         glyph.glyph_bitmap = data # Fixme:
-        self._glyphs[charcode] = glyph
-
-        # Generate kerning
-        # Fixme: exhaustive?
-        for glyph2 in self._glyphs.values():
-            self._set_kerning(glyph, glyph2)
-            self._set_kerning(glyph2, glyph)
-
-    ##############################################
-
-    def _set_kerning(self, glyph1, glyph2):
-
-        charcode1 = glyph1.charcode
-        charcode2 = glyph2.charcode
-        face = self._font._face
-        kerning = face.get_kerning(charcode2, charcode1, mode=freetype.FT_KERNING_UNFITTED)
-        if kerning.x != 0:
-            # 64 * 64 because of 26.6 encoding AND the transform matrix
-            glyph1._kerning[charcode2] = kerning.x / float(64**2)
+        self._glyphs[glyph_index] = glyph
 
 ####################################################################################################
 
@@ -391,16 +372,9 @@ class Glyph(object):
     of a single character. It is generally built automatically by a Font.
     """
 
-    def __init__(self, font_size, charcode, size, offset, advance):
+    def __init__(self, font_size, glyph_index, size, offset, advance):
 
         """
-        Build a new glyph
-
-        Parameter:
-        ----------
-
-        charcode : char
-            Represented character
 
         size: tuple of 2 ints
             Glyph size in pixels
@@ -413,27 +387,10 @@ class Glyph(object):
         """
 
         self.font_size = font_size
-        self.charcode = charcode
+        self.glyph_index = glyph_index
         self.size = size
         self.offset = offset
         self.advance = advance
-
-        self._kerning = {}
-
-    ##############################################
-
-    def get_kerning(self, charcode):
-
-        """ Get kerning information
-
-        Parameters:
-        -----------
-
-        charcode: char
-            Character preceding this glyph
-        """
-
-        return self._kerning.get(charcode, 0)
 
 ####################################################################################################
 #

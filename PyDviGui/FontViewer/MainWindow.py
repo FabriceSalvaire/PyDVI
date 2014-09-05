@@ -78,6 +78,7 @@ class MainWindow(MainWindowBase):
 
         use_pk = form.pk_radio_button.isChecked()
         self.font_manager = FontManager(font_map='pdftex', use_pk=use_pk)
+        self.type1_font_manager = FontManager(font_map='pdftex', use_pk=False)
         form.font_information_table_view.resizeColumnsToContents()
         self.load_font()
 
@@ -95,6 +96,7 @@ class MainWindow(MainWindowBase):
 
         # self.font = self.font_manager.load_font(font_types.Pk, font_name)
         self.font = self.font_manager[font_name]
+        self.type1_font = self.type1_font_manager[font_name]
         self.font_information_table_model.set_font(self.font)
         form.font_information_table_view.resizeColumnsToContents()
         form.char_code_spin_box.setMaximum(len(self.font) -1)
@@ -123,7 +125,7 @@ class MainWindow(MainWindowBase):
         # glyph.print_summary()
         # glyph.print_glyph()
 
-        form.glyph_graphics_view.show_glyph(self.font, glyph_index)
+        form.glyph_graphics_view.show_glyph(self.font, self.type1_font, glyph_index)
 
 ####################################################################################################
 #

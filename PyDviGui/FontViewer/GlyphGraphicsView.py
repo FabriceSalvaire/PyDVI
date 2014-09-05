@@ -76,7 +76,7 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
 
     ##############################################
 
-    def show_glyph(self, font, glyph_index):
+    def show_glyph(self, font, type1_font, glyph_index):
    
         self.scene.clear()
 
@@ -84,6 +84,7 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
             self.add_type1_char(font, glyph_index)
         elif isinstance(font, PkFont):
             self.add_pk_char(font, glyph_index)
+            self.add_type1_char(type1_font, glyph_index)
 
         self.add_grid()
         self.add_glyph_box()
