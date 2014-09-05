@@ -141,7 +141,7 @@ class FtGlyph(object):
 
         self.width = glyph_bitmap.shape[1]
         self.height = glyph_bitmap.shape[0]
-        self.horizontal_offset = -glyph.offset[0] + 70
+        self.horizontal_offset = -glyph.offset[0]
         self.vertical_offset = -glyph.offset[1]
 
         # Fixme: Compute once?
