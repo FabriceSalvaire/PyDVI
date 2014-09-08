@@ -22,7 +22,7 @@ logger = Logging.setup_logging()
 
 ####################################################################################################
 
-from PyDviGui.DviViewer.MainWindow import MainWindow
+from PyDviGui.DviGlViewer.MainWindow import MainWindow
 
 ####################################################################################################
 #

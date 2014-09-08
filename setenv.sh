@@ -8,6 +8,9 @@ source ${HOME}/python-virtual-env/standard/bin/activate
 
 append_to_python_path_if_not $PWD
 
+append_to_python_path_if_not $HOME/PyOpenGLng
+append_to_ld_library_path_if_not /usr/local/stow/freetype-2.5.2/lib
+
 ####################################################################################################
 #
 # End

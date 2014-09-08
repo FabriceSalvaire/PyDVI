@@ -28,19 +28,18 @@ handlers:
 ####################################################################################################
 
 root:
-  level: DEBUG
-  #level: INFO
+  # level: DEBUG
+  level: INFO
   #level: WARNING
   handlers: [console]
 
 ####################################################################################################
 
-# loggers:
+loggers:
 
-# ##################################################
-# #
-# # Modules
-# #
+  PyOpenGLng:
+    level: WARNING
+    handlers: [console]
 
 #   PyDvi:
 #     level: DEBUG
