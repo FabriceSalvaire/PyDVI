@@ -28,6 +28,8 @@ from PyQt4 import QtGui, QtCore
 
 ####################################################################################################
 
+from PyOpenGLng.Tools.Interval import IntervalInt2D
+
 from PyDvi.Dvi.DviParser import DviParser 
 from PyDvi.Font.FontManager import FontManager
 from PyDvi.TeXUnit import *

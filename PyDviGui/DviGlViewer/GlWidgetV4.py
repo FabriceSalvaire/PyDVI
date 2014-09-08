@@ -38,7 +38,6 @@ class GlWidget(GlWidgetBase):
     def __init__(self, parent):
 
         self.logger.debug('Initialise GlWidget')
-
         super(GlWidget, self).__init__(parent)
 
     ##############################################
@@ -46,7 +45,6 @@ class GlWidget(GlWidgetBase):
     def wheelEvent(self, event):
 
         self.logger.debug('Wheel Event')
-
         return self.wheel_zoom(event)
 
     ##############################################
@@ -54,7 +52,8 @@ class GlWidget(GlWidgetBase):
     def init_glortho2d(self):
 
         # Set max_area so as to correspond to max_binning zoom centered at the origin
-        page_width = 210 # mm
+        # Fixme: from dvi machine
+        page_width = 210 # mm 
         page_height = 297
         # max_area = IntervalInt2D([0, page_width], [0, page_height])
         # max_area.enlarge(100)
@@ -62,22 +61,17 @@ class GlWidget(GlWidgetBase):
         max_area = IntervalInt2D([-area_size, area_size], [-area_size, area_size])
 
         super(GlWidget, self).init_glortho2d(max_area, zoom_manager=None)
+        self.zoom_interval(IntervalInt2D((0, 210), (0, 297))) # Fixme
 
     ##############################################
 
     def initializeGL(self):
 
         self.logger.debug('Initialise GL')
-
         super(GlWidget, self).initializeGL()
 
         GL.glEnable(GL.GL_POINT_SMOOTH) #compat# 
         GL.glEnable(GL.GL_LINE_SMOOTH) #compat# 
-        
-        self.qglClearColor(QtCore.Qt.black)
-        #!# self.qglClearColor(QtCore.Qt.white)
-        # GL.glPointSize(5.)
-        # GL.glLineWidth(3.)
 
         self._init_shader()
         self.create_vertex_array_objects()
@@ -119,6 +113,8 @@ class GlWidget(GlWidgetBase):
     ##############################################
 
     def create_page_layout(self): # , page_bounding_box
+
+        # Fixme: from dvi machine
 
         page_width = 210 # mm
         page_height = 297
@@ -192,6 +188,9 @@ class GlWidget(GlWidgetBase):
     def paint(self):
 
         self._logger.info('')
+        # Clear the buffer using white colour (white paper)
+        GL.glClearColor(1, 1, 1, 1)
+        GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         self.paint_page_layout()
         self.paint_text()
 
@@ -202,16 +201,17 @@ class GlWidget(GlWidgetBase):
         self._logger.info('')
         shader_program = self.shader_manager.rectangle_shader_program
         shader_program.bind()
-        GL.glLineWidth(2.)
-        shader_program.uniforms.colour = (1., 0., 1.)
+        # GL.glLineWidth(1.)
+        shader_program.uniforms.colour = (.0, 0., .0)
         self.rectangle_vertex_array.draw()
 
-        shader_program = self.shader_manager.fixed_shader_program
-        shader_program.bind()
-        GL.glLineWidth(1.)
-        shader_program.uniforms.colour = (1., 1., 1.)
-        self.grid_vertex_array.draw()
-        shader_program.unbind()
+        if False:
+            shader_program = self.shader_manager.fixed_shader_program
+            shader_program.bind()
+            # GL.glLineWidth(.1) # Fixme: do in shader ...
+            shader_program.uniforms.colour = (.0, .0, .1)
+            self.grid_vertex_array.draw()
+            shader_program.unbind()
 
     ##############################################
 
@@ -225,12 +225,13 @@ class GlWidget(GlWidgetBase):
             text_vertex_array.draw(shader_program)
         # shader_program.unbind()
 
-        self._logger.info('Paint char bounding boxes')
-        shader_program = self.shader_manager.rectangle_shader_program
-        shader_program.bind()
-        GL.glLineWidth(1.)
-        shader_program.uniforms.colour = (1., 0., 0.)
-        self._char_bounding_box_vertex_array.draw()
+        if False:
+            self._logger.info('Paint char bounding boxes')
+            shader_program = self.shader_manager.rectangle_shader_program
+            shader_program.bind()
+            # GL.glLineWidth(1.)
+            shader_program.uniforms.colour = (1., 0., 0.)
+            self._char_bounding_box_vertex_array.draw()
 
 ####################################################################################################
 #

@@ -65,7 +65,7 @@ void main()
 
   // fragment_colour.rgb = rgb * vertex.colour.rgb;
   // fragment_colour.a = (rgb.r + rgb.g + rgb.b)/3.0 * vertex.colour.a;
-  fragment_colour = current * vertex.colour + vec4(1, 1, 1, 0);
+  fragment_colour = current * vertex.colour;
 }
 
 /* *********************************************************************************************** *
