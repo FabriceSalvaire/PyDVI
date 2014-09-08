@@ -11,10 +11,9 @@ import logging
 
 import numpy as np
 
-import OpenGL.GL as GL # Fixme
-
 ####################################################################################################
 
+from PyOpenGLng.HighLevelApi import GL
 from PyOpenGLng.HighLevelApi.Buffer import GlArrayBuffer
 from PyOpenGLng.HighLevelApi.VertexArrayObject import GlVertexArrayObject
 
@@ -64,7 +63,6 @@ class TextVertexArray(GlVertexArrayObject):
 
         for i, glyph in enumerate(glyphs):
             char_bounding_box, glyph_texture_coordinates = glyph
-            print i, char_bounding_box, glyph_texture_coordinates
             texture_coordinates[i] = glyph_texture_coordinates
             vertexes[i] = char_bounding_box
             colours[i] = colour
@@ -123,7 +121,6 @@ class TextVertexArray(GlVertexArrayObject):
         self.bind()
 
         shader_program.uniforms.font_atlas = 0
-        # shader_program.uniforms.font_atlas_shape = self._font_atlas_shape
         # shader_program.uniforms.gamma = 1.
 
         GL.glDrawArrays(GL.GL_POINTS, 0, self._number_of_vertexes)

@@ -60,7 +60,7 @@ void main()
 
   emit_vertex(position + vec2(0, glyph_size.y), uv1);
   emit_vertex(position + vec2(0, 0), vec2(uv1.s, uv2.t));
-  emit_vertex(position + vec2(glyph_size.x, glyph_size), vec2(uv2.s, uv1.t));
+  emit_vertex(position + vec2(glyph_size.x, glyph_size.y), vec2(uv2.s, uv1.t));
   emit_vertex(position + vec2(glyph_size.x, 0), uv2);
   EndPrimitive();
 }

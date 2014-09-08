@@ -38,7 +38,7 @@ class Application(QtGui.QApplication):
         super(Application, self).__init__(sys.argv)
 
         self.main_window = MainWindow(dvi_file)
-        self.main_window.show()
+        self.main_window.showMaximized()
 
 ####################################################################################################
 #

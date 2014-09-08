@@ -85,6 +85,8 @@ paper_orientation_enum = EnumFactory('PaperOrientation',
 
 class Opcode(object):
 
+    _logger = _module_logger.getChild('Opcode')
+
     ##############################################
 
     def run(self, dvi_machine, compute_bounding_box=False):
@@ -148,7 +150,7 @@ class Opcode_putset_char(Opcode):
                                            [registers.v - char_height, registers.v + char_depth])
 
             if compute_bounding_box:
-                print 'Char bounding box', char_bounding_box
+                self._logger.info('Char bounding box\n{}'.format(char_bounding_box))
                 if bounding_box is None:
                     bounding_box = char_bounding_box
                 else:
@@ -163,9 +165,9 @@ class Opcode_putset_char(Opcode):
             if self.set_char:
                 registers.h += char_width
 
-            print '%s char %3u "%s" width %8u h %10u' % (self.opcode_name,
-                                                         char_code, chr(char_code),
-                                                         char_width, registers.h)
+            self._logger.info('{} char {:3} "{}" width {:8} h {:10}'.format(self.opcode_name,
+                                                                            char_code, chr(char_code),
+                                                                            char_width, registers.h))
             
         if compute_bounding_box:
             return bounding_box
@@ -414,7 +416,7 @@ class Opcode_w(OpcodeX):
     def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.registers
-        registers.w  = self.x
+        registers.w = self.x
         registers.h += self.x
 
 ####################################################################################################
@@ -550,7 +552,7 @@ class Opcode_z(OpcodeX):
     def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.registers
-        registers.z  = self.x
+        registers.z = self.x
         registers.v += self.x
 
 ####################################################################################################
@@ -935,7 +937,8 @@ class DviMachineRegisters(object):
 
     def __init__(self, h=one_in_sp, v=one_in_sp, w=0, x=0, y=0, z=0):
 
-        self.h, self.v, self.w, self.x, self.y, self.z = h, v, w, x, y, z
+        self.h, self.v = h, v # horizontal and vertical position
+        self.w, self.x, self.y, self.z = w, x, y, z
 
     ##############################################
 
@@ -946,7 +949,7 @@ class DviMachineRegisters(object):
  w=+%10u sp %+10.2f mm x=+%10u sp %+10.2f mm
  y=+%10u sp %+10.2f mm z=+%10u sp %+10.2f mm)
 '''
-        return string_format % (
+        return string_format.strip() % (
             self.h, sp2mm(self.h),
             self.v, sp2mm(self.v),
             self.w, sp2mm(self.w),
@@ -968,6 +971,8 @@ class DviMachineRegisters(object):
 class DviMachine(object):
 
     """ This class implements a DVI Machine. """
+
+    _logger = _module_logger.getChild('DviMachine')
     
     ##############################################
 
@@ -985,70 +990,55 @@ class DviMachine(object):
         """ Reset the machine. """
 
         self.current_font_id = None
-        self.registers_stack = [DviMachineRegisters()]
-        self.colour_stack = [DviColorBlack()]
+        self._registers_stack = [DviMachineRegisters()]
+        self._colour_stack = [DviColorBlack()]
 
     ##############################################
 
-    def _get_registers(self):
-
+    @property
+    def registers(self):
         """ Return the current register set. """
-
-        return self.registers_stack[-1]
-
-    registers = property(_get_registers, None, None, 'Register set')
+        return self._registers_stack[-1]
 
     ##############################################
 
     def push_registers(self):
-
         """ Push the register set. """
-
-        self.registers_stack.append(self.registers.clone())
+        self._registers_stack.append(self.registers.clone())
 
     ##############################################
 
     def pop_registers(self, n=1):
-
         """ Pop *n* level in the register set stack. """
-
-        del self.registers_stack[n]
+        for i in xrange(n):
+            del self._registers_stack[-1]
 
     ##############################################
 
     def push_colour(self, colour):
-
         """ Push the current colour. """
-
-        self.colour_stack.append(colour)
+        self._colour_stack.append(colour)
 
     ##############################################
 
-    def pop_colour(self, n = 1):
-
+    def pop_colour(self, n=1):
         """ Pop *n* level in the colour stack. """
-
-        del self.registers_stack[-n]
+        for i in xrange(n):
+            del self._colour_stack[-1]
 
     ##############################################
 
-    def _get_current_font(self):
-
+    @property
+    def current_font(self):
         """ Return the current font. """
-
         return self.fonts[self.current_font_id]
 
-    current_font = property(_get_current_font, None, None, 'Current font')
-
     ##############################################
 
-    def _get_current_dvi_font(self):
-
+    @property
+    def current_dvi_font(self):
         """ Return the current dvi font. """
-
         return self.dvi_program.get_font(self.current_font_id)
-
-    current_dvi_font = property(_get_current_dvi_font, None, None, 'Current dvi font')
 
     ##############################################
 
@@ -1057,7 +1047,6 @@ class DviMachine(object):
         """ Load a :class:`DviProgam` instance. """
 
         self.dvi_program = dvi_program
-
         if load_fonts:
             self._load_dvi_fonts()
 
@@ -1086,15 +1075,14 @@ class DviMachine(object):
     def run_page(self, page):
 
         self.reset()
-
         opcode_program = self.dvi_program.get_page(page)
-
-        print 'Program Length:', len(opcode_program)
-
+        self._logger.info('Program Length: {}'.format(len(opcode_program)))
         for opcode in opcode_program:
-            print opcode
+            self._logger.info(opcode)
             opcode.run(self)
-            print 'level %u' % (len(self.registers_stack)), self.registers
+            self._logger.info('Registers:\n'
+                              'level {}\n'
+                              '{}'.format(len(self._registers_stack), self.registers))
 
     ##############################################
 
@@ -1106,22 +1094,24 @@ class DviMachine(object):
 
         bounding_box = None
         for opcode in opcode_program:
-            print opcode
+            self._logger.info(str(opcode))
             opcode_bounding_box = opcode.run(self, compute_bounding_box=True)
-            print 'Register Stack level %u' % (len(self.registers_stack)), self.registers
+            self._logger.info('Register Stack level {}\n{}'.format(len(self._registers_stack), self.registers))
             if opcode_bounding_box is not None:
-                print 'Opcode bounding box', opcode_bounding_box
+                self._logger.info('Opcode bounding box {}'.format(opcode_bounding_box))
                 if bounding_box is None:
                     bounding_box = opcode_bounding_box
                 else:
                     bounding_box |= opcode_bounding_box
-                print 'Current page bounding box', bounding_box
+                self._logger.info('Current page bounding box {}'.format(bounding_box))
 
-        print 'Page bounding box\n ', bounding_box, 'sp'
         (x_min_mm, x_max_mm,
          y_min_mm, y_max_mm) = [sp2mm(x) for x in (bounding_box.x.inf, bounding_box.x.sup,
                                                    bounding_box.y.inf, bounding_box.y.sup)]
-        print '  [%.2f, %.2f]*[%.2f, %.2f] mm' % (x_min_mm, x_max_mm, y_min_mm, y_max_mm) 
+        self._logger.info('Page bounding box\n {} sp\n'
+                          '  [{:.2f}, {:.2f}]*[{:.2f}, {:.2f}] mm'.format(bounding_box,
+                                                                          x_min_mm, x_max_mm,
+                                                                          y_min_mm, y_max_mm) )
 
         return bounding_box
 
@@ -1140,6 +1130,9 @@ class DviMachine(object):
 ####################################################################################################
 
 class DviSimplifyMachine(DviMachine):
+
+    # Fixme:
+    #  - merge push
 
     #: Defines papersize special
     xxx_papersize = 'papersize='
@@ -1278,7 +1271,7 @@ class DviSimplifyMachine(DviMachine):
                     delete_opcode = True
 
                 elif isinstance(opcode, OpcodeX):
-                    _module_logger.info("Merge OpcodeX")
+                    _module_logger.info("Merge OpcodeX {}".format(opcode))
                     previous_opcode.x += opcode.x
                     delete_opcode = True
                     if previous_opcode.x == 0:
