@@ -55,6 +55,7 @@ if shader_manager.has_visual():
         'geometry-shader/fixed_colour_vertex_shader_in',
         #
         'geometry-shader/rectangle_geometry_shader',
+        'geometry-shader/rule_geometry_shader',
         'geometry-shader/wide_line_geometry_shader',
         #
         'texture-shader/texture_vertex_shader',
@@ -98,6 +99,13 @@ if shader_manager.has_visual():
         {'program_name':'wide_line_shader_program',
          'shader_list':('fixed_colour_vertex_shader_in',
                         'wide_line_geometry_shader',
+                        'simple_fragment_shader'),
+         'program_interface':position_shader_program_interface,
+         },
+
+        {'program_name':'rule_shader_program',
+         'shader_list':('fixed_colour_vertex_shader_in',
+                        'rule_geometry_shader',
                         'simple_fragment_shader'),
          'program_interface':position_shader_program_interface,
          },

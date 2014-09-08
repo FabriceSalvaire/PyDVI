@@ -175,13 +175,20 @@ class GlWidget(GlWidgetBase):
             text_vertex_array.bind_to_shader(self.shader_manager.text_shader_program.interface.attributes)
             self._text_vertex_arrays.append(text_vertex_array)
 
-            for i, glyph in enumerate(glyphs):
+            for glyph in glyphs:
                 char_bounding_box, glyph_texture_coordinates = glyph
                 x, y, width, height = char_bounding_box
                 rectangles.append(Rectangle(Point(x, y), Offset(width, height)))
 
         self._char_bounding_box_vertex_array = GlRectangleVertexArray(rectangles)
         self._char_bounding_box_vertex_array.bind_to_shader(self.position_shader_interface.attributes.position)
+
+        rectangles = []
+        for rule in dvi_machine._rules:
+            x, y, width, height = rule
+            rectangles.append(Rectangle(Point(x, y), Offset(width, height)))
+        self._rule_vertex_array = GlRectangleVertexArray(rectangles)
+        self._rule_vertex_array.bind_to_shader(self.position_shader_interface.attributes.position)
 
     ##############################################
 
@@ -225,13 +232,20 @@ class GlWidget(GlWidgetBase):
             text_vertex_array.draw(shader_program)
         # shader_program.unbind()
 
-        if False:
+        if True:
             self._logger.info('Paint char bounding boxes')
             shader_program = self.shader_manager.rectangle_shader_program
             shader_program.bind()
             # GL.glLineWidth(1.)
             shader_program.uniforms.colour = (1., 0., 0.)
             self._char_bounding_box_vertex_array.draw()
+
+        self._logger.info('Paint rules')
+        # Fixme: anti-alias
+        shader_program = self.shader_manager.rule_shader_program
+        shader_program.bind()
+        shader_program.uniforms.colour = (0, 0, 0)
+        self._rule_vertex_array.draw()
 
 ####################################################################################################
 #

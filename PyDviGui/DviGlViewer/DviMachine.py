@@ -51,31 +51,16 @@ class GlDviMachine(DviMachine):
 
         self._texture_fonts = {}
         self._glyphs = {} # index by font name
+        self._rules = []
 
     ##############################################
 
     def paint_rule(self, x, y, w, h):
 
         self._logger.info("\nrule ({}, {}) +({}, {})".format(x, y, w, h))
-
-        x_mm, y_mm, w_mm, h_mm = map(sp2mm, (x, y, w, h))
-        # print 'paint_rule', x_mm, y_mm, w_mm, h_mm
-        # rule_rect = QtCore.QRectF(x_mm, y_mm - h_mm, w_mm, h_mm)
-        # pen = QtGui.QPen(QtCore.Qt.black)
-        # brush = QtGui.QBrush(QtCore.Qt.black, QtCore.Qt.SolidPattern)
-        # rule_item = self.scene.addRect(rule_rect, pen, brush)
-
-    ##############################################
-
-    def paint_char_box(self, char_bounding_box):
-
-        x, y = char_bounding_box.x.inf, char_bounding_box.y.inf
-        x_mm, y_mm = map(sp2mm, (x, y))
-        box_width  = sp2mm(char_bounding_box.x.length())
-        box_height = sp2mm(char_bounding_box.y.length())
-        # red_pen = QtGui.QPen(QtCore.Qt.red)
-        # char_box_rect = QtCore.QRectF(x_mm, y_mm, box_width, box_height)
-        # char_box_item = self.scene.addRect(char_box_rect, red_pen)
+        x_mm, y_mm, w_mm, h_mm = [sp2mm(z) for z in (x, y, w, h)]
+        y_mm = 297 - y_mm # Fixme: opengl frame
+        self._rules.append((x_mm, y_mm, w_mm, h_mm))
 
     ##############################################
 
@@ -84,9 +69,8 @@ class GlDviMachine(DviMachine):
         self._logger.info("\nchar ({}, {}) {} {}[{}]@{}".format(xg, yg, char_bounding_box,
                                                                 font.name, glyph_index, magnification))
 
-        # self.paint_char_box(char_bounding_box)
-
-        xg_mm, yg_mm = map(sp2mm, (xg, yg))
+        xg_mm = sp2mm(xg)
+        yg_mm = sp2mm(yg)
         yg_mm = 297 - yg_mm # Fixme: opengl frame
 
         if font.name not in self._texture_fonts:
@@ -99,9 +83,14 @@ class GlDviMachine(DviMachine):
         texture_coordinates = textures_font.glyph(glyph_index, magnification)
         self._logger.info("{}".format(texture_coordinates))
 
+        x_mm = sp2mm(char_bounding_box.x.inf)
+        y_mm = sp2mm(char_bounding_box.y.inf)
+        y_mm = 297 - y_mm # Fixme: opengl frame
+        box_width  = sp2mm(char_bounding_box.x.length())
+        box_height = sp2mm(char_bounding_box.y.length())
+
         # Fixme: wrong
-        width, height = [sp2mm(x) for x in char_bounding_box.x.length(), char_bounding_box.y.length()]
-        self._glyphs[font.name].append(((xg_mm, yg_mm, width, height), texture_coordinates))
+        self._glyphs[font.name].append(((xg_mm, yg_mm, box_width, box_height), texture_coordinates))
 
         # char_pixmap_item.setOffset(glyph.horizontal_offset, glyph.vertical_offset)
         # char_pixmap_item.translate(xg_mm, yg_mm)
