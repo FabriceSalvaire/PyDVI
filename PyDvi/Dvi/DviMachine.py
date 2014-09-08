@@ -223,7 +223,7 @@ class Opcode_putset_rule(Opcode):
         if compute_bounding_box:
             # Fixme: check
             bounding_box = Interval2D([registers.h, registers.h + self.width],
-                                      [registers.v + self.height, registers.v])
+                                      [registers.v, registers.v + self.height])
         else:
             dvi_machine.paint_rule(registers.h, registers.v, self.width, self.height)
 
