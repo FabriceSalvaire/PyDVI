@@ -33,7 +33,7 @@ class TextureFont(object):
 
         # Fixme: an atlas could be shared by several fonts and sizes
         atlas_size = 1024
-        self._atlas = TextureAtlas(atlas_size, atlas_size, depth=1) # Fixme: 3
+        self._atlas = TextureAtlas(atlas_size, atlas_size, depth=3) # Fixme: using lcd rendering
         self._dirty = False
 
         self._glyphs = {}
@@ -65,7 +65,7 @@ class TextureFont(object):
         # Glyphes are separated by a margin
         # margin = 1 # px
         # dimension are given in pixel thus we correct the bitmap width
-        x, y, w, h = atlas.get_region(width/atlas.depth +2, rows +2)
+        x, y, w, h = atlas.get_region(width +2, rows +2)
         if x == -1:
             raise NameError("Cannot allocate glyph in atlas")
         x, y = x+1, y+1

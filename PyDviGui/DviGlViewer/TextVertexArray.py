@@ -114,7 +114,8 @@ class TextVertexArray(GlVertexArrayObject):
         # alpha: 0: complete transparency, 1: complete opacity
         # Set (Sf, Df) for transparency: O = Sa*S + (1-Sa)*D 
         # GL.glBlendEquation(GL.GL_FUNC_ADD)
-        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+        # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_SRC_ALPHA) # Fixme: check cf. fragment shader
 
         shader_program.bind()
         self._image_texture.bind()

@@ -32,6 +32,10 @@ void main()
   vec4 previous = texture2D(font_atlas, vertex.uv + vec2(-1.,.0)*(1./font_atlas_shape));
   // vec4 next = texture2D(font_atlas, vertex.uv + vec2(+1.,.0)*(1./font_atlas_shape));
 
+  float r = current.r;
+  float g = current.g;
+  float b = current.b;
+
   /*
   float r = 0;
   float g = 0;
@@ -61,11 +65,10 @@ void main()
 
   // Gamma correction
   // Standard LCD Gamma: Out = IN**2.2
-  // vec3 rgb = pow(vec3(r,g,b), vec3(gamma));
+  vec3 rgb = pow(vec3(r,g,b), vec3(gamma));
 
-  // fragment_colour.rgb = rgb * vertex.colour.rgb;
-  // fragment_colour.a = (rgb.r + rgb.g + rgb.b)/3.0 * vertex.colour.a;
-  fragment_colour = current * vertex.colour;
+  fragment_colour.rgb = rgb * vertex.colour.rgb;
+  fragment_colour.a = 1 - ((rgb.r + rgb.g + rgb.b)/3.0 * vertex.colour.a); // Fixme: check cf. blending
 }
 
 /* *********************************************************************************************** *

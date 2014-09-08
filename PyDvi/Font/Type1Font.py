@@ -306,7 +306,9 @@ class FontSize(object):
 
     ##############################################
  
-    def load_glyph(self, glyph_index):
+    def load_glyph(self, glyph_index, lcd=True):
+
+        # Fixme: lcd steering
 
         if glyph_index in self._glyphs:
             return
@@ -318,7 +320,8 @@ class FontSize(object):
         face = self._font._face
 
         flags = freetype.FT_LOAD_RENDER | freetype.FT_LOAD_FORCE_AUTOHINT
-        # flags |= freetype.FT_LOAD_TARGET_LCD
+        if lcd:
+            flags |= freetype.FT_LOAD_TARGET_LCD
 
         face.load_glyph(glyph_index, flags)
 
@@ -332,12 +335,10 @@ class FontSize(object):
         # Remove padding
         data = np.array(bitmap.buffer).reshape(rows, pitch)
         data = data[:,:width].astype(np.ubyte)
+        if lcd:
+            # RBG data else grayscale
+            data = data.reshape(rows, width/3, 3)
         
-        # Gamma correction
-        # gamma = 1.5
-        # Z = (data/255.0)**gamma
-        # data = Z*255
-
         # Build glyph
         size = data.shape[1], data.shape[0]
         offset = left, top

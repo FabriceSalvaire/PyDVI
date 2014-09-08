@@ -134,8 +134,13 @@ class FtGlyph(object):
 
         glyph = font.get_glyph(glyph_index, size)
         glyph_bitmap = glyph.glyph_bitmap
+        glyph_bitmap = 255 - glyph_bitmap
 
-        glyph_image = gray_array_to_qimage(glyph_bitmap)
+        # glyph_image = gray_array_to_qimage(glyph_bitmap)
+        glyph_image = QtGui.QImage(glyph_bitmap.tostring(),
+                                   glyph_bitmap.shape[1], glyph_bitmap.shape[0],
+                                   glyph_bitmap.shape[1]*3,
+                                   QtGui.QImage.Format_RGB888)
         glyph_pixmap = QtGui.QPixmap.fromImage(glyph_image)
         self.pixmap = glyph_pixmap
 

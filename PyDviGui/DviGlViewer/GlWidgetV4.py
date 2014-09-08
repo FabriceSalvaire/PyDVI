@@ -170,7 +170,7 @@ class GlWidget(GlWidgetBase):
             font_atlas_texture = ImageTexture(texture_font.atlas.data)
             text_vertex_array = TextVertexArray(font_atlas_texture)
             glyphs = dvi_machine._glyphs[texture_font.name]
-            text_vertex_array.add(glyphs=glyphs, colour=(1.0, 1.0, 1.0, 1.0))
+            text_vertex_array.add(glyphs=glyphs, colour=(1., 1., 1., 1.))
             text_vertex_array.upload()
             text_vertex_array.bind_to_shader(self.shader_manager.text_shader_program.interface.attributes)
             self._text_vertex_arrays.append(text_vertex_array)
