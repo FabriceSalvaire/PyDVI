@@ -341,14 +341,18 @@ class FontSize(object):
         data = data[:,:width].astype(np.ubyte)
         if lcd:
             # RBG data else grayscale
-            data = data.reshape(rows, width/3, 3)
+            glyph_bitmap = data.reshape(rows, width/3, 3)
+        else:
+            glyph_bitmap = np.zeros((rows, width, 3), dtype=np.ubyte)
+            for i in xrange(3):
+                glyph_bitmap[:,:,i] = data
         
         # Build glyph
-        size = data.shape[1], data.shape[0]
+        size = glyph_bitmap.shape[1], glyph_bitmap.shape[0]
         offset = left, top
         advance = face.glyph.advance.x, face.glyph.advance.y
         glyph = Glyph(self, glyph_index, size, offset, advance)
-        glyph.glyph_bitmap = data # Fixme:
+        glyph.glyph_bitmap = glyph_bitmap # Fixme:
         self._glyphs[glyph_index] = glyph
 
 ####################################################################################################

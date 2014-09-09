@@ -245,7 +245,7 @@ class GlWidget(GlWidgetBase):
             text_vertex_array.draw(shader_program)
         # shader_program.unbind()
 
-        if True:
+        if False:
             self._logger.info('Paint char bounding boxes')
             shader_program = self.shader_manager.rectangle_shader_program
             shader_program.bind()

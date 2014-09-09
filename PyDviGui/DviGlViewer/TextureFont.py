@@ -82,7 +82,7 @@ class TextureFont(object):
         if x == -1:
             raise NameError("Cannot allocate glyph in atlas")
         x, y = x+1, y+1
-        w, h = w-2, h-2 # = width/depth, rows
+        w, h = w-2, h-2
         atlas.set_region((x, y, w, h), glyph_bitmap)
 
         # Compute texture coordinates
