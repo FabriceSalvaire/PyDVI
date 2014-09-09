@@ -27,11 +27,11 @@ from RstFactory import RstFactory
 
 ####################################################################################################
 
-module_path = 'PyDvi'
 rst_directory = 'doc/sphinx/source/api'
 excluded_directory = ()
 
-rst_factory = RstFactory(module_path, rst_directory, excluded_directory) 
+for module_path in 'PyDvi', 'PyDviGui':
+    rst_factory = RstFactory(module_path, rst_directory, excluded_directory) 
 
 ####################################################################################################
 # 
