@@ -20,6 +20,11 @@
 # 
 ####################################################################################################
 
+"""This code is deprecated in favor of the OpenGL viewer. The Qt graphic scene is not suited for
+this purpose.
+
+"""
+
 ####################################################################################################
 
 from PyQt4 import QtGui, QtCore
