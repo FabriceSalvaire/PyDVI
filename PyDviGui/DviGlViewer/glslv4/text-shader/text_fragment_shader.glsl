@@ -27,7 +27,9 @@ out vec4 fragment_colour;
 
 void main()
 {
-  // LCD Filter
+  // The glyphs are rendered in white (grayscale or LCD RGB anti-aliasing) in the font atlas.
+
+  // lcd Filter
   vec4 current = texture2D(font_atlas, vertex.uv);
   vec4 previous = texture2D(font_atlas, vertex.uv + vec2(-1.,.0)*(1./font_atlas_shape));
   // vec4 next = texture2D(font_atlas, vertex.uv + vec2(+1.,.0)*(1./font_atlas_shape));
@@ -67,8 +69,11 @@ void main()
   // Standard LCD Gamma: Out = IN**2.2
   vec3 rgb = pow(vec3(r,g,b), vec3(gamma));
 
+  // note: black colour is null
   fragment_colour.rgb = rgb * vertex.colour.rgb;
-  fragment_colour.a = 1 - ((rgb.r + rgb.g + rgb.b)/3.0 * vertex.colour.a); // Fixme: check cf. blending
+  // alpha = 1 means fully opaque while alpha = 0 means fully transparent
+  float average_luminosity = (rgb.r + rgb.g + rgb.b)/3.;
+  fragment_colour.a = 1 - (average_luminosity * vertex.colour.a); // Fixme: check cf. blending
 }
 
 /* *********************************************************************************************** *

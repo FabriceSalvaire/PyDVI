@@ -1,7 +1,20 @@
 ####################################################################################################
 # 
-# @Project@ - @ProjectDescription@.
+# PyDvi - A Python Library to Process DVI Stream
 # Copyright (C) 2014 Fabrice Salvaire
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 ####################################################################################################
 
@@ -35,10 +48,6 @@ shader_manager = GlShaderManager()
 position_shader_program_interface = GlShaderProgramInterface(uniform_blocks=('viewport',),
                                                              attributes=('position',))
 
-texture_shader_program_interface = GlShaderProgramInterface(uniform_blocks=('viewport',),
-                                                            attributes=('position',
-                                                                        'position_uv'))
-
 text_shader_program_interface = GlShaderProgramInterface(uniform_blocks=('viewport',),
                                                          attributes=('position',
                                                                      'position_uv',
@@ -58,10 +67,6 @@ if shader_manager.has_visual():
         'geometry-shader/rule_geometry_shader',
         'geometry-shader/wide_line_geometry_shader',
         #
-        'texture-shader/texture_vertex_shader',
-        'texture-shader/texture_fragment_shader',
-        'texture-shader/texture_label_fragment_shader',
-        #
         'text-shader/text_vertex_shader',
         'text-shader/text_geometry_shader',
         'text-shader/text_fragment_shader',
@@ -70,18 +75,6 @@ if shader_manager.has_visual():
         shader_manager.load_from_file(shader_name, ConfigPath.glsl(shader_path + '.glsl'))
     
     for args in (
-        {'program_name':'fixed_shader_program',
-         'shader_list':('fixed_colour_vertex_shader',
-                        'simple_fragment_shader'),
-         'program_interface':texture_shader_program_interface,
-         },
-    
-        {'program_name':'texture_shader_program',
-         'shader_list':('texture_vertex_shader',
-                        'texture_fragment_shader'),
-         'program_interface':texture_shader_program_interface,
-         },
-
         {'program_name':'text_shader_program',
          'shader_list':('text_vertex_shader',
                         'text_geometry_shader',

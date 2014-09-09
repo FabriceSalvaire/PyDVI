@@ -1,7 +1,20 @@
 ####################################################################################################
 # 
-# @Project@ - @ProjectDescription@.
+# PyDvi - A Python Library to Process DVI Stream
 # Copyright (C) 2014 Fabrice Salvaire
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 ####################################################################################################
 
@@ -109,10 +122,14 @@ class TextVertexArray(GlVertexArrayObject):
     
     def draw(self, shader_program):
 
-        GL.glEnable(GL.GL_BLEND)
         # Blending: O = Sf*S + Df*D
-        # alpha: 0: complete transparency, 1: complete opacity
+        #  where S is the colour from the fragment shader and D the colour from the framebuffer
+        #   alpha: fully transparent = 0 and fully opaque = 1
+        #   Sa = average luminosity * colour aplha
+        #
         # Set (Sf, Df) for transparency: O = Sa*S + (1-Sa)*D 
+
+        GL.glEnable(GL.GL_BLEND)
         # GL.glBlendEquation(GL.GL_FUNC_ADD)
         # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
         GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_SRC_ALPHA) # Fixme: check cf. fragment shader
