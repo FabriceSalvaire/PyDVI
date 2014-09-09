@@ -116,14 +116,15 @@ class MainWindow(MainWindowBase):
 
         form = self.main_window_ui
 
-        self.tfm_char = self.font.tfm[glyph_index]
-        self.glyph_information_table_model.set_tfm_char(self.tfm_char)
+        glyph = form.glyph_graphics_view.show_glyph(self.font, glyph_index)
+
+        # glyph = self.font[glyph_index] # works only for PkFont
+        tfm_char = self.font.tfm[glyph_index]
+        self.glyph_information_table_model.set_tfm_char(glyph, tfm_char)
         form.glyph_information_table_view.resizeColumnsToContents()
 
         # glyph.print_summary()
         # glyph.print_glyph()
-
-        form.glyph_graphics_view.show_glyph(self.font, glyph_index)
 
 ####################################################################################################
 #

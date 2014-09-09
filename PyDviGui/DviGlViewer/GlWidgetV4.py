@@ -189,7 +189,7 @@ class GlWidget(GlWidgetBase):
             self._text_vertex_arrays.append(text_vertex_array)
 
             for glyph in glyphs:
-                char_bounding_box, glyph_texture_coordinates = glyph
+                glyph_bounding_box, char_bounding_box, glyph_texture_coordinates = glyph
                 x, y, width, height = char_bounding_box
                 rectangles.append(Rectangle(Point(x, y), Offset(width, height)))
 

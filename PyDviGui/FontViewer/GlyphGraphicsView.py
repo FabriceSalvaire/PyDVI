@@ -90,6 +90,8 @@ class GlyphGraphicsView(QtGui.QGraphicsView):
 
         self.scene.update()
 
+        return self._glyph.glyph # Fixme: naming ...
+
     ##############################################
 
     def add_glyph_box(self):

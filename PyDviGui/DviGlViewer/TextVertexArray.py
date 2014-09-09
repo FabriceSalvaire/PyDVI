@@ -75,7 +75,7 @@ class TextVertexArray(GlVertexArrayObject):
         vertexes, texture_coordinates, colours = self._create_arrays(number_of_vertexes)
 
         for i, glyph in enumerate(glyphs):
-            char_bounding_box, glyph_texture_coordinates = glyph
+            glyph_bounding_box, char_bounding_box, glyph_texture_coordinates = glyph
             texture_coordinates[i] = glyph_texture_coordinates
             vertexes[i] = char_bounding_box
             colours[i] = colour

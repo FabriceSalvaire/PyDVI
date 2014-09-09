@@ -69,10 +69,6 @@ class GlDviMachine(DviMachine):
         self._logger.info("\nchar ({}, {}) {} {}[{}]@{}".format(xg, yg, char_bounding_box,
                                                                 font.name, glyph_index, magnification))
 
-        xg_mm = sp2mm(xg)
-        yg_mm = sp2mm(yg)
-        yg_mm = 297 - yg_mm # Fixme: opengl frame
-
         if font.name not in self._texture_fonts:
             textures_font = TextureFont(font)
             self._texture_fonts[font.name] = textures_font
@@ -80,17 +76,30 @@ class GlDviMachine(DviMachine):
         else:
             textures_font = self._texture_fonts[font.name]
 
-        texture_coordinates = textures_font.glyph(glyph_index, magnification)
-        self._logger.info("{}".format(texture_coordinates))
+        glyph = textures_font.glyph(glyph_index, magnification)
+
+        xg_mm = sp2mm(xg) + glyph.px_to_mm(glyph.offset[0])
+        yg_mm = sp2mm(yg) + glyph.px_to_mm(glyph.size[1] - glyph.offset[1]) # offset = top - origin
+        yg_mm = 297 - yg_mm # Fixme: opengl frame
+        width = glyph.px_to_mm(glyph.size[0])
+        height = glyph.px_to_mm(glyph.size[1])
 
         x_mm = sp2mm(char_bounding_box.x.inf)
         y_mm = sp2mm(char_bounding_box.y.inf)
         y_mm = 297 - y_mm # Fixme: opengl frame
         box_width  = sp2mm(char_bounding_box.x.length())
         box_height = sp2mm(char_bounding_box.y.length())
+        y_mm -= box_height
 
         # Fixme: wrong
-        self._glyphs[font.name].append(((xg_mm, yg_mm, box_width, box_height), texture_coordinates))
+        self._glyphs[font.name].append(((xg_mm, yg_mm, width, height),
+                                        (x_mm, y_mm, box_width, box_height),
+                                        glyph.texture_coordinates))
+
+        # horizontal_offset = -glyph.horizontal_offset
+        # vertical_offset = -glyph.vertical_offset
+        # h_scale = magnification*dpi2mm(glyph.pk_font.horizontal_dpi)
+        # v_scale = magnification*dpi2mm(glyph.pk_font.vertical_dpi)
 
         # char_pixmap_item.setOffset(glyph.horizontal_offset, glyph.vertical_offset)
         # char_pixmap_item.translate(xg_mm, yg_mm)

@@ -60,7 +60,7 @@ class Application(QtGui.QApplication):
         super(Application, self).__init__(sys.argv)
 
         self._main_window = MainWindow(self, args)
-        self._main_window.show()
+        self._main_window.showMaximized()
 
 ####################################################################################################
 

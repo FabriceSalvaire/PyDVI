@@ -326,11 +326,15 @@ class FontSize(object):
         face.load_glyph(glyph_index, flags)
 
         bitmap = face.glyph.bitmap # a list
-        left = face.glyph.bitmap_left
-        top = face.glyph.bitmap_top
         width = face.glyph.bitmap.width
         rows = face.glyph.bitmap.rows
         pitch = face.glyph.bitmap.pitch # stride / number of bytes taken by one bitmap row
+        # left: The left-side bearing, i.e., the horizontal distance from the current pen position
+        #   to the left border of the glyph bitmap.
+        # top: The top-side bearing, i.e., the vertical distance from the current pen position to
+        #   the top border of the glyph bitmap. This distance is positive for upwards y!
+        left = face.glyph.bitmap_left
+        top = face.glyph.bitmap_top
 
         # Remove padding
         data = np.array(bitmap.buffer).reshape(rows, pitch)
@@ -351,11 +355,31 @@ class FontSize(object):
 
 class FontMetrics(object):
 
+    """Font Metrics
+
+    * Ascent
+        The distance from the baseline to the highest or upper grid coordinate used to place an
+        outline point. It is a positive value, due to the grid's orientation with the Y axis
+        upwards.
+    * Descent
+        The distance from the baseline to the lowest grid coordinate used to place an outline
+        point. In FreeType, this is a negative value, due to the grid's orientation. Note that in
+        some font formats this is a positive value.
+    * Linegap
+        The distance that must be placed between two lines of text. The baseline-to-baseline
+        distance should be computed as
+
+            linespace = ascent - descent + linegap
+        if you use the typographic values.
+
+    """
+
     ##############################################
 
     def __init__(self, font_size):
 
         face = font_size._font._face
+        # Fixme: TeX point = 72.27 but FreeType 72 ???
         face.set_char_size(int(to_64th_point(font_size.size)))
         metrics = face.size
 
@@ -392,6 +416,11 @@ class Glyph(object):
         self.size = size
         self.offset = offset
         self.advance = advance
+
+    ##############################################
+
+    def px_to_mm(self, x):
+        return 25.4/self.font_size.resolution * x
 
 ####################################################################################################
 #

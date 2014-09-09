@@ -133,6 +133,7 @@ class FtGlyph(object):
         size = magnification * font.tfm.design_font_size # pt
 
         glyph = font.get_glyph(glyph_index, size)
+        self.glyph = glyph
         glyph_bitmap = glyph.glyph_bitmap
         glyph_bitmap = 255 - glyph_bitmap
 
@@ -172,6 +173,7 @@ class PkGlyph(object):
         self._logger.info("font {} glyph[{}] @mag {}".format(font.name, glyph_index, magnification))
 
         glyph = font[glyph_index]
+        self.glyph = glyph
         glyph_bitmap = glyph.get_glyph_bitmap()
 
         glyph_image = bitmap_array_to_qimage(glyph_bitmap)

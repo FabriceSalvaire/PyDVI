@@ -26,6 +26,7 @@ __all__ = ['GlyphInfoTableModel']
 
 ####################################################################################################
 
+from PyDvi.Font.PkGlyph import PkGlyph
 from PyDvi.TeXUnit import *
 
 from .InfoTableModel import InfoTableModel
@@ -46,19 +47,27 @@ class GlyphInfoTableModel(InfoTableModel):
 
     def format_dimension(self, x):
 
-        return '%.2f ds %.2f mm' % (x, pt2mm(int(x*self.design_font_size)))
+        return '{:.2f} ds {:.2f} mm'.format(x, pt2mm(int(x*self.design_font_size)))
 
     ############################################################################
 
-    def set_tfm_char(self, tfm_char):
+    def format_px(self, x):
 
-        self.tfm_char = tfm_char
+        return '{} px'.format(x)
+
+    ############################################################################
+
+    def set_tfm_char(self, glyph, tfm_char):
 
         self.fields = [
             'Width',
             'Height',
             'Depth',
             'Italic Correction',
+            'Glyph Width',
+            'Glyph Height',
+            'Glyph Horizontal Offset',
+            'Glyph Vertical Offset',
             ]
 
         self.design_font_size = tfm_char.tfm.design_font_size
@@ -67,6 +76,17 @@ class GlyphInfoTableModel(InfoTableModel):
         self.values['Height'] = self.format_dimension(tfm_char.height)
         self.values['Depth'] = self.format_dimension(tfm_char.depth)
         self.values['Italic Correction'] = self.format_dimension(tfm_char.italic_correction)
+
+        if isinstance(glyph, PkGlyph):
+            self.values['Glyph Width'] = self.format_px(glyph.width)
+            self.values['Glyph Height'] = self.format_px(glyph.height)
+            self.values['Glyph Horizontal Offset'] = self.format_px(glyph.horizontal_offset)
+            self.values['Glyph Vertical Offset'] = self.format_px(glyph.vertical_offset)
+        else:
+            self.values['Glyph Width'] = self.format_px(glyph.size[0])
+            self.values['Glyph Height'] = self.format_px(glyph.size[1])
+            self.values['Glyph Horizontal Offset'] = self.format_px(glyph.offset[0])
+            self.values['Glyph Vertical Offset'] = self.format_px(glyph.offset[1])
 
         self.reset()
 

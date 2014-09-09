@@ -90,11 +90,11 @@ class TextureFont(object):
         v0 = y / float(atlas.height)
         u1 = (x + w) / float(atlas.width)
         v1 = (y + h) / float(atlas.height)
-        texture_coordinate = (u0, v0, u1, v1)
 
-        # Fixme: store glyph or texture_coordinate ?
+        # Fixme: better idea?
+        glyph.texture_coordinates = (u0, v0, u1, v1)
 
-        return texture_coordinate
+        return glyph
 
     ##############################################
  
