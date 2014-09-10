@@ -45,6 +45,10 @@ _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
+_cache = {}
+
+####################################################################################################
+
 def kpsewhich(filename, file_format=None, options=None):
 
     """Wrapper around the :command:`kpsewhich` command, cf. kpsewhich(1).
@@ -61,6 +65,10 @@ def kpsewhich(filename, file_format=None, options=None):
        '/usr/share/texmf/fonts/tfm/public/cm/cmr10.tfm'
     """
 
+    key = '{}-{}-{}'.format(filename, file_format, options)
+    if key in _cache:
+        return _cache[key]
+
     command = ['kpsewhich']
     if file_format is not None:
         command.append("--format='%s'" % (file_format))
@@ -74,8 +82,10 @@ def kpsewhich(filename, file_format=None, options=None):
     stdout = pipe.communicate()[0]
     _module_logger.info('stdout:\n' + stdout)
     path = stdout.rstrip()
+    path = path if path else None
 
-    return path if path else None
+    _cache[key] = path
+    return path
 
 ####################################################################################################
 #
