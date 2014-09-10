@@ -18,7 +18,7 @@ PDF_FILES = $(patsubst %.tex, %.pdf, $(TEX_FILES))
 
 INTERACTION="--interaction=batchmode"
 
-LATEX = latex -shell-escape $(INTERACTION)
+LATEX = latex -synctex=1 -shell-escape $(INTERACTION)
 PDFLATEX = pdflatex -shell-escape $(INTERACTION)
 
 ####################################################################################################
@@ -26,8 +26,6 @@ PDFLATEX = pdflatex -shell-escape $(INTERACTION)
 # Rules
 #
 ####################################################################################################
-
-.PHONY: all pdf dvi clean
 
 all: dvi pdf
 
@@ -42,6 +40,8 @@ pdf: ${PDF_FILES}
 
 clean:
 	-rm -f *.aux *.log
+
+.PHONY: all pdf dvi clean
 
 ####################################################################################################
 #

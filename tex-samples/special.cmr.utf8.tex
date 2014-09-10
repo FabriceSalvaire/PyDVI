@@ -17,8 +17,12 @@ dvips,%
 
 %****************************************
 
-\usepackage[dvipdf]{graphics}
-\usepackage[dvipdf]{color}
+%\usepackage{graphics}
+%\usepackage{color}
+\usepackage[dvips]{graphics}
+\usepackage[dvips]{color}
+%\usepackage[dvipdf]{graphics}
+%\usepackage[dvipdf]{color}
 
 %****************************************
 
@@ -28,27 +32,29 @@ dvips,%
 %
 \section{Colours}
 \begin{itemize}
-\item \textcolor{red}{Text in red colour}
-\item \colorbox{blue}{Text with a red frame}
+\item \textcolor{red}{Text in red}
+\item \colorbox{blue}{Text with a blue frame}
 \item \fcolorbox{red}{blue}{and with a red box}
+%
 \definecolor{color1}{gray}{.5}
+\item \textcolor{color1}{Text in gray}
+%
 \definecolor{color2}{rgb}{.1,.2,.3}
+\item \textcolor{color2}{Text in rgb}
+%
 \definecolor{color3}{cmyk}{.1,.2,.3,.4}
-\item \textcolor{color1}{Text in colour 1}
-\item \textcolor{color2}{Text in colour 2}
-\item \textcolor{color3}{Text in colour 3}
+\item \textcolor{color3}{Text in cmyk}
 \end{itemize}
 %
 \section{Transformations}
 \begin{itemize}
 \item \scalebox{2}{Text scaled twice}
-\item \scalebox{2}[3]{Text distorded}
+\item \scalebox{2}[3]{Text distorted}
 \item \resizebox{2cm}{1cm}{Text resized}
 \item \rotatebox{45}{Text rotated by 45}
 \item \rotatebox{90}{Text rotated by 90}
-\item \reflectbox{Mirror}
+\item \reflectbox{Text mirrored}
 \end{itemize}
-
 %
 \end{document}
 
