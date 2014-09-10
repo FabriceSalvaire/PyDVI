@@ -126,7 +126,7 @@ class Type1Font(Font):
 
     ##############################################
 
-    def font_size(self, font_size, resolution=600):
+    def font_size(self, font_size, resolution):
 
         key = "{}@{}".format(font_size, resolution)
         if font_size not in self._font_size:
@@ -239,7 +239,7 @@ class FontSize(object):
 
     ##############################################
 
-    def __init__(self, font, font_size, resolution=600):
+    def __init__(self, font, font_size, resolution):
 
         self._font = font
         self._size = font_size

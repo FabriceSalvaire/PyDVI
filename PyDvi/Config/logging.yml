@@ -37,10 +37,6 @@ root:
 
 loggers:
 
-  PyOpenGLng:
-    level: WARNING
-    handlers: [console]
-
 #   PyDvi:
 #     level: DEBUG
 #     #level: INFO
