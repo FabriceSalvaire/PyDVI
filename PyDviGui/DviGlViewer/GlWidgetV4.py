@@ -22,13 +22,9 @@
 
 import logging
 
-from PyQt4 import QtCore
-
-import numpy as np
+from PyQt4 import QtCore, QtGui
 
 ####################################################################################################
-
-#!# from PyOpenGLng.HighLevelApi.GlOrtho2D import ZoomManagerAbc
 
 from PyOpenGLng.HighLevelApi import GL
 from PyOpenGLng.HighLevelApi.Buffer import GlUniformBuffer
@@ -38,26 +34,35 @@ from PyOpenGLng.HighLevelApi.ImageTexture import ImageTexture
 from PyOpenGLng.HighLevelApi.PrimitiveVertexArray import GlSegmentVertexArray, GlRectangleVertexArray
 from PyOpenGLng.Tools.Interval import IntervalInt2D
 
+####################################################################################################
+
 from .TextVertexArray import TextVertexArray
+
+####################################################################################################
+
+_module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
 class GlWidget(GlWidgetBase):
 
-    logger = logging.getLogger(__name__)
+    _logger = _module_logger.getChild('GlWidget')
  
     ##############################################
     
-    def __init__(self, parent):
+    def __init__(self, parent, main_window):
 
-        self.logger.debug('Initialise GlWidget')
+        self._logger.debug('Initialise GlWidget')
         super(GlWidget, self).__init__(parent)
+
+        self._application = QtGui.QApplication.instance()
+        self._main_window = main_window # self._application.main_window # not yet initialised
 
     ##############################################
 
     def wheelEvent(self, event):
 
-        self.logger.debug('Wheel Event')
+        self._logger.debug('Wheel Event')
         return self.wheel_zoom(event)
 
     ##############################################
@@ -80,7 +85,7 @@ class GlWidget(GlWidgetBase):
 
     def initializeGL(self):
 
-        self.logger.debug('Initialise GL')
+        self._logger.debug('Initialise GL')
         super(GlWidget, self).initializeGL()
 
         GL.glEnable(GL.GL_POINT_SMOOTH) #compat# 
@@ -93,7 +98,7 @@ class GlWidget(GlWidgetBase):
 
     def _init_shader(self):
 
-        self.logger.debug('Initialise Shader')
+        self._logger.debug('Initialise Shader')
 
         import ShaderProgramesV4 as ShaderProgrames
         self.shader_manager = ShaderProgrames.shader_manager
@@ -108,12 +113,12 @@ class GlWidget(GlWidgetBase):
 
     def update_model_view_projection_matrix(self):
 
-        self.logger.debug('Update Model View Projection Matrix'
-                         '\n' + str(self.glortho2d))
+        self._logger.debug('Update Model View Projection Matrix'
+                           '\n' + str(self.glortho2d))
 
         viewport_uniform_buffer_data = self.glortho2d.viewport_uniform_buffer_data(self.size())
-        self.logger.debug('Viewport Uniform Buffer Data '
-                          '\n' + str(viewport_uniform_buffer_data))
+        self._logger.debug('Viewport Uniform Buffer Data '
+                           '\n' + str(viewport_uniform_buffer_data))
         self._viewport_uniform_buffer.set(viewport_uniform_buffer_data)
 
     ##############################################
@@ -121,7 +126,7 @@ class GlWidget(GlWidgetBase):
     def create_vertex_array_objects(self):
 
         self.create_page_layout()
-        self.create_text()
+        self._paint_page = False
 
     ##############################################
 
@@ -168,18 +173,12 @@ class GlWidget(GlWidgetBase):
 
     def update_dvi(self, dvi_machine):
 
-        self._dvi_machine = dvi_machine
-
-    ##############################################
-
-    def create_text(self, ):
-
-        dvi_machine = self._dvi_machine
+        self._logger.info('Update DVI')
 
         self._text_vertex_arrays = []
         rectangles = []
         for texture_font in dvi_machine._texture_fonts.itervalues():
-            texture_font.atlas.save(texture_font.name + '.png')
+            # texture_font.atlas.save(texture_font.name + '.png')
             font_atlas_texture = ImageTexture(texture_font.atlas.data)
             text_vertex_array = TextVertexArray(font_atlas_texture)
             glyphs = dvi_machine._glyphs[texture_font.name]
@@ -203,6 +202,11 @@ class GlWidget(GlWidgetBase):
         self._rule_vertex_array = GlRectangleVertexArray(rectangles)
         self._rule_vertex_array.bind_to_shader(self.position_shader_interface.attributes.position)
 
+        self._logger.info('update DVI done')
+
+        self._paint_page = True
+        self.update()
+
     ##############################################
 
     def paint(self):
@@ -211,8 +215,9 @@ class GlWidget(GlWidgetBase):
         # Clear the buffer using white colour (white paper)
         GL.glClearColor(1, 1, 1, 1)
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
-        self.paint_page_layout()
-        self.paint_text()
+        if self._paint_page:
+            self.paint_page_layout()
+            self.paint_text()
 
     ##############################################
 
@@ -259,6 +264,20 @@ class GlWidget(GlWidgetBase):
         shader_program.bind()
         shader_program.uniforms.colour = (0, 0, 0)
         self._rule_vertex_array.draw()
+
+    ##############################################
+
+    def mouseMoveEvent(self, event):
+
+        self._show_coordinate(event)
+                
+    ##############################################
+
+    def _show_coordinate(self, event):
+
+        coordinate = self.window_to_gl_coordinate(event)
+        x, y = coordinate
+        self._main_window.status_bar.update_coordinate_status(x, y)
 
 ####################################################################################################
 #

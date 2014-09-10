@@ -1,6 +1,3 @@
-#! /usr/bin/env python
-# -*- python -*-
-
 ####################################################################################################
 # 
 # PyDvi - A Python Library to Process DVI Stream
@@ -23,52 +20,50 @@
 
 ####################################################################################################
 
-import argparse
+import os
+import types
 
 ####################################################################################################
 
-import PyDviGui.Logging.Logging as Logging
-logger = Logging.setup_logging()
+def to_absolute_path(path):
+
+    # Expand ~ . and Remove trailing '/'
+
+    return os.path.abspath(os.path.expanduser(path))
 
 ####################################################################################################
 
-from PyDviGui.DviGlViewer import Application
-
-####################################################################################################
-#
-# Options
-#
-
-parser = argparse.ArgumentParser(description='DVI Viewer.')
-
-parser.add_argument('dvi_file', metavar='DVI_File',
-                    help='DVI File')
-
-parser.add_argument('--profile',
-                    action='store_true', default=False,
-                    help='profile the application')
-
-args = parser.parse_args()
+def parent_directory_of(file_name, step=1):
+    
+    directory = file_name
+    for i in xrange(step):
+        directory = os.path.dirname(directory)
+    return directory
 
 ####################################################################################################
 
-profile = None
-if args.profile:
-    import cProfile, pstats, StringIO
-    profile = cProfile.Profile()
-    profile.enable()
+def find(file_name, directories):
+    
+    if isinstance(directories, types.StringType):
+        directories = (directories,)
+    for directory in directories:
+        for directory_path, sub_directories, file_names in os.walk(directory):
+            if file_name in file_names:
+                return os.path.join(directory_path, file_name)
 
-application = Application(args)
-application.exec_()
+    raise NameError("File %s not found in directories %s" % (file_name, str(directories)))
 
-if args.profile:
-    profile.disable()
-    string_io = StringIO.StringIO()
-    sort_by = 'cumulative'
-    ps = pstats.Stats(profile, stream=string_io).sort_stats(sort_by)
-    ps.print_stats()
-    print string_io.getvalue()
+####################################################################################################
 
+def find_alias(directory, file_names):
+
+    for file_name in file_names:
+        absolut_file_name = os.path.join(directory, file_name)
+        if os.path.exists(absolut_file_name):
+            return absolut_file_name
+
+    raise NameError("Any file in %s found in directory %s" % (str(file_names), directory))
+            
 ####################################################################################################
 #
 # End

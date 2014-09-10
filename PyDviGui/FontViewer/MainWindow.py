@@ -22,13 +22,9 @@
 
 ####################################################################################################
 
-from PyQt4 import QtGui, QtCore
-
-####################################################################################################
-
 from PyDvi.Font.FontManager import FontManager
 
-from ..MainWindowBase import MainWindowBase
+from ..Widgets.MainWindowBase import MainWindowBase
 from .FontInfoTableModel import FontInfoTableModel
 from .GlyphInfoTableModel import GlyphInfoTableModel
 
@@ -42,23 +38,20 @@ class MainWindow(MainWindowBase):
 
     ##############################################
 
-    def __init__(self, application, args):
+    def __init__(self):
 
-        super(MainWindow, self).__init__(application)
-
-        self.args = args
+        super(MainWindow, self).__init__('Font Viewer')
 
         self.main_window_ui = Ui_main_window()
         self.main_window_ui.setupUi(self)
         form = self.main_window_ui
-
-        super(MainWindow, self).init_actions()
 
         form.load_font_button.clicked.connect(self.load_font)
         form.pk_radio_button.clicked.connect(self.init_font_manager)
         form.type1_radio_button.clicked.connect(self.init_font_manager)
         form.char_code_spin_box.valueChanged.connect(self.show_glyph)
 
+        args = self.application.args
         if args.font_name is not None:
             form.font_name_line_edit.setText(args.font_name)
 

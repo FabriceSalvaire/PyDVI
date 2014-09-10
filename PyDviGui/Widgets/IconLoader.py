@@ -18,23 +18,42 @@
 # 
 ####################################################################################################
 
-####################################################################################################
-
-from ..Widgets.ApplicationBase import ApplicationBase
-from .MainWindow import MainWindow
+""" Inspired from KIcon. """
 
 ####################################################################################################
 
-class Application(ApplicationBase):
+from PyQt4 import QtCore, QtGui
 
-    ###############################################
+####################################################################################################
 
-    def __init__(self, args):
+from ..Tools.Singleton import singleton
+import PyDviGui.Config.ConfigInstall as ConfigInstall
 
-        super(Application, self).__init__(args)
+####################################################################################################
 
-        self._main_window = MainWindow()
-        self._main_window.showMaximized()
+@singleton
+class IconLoader(object):
+
+    ##############################################
+
+    def __init__(self):
+
+        self._cache = {}
+
+    ##############################################
+
+    def __getitem__(self, file_name):
+
+        if file_name not in self._cache:
+            absolut_file_name = self._find(file_name)
+            self._cache[file_name] = QtGui.QIcon(absolut_file_name)
+        return self._cache[file_name]
+
+    ##############################################
+
+    def _find(self, file_name, extension='.png'):
+
+        return ConfigInstall.Icon.find(file_name + extension)
 
 ####################################################################################################
 # 

@@ -24,18 +24,15 @@
 ####################################################################################################
 
 import argparse
-import sys
-
-from PyQt4 import QtGui, QtCore
 
 ####################################################################################################
 
-import PyDvi.Logging.Logging as Logging
+import PyDviGui.Logging.Logging as Logging
 logger = Logging.setup_logging()
 
 ####################################################################################################
 
-from PyDviGui.FontViewer.MainWindow import MainWindow
+from PyDviGui.FontViewer import Application
 
 ####################################################################################################
 #
@@ -48,19 +45,6 @@ parser.add_argument('font_name', metavar='FontName',
                     help='Font Name')
 
 args = parser.parse_args()
-
-####################################################################################################
-
-class Application(QtGui.QApplication):
-
-    ###############################################
-
-    def __init__(self, args):
-
-        super(Application, self).__init__(sys.argv)
-
-        self._main_window = MainWindow(self, args)
-        self._main_window.showMaximized()
 
 ####################################################################################################
 

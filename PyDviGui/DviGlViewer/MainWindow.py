@@ -28,70 +28,127 @@ from PyQt4 import QtGui, QtCore
 
 ####################################################################################################
 
-from PyOpenGLng.Tools.Interval import IntervalInt2D
-
-from PyDvi.Dvi.DviParser import DviParser 
-from PyDvi.Font.FontManager import FontManager
-from PyDvi.TeXUnit import *
-from PyDvi.Tools.Stream import FileStream
-
-from .DviMachine import GlDviMachine
+from ..Widgets.IconLoader import IconLoader
+from ..Widgets.MainWindowBase import MainWindowBase
 from .GlWidgetV4 import GlWidget
 
 ####################################################################################################
 
 _module_logger = logging.getLogger(__name__)
 
-####################################################################################################
-
-class MainWindow(QtGui.QMainWindow):
+class MainWindow(MainWindowBase):
 
     _logger = _module_logger.getChild('MainWindow')
 
     ##############################################
 
-    def __init__(self, dvi_file):
+    def __init__(self):
 
-        super(MainWindow, self).__init__()
+        super(MainWindow, self).__init__('Dvi Viewer')
 
-        self.resize(1000, 800)
+        self.resize(1000, 800) # else Ortho2D fails ...
+
+        self._init_ui()
+
+    ##############################################
+
+    def _init_ui(self):
+
+        from .ApplicationStatusBar import ApplicationStatusBar
+
+        self.status_bar = ApplicationStatusBar(self)
 
         self.central_widget = QtGui.QWidget(self)
         self.horizontal_layout = QtGui.QHBoxLayout(self.central_widget)
 
-        self.graphics_view = GlWidget(self.central_widget)
-        self.graphics_view.setFocusPolicy(QtCore.Qt.ClickFocus)
+        self.graphics_view = GlWidget(self.central_widget, self)
+        self.graphics_view.setFocusPolicy(QtCore.Qt.ClickFocus|QtCore.Qt.WheelFocus)
 
         self.horizontal_layout.addWidget(self.graphics_view)
         self.setCentralWidget(self.central_widget)
 
-        self._init_dvi_machine()
-        self.process_dvi_stream(dvi_file)
+        self._create_actions()
+        self._create_toolbar()
+
+    ##############################################
+    
+    def _create_actions(self):
+
+        icon_loader = IconLoader()
+
+        self._previous_page_action = \
+            QtGui.QAction(icon_loader['arrow-left'],
+                          'Previous document',
+                          self,
+                          toolTip='Previous Document',
+                          triggered=lambda: self.previous_page(),
+                          shortcut='Backspace',
+                          shortcutContext=QtCore.Qt.ApplicationShortcut,
+                          )
+
+        self._next_page_action = \
+            QtGui.QAction(icon_loader['arrow-right'],
+                          'Next document',
+                          self,
+                          toolTip='Next Document',
+                          triggered=lambda: self.next_page(),
+                          shortcut='Space',
+                          shortcutContext=QtCore.Qt.ApplicationShortcut,
+                          )
+
+    ##############################################
+    
+    def _create_toolbar(self):
+
+        self._page_index_line_edit = QtGui.QLineEdit()
+        size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
+        self._page_index_line_edit.setSizePolicy(size_policy)
+        self._last_page_index_label = QtGui.QLabel()
+
+        self._page_tool_bar = self.addToolBar('Navigation')
+        for item in (self._previous_page_action,
+                     self._page_index_line_edit,
+                     self._last_page_index_label,
+                     self._next_page_action,
+                    ):
+            if isinstance(item,QtGui.QAction):
+                self._page_tool_bar.addAction(item)
+            else:
+                self._page_tool_bar.addWidget(item)
+
+    ##############################################
+    
+    def open_dvi(self, dvi_path):
+
+        self._application.process_dvi_stream(dvi_path)
+        self._page_index = 0
+        self._last_page_index_label.setText('of {}'.format(self._application.number_of_pages))
+        self._run_page()
 
     ##############################################
 
-    def _init_dvi_machine(self):
+    def _run_page(self):
 
-        self.dvi_parser = DviParser()
-        self.font_manager = FontManager(font_map='pdftex', use_pk=False)
-        self.dvi_machine = GlDviMachine(self.font_manager)
+        self._page_index_line_edit.setText(str(self._page_index +1))
+        dvi_machine = self._application.run_page(self._page_index)
+        if dvi_machine is not None:
+            self.graphics_view.update_dvi(dvi_machine)
+            
+    ##############################################
+
+    def previous_page(self):
+
+        if self._page_index > 0:
+            self._page_index -= 1
+            self._run_page()
 
     ##############################################
 
-    def process_dvi_stream(self, dvi_file):
+    def next_page(self):
 
-        dvi_stream = FileStream(dvi_file)
-        dvi_program = self.dvi_parser.process_stream(dvi_stream)
-        dvi_program.print_summary()
-
-        # scene.clear()
-        self.dvi_machine.load_dvi_program(dvi_program)
-        page_index = 0
-        self._logger.info("Run page: {}".format(page_index))
-        if len(dvi_program.pages) > 0:
-            page_bounding_box = self.dvi_machine.compute_page_bounding_box(page_index)
-            self.dvi_machine.run_page(page_index)
-        self.graphics_view.update_dvi(self.dvi_machine) # Fixme:
+        if self._page_index < (self._application.number_of_pages - 1):
+            self._page_index += 1
+            self._run_page()
 
 ####################################################################################################
 #

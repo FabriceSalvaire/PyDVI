@@ -49,6 +49,11 @@ class GlDviMachine(DviMachine):
 
         super(GlDviMachine, self).__init__(font_manager)
 
+    ##############################################
+
+    def reset(self):
+
+        DviMachine.reset(self)
         self._texture_fonts = {}
         self._glyphs = {} # index by font name
         self._rules = []
