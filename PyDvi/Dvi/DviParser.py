@@ -442,8 +442,20 @@ class DviParser(object):
 
         stream = self.stream
         opcode_program = self.dvi_program.get_page(self.page_number)
-        
+
+        # define some counters to track fonts, characters and rules
+        font_id = None
+        char_counter = {}
+        rule_counter = 0
+
+        # opcode tracker to merge char opcode
         previous_opcode_obj = None
+        previous_opcode_was_set = None
+
+        # Fixme: tracking versus program simplification
+        #   could merge same opcode using a test and a merge method
+        #   char pop push positionning
+
         while True:
             opcode = stream.read_unsigned_byte1()
             if opcode == dvi_opcodes.EOP:
@@ -451,23 +463,46 @@ class DviParser(object):
             else:
                 opcode_parser = self.opcode_parser_set[opcode]
                 parameters = opcode_parser.read_parameters(self)
-                
                 self._logger.info('Opcode {} {} {}'.format(opcode, opcode_parser.name, parameters))
 
-                # If the current and the previous opcode correspond to set char then the new char is
-                # concatenated
-                is_set_char = opcode <= dvi_opcodes.SET4
-                if is_set_char and previous_opcode_obj is not None:
+                # count characters by font
+                is_font = dvi_opcodes.FONT_00 <= opcode <= dvi_opcodes.FNT4
+                is_set_char = opcode <= dvi_opcodes.SET4 # SET1 == 0
+                is_put_char = dvi_opcodes.PUT1 <= opcode <= dvi_opcodes.PUT4
+                is_char = is_set_char or is_put_char
+                if is_char:
+                    if font_id in char_counter:
+                        char_counter[font_id] += 1
+                    else:
+                        char_counter[font_id] = 1
+
+                # count rules
+                is_rule = opcode == dvi_opcodes.SET_RULE or opcode == dvi_opcodes.PUT_RULE
+                if is_rule:
+                    rule_counter += 1
+
+                # If the current and the previous opcode correspond to set/put char then the new
+                # char is concatenated.
+                if (is_char
+                    and previous_opcode_obj is not None
+                    and previous_opcode_was_set == is_set_char):
                     previous_opcode_obj.append(parameters[0])
                 else:
                     opcode_obj = opcode_parser.to_opcode(parameters) 
                     if opcode_obj is not None:
                         opcode_program.append(opcode_obj)
-
-                    if is_set_char:
+                    if is_font:
+                        font_id = opcode_obj.font_id
+                    if is_char:
                         previous_opcode_obj = opcode_obj
+                        previous_opcode_was_set = is_set_char
                     else:
                         previous_opcode_obj = None
+                        previous_opcode_was_set = None
+        # end of while loop
+
+        opcode_program.number_of_chars = char_counter
+        opcode_program.number_of_rules = rule_counter
 
 ####################################################################################################
 #

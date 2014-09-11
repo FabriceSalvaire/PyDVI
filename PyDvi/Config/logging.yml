@@ -37,11 +37,11 @@ root:
 
 loggers:
 
-#   PyDvi:
-#     level: DEBUG
-#     #level: INFO
-#     #level: WARNING
-#     handlers: [console]
+  PyDvi:
+    #level: DEBUG
+    level: INFO
+    #level: WARNING
+    handlers: [console]
 
 ####################################################################################################
 #

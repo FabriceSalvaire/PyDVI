@@ -750,6 +750,12 @@ class DviProgramPage(list):
         self.set_paper_size(height, width)
         self.paper_orientation = paper_orientation
 
+        self.number_of_rules = None
+        self.number_of_chars = None
+
+        self.is_opcodes_simplified = False
+        self.is_xxx_opcodes_simplified = False
+
     ##############################################
 
     def set_paper_size(self, height, width):
@@ -766,14 +772,18 @@ class DviProgramPage(list):
 
         string_format = \
 '''Page Program
- - Paper Size: height = %.3f pt width = %.3f pt
- - Paper Orientation: %s
+ - Paper Size: height = {:.3f} pt width = {:.3f} pt
+ - Paper Orientation: {}
+ - number of rules: {}
+ - number of characters: {}
 '''
 
-        message = string_format % (
-            self.height, self.width,
-            self.paper_orientation,
-            )
+        message = string_format.format(self.height, self.width,
+                                       self.paper_orientation,
+                                       self.number_of_rules,
+                                       self.number_of_chars,
+                                      )
+        
         print message
         for opcode in self:
             print opcode
@@ -1145,14 +1155,14 @@ class DviSimplifyMachine(DviMachine):
     
     ##############################################
 
-    def simplify(self):
+    def simplify(self, simplify_opcodes=False):
 
         """ Simplify the program. """
 
         _module_logger.info('Process the xxx opcodes in the program')
-
         for program_page in self.dvi_program:
-            self.simplify_page(program_page)
+            if simplify_opcodes:
+                self.simplify_page(program_page)
             self.process_page_xxx_opcodes(program_page)
 
     ##############################################
@@ -1160,6 +1170,9 @@ class DviSimplifyMachine(DviMachine):
     def process_page_xxx_opcodes(self, program_page):
 
         """ Process the xxx opcodes in the page program. """
+
+        if program_page.is_xxx_opcodes_simplified:
+            return
 
         _module_logger.info('Process the xxx opcodes in the page program #%u' % program_page.page_number)
 
@@ -1185,6 +1198,8 @@ class DviSimplifyMachine(DviMachine):
 
             else:
                 i += 1
+
+        program_page.is_xxx_opcodes_simplified = True
 
     ##############################################
 
@@ -1254,6 +1269,9 @@ class DviSimplifyMachine(DviMachine):
 
         """ Simplify the page. """
 
+        if program_page.is_opcodes_simplified:
+            return
+
         _module_logger.info('Simplify the program page #%u' % program_page.page_number)
 
         i = 0
@@ -1284,6 +1302,8 @@ class DviSimplifyMachine(DviMachine):
             else:
                 previous_opcode = opcode
                 i += 1
+
+        program_page.is_opcodes_simplified = True
 
 ####################################################################################################
 #
