@@ -11,7 +11,7 @@
 
 /* *********************************************************************************************** */
 
-layout(lines) in;
+layout(points) in;
 layout(triangle_strip, max_vertices=4) out;
 
 /* *********************************************************************************************** */
@@ -19,6 +19,7 @@ layout(triangle_strip, max_vertices=4) out;
 in VertexAttributesIn
 {
   vec2 position;
+  vec2 dimension;
   vec4 colour;
 } vertexIn[];
 
@@ -50,11 +51,11 @@ void main()
 {
   vertex.colour = vertexIn[0].colour;
 
-  vec2 pos1 = vertexIn[1].position;
-  emit_vertex_add(vec2(0, pos1.y));
-  emit_vertex_add(pos1);
+  vec2 dimension = vertexIn[0].dimension;
+  emit_vertex_add(vec2(0, dimension.y));
+  emit_vertex_add(dimension);
   emit_vertex();
-  emit_vertex_add(vec2(pos1.x, 0));
+  emit_vertex_add(vec2(dimension.x, 0));
   EndPrimitive();
 }
 

@@ -22,9 +22,11 @@
 
 import logging
 
+import numpy as np
+
 ####################################################################################################
 
-from PyDvi.Dvi.DviMachine import DviMachine
+from PyDvi.Dvi.DviMachine import DviMachine, DviSimplifyMachine
 from PyDvi.Font.PkFont import PkFont
 from PyDvi.Font.Type1Font import Type1Font
 from PyDvi.TeXUnit import *
@@ -39,7 +41,7 @@ _module_logger = logging.getLogger(__name__)
 
 ####################################################################################################
 
-class GlDviMachine(DviMachine):
+class GlDviMachine(DviSimplifyMachine):
 
     _logger = _module_logger.getChild('GlDviMachine')
     
@@ -51,12 +53,14 @@ class GlDviMachine(DviMachine):
 
     ##############################################
 
-    def reset(self):
+    def begin_run_page(self):
 
-        DviMachine.reset(self)
         self._texture_fonts = {}
         self._glyphs = {} # index by font name
-        self._rules = []
+
+        self._rule_index = 0
+        # rule = [vec2 (x,y) position, vec2 (width,height) dimension, vec4 rgba colour]
+        self._rules = np.zeros((self.current_opcode_program.number_of_rules, 8), dtype='f')
 
     ##############################################
 
@@ -65,7 +69,10 @@ class GlDviMachine(DviMachine):
         self._logger.info("\nrule ({}, {}) +({}, {})".format(x, y, w, h))
         x_mm, y_mm, w_mm, h_mm = [sp2mm(z) for z in (x, y, w, h)]
         y_mm = 297 - y_mm # Fixme: opengl frame
-        self._rules.append((x_mm, y_mm, w_mm, h_mm))
+
+        self._rules[self._rule_index,:4] = [x_mm, y_mm, w_mm, h_mm]
+        self._rules[self._rule_index,4:] = self.current_colour.colour
+        self._rule_index += 1
 
     ##############################################
 

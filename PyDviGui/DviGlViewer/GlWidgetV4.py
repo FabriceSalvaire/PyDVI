@@ -37,6 +37,8 @@ from PyOpenGLng.Tools.Interval import IntervalInt2D
 ####################################################################################################
 
 from .TextVertexArray import TextVertexArray
+from .PrimitiveVertexArray import RuleVertexArray
+# from .RuleVertexArray import RuleVertexArray
 
 ####################################################################################################
 
@@ -103,6 +105,8 @@ class GlWidget(GlWidgetBase):
         import ShaderProgramesV4 as ShaderProgrames
         self.shader_manager = ShaderProgrames.shader_manager
         self.position_shader_interface = ShaderProgrames.position_shader_program_interface
+        self.rule_shader_interface = ShaderProgrames.rule_shader_program_interface
+        self.text_shader_interface = ShaderProgrames.text_shader_program_interface
 
         # Fixme: share interface
         self._viewport_uniform_buffer = GlUniformBuffer()
@@ -184,7 +188,7 @@ class GlWidget(GlWidgetBase):
             glyphs = dvi_machine._glyphs[texture_font.name]
             text_vertex_array.add(glyphs=glyphs, colour=(1., 1., 1., 1.))
             text_vertex_array.upload()
-            text_vertex_array.bind_to_shader(self.shader_manager.text_shader_program.interface.attributes)
+            text_vertex_array.bind_to_shader(self.text_shader_interface.attributes)
             self._text_vertex_arrays.append(text_vertex_array)
 
             for glyph in glyphs:
@@ -195,12 +199,8 @@ class GlWidget(GlWidgetBase):
         self._char_bounding_box_vertex_array = GlRectangleVertexArray(rectangles)
         self._char_bounding_box_vertex_array.bind_to_shader(self.position_shader_interface.attributes.position)
 
-        rectangles = []
-        for rule in dvi_machine._rules:
-            x, y, width, height = rule
-            rectangles.append(Rectangle(Point(x, y), Offset(width, height)))
-        self._rule_vertex_array = GlRectangleVertexArray(rectangles)
-        self._rule_vertex_array.bind_to_shader(self.position_shader_interface.attributes.position)
+        self._rule_vertex_array = RuleVertexArray(dvi_machine._rules)
+        self._rule_vertex_array.bind_to_shader(self.rule_shader_interface.attributes)
 
         self._logger.info('update DVI done')
 
@@ -262,7 +262,6 @@ class GlWidget(GlWidgetBase):
         # Fixme: anti-alias
         shader_program = self.shader_manager.rule_shader_program
         shader_program.bind()
-        shader_program.uniforms.colour = (0, 0, 0)
         self._rule_vertex_array.draw()
 
     ##############################################

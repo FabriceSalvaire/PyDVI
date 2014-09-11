@@ -48,6 +48,11 @@ shader_manager = GlShaderManager()
 position_shader_program_interface = GlShaderProgramInterface(uniform_blocks=('viewport',),
                                                              attributes=('position',))
 
+rule_shader_program_interface = GlShaderProgramInterface(uniform_blocks=('viewport',),
+                                                         attributes=('position',
+                                                                     'dimension',
+                                                                     'colour'))
+
 text_shader_program_interface = GlShaderProgramInterface(uniform_blocks=('viewport',),
                                                          attributes=('position',
                                                                      'position_uv',
@@ -62,6 +67,7 @@ if shader_manager.has_visual():
         'fragment-shader/simple_fragment_shader',
         #
         'geometry-shader/fixed_colour_vertex_shader_in',
+        'geometry-shader/rule_vertex_shader_in',
         #
         'geometry-shader/rectangle_geometry_shader',
         'geometry-shader/rule_geometry_shader',
@@ -97,10 +103,10 @@ if shader_manager.has_visual():
          },
 
         {'program_name':'rule_shader_program',
-         'shader_list':('fixed_colour_vertex_shader_in',
+         'shader_list':('rule_vertex_shader_in',
                         'rule_geometry_shader',
                         'simple_fragment_shader'),
-         'program_interface':position_shader_program_interface,
+         'program_interface':rule_shader_program_interface,
          },
     
    
