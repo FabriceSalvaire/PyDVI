@@ -264,7 +264,8 @@ class DviParser(object):
 
         """ Process a DVI stream and return a :class:`DviProgam` instance. """
 
-        # Fixme: read pages before postamble
+        # Fixme: read pages before postamble (note: why ?)
+        # Fixme: it would be better to read page on demand for long documents.
 
         self._reset()
         self.stream = stream
@@ -443,7 +444,8 @@ class DviParser(object):
         stream = self.stream
         opcode_program = self.dvi_program.get_page(self.page_number)
 
-        # define some counters to track fonts, characters and rules
+        # Define some counters to track fonts, characters and rules
+        # These counters are intended to allocate memory at the beginning of a page rendering.
         font_id = None
         char_counter = {}
         rule_counter = 0

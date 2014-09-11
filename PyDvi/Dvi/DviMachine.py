@@ -455,7 +455,7 @@ class Opcode_x(OpcodeX):
     def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.registers
-        registers.x  = self.x
+        registers.x = self.x
         registers.h += self.x
 
 ####################################################################################################
@@ -513,7 +513,7 @@ class Opcode_y(OpcodeX):
     def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.registers
-        registers.y  = self.x
+        registers.y = self.x
         registers.v += self.x
 
 ####################################################################################################
@@ -663,13 +663,31 @@ class DviFont(object):
 ####################################################################################################
 
 class DviColor(object):
-    pass
+
+    ##############################################
+
+    def __init__(self, red, green, blue, alpha=0):
+
+        self.red, self.green, self.blue = red, green, blue
+        self.alpha = alpha
+
+    ##############################################
+
+    @property
+    def colour(self):
+        return self.red, self.green, self.blue, self.alpha
  
 ####################################################################################################
 
 class DviColorBlack(DviColor):
 
     """ This class implements the black colour. """
+
+    ##############################################
+
+    def __init__(self):
+
+        super(DviColorBlack, self).__init__(0, 0, 0)
 
     ##############################################
 
@@ -689,6 +707,8 @@ class DviColorGray(DviColor):
 
         self.gray_level = gray_level
 
+        super(DviColorGray, self).__init__(gray_level, gray_level, gray_level)
+
     ##############################################
 
     def __str__(self):
@@ -700,12 +720,6 @@ class DviColorGray(DviColor):
 class DviColorRGB(DviColor):
 
     """ This class implements RGB colour. """
-
-    ##############################################
-
-    def __init__(self, red, green, blue):
-
-        self.red, self.green, self.blue = red, green, blue
 
     ##############################################
 
@@ -722,6 +736,14 @@ class DviColorCMYK(DviColor):
     ##############################################
 
     def __init__(self, cyan, magenta, yellow, dark):
+
+        # We don't use an ICC profile to perform the conversion
+        luminosity = 1 - dark
+        red = (1 - cyan) * luminosity
+        green = (1 - magenta) * luminosity
+        blue = (1 - yellow) * luminosity
+
+        super(DviColorCMYK, self).__init__(red, green, blue)
 
         self.cyan, self.magenta, self.yellow, self.dark = cyan, magenta, yellow, dark
 
@@ -991,14 +1013,15 @@ class DviMachine(object):
         self.font_manager = font_manager
 
         self.fonts = {}
-        self.reset()
+        self._reset()
 
     ##############################################
 
-    def reset(self):
+    def _reset(self):
 
         """ Reset the machine. """
 
+        self.current_opcode_program = None
         self.current_font_id = None
         self._registers_stack = [DviMachineRegisters()]
         self._colour_stack = [DviColorBlack()]
@@ -1022,6 +1045,13 @@ class DviMachine(object):
         """ Pop *n* level in the register set stack. """
         for i in xrange(n):
             del self._registers_stack[-1]
+
+    ##############################################
+
+    @property
+    def current_colour(self):
+        """ Return the current colour. """
+        return self._colour_stack[-1]
 
     ##############################################
 
@@ -1082,25 +1112,35 @@ class DviMachine(object):
 
     ##############################################
 
-    def run_page(self, page):
+    def run_page(self, page_index):
 
-        self.reset()
-        opcode_program = self.dvi_program.get_page(page)
-        self._logger.info('Program Length: {}'.format(len(opcode_program)))
-        for opcode in opcode_program:
+        self._reset()
+        self.current_opcode_program = self.dvi_program.get_page(page_index)
+        self._logger.info('Program Length: {}'.format(len(self.current_opcode_program)))
+        self.begin_run_page()
+        for opcode in self.current_opcode_program:
             self._logger.info(opcode)
             opcode.run(self)
             self._logger.info('Registers:\n'
                               'level {}\n'
                               '{}'.format(len(self._registers_stack), self.registers))
+        self.end_run_page()
 
     ##############################################
 
-    def compute_page_bounding_box(self, page):
+    def begin_run_page(self):
+        pass
 
-        self.reset()
+    def end_run_page(self):
+        pass
 
-        opcode_program = self.dvi_program.get_page(page)
+    ##############################################
+
+    def compute_page_bounding_box(self, page_index):
+
+        self._reset()
+
+        opcode_program = self.dvi_program.get_page(page_index)
 
         bounding_box = None
         for opcode in opcode_program:
