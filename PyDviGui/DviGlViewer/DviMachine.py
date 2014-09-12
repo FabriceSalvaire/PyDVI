@@ -60,12 +60,15 @@ class GlDviMachine(DviSimplifyMachine):
         # Fixme: could we use array instead of dict ?
         # Fixme: load all the fonts of the document
         # Fixme: we can use one TextureFont per font since we handle correctly the magnification
-        self._texture_fonts = {font_id:TextureFont(font) for font_id, font in self.fonts.iteritems()}
+        self.texture_fonts = {font_id:TextureFont(font) for font_id, font in self.fonts.iteritems()}
 
         # Fixme glyph versus char
-        self._glyphs = {font_id:np.zeros((number_of_chars, 16), dtype='f')
-                        for font_id, number_of_chars in program.number_of_chars.iteritems()}
         self._glyph_indexes = {font_id:0 for font_id in program.number_of_chars}
+        self.glyphs = {font_id:(np.zeros((number_of_chars, 4), dtype='f'), # position
+                                np.zeros((number_of_chars, 4), dtype='f'), # bounding box
+                                np.zeros((number_of_chars, 4), dtype='f'), # texture coordinates
+                                np.zeros((number_of_chars, 4), dtype='f')) # colours
+                       for font_id, number_of_chars in program.number_of_chars.iteritems()}
         
         self._rule_index = 0
         # rule = [vec2 (x,y) position, vec2 (width,height) dimension, vec4 rgba colour]
@@ -95,7 +98,7 @@ class GlDviMachine(DviSimplifyMachine):
         self._logger.info("\nchar ({}, {}) {} {}[{}]@{}".format(xg, yg, char_bounding_box,
                                                                 font.name, glyph_index, dvi_font.magnification))
 
-        textures_font = self._texture_fonts[font_id]
+        textures_font = self.texture_fonts[font_id]
 
         glyph = textures_font.glyph(glyph_index, dvi_font.magnification)
 
@@ -113,11 +116,11 @@ class GlDviMachine(DviSimplifyMachine):
         y_mm -= box_height
 
         glyph_index = self._glyph_indexes[font_id]
-        glyph_slot = self._glyphs[font_id][glyph_index]
-        glyph_slot[:8] = (xg_mm, yg_mm, width, height,
-                          x_mm, y_mm, box_width, box_height)
-        glyph_slot[8:12] = glyph.texture_coordinates
-        glyph_slot[12:] = (1, 1, 1, 1)
+        positions, bounding_boxes, texture_coordinates, colours = self.glyphs[font_id]
+        positions[glyph_index] = xg_mm, yg_mm, width, height
+        bounding_boxes[glyph_index] = x_mm, y_mm, box_width, box_height
+        texture_coordinates[glyph_index] = glyph.texture_coordinates
+        colours[glyph_index] = (1, 1, 1, 1)
         self._glyph_indexes[font_id] += 1
 
         # horizontal_offset = -glyph.horizontal_offset

@@ -181,11 +181,13 @@ class GlWidget(GlWidgetBase):
 
 
         self._text_vertex_arrays = []
-        for font_id, glyphs in dvi_machine._glyphs.iteritems():
-            texture_font = dvi_machine._texture_fonts[font_id]
+        for font_id, glyphs in dvi_machine.glyphs.iteritems():
+            texture_font = dvi_machine.texture_fonts[font_id]
             # texture_font.atlas.save(texture_font.name + '.png')
             font_atlas_texture = ImageTexture(texture_font.atlas.data)
-            text_vertex_array = TextVertexArray(font_atlas_texture, glyphs)
+            positions, bounding_boxes, texture_coordinates, colours = glyphs
+            items = (positions, texture_coordinates, colours)
+            text_vertex_array = TextVertexArray(font_atlas_texture, items)
             text_vertex_array.bind_to_shader(self.text_shader_interface.attributes)
             self._text_vertex_arrays.append(text_vertex_array)
 

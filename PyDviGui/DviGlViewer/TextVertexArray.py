@@ -52,27 +52,22 @@ class TextVertexArray(GlVertexArrayObject):
         self._font_atlas_shape = image_texture.shape
 
         self._number_of_items = 0
-        self._vertexes_buffer = GlArrayBuffer() # could pass data here
+        self._positions_buffer = GlArrayBuffer() # could pass data here
         self._texture_coordinates_buffer = GlArrayBuffer()
         self._colours_buffer = GlArrayBuffer()
 
         if items is not None:
-            self.set(items)
+            self.set(*items)
 
     ##############################################
     
-    def set(self, items):
+    def set(self, positions, texture_coordinates, colours):
 
         """ Set the vertex array from a numpy array. """
 
-        self._number_of_items = items.shape[0]
+        self._number_of_items = positions.shape[0]
 
-        # Fixme: we recreate the arrays
-        vertexes = np.array(items[:,:4], dtype='f') # dtype=np.float
-        texture_coordinates = np.array(items[:,8:12], dtype='f') # dtype=np.float
-        colours = np.array(items[:,12:], dtype='f') # dtype=np.float
-
-        self._vertexes_buffer.set(vertexes)
+        self._positions_buffer.set(positions)
         self._texture_coordinates_buffer.set(texture_coordinates)
         self._colours_buffer.set(colours)
 
@@ -82,7 +77,7 @@ class TextVertexArray(GlVertexArrayObject):
 
         self.bind()
 
-        shader_program_interface.position.bind_to_buffer(self._vertexes_buffer)
+        shader_program_interface.position.bind_to_buffer(self._positions_buffer)
         shader_program_interface.position_uv.bind_to_buffer(self._texture_coordinates_buffer)
         shader_program_interface.colour.bind_to_buffer(self._colours_buffer)
 
