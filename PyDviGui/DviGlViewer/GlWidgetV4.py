@@ -197,7 +197,9 @@ class GlWidget(GlWidgetBase):
         # self._char_bounding_box_vertex_array = GlRectangleVertexArray(rectangles)
         # self._char_bounding_box_vertex_array.bind_to_shader(self.position_shader_interface.attributes.position)
 
-        self._rule_vertex_array = RuleVertexArray(dvi_machine._rules)
+        self._rule_vertex_array = RuleVertexArray((dvi_machine.rule_positions,
+                                                   dvi_machine.rule_dimensions,
+                                                   dvi_machine.rule_colours))
         self._rule_vertex_array.bind_to_shader(self.rule_shader_interface.attributes)
 
         self._logger.info('update DVI done')

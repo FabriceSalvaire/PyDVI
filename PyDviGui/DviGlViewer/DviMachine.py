@@ -69,7 +69,9 @@ class GlDviMachine(DviSimplifyMachine):
         
         self._rule_index = 0
         # rule = [vec2 (x,y) position, vec2 (width,height) dimension, vec4 rgba colour]
-        self._rules = np.zeros((program.number_of_rules, 8), dtype='f')
+        self.rule_positions = np.zeros((program.number_of_rules, 2), dtype='f')
+        self.rule_dimensions = np.zeros((program.number_of_rules, 2), dtype='f')
+        self.rule_colours = np.zeros((program.number_of_rules, 4), dtype='f')
 
     ##############################################
     
@@ -79,8 +81,9 @@ class GlDviMachine(DviSimplifyMachine):
         x_mm, y_mm, w_mm, h_mm = [sp2mm(z) for z in (x, y, w, h)]
         y_mm = 297 - y_mm # Fixme: opengl frame
 
-        self._rules[self._rule_index,:4] = [x_mm, y_mm, w_mm, h_mm]
-        self._rules[self._rule_index,4:] = self.current_colour.colour
+        self.rule_positions[self._rule_index] = x_mm, y_mm
+        self.rule_dimensions[self._rule_index] = w_mm, h_mm
+        self.rule_colours[self._rule_index:] = self.current_colour.colour
         self._rule_index += 1
 
     ##############################################

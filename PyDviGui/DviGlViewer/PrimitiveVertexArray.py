@@ -106,20 +106,15 @@ class RuleVertexArray(GlVertexArrayObject):
         self._colours_buffer = GlArrayBuffer()
 
         if items is not None:
-            self.set(items)
+            self.set(*items)
 
     ##############################################
     
-    def set(self, items):
+    def set(self, positions, dimensions, colours):
 
         """ Set the vertex array from a numpy array. """
 
-        self._number_of_items = items.shape[0]
-
-        # Fixme: we recreate the arrays
-        positions = np.array(items[:,:2], dtype='f') # dtype=np.float
-        dimensions = np.array(items[:,2:4], dtype='f') # dtype=np.float
-        colours = np.array(items[:,4:], dtype='f') # dtype=np.float
+        self._number_of_items = positions.shape[0]
 
         self._positions_buffer.set(positions)
         self._dimensions_buffer.set(dimensions)
