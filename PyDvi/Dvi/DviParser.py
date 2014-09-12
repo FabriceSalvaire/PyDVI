@@ -18,14 +18,6 @@
 # 
 ####################################################################################################
 
-####################################################################################################
-#
-# Audit
-#
-#  - 17/01/2010 fabrice
-#
-####################################################################################################
-
 """ This module implements a DVI Stream Parser.
 """
 
@@ -256,7 +248,7 @@ class DviParser(object):
         self.dvi_program = DviProgam()
         self.post_pointer = None
         self.page_number = None
-        self.bop_pointer_stack = []
+        self.bop_pointer_stack = [] # can be used for lazy loading, reverse if backward
      
     ##############################################
 
@@ -271,7 +263,7 @@ class DviParser(object):
         self.stream = stream
         self._process_preambule()
         self._process_postambule()
-        self._process_pages_backward()
+        self._process_pages_backward() # Fixme: retrieve bop pointers but don't read the page
         self.stream = None
 
         return self.dvi_program
@@ -280,7 +272,7 @@ class DviParser(object):
 
     def _process_preambule(self):
 
-        """ Process the preamble. """
+        """ Process the preamble where we get the magnification. """
 
         self._logger.info('Process the preamble')
 
@@ -309,7 +301,7 @@ class DviParser(object):
 
     def _process_postambule(self):
 
-        """ Process the postamble. """
+        """ Process the postamble where we get the number of pages and the fonts. """
 
         # DVI postamble format:
         #   postamble: post opcode
@@ -415,6 +407,8 @@ class DviParser(object):
     ##############################################
 
     def process_page_forward(self):
+
+        # Fixme: test this code
 
         stream = self.stream
 

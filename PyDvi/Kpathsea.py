@@ -82,7 +82,7 @@ def kpsewhich(filename, file_format=None, options=None):
     stdout = pipe.communicate()[0]
     _module_logger.info('stdout:\n' + stdout)
     path = stdout.rstrip()
-    path = path if path else None
+    path = path if path else None # Fixme: could raise an exception
 
     _cache[key] = path
     return path
