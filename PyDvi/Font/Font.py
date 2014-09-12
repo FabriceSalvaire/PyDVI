@@ -36,12 +36,18 @@ __all__ = ['Font', 'font_types', 'sort_font_class']
 
 ####################################################################################################
 
+import os
+
+####################################################################################################
+
 from ..Kpathsea import kpsewhich
 from ..Tools.EnumFactory import EnumFactory
 from ..Tools.Logging import print_card
 from .TfmParser import TfmParser
 
 ####################################################################################################
+
+# Fixme: we could use a metaclass to register the font classes
 
 #: Font Type Enumerate 
 font_types = EnumFactory('FontTypes', ('Pk', 'Type1', 'TrueType', 'OpenType'))
@@ -54,25 +60,26 @@ def sort_font_class(*args):
 
 class Font(object):
 
-    """ This class is a base class for font managed by the Font Manager.
+    """This class is a base class for font managed by the Font Manager.
 
     Class attributes to be defined in subclass:
 
       ``font_type``
-        Font Type Enumerate
+        font type enumerate
 
       ``font_type_string``
-        Description string of the font type
+        description of the font type
 
       ``extension``
-        File extension
+        file extension
 
     To create a :class:`Font` instance use::
 
       font = Font(font_manager, font_id, name)
 
-    where *font_manager* is a :class:`PyDvi.FontManager.FontManager`, *font_id* is the font id
-    provided by the Font Manager and *name* is the font name, "cmr10" for example.
+    where *font_manager* is a :class:`PyDvi.FontManager.FontManager` instance, *font_id* is the font
+    id provided by the font manager and *name* is the font name, "cmr10" for example.
+
     """
 
     font_type = None
@@ -84,8 +91,11 @@ class Font(object):
     def __init__(self, font_manager, font_id, name):
 
         self.font_manager = font_manager
-        self.id = font_id
-        self.name = name.replace('.' + self.extension, '')
+        self.id = font_id # Fixme: ask the font_manager
+        self.name, extension = os.path.splitext(name)
+        # Fixme: extension = '' for pk
+        # if extension != '.' + self.extension:
+        #     raise NameError("Wrong file extension {} versus {}".format(extension, self.extension))
 
         self._find_font()
         self._find_tfm()
@@ -97,7 +107,6 @@ class Font(object):
         """ Find the font file location in the system using Kpathsea. """
 
         basename = self.basename()
-
         self.filename = kpsewhich(basename, options=kpsewhich_options)
         if self.filename is None:
             raise NameError("Font file %s not found" % (basename))
@@ -111,8 +120,8 @@ class Font(object):
         tfm_file = kpsewhich(self.name, file_format='tfm')
         if tfm_file is None:
             raise NameError("TFM file %s not found" % (self.name))
-
-        self.tfm = TfmParser.parse(self.name, tfm_file)
+        else:
+            self.tfm = TfmParser.parse(self.name, tfm_file)
 
     ##############################################
 
@@ -124,7 +133,7 @@ class Font(object):
 
     ##############################################
 
-    def print_header(self):
+    def _print_header(self):
 
         string_format = """%s %s
 
@@ -142,7 +151,7 @@ class Font(object):
 
     def print_summary(self):
 
-        print_card(self.print_header())
+        print_card(self._print_header())
 
 ####################################################################################################
 #

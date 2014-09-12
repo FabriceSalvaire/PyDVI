@@ -19,17 +19,6 @@
 ####################################################################################################
 
 ####################################################################################################
-#
-# Audit
-#
-#  - 17/01/2010 fabrice
-#
-####################################################################################################
-
-"""
-"""
-
-####################################################################################################
 
 __all__ = ['PkFont']
 
@@ -43,15 +32,16 @@ from .PkFontParser import PkFontParser
 
 class PkFont(Font):
 
-    """ This class implements the Packed Font Type in the Font Manager.
+    """This class implements the packed font type in the font manager.
 
-    To create a Packed Font instance use::
+    To create a packed font instance use::
 
       font = PkFont(font_manager, font_id, name)
 
-    where *font_manager* is a :class:`PyDvi.FontManager.FontManager`, *font_id* is the font id
-    provided by the Font Manager and *name* is the font name, "cmr10" for example.  The Packed Font
-    file is parsed using a :class:`PyDvi.PkFontParser.PkFontParser` isntance.
+    where *font_manager* is a :class:`PyDvi.FontManager.FontManager` instance, *font_id* is the font
+    id provided by the font manager and *name* is the font name, "cmr10" for example.  The packed
+    font file is parsed using a :class:`PyDvi.PkFontParser.PkFontParser` instance.
+
     """
 
     font_type = font_types.Pk
@@ -64,7 +54,7 @@ class PkFont(Font):
 
         super(PkFont, self).__init__(font_manager, font_id, name)
         
-        self.glyphs = {}
+        self._glyphs = {}
         PkFontParser.parse(self)
 
     ##############################################
@@ -73,7 +63,7 @@ class PkFont(Font):
  
         """ Return the :class:`PyDvi.PkGlyph.PkGlyph` instance for the char code *char_code*. """
 
-        return self.glyphs[char_code]
+        return self._glyphs[char_code]
 
     ##############################################
 
@@ -81,7 +71,7 @@ class PkFont(Font):
 
         """ Return the number of glyphs in the font. """
 
-        return len(self.glyphs)
+        return len(self._glyphs)
 
     ##############################################
 
@@ -116,13 +106,13 @@ class PkFont(Font):
 
     def register_glyph(self, glyph):
 
-        self.glyphs[glyph.char_code] = glyph
+        self._glyphs[glyph.char_code] = glyph
 
     ##############################################
 
     def get_glyph(self, glyph_index, size=None, resolution=None):
 
-        return self.glyphs[glyph_index]
+        return self._glyphs[glyph_index]
 
     ##############################################
 

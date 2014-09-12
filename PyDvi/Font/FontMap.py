@@ -27,13 +27,12 @@
 #
 ####################################################################################################
 
-"""
-This module handles font map file.
+"""This module handles font map files.
 
-A font map gives the correspondance between the TeX PK fonts and their PostScript equivalents. It
-uses the ``.map`` extension.
+A font map file gives the correspondance between the TeX PK fonts and their PostScript
+equivalents. These files use the ``.map`` extension.
 
-For example, the file :file:`pdftex.map` contains lines like::
+For example, the file :file:`pdftex.map` contains lines like this one::
 
   futbo8r Utopia-Bold ".167 SlantFont TeXBase1Encoding ReEncodeFont" <8r.enc <putb8a.pfb
 
@@ -42,11 +41,11 @@ Each line describes a PK font using the following format::
   PK_FONT_NAME PS_FONT_NAME "PostScript snippet" <FILE_NAME1 <FILE_NAME2
 
 The first word is the TeX font name and the second word is the PostScript font name. The PostScript
-font name can be omitted if it is the same than the TeX font name. The word starting by "<" are
-filenames to be included in the PostScript file. A filename with the extension ``.enc`` is an
-encoding file and a filename with the extension ``.pfb`` is a Printer Font Binary file. The text
-enclosed by double quotes is optional and gives a PostScript snippet to be inserted in the
-PostScript file. It can be placed at the end of the line.
+font name can be omitted if it is the same than for TeX. The word starting by "<" are filenames to
+be included in the PostScript file. A filename with the extension ``.enc`` is an encoding file and a
+filename with the extension ``.pfb`` is a Printer Font Binary file. The text enclosed by double
+quotes is optional and gives a PostScript snippet to be inserted in the PostScript file. It can be
+placed at the end of the line.
 
 The percent character is used for comment as for TeX.
 
@@ -62,7 +61,7 @@ References:
 * updmap(1) - Update font map files for TeX output drivers.
 * updmap.cfg(5) - Configuration of font mapping/inclusion for dvips and friends
 
-The font map :file:`pdftex.map` can be parsed using::
+To parse the font map :file:`pdftex.map` do::
 
   font_map = FontMap('/usr/share/texmf/fonts/map/pdftex/updmap/pdftex.map')
 
@@ -71,7 +70,7 @@ key::
 
   font_map_entry = font_map['futbo8r']
 
-Then the ``.pfb`` file name as well the other parameters can be queried as attribute::
+The ``.pfb`` file name and the other parameters are stored as attributes::
 
   >>> font_map_entry.pfb_filename
   'putb8a.pfb'
@@ -97,7 +96,7 @@ class FontMapEntry(object):
 
     """ This class encapsulates a font map entry.
     
-    Public attributes are:
+    Public attributes:
 
       :attr:`tex_name`
 
@@ -150,8 +149,7 @@ class FontMapEntry(object):
 
 class FontMap(object):
 
-    """ This class parses a fontmap file.
-    """
+    """ This class parses a font map file. """
 
     ##############################################
 
@@ -180,8 +178,7 @@ class FontMap(object):
  
     def _register_entry(self, font_map_entry):
  
-        """ Register a font map entry.
-        """
+        """ Register a font map entry. """
 
         self._map[font_map_entry.tex_name] = font_map_entry
 
@@ -189,8 +186,7 @@ class FontMap(object):
  
     def _parse_line(self, line):
 
-        """ Parse a line:
-        """
+        """ Parse a line. """
 
         # 1) Extract PostScript Snippet if there
         first_double_quote_index = line.find('"')
@@ -241,8 +237,7 @@ class FontMap(object):
     @staticmethod
     def _parse_effects(ps_snippet):
 
-        """ Parse the PostScript snippet.
-        """
+        """ Parse the PostScript snippet. """
  
         effects_list = ps_snippet.split()
         effects = {}
