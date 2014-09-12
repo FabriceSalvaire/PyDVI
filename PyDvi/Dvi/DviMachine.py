@@ -125,6 +125,12 @@ class Opcode_putset_char(Opcode):
 
     ##############################################
 
+    def __len__(self):
+
+        return len(self.characters)
+
+    ##############################################
+
     def append(self, char_code):
 
         """ Append the char code. """
@@ -136,12 +142,12 @@ class Opcode_putset_char(Opcode):
     def run(self, dvi_machine, compute_bounding_box=False):
 
         registers = dvi_machine.registers
-        current_font = dvi_machine.current_font
+        font = dvi_machine.current_font
         dvi_font = dvi_machine.current_dvi_font
 
         bounding_box = None
         for char_code in self.characters:
-            tfm_char = current_font.tfm[char_code]
+            tfm_char = font.tfm[char_code]
             char_width  = dvi_font.char_scaled_width(tfm_char)
             char_depth  = dvi_font.char_scaled_depth(tfm_char)
             char_height = dvi_font.char_scaled_height(tfm_char)
@@ -158,9 +164,9 @@ class Opcode_putset_char(Opcode):
             else:
                 dvi_machine.paint_char(registers.h, registers.v,
                                        char_bounding_box,
-                                       current_font,
-                                       char_code,
-                                       dvi_font.magnification)
+                                       font,
+                                       dvi_font,
+                                       char_code)
 
             if self.set_char:
                 registers.h += char_width
@@ -905,14 +911,17 @@ class DviProgam(object):
             
     ##############################################
 
+    # Fixme: property ?
     def get_font(self, i):
 
         return self.fonts[i]
 
     ##############################################
 
+    # Fixme: property ?
     def get_page(self, i):
 
+        # Fixme: for long document, the dvi stream should be read on demand: lazy loading
         return self.pages[i]
 
     ##############################################
@@ -1012,7 +1021,7 @@ class DviMachine(object):
 
         self.font_manager = font_manager
 
-        self.fonts = {}
+        self.fonts = {} # indexed by TeX font id which is not an incremental number starting from 0
         self._reset()
 
     ##############################################
@@ -1112,6 +1121,29 @@ class DviMachine(object):
 
     ##############################################
 
+    def count_opcodes(self, page_index):
+
+        self._reset()
+        self.current_opcode_program = self.dvi_program.get_page(page_index)
+        self._logger.info('Program Length: {}'.format(len(self.current_opcode_program)))
+        number_of_rules = 0
+        number_of_chars = {font_id:0 for font_id in self.fonts}
+        current_font_id = None
+        total_number_of_chars = 0
+        for opcode in self.current_opcode_program:
+            if isinstance(opcode, Opcode_font):
+                opcode.run(self)
+                current_font_id = self.current_font_id
+            elif isinstance(opcode, Opcode_putset_rule):
+                number_of_rules += 1
+            elif isinstance(opcode, Opcode_putset_char):
+                total_number_of_chars += len(opcode)
+                number_of_chars[current_font_id] += len(opcode)
+
+        return number_of_rules, number_of_chars
+
+    ##############################################
+
     def run_page(self, page_index):
 
         self._reset()
@@ -1173,7 +1205,7 @@ class DviMachine(object):
 
     ##############################################
 
-    def paint_char(self, x, y, char_bounding_box, font, char_code, magnification): #!# , glyph
+    def paint_char(self, x, y, char_bounding_box, font, dvi_font, char_code): #!# , glyph
 
         pass
 

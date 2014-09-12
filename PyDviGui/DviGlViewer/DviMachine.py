@@ -55,15 +55,24 @@ class GlDviMachine(DviSimplifyMachine):
 
     def begin_run_page(self):
 
-        self._texture_fonts = {}
-        self._glyphs = {} # index by font name
+        program = self.current_opcode_program
 
+        # Fixme: could we use array instead of dict ?
+        # Fixme: load all the fonts of the document
+        # Fixme: we can use one TextureFont per font since we handle correctly the magnification
+        self._texture_fonts = {font_id:TextureFont(font) for font_id, font in self.fonts.iteritems()}
+
+        # Fixme glyph versus char
+        self._glyphs = {font_id:np.zeros((number_of_chars, 16), dtype='f')
+                        for font_id, number_of_chars in program.number_of_chars.iteritems()}
+        self._glyph_indexes = {font_id:0 for font_id in program.number_of_chars}
+        
         self._rule_index = 0
         # rule = [vec2 (x,y) position, vec2 (width,height) dimension, vec4 rgba colour]
-        self._rules = np.zeros((self.current_opcode_program.number_of_rules, 8), dtype='f')
+        self._rules = np.zeros((program.number_of_rules, 8), dtype='f')
 
     ##############################################
-
+    
     def paint_rule(self, x, y, w, h):
 
         self._logger.info("\nrule ({}, {}) +({}, {})".format(x, y, w, h))
@@ -76,19 +85,16 @@ class GlDviMachine(DviSimplifyMachine):
 
     ##############################################
 
-    def paint_char(self, xg, yg, char_bounding_box, font, glyph_index, magnification):
+    def paint_char(self, xg, yg, char_bounding_box, font, dvi_font, glyph_index):
+
+        font_id = dvi_font.id
 
         self._logger.info("\nchar ({}, {}) {} {}[{}]@{}".format(xg, yg, char_bounding_box,
-                                                                font.name, glyph_index, magnification))
+                                                                font.name, glyph_index, dvi_font.magnification))
 
-        if font.name not in self._texture_fonts:
-            textures_font = TextureFont(font)
-            self._texture_fonts[font.name] = textures_font
-            self._glyphs[font.name] = []
-        else:
-            textures_font = self._texture_fonts[font.name]
+        textures_font = self._texture_fonts[font_id]
 
-        glyph = textures_font.glyph(glyph_index, magnification)
+        glyph = textures_font.glyph(glyph_index, dvi_font.magnification)
 
         xg_mm = sp2mm(xg) + glyph.px_to_mm(glyph.offset[0])
         yg_mm = sp2mm(yg) + glyph.px_to_mm(glyph.size[1] - glyph.offset[1]) # offset = top - origin
@@ -103,10 +109,13 @@ class GlDviMachine(DviSimplifyMachine):
         box_height = sp2mm(char_bounding_box.y.length())
         y_mm -= box_height
 
-        # Fixme: wrong
-        self._glyphs[font.name].append(((xg_mm, yg_mm, width, height),
-                                        (x_mm, y_mm, box_width, box_height),
-                                        glyph.texture_coordinates))
+        glyph_index = self._glyph_indexes[font_id]
+        glyph_slot = self._glyphs[font_id][glyph_index]
+        glyph_slot[:8] = (xg_mm, yg_mm, width, height,
+                          x_mm, y_mm, box_width, box_height)
+        glyph_slot[8:12] = glyph.texture_coordinates
+        glyph_slot[12:] = (1, 1, 1, 1)
+        self._glyph_indexes[font_id] += 1
 
         # horizontal_offset = -glyph.horizontal_offset
         # vertical_offset = -glyph.vertical_offset

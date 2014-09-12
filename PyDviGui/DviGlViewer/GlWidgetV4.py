@@ -179,25 +179,23 @@ class GlWidget(GlWidgetBase):
 
         self._logger.info('Update DVI')
 
+
         self._text_vertex_arrays = []
-        rectangles = []
-        for texture_font in dvi_machine._texture_fonts.itervalues():
+        for font_id, glyphs in dvi_machine._glyphs.iteritems():
+            texture_font = dvi_machine._texture_fonts[font_id]
             # texture_font.atlas.save(texture_font.name + '.png')
             font_atlas_texture = ImageTexture(texture_font.atlas.data)
-            text_vertex_array = TextVertexArray(font_atlas_texture)
-            glyphs = dvi_machine._glyphs[texture_font.name]
-            text_vertex_array.add(glyphs=glyphs, colour=(1., 1., 1., 1.))
-            text_vertex_array.upload()
+            text_vertex_array = TextVertexArray(font_atlas_texture, glyphs)
             text_vertex_array.bind_to_shader(self.text_shader_interface.attributes)
             self._text_vertex_arrays.append(text_vertex_array)
 
-            for glyph in glyphs:
-                glyph_bounding_box, char_bounding_box, glyph_texture_coordinates = glyph
-                x, y, width, height = char_bounding_box
-                rectangles.append(Rectangle(Point(x, y), Offset(width, height)))
+        #     for glyph in glyphs:
+        #         glyph_bounding_box, char_bounding_box, glyph_texture_coordinates = glyph
+        #         x, y, width, height = char_bounding_box
+        #         rectangles.append(Rectangle(Point(x, y), Offset(width, height)))
 
-        self._char_bounding_box_vertex_array = GlRectangleVertexArray(rectangles)
-        self._char_bounding_box_vertex_array.bind_to_shader(self.position_shader_interface.attributes.position)
+        # self._char_bounding_box_vertex_array = GlRectangleVertexArray(rectangles)
+        # self._char_bounding_box_vertex_array.bind_to_shader(self.position_shader_interface.attributes.position)
 
         self._rule_vertex_array = RuleVertexArray(dvi_machine._rules)
         self._rule_vertex_array.bind_to_shader(self.rule_shader_interface.attributes)

@@ -42,66 +42,39 @@ class TextVertexArray(GlVertexArrayObject):
 
     _logger = _module_logger.getChild('TextVertexArray')
 
-    _uv_vbo = None
-
     ##############################################
     
-    def __init__(self, image_texture):
+    def __init__(self, image_texture, items=None):
 
         super(TextVertexArray, self).__init__()
 
         self._image_texture = image_texture # Fixme: could contains several font and size
         self._font_atlas_shape = image_texture.shape
 
-        self._number_of_vertexes = 0
-        self._vertexes, self._texture_coordinates, self._colours = self._create_arrays(0)
+        self._number_of_items = 0
+        self._vertexes_buffer = GlArrayBuffer() # could pass data here
+        self._texture_coordinates_buffer = GlArrayBuffer()
+        self._colours_buffer = GlArrayBuffer()
+
+        if items is not None:
+            self.set(items)
 
     ##############################################
     
-    def _create_arrays(self, number_of_vertexes):
+    def set(self, items):
 
-        vertexes = np.zeros((number_of_vertexes, 4), dtype=np.float32)
-        texture_coordinates = np.zeros((number_of_vertexes, 4), dtype=np.float32)
-        colours = np.zeros((number_of_vertexes, 4), dtype=np.float32)
+        """ Set the vertex array from a numpy array. """
 
-        return vertexes, texture_coordinates, colours
+        self._number_of_items = items.shape[0]
 
-    ##############################################
-    
-    def add(self, glyphs, colour):
+        # Fixme: we recreate the arrays
+        vertexes = np.array(items[:,:4], dtype='f') # dtype=np.float
+        texture_coordinates = np.array(items[:,8:12], dtype='f') # dtype=np.float
+        colours = np.array(items[:,12:], dtype='f') # dtype=np.float
 
-        number_of_glyphs = len(glyphs)
-        number_of_vertexes = number_of_glyphs
-        vertexes, texture_coordinates, colours = self._create_arrays(number_of_vertexes)
-
-        for i, glyph in enumerate(glyphs):
-            glyph_bounding_box, char_bounding_box, glyph_texture_coordinates = glyph
-            texture_coordinates[i] = glyph_texture_coordinates
-            vertexes[i] = char_bounding_box
-            colours[i] = colour
-
-        # Concatenate the vertexes
-        self._number_of_vertexes += number_of_vertexes
-        self._vertexes = np.concatenate((self._vertexes, vertexes))
-        self._texture_coordinates = np.concatenate((self._texture_coordinates, texture_coordinates))
-        self._colours = np.concatenate((self._colours, colours))
-
-    ##############################################
-    
-    def __del__(self):
-
-        self._logger.debug('')
-        super(TextVertexArray, self).__del__()
-
-    ##############################################
-    
-    def upload(self):
-
-        # Create VBO
-        # self._logger.debug(str(self._vertexes))
-        self._vertexes_vbo = GlArrayBuffer(self._vertexes)
-        self._texture_coordinates_vbo = GlArrayBuffer(self._texture_coordinates)
-        self._colours_vbo = GlArrayBuffer(self._colours)
+        self._vertexes_buffer.set(vertexes)
+        self._texture_coordinates_buffer.set(texture_coordinates)
+        self._colours_buffer.set(colours)
 
     ##############################################
     
@@ -109,9 +82,9 @@ class TextVertexArray(GlVertexArrayObject):
 
         self.bind()
 
-        shader_program_interface.position.bind_to_buffer(self._vertexes_vbo) # self._vertex_vbo
-        shader_program_interface.position_uv.bind_to_buffer(self._texture_coordinates_vbo) # self._uv_vbo
-        shader_program_interface.colour.bind_to_buffer(self._colours_vbo)
+        shader_program_interface.position.bind_to_buffer(self._vertexes_buffer)
+        shader_program_interface.position_uv.bind_to_buffer(self._texture_coordinates_buffer)
+        shader_program_interface.colour.bind_to_buffer(self._colours_buffer)
 
         # Texture unit as default
         # shader_program.uniforms.texture0 = 0
@@ -141,7 +114,7 @@ class TextVertexArray(GlVertexArrayObject):
         shader_program.uniforms.font_atlas = 0
         # shader_program.uniforms.gamma = 1.
 
-        GL.glDrawArrays(GL.GL_POINTS, 0, self._number_of_vertexes)
+        GL.glDrawArrays(GL.GL_POINTS, 0, self._number_of_items)
 
         self.unbind()
         self._image_texture.unbind()
