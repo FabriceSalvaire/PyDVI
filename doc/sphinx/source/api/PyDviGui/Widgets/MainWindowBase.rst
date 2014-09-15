@@ -2,7 +2,7 @@
  :mod:`MainWindowBase`
 ***********************
 
-.. automodule:: PyDviGui.MainWindowBase
+.. automodule:: PyDviGui.Widgets.MainWindowBase
    :members:
    :show-inheritance:
 
