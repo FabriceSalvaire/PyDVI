@@ -1,0 +1,348 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDviGui.DviGlViewer.GlWidgetV4 &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDviGui.DviGlViewer.GlWidgetV4</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c"># </span>
+<span class="c"># @Project@ - @ProjectDescription@.</span>
+<span class="c"># Copyright (C) 2014 Fabrice Salvaire</span>
+<span class="c"># </span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="c">#!# from PyOpenGLng.HighLevelApi.GlOrtho2D import ZoomManagerAbc</span>
+
+<span class="kn">from</span> <span class="nn">PyOpenGLng.HighLevelApi</span> <span class="kn">import</span> <span class="n">GL</span>
+<span class="kn">from</span> <span class="nn">PyOpenGLng.HighLevelApi.Buffer</span> <span class="kn">import</span> <span class="n">GlUniformBuffer</span>
+<span class="kn">from</span> <span class="nn">PyOpenGLng.HighLevelApi.Geometry</span> <span class="kn">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Offset</span><span class="p">,</span> <span class="n">Segment</span><span class="p">,</span> <span class="n">Rectangle</span>
+<span class="kn">from</span> <span class="nn">PyOpenGLng.HighLevelApi.GlWidgetBase</span> <span class="kn">import</span> <span class="n">GlWidgetBase</span>
+<span class="kn">from</span> <span class="nn">PyOpenGLng.HighLevelApi.ImageTexture</span> <span class="kn">import</span> <span class="n">ImageTexture</span>
+<span class="kn">from</span> <span class="nn">PyOpenGLng.HighLevelApi.PrimitiveVertexArray</span> <span class="kn">import</span> <span class="n">GlSegmentVertexArray</span><span class="p">,</span> <span class="n">GlRectangleVertexArray</span>
+<span class="kn">from</span> <span class="nn">PyOpenGLng.Tools.Interval</span> <span class="kn">import</span> <span class="n">IntervalInt2D</span>
+
+<span class="kn">from</span> <span class="nn">.TextVertexArray</span> <span class="kn">import</span> <span class="n">TextVertexArray</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="GlWidget"><a class="viewcode-back" href="../../../api/PyDviGui/DviGlViewer/GlWidgetV4.html#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget">[docs]</a><span class="k">class</span> <span class="nc">GlWidget</span><span class="p">(</span><span class="n">GlWidgetBase</span><span class="p">):</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+ 
+    <span class="c">##############################################</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Initialise GlWidget&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GlWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="GlWidget.wheelEvent"><a class="viewcode-back" href="../../../api/PyDviGui/DviGlViewer/GlWidgetV4.html#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.wheelEvent">[docs]</a>    <span class="k">def</span> <span class="nf">wheelEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Wheel Event&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wheel_zoom</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="GlWidget.init_glortho2d"><a class="viewcode-back" href="../../../api/PyDviGui/DviGlViewer/GlWidgetV4.html#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.init_glortho2d">[docs]</a>    <span class="k">def</span> <span class="nf">init_glortho2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># Set max_area so as to correspond to max_binning zoom centered at the origin</span>
+        <span class="c"># Fixme: from dvi machine</span>
+        <span class="n">page_width</span> <span class="o">=</span> <span class="mi">210</span> <span class="c"># mm </span>
+        <span class="n">page_height</span> <span class="o">=</span> <span class="mi">297</span>
+        <span class="c"># max_area = IntervalInt2D([0, page_width], [0, page_height])</span>
+        <span class="c"># max_area.enlarge(100)</span>
+        <span class="n">area_size</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="mi">3</span>
+        <span class="n">max_area</span> <span class="o">=</span> <span class="n">IntervalInt2D</span><span class="p">([</span><span class="o">-</span><span class="n">area_size</span><span class="p">,</span> <span class="n">area_size</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="n">area_size</span><span class="p">,</span> <span class="n">area_size</span><span class="p">])</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">GlWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">init_glortho2d</span><span class="p">(</span><span class="n">max_area</span><span class="p">,</span> <span class="n">zoom_manager</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zoom_interval</span><span class="p">(</span><span class="n">IntervalInt2D</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">210</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">297</span><span class="p">)))</span> <span class="c"># Fixme</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="GlWidget.initializeGL"><a class="viewcode-back" href="../../../api/PyDviGui/DviGlViewer/GlWidgetV4.html#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.initializeGL">[docs]</a>    <span class="k">def</span> <span class="nf">initializeGL</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Initialise GL&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GlWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">initializeGL</span><span class="p">()</span>
+
+        <span class="n">GL</span><span class="o">.</span><span class="n">glEnable</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_POINT_SMOOTH</span><span class="p">)</span> <span class="c">#compat# </span>
+        <span class="n">GL</span><span class="o">.</span><span class="n">glEnable</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_LINE_SMOOTH</span><span class="p">)</span> <span class="c">#compat# </span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_shader</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_vertex_array_objects</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="GlWidget._init_shader"><a class="viewcode-back" href="../../../api/PyDviGui/DviGlViewer/GlWidgetV4.html#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget._init_shader">[docs]</a>    <span class="k">def</span> <span class="nf">_init_shader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Initialise Shader&#39;</span><span class="p">)</span>
+
+        <span class="kn">import</span> <span class="nn">ShaderProgramesV4</span> <span class="kn">as</span> <span class="nn">ShaderProgrames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shader_manager</span> <span class="o">=</span> <span class="n">ShaderProgrames</span><span class="o">.</span><span class="n">shader_manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">position_shader_interface</span> <span class="o">=</span> <span class="n">ShaderProgrames</span><span class="o">.</span><span class="n">position_shader_program_interface</span>
+
+        <span class="c"># Fixme: share interface</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_viewport_uniform_buffer</span> <span class="o">=</span> <span class="n">GlUniformBuffer</span><span class="p">()</span>
+        <span class="n">viewport_uniform_block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position_shader_interface</span><span class="o">.</span><span class="n">uniform_blocks</span><span class="o">.</span><span class="n">viewport</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_viewport_uniform_buffer</span><span class="o">.</span><span class="n">bind_buffer_base</span><span class="p">(</span><span class="n">viewport_uniform_block</span><span class="o">.</span><span class="n">binding_point</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="GlWidget.update_model_view_projection_matrix"><a class="viewcode-back" href="../../../api/PyDviGui/DviGlViewer/GlWidgetV4.html#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.update_model_view_projection_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">update_model_view_projection_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Update Model View Projection Matrix&#39;</span>
+                         <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">glortho2d</span><span class="p">))</span>
+
+        <span class="n">viewport_uniform_buffer_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">glortho2d</span><span class="o">.</span><span class="n">viewport_uniform_buffer_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Viewport Uniform Buffer Data &#39;</span>
+                          <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">viewport_uniform_buffer_data</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_viewport_uniform_buffer</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">viewport_uniform_buffer_data</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="GlWidget.create_vertex_array_objects"><a class="viewcode-back" href="../../../api/PyDviGui/DviGlViewer/GlWidgetV4.html#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.create_vertex_array_objects">[docs]</a>    <span class="k">def</span> <span class="nf">create_vertex_array_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_page_layout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_text</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="GlWidget.create_page_layout"><a class="viewcode-back" href="../../../api/PyDviGui/DviGlViewer/GlWidgetV4.html#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.create_page_layout">[docs]</a>    <span class="k">def</span> <span class="nf">create_page_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c"># , page_bounding_box</span>
+
+        <span class="c"># Fixme: from dvi machine</span>
+
+        <span class="n">page_width</span> <span class="o">=</span> <span class="mi">210</span> <span class="c"># mm</span>
+        <span class="n">page_height</span> <span class="o">=</span> <span class="mi">297</span>
+
+        <span class="c"># (page_x_min, page_y_min,</span>
+        <span class="c">#  text_width, text_height) = map(sp2mm,</span>
+        <span class="c">#                                 (page_bounding_box.x.inf,</span>
+        <span class="c">#                                  page_bounding_box.y.inf,</span>
+        <span class="c">#                                  page_bounding_box.x.length(),</span>
+        <span class="c">#                                  page_bounding_box.y.length(),</span>
+        <span class="c">#                                  ))</span>
+
+        <span class="n">rectangles</span> <span class="o">=</span> <span class="p">(</span><span class="n">Rectangle</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Offset</span><span class="p">(</span><span class="n">page_width</span><span class="p">,</span> <span class="n">page_height</span><span class="p">)),)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rectangle_vertex_array</span> <span class="o">=</span> <span class="n">GlRectangleVertexArray</span><span class="p">(</span><span class="n">rectangles</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rectangle_vertex_array</span><span class="o">.</span><span class="n">bind_to_shader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position_shader_interface</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+
+        <span class="n">segments</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">grid_spacing</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">grid_spacing</span>
+        <span class="k">while</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">page_width</span><span class="p">:</span>
+            <span class="n">p1</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">p2</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">page_height</span><span class="p">)</span>
+            <span class="n">segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Segment</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">))</span>
+            <span class="n">x</span> <span class="o">+=</span> <span class="n">grid_spacing</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">grid_spacing</span>
+        <span class="k">while</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">page_height</span><span class="p">:</span>
+            <span class="n">p1</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="n">p2</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">page_width</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="n">segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Segment</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">))</span>
+            <span class="n">y</span> <span class="o">+=</span> <span class="n">grid_spacing</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_vertex_array</span> <span class="o">=</span> <span class="n">GlSegmentVertexArray</span><span class="p">(</span><span class="n">segments</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_vertex_array</span><span class="o">.</span><span class="n">bind_to_shader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position_shader_interface</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="GlWidget.update_dvi"><a class="viewcode-back" href="../../../api/PyDviGui/DviGlViewer/GlWidgetV4.html#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.update_dvi">[docs]</a>    <span class="k">def</span> <span class="nf">update_dvi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dvi_machine</span> <span class="o">=</span> <span class="n">dvi_machine</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="GlWidget.create_text"><a class="viewcode-back" href="../../../api/PyDviGui/DviGlViewer/GlWidgetV4.html#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.create_text">[docs]</a>    <span class="k">def</span> <span class="nf">create_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">):</span>
+
+        <span class="n">dvi_machine</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dvi_machine</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_text_vertex_arrays</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">rectangles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">texture_font</span> <span class="ow">in</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">_texture_fonts</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="n">texture_font</span><span class="o">.</span><span class="n">atlas</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">texture_font</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39;.png&#39;</span><span class="p">)</span>
+            <span class="n">font_atlas_texture</span> <span class="o">=</span> <span class="n">ImageTexture</span><span class="p">(</span><span class="n">texture_font</span><span class="o">.</span><span class="n">atlas</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">text_vertex_array</span> <span class="o">=</span> <span class="n">TextVertexArray</span><span class="p">(</span><span class="n">font_atlas_texture</span><span class="p">)</span>
+            <span class="n">glyphs</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">_glyphs</span><span class="p">[</span><span class="n">texture_font</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">text_vertex_array</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">glyphs</span><span class="o">=</span><span class="n">glyphs</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">))</span>
+            <span class="n">text_vertex_array</span><span class="o">.</span><span class="n">upload</span><span class="p">()</span>
+            <span class="n">text_vertex_array</span><span class="o">.</span><span class="n">bind_to_shader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shader_manager</span><span class="o">.</span><span class="n">text_shader_program</span><span class="o">.</span><span class="n">interface</span><span class="o">.</span><span class="n">attributes</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_text_vertex_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text_vertex_array</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">glyph</span> <span class="ow">in</span> <span class="n">glyphs</span><span class="p">:</span>
+                <span class="n">char_bounding_box</span><span class="p">,</span> <span class="n">glyph_texture_coordinates</span> <span class="o">=</span> <span class="n">glyph</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">char_bounding_box</span>
+                <span class="n">rectangles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Rectangle</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">Offset</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_char_bounding_box_vertex_array</span> <span class="o">=</span> <span class="n">GlRectangleVertexArray</span><span class="p">(</span><span class="n">rectangles</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_char_bounding_box_vertex_array</span><span class="o">.</span><span class="n">bind_to_shader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position_shader_interface</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+
+        <span class="n">rectangles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">_rules</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">rule</span>
+            <span class="n">rectangles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Rectangle</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">Offset</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rule_vertex_array</span> <span class="o">=</span> <span class="n">GlRectangleVertexArray</span><span class="p">(</span><span class="n">rectangles</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rule_vertex_array</span><span class="o">.</span><span class="n">bind_to_shader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">position_shader_interface</span><span class="o">.</span><span class="n">attributes</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="GlWidget.paint"><a class="viewcode-back" href="../../../api/PyDviGui/DviGlViewer/GlWidgetV4.html#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.paint">[docs]</a>    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="c"># Clear the buffer using white colour (white paper)</span>
+        <span class="n">GL</span><span class="o">.</span><span class="n">glClearColor</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">GL</span><span class="o">.</span><span class="n">glClear</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_COLOR_BUFFER_BIT</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paint_page_layout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paint_text</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="GlWidget.paint_page_layout"><a class="viewcode-back" href="../../../api/PyDviGui/DviGlViewer/GlWidgetV4.html#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.paint_page_layout">[docs]</a>    <span class="k">def</span> <span class="nf">paint_page_layout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">shader_program</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shader_manager</span><span class="o">.</span><span class="n">rectangle_shader_program</span>
+        <span class="n">shader_program</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+        <span class="c"># GL.glLineWidth(1.)</span>
+        <span class="n">shader_program</span><span class="o">.</span><span class="n">uniforms</span><span class="o">.</span><span class="n">colour</span> <span class="o">=</span> <span class="p">(</span><span class="o">.</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="o">.</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rectangle_vertex_array</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">shader_program</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shader_manager</span><span class="o">.</span><span class="n">fixed_shader_program</span>
+            <span class="n">shader_program</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+            <span class="c"># GL.glLineWidth(.1) # Fixme: do in shader ...</span>
+            <span class="n">shader_program</span><span class="o">.</span><span class="n">uniforms</span><span class="o">.</span><span class="n">colour</span> <span class="o">=</span> <span class="p">(</span><span class="o">.</span><span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid_vertex_array</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+            <span class="n">shader_program</span><span class="o">.</span><span class="n">unbind</span><span class="p">()</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="GlWidget.paint_text"><a class="viewcode-back" href="../../../api/PyDviGui/DviGlViewer/GlWidgetV4.html#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.paint_text">[docs]</a>    <span class="k">def</span> <span class="nf">paint_text</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">shader_program</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shader_manager</span><span class="o">.</span><span class="n">text_shader_program</span>
+        <span class="c"># shader_program.bind()</span>
+        <span class="c"># shader_program.uniforms. ...</span>
+        <span class="k">for</span> <span class="n">text_vertex_array</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_text_vertex_arrays</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;paint text&#39;</span><span class="p">)</span>
+            <span class="n">text_vertex_array</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="n">shader_program</span><span class="p">)</span>
+        <span class="c"># shader_program.unbind()</span>
+
+        <span class="k">if</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Paint char bounding boxes&#39;</span><span class="p">)</span>
+            <span class="n">shader_program</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shader_manager</span><span class="o">.</span><span class="n">rectangle_shader_program</span>
+            <span class="n">shader_program</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+            <span class="c"># GL.glLineWidth(1.)</span>
+            <span class="n">shader_program</span><span class="o">.</span><span class="n">uniforms</span><span class="o">.</span><span class="n">colour</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_char_bounding_box_vertex_array</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Paint rules&#39;</span><span class="p">)</span>
+        <span class="c"># Fixme: anti-alias</span>
+        <span class="n">shader_program</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shader_manager</span><span class="o">.</span><span class="n">rule_shader_program</span>
+        <span class="n">shader_program</span><span class="o">.</span><span class="n">bind</span><span class="p">()</span>
+        <span class="n">shader_program</span><span class="o">.</span><span class="n">uniforms</span><span class="o">.</span><span class="n">colour</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rule_vertex_array</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

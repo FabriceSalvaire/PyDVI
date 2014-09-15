@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>3.1.10.8. Stream &mdash; PyDvi 0.1.0 documentation</title>
+    <title>3.1.9.8. Stream &mdash; PyDvi 0.1.0 documentation</title>
     
     <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
@@ -24,9 +26,9 @@
     <script type="text/javascript" src="../../../static/underscore.js"></script>
     <script type="text/javascript" src="../../../static/doctools.js"></script>
     <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
-    <link rel="up" title="3.1.10. Tools" href="../Tools.html" />
-    <link rel="next" title="3.1.10.9. TexCommentedFile" href="TexCommentedFile.html" />
-    <link rel="prev" title="3.1.10.7. RevisionVersion" href="RevisionVersion.html" /> 
+    <link rel="up" title="3.1.9. Tools" href="../Tools.html" />
+    <link rel="next" title="3.1.9.9. TexCommentedFile" href="TexCommentedFile.html" />
+    <link rel="prev" title="3.1.9.7. RevisionVersion" href="RevisionVersion.html" /> 
   </head>
   <body>
     <div class="related">
@@ -39,15 +41,15 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="TexCommentedFile.html" title="3.1.10.9. TexCommentedFile"
+          <a href="TexCommentedFile.html" title="3.1.9.9. TexCommentedFile"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="RevisionVersion.html" title="3.1.10.7. RevisionVersion"
+          <a href="RevisionVersion.html" title="3.1.9.7. RevisionVersion"
              accesskey="P">previous</a> |</li>
         <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
           <li><a href="../../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
           <li><a href="../../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li>
-          <li><a href="../Tools.html" accesskey="U">3.1.10. <tt class="docutils literal"><span class="pre">Tools</span></tt></a> &raquo;</li> 
+          <li><a href="../Tools.html" accesskey="U">3.1.9. <tt class="docutils literal"><span class="pre">Tools</span></tt></a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -57,7 +59,7 @@
           <div class="body">
             
   <div class="section" id="module-PyDvi.Tools.Stream">
-<span id="stream"></span><h1>3.1.10.8. <tt class="xref py py-mod docutils literal"><span class="pre">Stream</span></tt><a class="headerlink" href="#module-PyDvi.Tools.Stream" title="Permalink to this headline">¶</a></h1>
+<span id="stream"></span><h1>3.1.9.8. <tt class="xref py py-mod docutils literal"><span class="pre">Stream</span></tt><a class="headerlink" href="#module-PyDvi.Tools.Stream" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="PyDvi.Tools.Stream.AbstractStream">
 <em class="property">class </em><tt class="descclassname">PyDvi.Tools.Stream.</tt><tt class="descname">AbstractStream</tt><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#AbstractStream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream" title="Permalink to this definition">¶</a></dt>
@@ -73,7 +75,7 @@
 </div></blockquote>
 <p>and must be implemented in subclass.</p>
 <p>In the followings methods, the <em>position</em> argument is used to specify a position in the stream
-for the read operation.  If <em>position</em> is not <a class="reference external" href="http://docs.python.org/library/constants.html#None" title="(in Python v2.7)"><tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt></a>, it seeks to the specified position
+for the read operation.  If <em>position</em> is not <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, it seeks to the specified position
 before to read the stream else it reads from the current position.  See also <a class="reference internal" href="#PyDvi.Tools.Stream.AbstractStream.read_bytes" title="PyDvi.Tools.Stream.AbstractStream.read_bytes"><tt class="xref py py-meth docutils literal"><span class="pre">read_bytes()</span></tt></a>.</p>
 <dl class="method">
 <dt id="PyDvi.Tools.Stream.AbstractStream.read">
@@ -148,7 +150,7 @@ stream.</p>
 
 <dl class="attribute">
 <dt id="PyDvi.Tools.Stream.AbstractStream.read_signed_byten">
-<tt class="descname">read_signed_byten</tt><em class="property"> = (&lt;function read_signed_byte1 at 0x3fb9b18&gt;, &lt;function read_signed_byte2 at 0x3fb9b90&gt;, &lt;function read_signed_byte3 at 0x3fb9c08&gt;, &lt;function read_signed_byte4 at 0x3fb9c80&gt;)</em><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_signed_byten" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">read_signed_byten</tt><em class="property"> = (&lt;function read_signed_byte1 at 0x2fd6230&gt;, &lt;function read_signed_byte2 at 0x2fd62a8&gt;, &lt;function read_signed_byte3 at 0x2fd6320&gt;, &lt;function read_signed_byte4 at 0x2fd6398&gt;)</em><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_signed_byten" title="Permalink to this definition">¶</a></dt>
 <dd><p>This tuple permits to get the <em>read_signed_byte</em> method with the number of bytes as index.</p>
 </dd></dl>
 
@@ -184,7 +186,7 @@ stream.</p>
 
 <dl class="attribute">
 <dt id="PyDvi.Tools.Stream.AbstractStream.read_unsigned_byten">
-<tt class="descname">read_unsigned_byten</tt><em class="property"> = (&lt;function read_unsigned_byte1 at 0x3fb9cf8&gt;, &lt;function read_unsigned_byte2 at 0x3fb9d70&gt;, &lt;function read_unsigned_byte3 at 0x3fb9de8&gt;, &lt;function read_unsigned_byte4 at 0x3fb9e60&gt;)</em><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_unsigned_byten" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">read_unsigned_byten</tt><em class="property"> = (&lt;function read_unsigned_byte1 at 0x2fd6410&gt;, &lt;function read_unsigned_byte2 at 0x2fd6488&gt;, &lt;function read_unsigned_byte3 at 0x2fd6500&gt;, &lt;function read_unsigned_byte4 at 0x2fd6578&gt;)</em><a class="headerlink" href="#PyDvi.Tools.Stream.AbstractStream.read_unsigned_byten" title="Permalink to this definition">¶</a></dt>
 <dd><p>This tuple permits to get the read_unsigned_byte method with the number of bytes as index.</p>
 </dd></dl>
 
@@ -211,7 +213,7 @@ stream.</p>
 <dl class="method">
 <dt id="PyDvi.Tools.Stream.StandardStream.read">
 <tt class="descname">read</tt><big>(</big><em>number_of_bytes</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Tools/Stream.html#StandardStream.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Tools.Stream.StandardStream.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read <em>n</em> bytes from the current position and return a <a class="reference external" href="http://docs.python.org/library/functions.html#bytearray" title="(in Python v2.7)"><tt class="xref py py-obj docutils literal"><span class="pre">bytearray</span></tt></a></p>
+<dd><p>Read <em>n</em> bytes from the current position and return a <tt class="xref py py-obj docutils literal"><span class="pre">bytearray</span></tt></p>
 </dd></dl>
 
 <dl class="method">
@@ -261,10 +263,10 @@ fix word, exactly 12 are to the left of the binary point; thus, the largest fix 
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="RevisionVersion.html"
-                        title="previous chapter">3.1.10.7. <tt class="docutils literal"><span class="pre">RevisionVersion</span></tt></a></p>
+                        title="previous chapter">3.1.9.7. <tt class="docutils literal"><span class="pre">RevisionVersion</span></tt></a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="TexCommentedFile.html"
-                        title="next chapter">3.1.10.9. <tt class="docutils literal"><span class="pre">TexCommentedFile</span></tt></a></p>
+                        title="next chapter">3.1.9.9. <tt class="docutils literal"><span class="pre">TexCommentedFile</span></tt></a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../../../_sources/api/PyDvi/Tools/Stream.txt"
@@ -297,20 +299,20 @@ fix word, exactly 12 are to the left of the binary point; thus, the largest fix 
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="TexCommentedFile.html" title="3.1.10.9. TexCommentedFile"
+          <a href="TexCommentedFile.html" title="3.1.9.9. TexCommentedFile"
              >next</a> |</li>
         <li class="right" >
-          <a href="RevisionVersion.html" title="3.1.10.7. RevisionVersion"
+          <a href="RevisionVersion.html" title="3.1.9.7. RevisionVersion"
              >previous</a> |</li>
         <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
           <li><a href="../../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
           <li><a href="../../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li>
-          <li><a href="../Tools.html" >3.1.10. <tt class="docutils literal"><span class="pre">Tools</span></tt></a> &raquo;</li> 
+          <li><a href="../Tools.html" >3.1.9. <tt class="docutils literal"><span class="pre">Tools</span></tt></a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2011, Fabrice Salvaire.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

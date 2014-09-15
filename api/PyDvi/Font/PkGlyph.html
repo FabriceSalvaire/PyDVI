@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -67,7 +69,7 @@
 efficiency, the run count list is lazy decoded.</p>
 <p>The glyph bitmap can be printed using the method <a class="reference internal" href="#PyDvi.Font.PkGlyph.PkGlyph.print_glyph" title="PyDvi.Font.PkGlyph.PkGlyph.print_glyph"><tt class="xref py py-meth docutils literal"><span class="pre">print_glyph()</span></tt></a>.  For example the output
 for the letter &#8220;A&#8221; of the font &#8220;cmr10&#8221; at 600 dpi is:</p>
-<div class="highlight-python"><div class="highlight"><pre>    0000000000111111111122222222223333333333444444444455555
+<div class="highlight-python"><pre>    0000000000111111111122222222223333333333444444444455555
     0123456789012345678901234567890123456789012345678901234
    +-------------------------------------------------------+
  0 |                          xxx                          |
@@ -132,17 +134,15 @@ for the letter &#8220;A&#8221; of the font &#8220;cmr10&#8221; at 600 dpi is:</p
 59 |xxxxxxxxxxxxxxxxx               xxxxxxxxxxxxxxxxxxxxxxx|
    +-------------------------------------------------------+
     0000000000111111111122222222223333333333444444444455555
-    0123456789012345678901234567890123456789012345678901234
-</pre></div>
+    0123456789012345678901234567890123456789012345678901234</pre>
 </div>
 <p>Moreover the method <a class="reference internal" href="#PyDvi.Font.PkGlyph.PkGlyph.count_list" title="PyDvi.Font.PkGlyph.PkGlyph.count_list"><tt class="xref py py-meth docutils literal"><span class="pre">count_list()</span></tt></a> return a run count list string equivalent at the output of
 the command <strong class="command">pktype</strong>.  For example the output for the previous glyph is:</p>
-<div class="highlight-python"><div class="highlight"><pre>(26)[2]3(51)[2]5(49)[2]7(47)[2]9(45)[1]2(1)8(43)3(1)9(42)[1]2(3)8(41)3(3)9 
+<div class="highlight-python"><pre>(26)[2]3(51)[2]5(49)[2]7(47)[2]9(45)[1]2(1)8(43)3(1)9(42)[1]2(3)8(41)3(3)9 
 (40)[1]2(5)8(39)3(5)9(38)[1]2(7)8(37)3(7)9(36)[1]2(9)8(35)3(9)9(34)[1]2(11)8 
 (33)2(12)9(32)[1]2(13)8(31)2(14)9(30)[1]2(15)8(29)2(16)9(28)[1]2(17)8(27)2 
 (18)9(26)[1]29(25)31(24)[1]2(21)8(23)[2]2(23)8(21)[2]2(25)8(19)[1]2(27)8(17) 
-3(27)8(17)3(28)8(15)4(28)8(14)6(27)9(11)10(23)12(6)[2]17(15)23 
-</pre></div>
+3(27)8(17)3(28)8(15)4(28)8(14)6(27)9(11)10(23)12(6)[2]17(15)23 </pre>
 </div>
 <dl class="method">
 <dt id="PyDvi.Font.PkGlyph.PkGlyph._decode_bitmap_glyph">
@@ -201,7 +201,7 @@ the command <strong class="command">pktype</strong>.  For example the output for
 <dl class="method">
 <dt id="PyDvi.Font.PkGlyph.PkGlyph.is_bitmap">
 <tt class="descname">is_bitmap</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/PkGlyph.html#PkGlyph.is_bitmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.PkGlyph.PkGlyph.is_bitmap" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return <a class="reference external" href="http://docs.python.org/library/constants.html#True" title="(in Python v2.7)"><tt class="xref py py-obj docutils literal"><span class="pre">True</span></tt></a> is the glyph use the bitmap format.</p>
+<dd><p>Return <tt class="xref py py-obj docutils literal"><span class="pre">True</span></tt> is the glyph use the bitmap format.</p>
 </dd></dl>
 
 <dl class="method">
@@ -276,7 +276,7 @@ the command <strong class="command">pktype</strong>.  For example the output for
     </div>
     <div class="footer">
         &copy; Copyright 2011, Fabrice Salvaire.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

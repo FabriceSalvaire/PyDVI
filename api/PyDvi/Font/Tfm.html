@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -65,7 +67,7 @@ code for the font &#8220;cmr10&#8221;:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">tfm</span> <span class="o">=</span> <span class="n">TfmParser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s">&#39;cmr10&#39;</span><span class="p">,</span> <span class="s">&#39;/usr/share/texmf/fonts/tfm/public/cm/cmr10.tfm&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The number of characters in the font can be obtained using the function <a class="reference external" href="http://docs.python.org/library/functions.html#len" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">len()</span></tt></a>:</p>
+<p>The number of characters in the font can be obtained using the function <tt class="xref py py-func docutils literal"><span class="pre">len()</span></tt>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">tfm</span><span class="p">)</span>
 <span class="go">128</span>
 </pre></div>
@@ -129,7 +131,7 @@ code as index on the <a class="reference internal" href="#PyDvi.Font.Tfm.Tfm" ti
 <p><tt class="xref py py-attr docutils literal"><span class="pre">default_rule_thickness</span></tt></p>
 <p><tt class="xref py py-attr docutils literal"><span class="pre">big_op_spacing</span></tt></p>
 </div></blockquote>
-<p>The number of characters can be queried using <a class="reference external" href="http://docs.python.org/library/functions.html#len" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">len()</span></tt></a>. The <a class="reference internal" href="#PyDvi.Font.Tfm.TfmChar" title="PyDvi.Font.Tfm.TfmChar"><tt class="xref py py-class docutils literal"><span class="pre">TfmChar</span></tt></a> instance for a
+<p>The number of characters can be queried using <tt class="xref py py-func docutils literal"><span class="pre">len()</span></tt>. The <a class="reference internal" href="#PyDvi.Font.Tfm.TfmChar" title="PyDvi.Font.Tfm.TfmChar"><tt class="xref py py-class docutils literal"><span class="pre">TfmChar</span></tt></a> instance for a
 character code <em>char_code</em> can be set or get using the operator [].</p>
 <dl class="method">
 <dt id="PyDvi.Font.Tfm.Tfm.add_lig_kern">
@@ -197,7 +199,7 @@ character code <em>char_code</em> can be set or get using the operator [].</p>
 <dt id="PyDvi.Font.Tfm.TfmChar.next_larger_tfm_char">
 <tt class="descname">next_larger_tfm_char</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/Tfm.html#TfmChar.next_larger_tfm_char"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.Tfm.TfmChar.next_larger_tfm_char" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the <a class="reference internal" href="#PyDvi.Font.Tfm.TfmChar" title="PyDvi.Font.Tfm.TfmChar"><tt class="xref py py-class docutils literal"><span class="pre">TfmChar</span></tt></a> instance for the next larger char if it exists else return
-<a class="reference external" href="http://docs.python.org/library/constants.html#None" title="(in Python v2.7)"><tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt></a>.</p>
+<tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>.</p>
 </dd></dl>
 
 <dl class="method">
@@ -348,7 +350,7 @@ character code <em>char_code</em> can be set or get using the operator [].</p>
     </div>
     <div class="footer">
         &copy; Copyright 2011, Fabrice Salvaire.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

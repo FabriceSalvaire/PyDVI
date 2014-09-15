@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -134,6 +136,8 @@
 
 <span class="k">class</span> <span class="nc">Opcode</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
+    <span class="n">_logger</span> <span class="o">=</span> <span class="n">_module_logger</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s">&#39;Opcode&#39;</span><span class="p">)</span>
+
     <span class="c">##############################################</span>
 
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
@@ -197,7 +201,7 @@
                                            <span class="p">[</span><span class="n">registers</span><span class="o">.</span><span class="n">v</span> <span class="o">-</span> <span class="n">char_height</span><span class="p">,</span> <span class="n">registers</span><span class="o">.</span><span class="n">v</span> <span class="o">+</span> <span class="n">char_depth</span><span class="p">])</span>
 
             <span class="k">if</span> <span class="n">compute_bounding_box</span><span class="p">:</span>
-                <span class="k">print</span> <span class="s">&#39;Char bounding box&#39;</span><span class="p">,</span> <span class="n">char_bounding_box</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Char bounding box</span><span class="se">\n</span><span class="s">{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">char_bounding_box</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">bounding_box</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                     <span class="n">bounding_box</span> <span class="o">=</span> <span class="n">char_bounding_box</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -212,9 +216,9 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_char</span><span class="p">:</span>
                 <span class="n">registers</span><span class="o">.</span><span class="n">h</span> <span class="o">+=</span> <span class="n">char_width</span>
 
-            <span class="k">print</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> char </span><span class="si">%3u</span><span class="s"> &quot;</span><span class="si">%s</span><span class="s">&quot; width </span><span class="si">%8u</span><span class="s"> h </span><span class="si">%10u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opcode_name</span><span class="p">,</span>
-                                                         <span class="n">char_code</span><span class="p">,</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_code</span><span class="p">),</span>
-                                                         <span class="n">char_width</span><span class="p">,</span> <span class="n">registers</span><span class="o">.</span><span class="n">h</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;{} char {:3} &quot;{}&quot; width {:8} h {:10}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opcode_name</span><span class="p">,</span>
+                                                                            <span class="n">char_code</span><span class="p">,</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char_code</span><span class="p">),</span>
+                                                                            <span class="n">char_width</span><span class="p">,</span> <span class="n">registers</span><span class="o">.</span><span class="n">h</span><span class="p">))</span>
             
         <span class="k">if</span> <span class="n">compute_bounding_box</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">bounding_box</span>
@@ -270,7 +274,7 @@
         <span class="k">if</span> <span class="n">compute_bounding_box</span><span class="p">:</span>
             <span class="c"># Fixme: check</span>
             <span class="n">bounding_box</span> <span class="o">=</span> <span class="n">Interval2D</span><span class="p">([</span><span class="n">registers</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">registers</span><span class="o">.</span><span class="n">h</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">],</span>
-                                      <span class="p">[</span><span class="n">registers</span><span class="o">.</span><span class="n">v</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">registers</span><span class="o">.</span><span class="n">v</span><span class="p">])</span>
+                                      <span class="p">[</span><span class="n">registers</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="n">registers</span><span class="o">.</span><span class="n">v</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dvi_machine</span><span class="o">.</span><span class="n">paint_rule</span><span class="p">(</span><span class="n">registers</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">registers</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
 
@@ -463,7 +467,7 @@
 <div class="viewcode-block" id="Opcode_w.run"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.Opcode_w.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
 
         <span class="n">registers</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">registers</span>
-        <span class="n">registers</span><span class="o">.</span><span class="n">w</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
         <span class="n">registers</span><span class="o">.</span><span class="n">h</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
 
 <span class="c">####################################################################################################</span>
@@ -599,7 +603,7 @@
 <div class="viewcode-block" id="Opcode_z.run"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.Opcode_z.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_machine</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
 
         <span class="n">registers</span> <span class="o">=</span> <span class="n">dvi_machine</span><span class="o">.</span><span class="n">registers</span>
-        <span class="n">registers</span><span class="o">.</span><span class="n">z</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">registers</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
         <span class="n">registers</span><span class="o">.</span><span class="n">v</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
 
 <span class="c">####################################################################################################</span>
@@ -984,7 +988,8 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">one_in_sp</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">one_in_sp</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">h</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span> <span class="o">=</span> <span class="n">h</span><span class="p">,</span> <span class="n">v</span> <span class="c"># horizontal and vertical position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">w</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span>
 
     <span class="c">##############################################</span>
 
@@ -995,7 +1000,7 @@
 <span class="s"> w=+</span><span class="si">%10u</span><span class="s"> sp </span><span class="si">%+10.2f</span><span class="s"> mm x=+</span><span class="si">%10u</span><span class="s"> sp </span><span class="si">%+10.2f</span><span class="s"> mm</span>
 <span class="s"> y=+</span><span class="si">%10u</span><span class="s"> sp </span><span class="si">%+10.2f</span><span class="s"> mm z=+</span><span class="si">%10u</span><span class="s"> sp </span><span class="si">%+10.2f</span><span class="s"> mm)</span>
 <span class="s">&#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="n">string_format</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="k">return</span> <span class="n">string_format</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">%</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">sp2mm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">),</span>
@@ -1017,6 +1022,8 @@
 <div class="viewcode-block" id="DviMachine"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviMachine">[docs]</a><span class="k">class</span> <span class="nc">DviMachine</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
     <span class="sd">&quot;&quot;&quot; This class implements a DVI Machine. &quot;&quot;&quot;</span>
+
+    <span class="n">_logger</span> <span class="o">=</span> <span class="n">_module_logger</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s">&#39;DviMachine&#39;</span><span class="p">)</span>
     
     <span class="c">##############################################</span>
 
@@ -1034,79 +1041,63 @@
         <span class="sd">&quot;&quot;&quot; Reset the machine. &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">current_font_id</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">registers_stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">DviMachineRegisters</span><span class="p">()]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">colour_stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">DviColorBlack</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_registers_stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">DviMachineRegisters</span><span class="p">()]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_colour_stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">DviColorBlack</span><span class="p">()]</span>
 
     <span class="c">##############################################</span>
 </div>
-<div class="viewcode-block" id="DviMachine._get_registers"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviMachine._get_registers">[docs]</a>    <span class="k">def</span> <span class="nf">_get_registers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="DviMachine.registers"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviMachine.registers">[docs]</a>    <span class="k">def</span> <span class="nf">registers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the current register set. &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">registers_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-</div>
-    <span class="n">registers</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_registers</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;Register set&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registers_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="c">##############################################</span>
-
+</div>
 <div class="viewcode-block" id="DviMachine.push_registers"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviMachine.push_registers">[docs]</a>    <span class="k">def</span> <span class="nf">push_registers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot; Push the register set. &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">registers_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">registers</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_registers_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">registers</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
 
     <span class="c">##############################################</span>
 </div>
 <div class="viewcode-block" id="DviMachine.pop_registers"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviMachine.pop_registers">[docs]</a>    <span class="k">def</span> <span class="nf">pop_registers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot; Pop *n* level in the register set stack. &quot;&quot;&quot;</span>
-
-        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">registers_stack</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registers_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="c">##############################################</span>
 </div>
 <div class="viewcode-block" id="DviMachine.push_colour"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviMachine.push_colour">[docs]</a>    <span class="k">def</span> <span class="nf">push_colour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot; Push the current colour. &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">colour_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colour</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_colour_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">colour</span><span class="p">)</span>
 
     <span class="c">##############################################</span>
 </div>
-<div class="viewcode-block" id="DviMachine.pop_colour"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviMachine.pop_colour">[docs]</a>    <span class="k">def</span> <span class="nf">pop_colour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
-
+<div class="viewcode-block" id="DviMachine.pop_colour"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviMachine.pop_colour">[docs]</a>    <span class="k">def</span> <span class="nf">pop_colour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Pop *n* level in the colour stack. &quot;&quot;&quot;</span>
-
-        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">registers_stack</span><span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colour_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="c">##############################################</span>
 </div>
-<div class="viewcode-block" id="DviMachine._get_current_font"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviMachine._get_current_font">[docs]</a>    <span class="k">def</span> <span class="nf">_get_current_font</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="DviMachine.current_font"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviMachine.current_font">[docs]</a>    <span class="k">def</span> <span class="nf">current_font</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the current font. &quot;&quot;&quot;</span>
-
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fonts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current_font_id</span><span class="p">]</span>
-</div>
-    <span class="n">current_font</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_current_font</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;Current font&#39;</span><span class="p">)</span>
 
     <span class="c">##############################################</span>
-
-<div class="viewcode-block" id="DviMachine._get_current_dvi_font"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviMachine._get_current_dvi_font">[docs]</a>    <span class="k">def</span> <span class="nf">_get_current_dvi_font</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="DviMachine.current_dvi_font"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviMachine.current_dvi_font">[docs]</a>    <span class="k">def</span> <span class="nf">current_dvi_font</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Return the current dvi font. &quot;&quot;&quot;</span>
-
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span><span class="o">.</span><span class="n">get_font</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_font_id</span><span class="p">)</span>
-</div>
-    <span class="n">current_dvi_font</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_current_dvi_font</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;Current dvi font&#39;</span><span class="p">)</span>
 
     <span class="c">##############################################</span>
-
+</div>
 <div class="viewcode-block" id="DviMachine.load_dvi_program"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviMachine.load_dvi_program">[docs]</a>    <span class="k">def</span> <span class="nf">load_dvi_program</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dvi_program</span><span class="p">,</span> <span class="n">load_fonts</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
 
         <span class="sd">&quot;&quot;&quot; Load a :class:`DviProgam` instance. &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span> <span class="o">=</span> <span class="n">dvi_program</span>
-
         <span class="k">if</span> <span class="n">load_fonts</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_load_dvi_fonts</span><span class="p">()</span>
 
@@ -1135,15 +1126,14 @@
 <div class="viewcode-block" id="DviMachine.run_page"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviMachine.run_page">[docs]</a>    <span class="k">def</span> <span class="nf">run_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">page</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
-
         <span class="n">opcode_program</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span><span class="o">.</span><span class="n">get_page</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
-
-        <span class="k">print</span> <span class="s">&#39;Program Length:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">opcode_program</span><span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Program Length: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">opcode_program</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">opcode</span> <span class="ow">in</span> <span class="n">opcode_program</span><span class="p">:</span>
-            <span class="k">print</span> <span class="n">opcode</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">opcode</span><span class="p">)</span>
             <span class="n">opcode</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="k">print</span> <span class="s">&#39;level </span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">registers_stack</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">registers</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Registers:</span><span class="se">\n</span><span class="s">&#39;</span>
+                              <span class="s">&#39;level {}</span><span class="se">\n</span><span class="s">&#39;</span>
+                              <span class="s">&#39;{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_registers_stack</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">registers</span><span class="p">))</span>
 
     <span class="c">##############################################</span>
 </div>
@@ -1155,22 +1145,24 @@
 
         <span class="n">bounding_box</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="k">for</span> <span class="n">opcode</span> <span class="ow">in</span> <span class="n">opcode_program</span><span class="p">:</span>
-            <span class="k">print</span> <span class="n">opcode</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">opcode</span><span class="p">))</span>
             <span class="n">opcode_bounding_box</span> <span class="o">=</span> <span class="n">opcode</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compute_bounding_box</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-            <span class="k">print</span> <span class="s">&#39;Register Stack level </span><span class="si">%u</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">registers_stack</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">registers</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Register Stack level {}</span><span class="se">\n</span><span class="s">{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_registers_stack</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">registers</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">opcode_bounding_box</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="k">print</span> <span class="s">&#39;Opcode bounding box&#39;</span><span class="p">,</span> <span class="n">opcode_bounding_box</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Opcode bounding box {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">opcode_bounding_box</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">bounding_box</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
                     <span class="n">bounding_box</span> <span class="o">=</span> <span class="n">opcode_bounding_box</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">bounding_box</span> <span class="o">|=</span> <span class="n">opcode_bounding_box</span>
-                <span class="k">print</span> <span class="s">&#39;Current page bounding box&#39;</span><span class="p">,</span> <span class="n">bounding_box</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Current page bounding box {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bounding_box</span><span class="p">))</span>
 
-        <span class="k">print</span> <span class="s">&#39;Page bounding box</span><span class="se">\n</span><span class="s"> &#39;</span><span class="p">,</span> <span class="n">bounding_box</span><span class="p">,</span> <span class="s">&#39;sp&#39;</span>
         <span class="p">(</span><span class="n">x_min_mm</span><span class="p">,</span> <span class="n">x_max_mm</span><span class="p">,</span>
          <span class="n">y_min_mm</span><span class="p">,</span> <span class="n">y_max_mm</span><span class="p">)</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp2mm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">bounding_box</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">bounding_box</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">sup</span><span class="p">,</span>
                                                    <span class="n">bounding_box</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">bounding_box</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">sup</span><span class="p">)]</span>
-        <span class="k">print</span> <span class="s">&#39;  [</span><span class="si">%.2f</span><span class="s">, </span><span class="si">%.2f</span><span class="s">]*[</span><span class="si">%.2f</span><span class="s">, </span><span class="si">%.2f</span><span class="s">] mm&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">x_min_mm</span><span class="p">,</span> <span class="n">x_max_mm</span><span class="p">,</span> <span class="n">y_min_mm</span><span class="p">,</span> <span class="n">y_max_mm</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Page bounding box</span><span class="se">\n</span><span class="s"> {} sp</span><span class="se">\n</span><span class="s">&#39;</span>
+                          <span class="s">&#39;  [{:.2f}, {:.2f}]*[{:.2f}, {:.2f}] mm&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bounding_box</span><span class="p">,</span>
+                                                                          <span class="n">x_min_mm</span><span class="p">,</span> <span class="n">x_max_mm</span><span class="p">,</span>
+                                                                          <span class="n">y_min_mm</span><span class="p">,</span> <span class="n">y_max_mm</span><span class="p">)</span> <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">bounding_box</span>
 
@@ -1189,6 +1181,9 @@
 <span class="c">####################################################################################################</span>
 </div></div>
 <div class="viewcode-block" id="DviSimplifyMachine"><a class="viewcode-back" href="../../../api/PyDvi/Dvi/DviMachine.html#PyDvi.Dvi.DviMachine.DviSimplifyMachine">[docs]</a><span class="k">class</span> <span class="nc">DviSimplifyMachine</span><span class="p">(</span><span class="n">DviMachine</span><span class="p">):</span>
+
+    <span class="c"># Fixme:</span>
+    <span class="c">#  - merge push</span>
 
     <span class="c">#: Defines papersize special</span>
     <span class="n">xxx_papersize</span> <span class="o">=</span> <span class="s">&#39;papersize=&#39;</span>
@@ -1327,7 +1322,7 @@
                     <span class="n">delete_opcode</span> <span class="o">=</span> <span class="bp">True</span>
 
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">opcode</span><span class="p">,</span> <span class="n">OpcodeX</span><span class="p">):</span>
-                    <span class="n">_module_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Merge OpcodeX&quot;</span><span class="p">)</span>
+                    <span class="n">_module_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Merge OpcodeX {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">opcode</span><span class="p">))</span>
                     <span class="n">previous_opcode</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="n">opcode</span><span class="o">.</span><span class="n">x</span>
                     <span class="n">delete_opcode</span> <span class="o">=</span> <span class="bp">True</span>
                     <span class="k">if</span> <span class="n">previous_opcode</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1385,7 +1380,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2011, Fabrice Salvaire.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

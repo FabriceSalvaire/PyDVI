@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '0.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -283,10 +285,9 @@ an <tt class="docutils literal"><span class="pre">eop</span></tt> and a <tt clas
 <p>The last page in a DVI file is followed by <tt class="docutils literal"><span class="pre">post</span></tt>; this command introduces the postamble, which
 summarizes important facts that TEX has accumulated about the file, making it possible to print
 subsets of the data with reasonable efficiency.  The postamble has the form:</p>
-<div class="highlight-python"><div class="highlight"><pre>post p[4] num[4] den [4] mag[4] l[4] u[4] s[2] t[2]
+<div class="highlight-python"><pre>post p[4] num[4] den [4] mag[4] l[4] u[4] s[2] t[2]
 font definitions
-post_post q[4] i[1] 223&#39;s[&gt;=4]
-</pre></div>
+post_post q[4] i[1] 223's[&gt;=4]</pre>
 </div>
 <p>Here <tt class="docutils literal"><span class="pre">p</span></tt> is a pointer to the final <tt class="docutils literal"><span class="pre">bop</span></tt> in the file.  The next three parameters, <tt class="docutils literal"><span class="pre">num</span></tt>,
 <tt class="docutils literal"><span class="pre">den</span></tt>, and <tt class="docutils literal"><span class="pre">mag</span></tt>, are duplicates of the quantities that appeared in the preamble.</p>
@@ -379,7 +380,7 @@ saves a lot of time, since DVI files used in production jobs tend to be large.</
     </div>
     <div class="footer">
         &copy; Copyright 2011, Fabrice Salvaire.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

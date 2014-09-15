@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -355,7 +357,9 @@
 
     <span class="c">##############################################</span>
  
-    <span class="k">def</span> <span class="nf">load_glyph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">glyph_index</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">load_glyph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">glyph_index</span><span class="p">,</span> <span class="n">lcd</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+        <span class="c"># Fixme: lcd steering</span>
 
         <span class="k">if</span> <span class="n">glyph_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_glyphs</span><span class="p">:</span>
             <span class="k">return</span>
@@ -367,7 +371,8 @@
         <span class="n">face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_font</span><span class="o">.</span><span class="n">_face</span>
 
         <span class="n">flags</span> <span class="o">=</span> <span class="n">freetype</span><span class="o">.</span><span class="n">FT_LOAD_RENDER</span> <span class="o">|</span> <span class="n">freetype</span><span class="o">.</span><span class="n">FT_LOAD_FORCE_AUTOHINT</span>
-        <span class="c"># flags |= freetype.FT_LOAD_TARGET_LCD</span>
+        <span class="k">if</span> <span class="n">lcd</span><span class="p">:</span>
+            <span class="n">flags</span> <span class="o">|=</span> <span class="n">freetype</span><span class="o">.</span><span class="n">FT_LOAD_TARGET_LCD</span>
 
         <span class="n">face</span><span class="o">.</span><span class="n">load_glyph</span><span class="p">(</span><span class="n">glyph_index</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
 
@@ -381,12 +386,10 @@
         <span class="c"># Remove padding</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bitmap</span><span class="o">.</span><span class="n">buffer</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">pitch</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,:</span><span class="n">width</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ubyte</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lcd</span><span class="p">:</span>
+            <span class="c"># RBG data else grayscale</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">width</span><span class="o">/</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
         
-        <span class="c"># Gamma correction</span>
-        <span class="c"># gamma = 1.5</span>
-        <span class="c"># Z = (data/255.0)**gamma</span>
-        <span class="c"># data = Z*255</span>
-
         <span class="c"># Build glyph</span>
         <span class="n">size</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">offset</span> <span class="o">=</span> <span class="n">left</span><span class="p">,</span> <span class="n">top</span>
@@ -485,7 +488,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2011, Fabrice Salvaire.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

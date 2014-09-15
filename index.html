@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '0.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -59,30 +61,38 @@ git repository after each commit.</p>
 </div>
 <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<p>PyDvi is a <a class="reference external" href="http://python.org">Python</a> library that provides tools to read TeX DVI file, Packed Font and TeX Font
-Metric, Font Map and Font Encoding. The library provides a DVI Machine base class hat can be plugged
-to a TeX Daemon instance in order to render on-the-fly TeX inputs.</p>
-<div class="section" id="to-go-further">
-<h2>To Go Further<a class="headerlink" href="#to-go-further" title="Permalink to this headline">¶</a></h2>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Warning:</th><td class="field-body">The development of PyDvi is on standby since several years now.</td>
-</tr>
-</tbody>
-</table>
-<p>Some idea to go further:</p>
-<ul class="simple">
-<li>implement an OpenGL based viewer, actual Qt rendering is inefficient</li>
-<li>use Freetype to render the glyph, cf. <a class="reference external" href="http://code.google.com/p/freetype-gl">http://code.google.com/p/freetype-gl</a> and distance field
-rendering technique</li>
-<li>review the font manager</li>
-<li>review the DVI machine</li>
-<li>review everything</li>
-<li>try pypy</li>
-</ul>
-</div>
+<p>PyDvi is a <a class="reference external" href="http://python.org">Python</a> module which is able to read the DVI (DeVice Independent) file format, the
+native output of the famous TeX typesetting program implemented by <a class="reference external" href="http://www-cs-faculty.stanford.edu/~uno">Donald E. Knuth</a>.</p>
+<p>PyDvi is also able to read most of the file formats associated to the TeX world like Packed Font,
+TeX Font Metric, Font Map and Font Encoding.</p>
+<p>Basically a DVI file describes the layout of a page by a list of opcodes that interact with a
+register machine to update the position on the page, to load fonts and to paint glyphs and rules. In
+short it contains the glyphs and their positions on the page. Since TeX was designed to layout the
+series of books <em>The Art of Computer Programming</em> at the beginning of the eighties, it focuses on
+texts and mathematical expressions. Thus DVI is much simpler than Postscript or its successor PDF
+which are designed for graphics. However we can extend the capabilities of DVI using the <em>special</em>
+opcode which can contains any text like Postscript snippets.</p>
+<p>A DVI stream can come from a file or a TeX daemon in order to render TeX inputs on-the-fly.</p>
+<p>The DVI parser of PyDvi builds a program from a DVI stream that could be later processed by the
+provided DVI machine which is designed to be subclassed by the user.</p>
+<p>The source code includes as exemple an experimental DVI viewer which uses the OpenGL API for the
+rendering and thus feature an hardware accelerated rendering. PyDvi and the viewer can be used as an
+platform to experiment complex text rendering on GPU.</p>
+<p>PyDvi can be user for several purpose, we will review them in the followings:</p>
+<p>TeX is a major and historical typesetting program. PyDvi can serve to read and process its output
+using Python. The user can be a curious pearson who want to lean TeX or somebody interested by TeX
+postprocessing.</p>
+<p>TeX is one of the oldest computer program still in activity. The reason is quite simple, these
+algorithms do the right job, its ecosystem is rich and its code is not so simple. Thus nobody
+succeeds to reimplement it up to now, excepted its mathematical layout algorithms by the <a class="reference external" href="http://www.mathjax.org">MathJax</a>
+Javascript library which is intended to bring Mathematical layout to web browser. Before the
+delivery of Mathjax, the only solution to render properly mathematical content was to generate an
+image using a program like <a class="reference external" href="http://savannah.nongnu.org/projects/dvipng">Dvipng</a>. It is what does the engine of Wikipedia behind the
+scene. <a class="reference external" href="http://matplotlib.org">Matplotlib</a> uses also this approach to render LaTeX labels. Usually these programs like
+<a class="reference external" href="http://asymptote.sourceforge.net">Asymptote</a> or <a class="reference external" href="https://ece.uwaterloo.ca/~aplevich/Circuit_macros">Circuit_macros</a> generate the graphics as a PDF document and then include this
+document in a LaTeX document which contains the labels placed at absolute postion in the page. With
+PyDvi we can try another approach which consists to send TeX content to a daemon and get back the
+glyphs and their positions.</p>
 </div>
 <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
@@ -120,13 +130,24 @@ rendering technique</li>
 <li class="toctree-l3"><a class="reference internal" href="api/PyDvi/Kpathsea.html">3.1.4. <tt class="docutils literal"><span class="pre">Kpathsea</span></tt></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/PyDvi/Logging.html">3.1.5. <tt class="docutils literal"><span class="pre">Logging</span></tt></a></li>
 <li class="toctree-l3"><a class="reference internal" href="api/PyDvi/OpcodeParser.html">3.1.6. <tt class="docutils literal"><span class="pre">OpcodeParser</span></tt></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/PyDviVersion.html">3.1.7. <tt class="docutils literal"><span class="pre">PyDviVersion</span></tt></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/TeXUnit.html">3.1.8. <tt class="docutils literal"><span class="pre">TeXUnit</span></tt></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/TexDaemon.html">3.1.9. <tt class="docutils literal"><span class="pre">TexDaemon</span></tt></a></li>
-<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/Tools.html">3.1.10. <tt class="docutils literal"><span class="pre">Tools</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/TeXUnit.html">3.1.7. <tt class="docutils literal"><span class="pre">TeXUnit</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/TexDaemon.html">3.1.8. <tt class="docutils literal"><span class="pre">TexDaemon</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/Tools.html">3.1.9. <tt class="docutils literal"><span class="pre">Tools</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDvi/Version.html">3.1.10. <tt class="docutils literal"><span class="pre">Version</span></tt></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="reference-manual.html#indexes">3.2. Indexes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/PyDviGui.html">3.2. <tt class="docutils literal"><span class="pre">PyDviGui</span></tt></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDviGui/Config.html">3.2.1. <tt class="docutils literal"><span class="pre">Config</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDviGui/DviGlViewer.html">3.2.2. <tt class="docutils literal"><span class="pre">DviGlViewer</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDviGui/DviViewer.html">3.2.3. <tt class="docutils literal"><span class="pre">DviViewer</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDviGui/FontViewer.html">3.2.4. <tt class="docutils literal"><span class="pre">FontViewer</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDviGui/Logging.html">3.2.5. <tt class="docutils literal"><span class="pre">Logging</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDviGui/Tools.html">3.2.6. <tt class="docutils literal"><span class="pre">Tools</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDviGui/Widgets.html">3.2.7. <tt class="docutils literal"><span class="pre">Widgets</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/PyDviGui/ui.html">3.2.8. <tt class="docutils literal"><span class="pre">ui</span></tt></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="reference-manual.html#indexes">3.3. Indexes</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="bibliography.html">4. Bibliography</a><ul>
@@ -156,14 +177,13 @@ rendering technique</li>
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Introduction</a><ul>
-<li><a class="reference internal" href="#to-go-further">To Go Further</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#">Introduction</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#testing">Testing</a></li>
 <li><a class="reference internal" href="#documentation">Documentation</a></li>
-<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#overview">Overview</a><ul>
+</ul>
+</li>
 </ul>
 
   <h4>Next topic</h4>
@@ -208,7 +228,7 @@ rendering technique</li>
     </div>
     <div class="footer">
         &copy; Copyright 2011, Fabrice Salvaire.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

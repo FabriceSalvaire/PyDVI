@@ -1,0 +1,340 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDviGui.Tools.Platform &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDviGui.Tools.Platform</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c"># </span>
+<span class="c"># PyDvi - A Python Library to Process DVI Stream</span>
+<span class="c"># Copyright (C) 2014 Fabrice Salvaire</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c"># </span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c"># </span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c"># </span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c">#                                              Audit</span>
+<span class="c">#</span>
+<span class="c"># - 21/08/2014 simplify ?</span>
+<span class="c">#</span>
+<span class="c"># - 13/02/2013 Fabrice</span>
+<span class="c">#   - add dict interface ?</span>
+<span class="c">#   - property</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">PyDvi.Tools.EnumFactory</span> <span class="kn">import</span> <span class="n">EnumFactory</span>
+<span class="kn">from</span> <span class="nn">.Math</span> <span class="kn">import</span> <span class="n">rint</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">platform_enum</span> <span class="o">=</span> <span class="n">EnumFactory</span><span class="p">(</span><span class="s">&#39;PlatformEnum&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;linux&#39;</span><span class="p">,</span> <span class="s">&#39;windows&#39;</span><span class="p">,</span> <span class="s">&#39;macosx&#39;</span><span class="p">))</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="Platform"><a class="viewcode-back" href="../../../api/PyDviGui/Tools/Platform.html#PyDviGui.Tools.Platform.Platform">[docs]</a><span class="k">class</span> <span class="nc">Platform</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">python_version</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">python_version</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qt_version</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QT_VERSION_STR</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pyqt_version</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">PYQT_VERSION_STR</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_os</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">node</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distribution</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">platform</span><span class="o">.</span><span class="n">dist</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">machine</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">machine</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">architecture</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">architecture</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c"># CPU</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cpu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_cpu</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_cores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_number_of_cores</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cpu_khz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_cpu_khz</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cpu_mhz</span> <span class="o">=</span> <span class="n">rint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_cpu_khz</span><span class="p">()</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span>
+        
+        <span class="c"># RAM</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memory_size_kb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_memory_size_kb</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">memory_size_mb</span> <span class="o">=</span> <span class="n">rint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_size_kb</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="mi">1024</span><span class="p">))</span>
+        
+        <span class="c"># Screen</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">application</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">desktop</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">desktop</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_screens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">desktop</span><span class="o">.</span><span class="n">screenCount</span><span class="p">()</span> 
+        <span class="k">except</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">desktop</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_screens</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screens</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_of_screens</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">screens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Screen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+        
+        <span class="c"># OpenGL</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gl_renderer</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gl_version</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gl_vendor</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gl_extensions</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="Platform._get_os"><a class="viewcode-back" href="../../../api/PyDviGui/Tools/Platform.html#PyDviGui.Tools.Platform.Platform._get_os">[docs]</a>    <span class="k">def</span> <span class="nf">_get_os</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="s">&#39;nt&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">platform_enum</span><span class="o">.</span><span class="n">windows</span>
+        <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="ow">in</span> <span class="s">&#39;linux2&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">platform_enum</span><span class="o">.</span><span class="n">linux</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;unknown platform&#39;</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Platform._get_cpu"><a class="viewcode-back" href="../../../api/PyDviGui/Tools/Platform.html#PyDviGui.Tools.Platform.Platform._get_cpu">[docs]</a>    <span class="k">def</span> <span class="nf">_get_cpu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="n">platform_enum</span><span class="o">.</span><span class="n">linux</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;/proc/cpuinfo&#39;</span><span class="p">,</span> <span class="s">&#39;rt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cpuinfo</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cpuinfo</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s">&#39;model name&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="n">s</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="n">platform_enum</span><span class="o">.</span><span class="n">windows</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Platform._get_number_of_cores"><a class="viewcode-back" href="../../../api/PyDviGui/Tools/Platform.html#PyDviGui.Tools.Platform.Platform._get_number_of_cores">[docs]</a>    <span class="k">def</span> <span class="nf">_get_number_of_cores</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="n">platform_enum</span><span class="o">.</span><span class="n">linux</span><span class="p">:</span>
+            <span class="n">number_of_cores</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;/proc/cpuinfo&#39;</span><span class="p">,</span> <span class="s">&#39;rt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cpuinfo</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cpuinfo</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s">&#39;processor&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="n">number_of_cores</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">number_of_cores</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="n">platform_enum</span><span class="o">.</span><span class="n">windows</span><span class="p">:</span>
+
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&#39;NUMBER_OF_PROCESSORS&#39;</span><span class="p">))</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Platform._get_cpu_khz"><a class="viewcode-back" href="../../../api/PyDviGui/Tools/Platform.html#PyDviGui.Tools.Platform.Platform._get_cpu_khz">[docs]</a>    <span class="k">def</span> <span class="nf">_get_cpu_khz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="n">platform_enum</span><span class="o">.</span><span class="n">linux</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;/proc/cpuinfo&#39;</span><span class="p">,</span> <span class="s">&#39;rt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cpuinfo</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cpuinfo</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s">&#39;cpu MHz&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="n">s</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="n">platform_enum</span><span class="o">.</span><span class="n">windows</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Platform._get_memory_size_kb"><a class="viewcode-back" href="../../../api/PyDviGui/Tools/Platform.html#PyDviGui.Tools.Platform.Platform._get_memory_size_kb">[docs]</a>    <span class="k">def</span> <span class="nf">_get_memory_size_kb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="n">platform_enum</span><span class="o">.</span><span class="n">linux</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;/proc/meminfo&#39;</span><span class="p">,</span> <span class="s">&#39;rt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cpuinfo</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cpuinfo</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s">&#39;MemTotal&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                        <span class="n">s</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+                        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="n">platform_enum</span><span class="o">.</span><span class="n">windows</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="Platform.query_opengl"><a class="viewcode-back" href="../../../api/PyDviGui/Tools/Platform.html#PyDviGui.Tools.Platform.Platform.query_opengl">[docs]</a>    <span class="k">def</span> <span class="nf">query_opengl</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="kn">import</span> <span class="nn">OpenGL.GL</span> <span class="kn">as</span> <span class="nn">GL</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">gl_renderer</span> <span class="o">=</span> <span class="n">GL</span><span class="o">.</span><span class="n">glGetString</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_RENDERER</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gl_version</span> <span class="o">=</span> <span class="n">GL</span><span class="o">.</span><span class="n">glGetString</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_VERSION</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gl_vendor</span> <span class="o">=</span> <span class="n">GL</span><span class="o">.</span><span class="n">glGetString</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_VENDOR</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gl_extensions</span> <span class="o">=</span> <span class="n">GL</span><span class="o">.</span><span class="n">glGetString</span><span class="p">(</span><span class="n">GL</span><span class="o">.</span><span class="n">GL_EXTENSIONS</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      
+        <span class="n">message_template</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">Platform </span><span class="si">%(node)s</span><span class="s"></span>
+<span class="s">  Hardware:</span>
+<span class="s">    Machine: </span><span class="si">%(machine)s</span><span class="s"></span>
+<span class="s">    Architecture: </span><span class="si">%(architecture)s</span><span class="s"></span>
+<span class="s">    CPU: </span><span class="si">%(cpu)s</span><span class="s"></span>
+<span class="s">      Number of Cores: </span><span class="si">%(number_of_cores)u</span><span class="s"></span>
+<span class="s">      CPU Frequence: </span><span class="si">%(cpu_mhz)u</span><span class="s"> MHz</span>
+<span class="s">    Memory: </span><span class="si">%(memory_size_mb)u</span><span class="s"> MB</span>
+<span class="s">   OpenGL</span>
+<span class="s">     Render: </span><span class="si">%(gl_renderer)s</span><span class="s"></span>
+<span class="s">     Version: </span><span class="si">%(gl_version)s</span><span class="s"></span>
+<span class="s">     Vendor: </span><span class="si">%(gl_vendor)s</span><span class="s"></span>
+<span class="s">   Number of Screens: </span><span class="si">%(number_of_screens)u</span><span class="s"></span>
+<span class="s">&#39;&#39;&#39;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="n">message_template</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+
+        <span class="k">for</span> <span class="n">screen</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">screens</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">screen</span><span class="p">)</span>
+        
+        <span class="n">message_template</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="s">  Software Versions:</span>
+<span class="s">    OS: </span><span class="si">%(os)s</span><span class="s"></span>
+<span class="s">    Distribution: </span><span class="si">%(distribution)s</span><span class="s"></span>
+<span class="s">    Python: </span><span class="si">%(python_version)s</span><span class="s"></span>
+<span class="s">    Qt: </span><span class="si">%(qt_version)s</span><span class="s"></span>
+<span class="s">    PyQt: </span><span class="si">%(pyqt_version)s</span><span class="s"></span>
+<span class="s">&#39;&#39;&#39;</span>
+        <span class="n">message</span> <span class="o">+=</span> <span class="n">message_template</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+        
+        <span class="k">return</span> <span class="n">message</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="Screen"><a class="viewcode-back" href="../../../api/PyDviGui/Tools/Platform.html#PyDviGui.Tools.Platform.Screen">[docs]</a><span class="k">class</span> <span class="nc">Screen</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">platform_obj</span><span class="p">,</span> <span class="n">screen_id</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">screen_id</span> <span class="o">=</span> <span class="n">screen_id</span>
+
+        <span class="n">qt_screen_geometry</span> <span class="o">=</span> <span class="n">platform_obj</span><span class="o">.</span><span class="n">desktop</span><span class="o">.</span><span class="n">screenGeometry</span><span class="p">(</span><span class="n">screen_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screen_width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">screen_height</span> <span class="o">=</span> <span class="n">qt_screen_geometry</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">qt_screen_geometry</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+
+        <span class="n">widget</span> <span class="o">=</span> <span class="n">platform_obj</span><span class="o">.</span><span class="n">desktop</span><span class="o">.</span><span class="n">screen</span><span class="p">(</span><span class="n">screen_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dpi</span> <span class="o">=</span>  <span class="n">widget</span><span class="o">.</span><span class="n">physicalDpiX</span><span class="p">(),</span> <span class="n">widget</span><span class="o">.</span><span class="n">physicalDpiY</span><span class="p">()</span> 
+
+        <span class="c"># qt_available_geometry = self.desktop.availableGeometry(screen_id)</span>
+
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">message_template</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">    Screen </span><span class="si">%(screen_id)u</span><span class="s"></span>
+<span class="s">     geometry   </span><span class="si">%(screen_width)u</span><span class="s">x</span><span class="si">%(screen_height)u</span><span class="s"> px</span>
+<span class="s">     resolution </span><span class="si">%(dpi)s</span><span class="s"> dpi</span>
+<span class="s">&quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="n">message_template</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c">#</span>
+<span class="c"># End</span>
+<span class="c">#</span>
+<span class="c">####################################################################################################</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

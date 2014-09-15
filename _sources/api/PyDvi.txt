@@ -9,9 +9,9 @@
   PyDvi/Kpathsea
   PyDvi/Logging
   PyDvi/OpcodeParser
-  PyDvi/PyDviVersion
   PyDvi/TeXUnit
   PyDvi/TexDaemon
   PyDvi/Tools
+  PyDvi/Version
 
 .. End

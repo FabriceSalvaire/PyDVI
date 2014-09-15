@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '0.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -57,18 +59,16 @@
 <p>The program <em>gui/dvi-viewer</em> is a DVI Viewer demonstrator.</p>
 <p>The program <em>gui/font-viewer</em> is a tool to display font glyph.</p>
 <p>To run the unit tests use this shell command:</p>
-<div class="highlight-python"><div class="highlight"><pre>for i in unit_test/*.py; do python $i; done
-</pre></div>
+<div class="highlight-python"><pre>for i in unit_test/*.py; do python $i; done</pre>
 </div>
 <p>To run the test programs do:</p>
-<div class="highlight-python"><div class="highlight"><pre>python test/test_dvi_machine.py tex-samples/text.cmr.latin1.dvi
+<div class="highlight-python"><pre>python test/test_dvi_machine.py tex-samples/text.cmr.latin1.dvi
 python test/test_encoding.py ec.enc
 python test/test_font_manager.py
 python test/test_font_map.py pdftex.map
 python test/test_pkfont.py cmr10
 python test/test_tex_daemon.py
-python test/test_tfm.py cmr10
-</pre></div>
+python test/test_tfm.py cmr10</pre>
 </div>
 </div>
 
@@ -126,7 +126,7 @@ python test/test_tfm.py cmr10
     </div>
     <div class="footer">
         &copy; Copyright 2011, Fabrice Salvaire.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

@@ -1,0 +1,9 @@
+*********************************
+ :mod:`PrimitiveVertexArray-tmp`
+*********************************
+
+.. automodule:: PyDviGui.DviGlViewer.PrimitiveVertexArray-tmp
+   :members:
+   :show-inheritance:
+
+.. End

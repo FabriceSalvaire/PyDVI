@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -58,23 +60,21 @@
             
   <div class="section" id="module-PyDvi.Font.FontMap">
 <span id="fontmap"></span><h1>3.1.3.4. <tt class="xref py py-mod docutils literal"><span class="pre">FontMap</span></tt><a class="headerlink" href="#module-PyDvi.Font.FontMap" title="Permalink to this headline">¶</a></h1>
-<p>This module handles font map file.</p>
-<p>A font map gives the correspondance between the TeX PK fonts and their PostScript equivalents. It
-uses the <tt class="docutils literal"><span class="pre">.map</span></tt> extension.</p>
-<p>For example, the file <tt class="file docutils literal"><span class="pre">pdftex.map</span></tt> contains lines like:</p>
-<div class="highlight-python"><div class="highlight"><pre>futbo8r Utopia-Bold &quot;.167 SlantFont TeXBase1Encoding ReEncodeFont&quot; &lt;8r.enc &lt;putb8a.pfb
-</pre></div>
+<p>This module handles font map files.</p>
+<p>A font map file gives the correspondance between the TeX PK fonts and their PostScript
+equivalents. These files use the <tt class="docutils literal"><span class="pre">.map</span></tt> extension.</p>
+<p>For example, the file <tt class="file docutils literal"><span class="pre">pdftex.map</span></tt> contains lines like this one:</p>
+<div class="highlight-python"><pre>futbo8r Utopia-Bold ".167 SlantFont TeXBase1Encoding ReEncodeFont" &lt;8r.enc &lt;putb8a.pfb</pre>
 </div>
 <p>Each line describes a PK font using the following format:</p>
-<div class="highlight-python"><div class="highlight"><pre>PK_FONT_NAME PS_FONT_NAME &quot;PostScript snippet&quot; &lt;FILE_NAME1 &lt;FILE_NAME2
-</pre></div>
+<div class="highlight-python"><pre>PK_FONT_NAME PS_FONT_NAME "PostScript snippet" &lt;FILE_NAME1 &lt;FILE_NAME2</pre>
 </div>
 <p>The first word is the TeX font name and the second word is the PostScript font name. The PostScript
-font name can be omitted if it is the same than the TeX font name. The word starting by &#8220;&lt;&#8221; are
-filenames to be included in the PostScript file. A filename with the extension <tt class="docutils literal"><span class="pre">.enc</span></tt> is an
-encoding file and a filename with the extension <tt class="docutils literal"><span class="pre">.pfb</span></tt> is a Printer Font Binary file. The text
-enclosed by double quotes is optional and gives a PostScript snippet to be inserted in the
-PostScript file. It can be placed at the end of the line.</p>
+font name can be omitted if it is the same than for TeX. The word starting by &#8220;&lt;&#8221; are filenames to
+be included in the PostScript file. A filename with the extension <tt class="docutils literal"><span class="pre">.enc</span></tt> is an encoding file and a
+filename with the extension <tt class="docutils literal"><span class="pre">.pfb</span></tt> is a Printer Font Binary file. The text enclosed by double
+quotes is optional and gives a PostScript snippet to be inserted in the PostScript file. It can be
+placed at the end of the line.</p>
 <p>The percent character is used for comment as for TeX.</p>
 <p>References:</p>
 <ul class="simple">
@@ -84,7 +84,7 @@ written by Philipp Lehman. December 2004. Revision 2.14. cf. Creating map files 
 <li>updmap(1) - Update font map files for TeX output drivers.</li>
 <li>updmap.cfg(5) - Configuration of font mapping/inclusion for dvips and friends</li>
 </ul>
-<p>The font map <tt class="file docutils literal"><span class="pre">pdftex.map</span></tt> can be parsed using:</p>
+<p>To parse the font map <tt class="file docutils literal"><span class="pre">pdftex.map</span></tt> do:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">font_map</span> <span class="o">=</span> <span class="n">FontMap</span><span class="p">(</span><span class="s">&#39;/usr/share/texmf/fonts/map/pdftex/updmap/pdftex.map&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -93,7 +93,7 @@ key:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">font_map_entry</span> <span class="o">=</span> <span class="n">font_map</span><span class="p">[</span><span class="s">&#39;futbo8r&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>Then the <tt class="docutils literal"><span class="pre">.pfb</span></tt> file name as well the other parameters can be queried as attribute:</p>
+<p>The <tt class="docutils literal"><span class="pre">.pfb</span></tt> file name and the other parameters are stored as attributes:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">font_map_entry</span><span class="o">.</span><span class="n">pfb_filename</span>
 <span class="go">&#39;putb8a.pfb&#39;</span>
 </pre></div>
@@ -102,7 +102,7 @@ key:</p>
 <dt id="PyDvi.Font.FontMap.FontMap">
 <em class="property">class </em><tt class="descclassname">PyDvi.Font.FontMap.</tt><tt class="descname">FontMap</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/FontMap.html#FontMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.FontMap.FontMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
-<p>This class parses a fontmap file.</p>
+<p>This class parses a font map file.</p>
 <dl class="staticmethod">
 <dt id="PyDvi.Font.FontMap.FontMap._parse_effects">
 <em class="property">static </em><tt class="descname">_parse_effects</tt><big>(</big><em>ps_snippet</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/FontMap.html#FontMap._parse_effects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.FontMap.FontMap._parse_effects" title="Permalink to this definition">¶</a></dt>
@@ -112,7 +112,7 @@ key:</p>
 <dl class="method">
 <dt id="PyDvi.Font.FontMap.FontMap._parse_line">
 <tt class="descname">_parse_line</tt><big>(</big><em>line</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/FontMap.html#FontMap._parse_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.FontMap.FontMap._parse_line" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parse a line:</p>
+<dd><p>Parse a line.</p>
 </dd></dl>
 
 <dl class="method">
@@ -133,7 +133,7 @@ key:</p>
 <em class="property">class </em><tt class="descclassname">PyDvi.Font.FontMap.</tt><tt class="descname">FontMapEntry</tt><big>(</big><em>tex_name</em>, <em>ps_font_name</em>, <em>ps_snippet</em>, <em>effects</em>, <em>encoding</em>, <em>pfb_filename</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/FontMap.html#FontMapEntry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.FontMap.FontMapEntry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>This class encapsulates a font map entry.</p>
-<p>Public attributes are:</p>
+<p>Public attributes:</p>
 <blockquote>
 <div><p><tt class="xref py py-attr docutils literal"><span class="pre">tex_name</span></tt></p>
 <p><tt class="xref py py-attr docutils literal"><span class="pre">ps_font_name</span></tt></p>
@@ -208,7 +208,7 @@ key:</p>
     </div>
     <div class="footer">
         &copy; Copyright 2011, Fabrice Salvaire.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -314,7 +316,7 @@
 
 <dl class="class">
 <dt id="PyDvi.Dvi.DviMachine.DviColorRGB">
-<em class="property">class </em><tt class="descclassname">PyDvi.Dvi.DviMachine.</tt><tt class="descname">DviColorRGB</tt><big>(</big><em>red</em>, <em>green</em>, <em>blue</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviColorRGB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviColorRGB" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">PyDvi.Dvi.DviMachine.</tt><tt class="descname">DviColorRGB</tt><big>(</big><em>red</em>, <em>green</em>, <em>blue</em>, <em>alpha=0</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviColorRGB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviColorRGB" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyDvi.Dvi.DviMachine.DviColor</span></tt></p>
 <p>This class implements RGB colour.</p>
 </dd></dl>
@@ -401,45 +403,59 @@
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>This class implements a DVI Machine.</p>
 <dl class="method">
-<dt id="PyDvi.Dvi.DviMachine.DviMachine._get_current_dvi_font">
-<tt class="descname">_get_current_dvi_font</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviMachine._get_current_dvi_font"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine._get_current_dvi_font" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the current dvi font.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyDvi.Dvi.DviMachine.DviMachine._get_current_font">
-<tt class="descname">_get_current_font</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviMachine._get_current_font"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine._get_current_font" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the current font.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyDvi.Dvi.DviMachine.DviMachine._get_registers">
-<tt class="descname">_get_registers</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviMachine._get_registers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine._get_registers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the current register set.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="PyDvi.Dvi.DviMachine.DviMachine._load_dvi_fonts">
 <tt class="descname">_load_dvi_fonts</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviMachine._load_dvi_fonts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine._load_dvi_fonts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load the fonts used by the DVI program.</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="PyDvi.Dvi.DviMachine.DviMachine._logger">
+<tt class="descname">_logger</tt><em class="property"> = &lt;logging.Logger object at 0x2347490&gt;</em><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine._logger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Dvi.DviMachine.DviMachine._reset">
+<tt class="descname">_reset</tt><big>(</big><big>)</big><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine._reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the machine.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Dvi.DviMachine.DviMachine.begin_run_page">
+<tt class="descname">begin_run_page</tt><big>(</big><big>)</big><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.begin_run_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="PyDvi.Dvi.DviMachine.DviMachine.compute_page_bounding_box">
-<tt class="descname">compute_page_bounding_box</tt><big>(</big><em>page</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviMachine.compute_page_bounding_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.compute_page_bounding_box" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">compute_page_bounding_box</tt><big>(</big><em>page_index</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviMachine.compute_page_bounding_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.compute_page_bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Dvi.DviMachine.DviMachine.count_opcodes">
+<tt class="descname">count_opcodes</tt><big>(</big><em>page_index</em><big>)</big><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.count_opcodes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
+<dt id="PyDvi.Dvi.DviMachine.DviMachine.current_colour">
+<tt class="descname">current_colour</tt><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.current_colour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current colour.</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="PyDvi.Dvi.DviMachine.DviMachine.current_dvi_font">
-<tt class="descname">current_dvi_font</tt><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.current_dvi_font" title="Permalink to this definition">¶</a></dt>
-<dd><p>Current dvi font</p>
+<tt class="descname">current_dvi_font</tt><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviMachine.current_dvi_font"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.current_dvi_font" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current dvi font.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="PyDvi.Dvi.DviMachine.DviMachine.current_font">
-<tt class="descname">current_font</tt><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.current_font" title="Permalink to this definition">¶</a></dt>
-<dd><p>Current font</p>
+<tt class="descname">current_font</tt><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviMachine.current_font"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.current_font" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current font.</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Dvi.DviMachine.DviMachine.end_run_page">
+<tt class="descname">end_run_page</tt><big>(</big><big>)</big><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.end_run_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="PyDvi.Dvi.DviMachine.DviMachine.load_dvi_program">
@@ -449,7 +465,7 @@
 
 <dl class="method">
 <dt id="PyDvi.Dvi.DviMachine.DviMachine.paint_char">
-<tt class="descname">paint_char</tt><big>(</big><em>x</em>, <em>y</em>, <em>char_bounding_box</em>, <em>font</em>, <em>char_code</em>, <em>magnification</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviMachine.paint_char"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.paint_char" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">paint_char</tt><big>(</big><em>x</em>, <em>y</em>, <em>char_bounding_box</em>, <em>font</em>, <em>dvi_font</em>, <em>char_code</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviMachine.paint_char"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.paint_char" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -483,19 +499,13 @@
 
 <dl class="attribute">
 <dt id="PyDvi.Dvi.DviMachine.DviMachine.registers">
-<tt class="descname">registers</tt><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.registers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Register set</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyDvi.Dvi.DviMachine.DviMachine.reset">
-<tt class="descname">reset</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviMachine.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.reset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reset the machine.</p>
+<tt class="descname">registers</tt><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviMachine.registers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.registers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current register set.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="PyDvi.Dvi.DviMachine.DviMachine.run_page">
-<tt class="descname">run_page</tt><big>(</big><em>page</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviMachine.run_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.run_page" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">run_page</tt><big>(</big><em>page_index</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviMachine.run_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviMachine.run_page" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -518,7 +528,7 @@
 
 <dl class="method">
 <dt id="PyDvi.Dvi.DviMachine.DviSimplifyMachine.simplify">
-<tt class="descname">simplify</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviSimplifyMachine.simplify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviSimplifyMachine.simplify" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">simplify</tt><big>(</big><em>simplify_opcodes=False</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Dvi/DviMachine.html#DviSimplifyMachine.simplify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Dvi.DviMachine.DviSimplifyMachine.simplify" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simplify the program.</p>
 </dd></dl>
 
@@ -625,7 +635,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2011, Fabrice Salvaire.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>
