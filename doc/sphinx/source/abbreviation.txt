@@ -12,4 +12,33 @@
 .. |Sphinx| replace:: Sphinx
 .. _Sphinx: http://sphinx-doc.org
 
+.. |TUG| replace:: TeX User Group
+.. _TUG: http://sphinx-doc.org
+
+.. an extended version of pdfTeX using Lua as an embedded scripting language
+.. |LuaTeX| replace:: LuaTeX
+.. _LuaTeX: http://www.luatex.org
+
+.. |Knuth| replace:: Donald E. Knuth
+.. _Knuth: http://www-cs-faculty.stanford.edu/~uno
+
+.. |MathJax| replace:: MathJax
+.. _MathJax: http://www.mathjax.org
+
+.. A DVI-to-PNG converter
+.. |Dvipng| replace:: Dvipng
+.. _Dvipng: http://savannah.nongnu.org/projects/dvipng
+
+.. |Matplotlib| replace:: Matplotlib
+.. _Matplotlib: http://matplotlib.org
+
+.. |PGF| replace:: PGF
+.. _PGF: http://sourceforge.net/projects/pgf
+
+.. |Asymptote| replace:: Asymptote
+.. _Asymptote: http://asymptote.sourceforge.net
+
+.. |Circuit_macros| replace:: Circuit_macros
+.. _Circuit_macros: https://ece.uwaterloo.ca/~aplevich/Circuit_macros
+
 .. End
