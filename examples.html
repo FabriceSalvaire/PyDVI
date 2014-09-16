@@ -56,13 +56,15 @@
             
   <span class="target" id="examples-page"></span><div class="section" id="examples">
 <h1>2. Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
-<p>The program <em>gui/dvi-viewer</em> is a DVI Viewer demonstrator.</p>
+<a class="reference internal image-reference" href="images/dvi-gl-viewer.scaled.png"><img alt="images/dvi-gl-viewer.scaled.png" class="align-right" src="images/dvi-gl-viewer.scaled.png" style="width: 400.0px; height: 218.5px;" /></a>
+<p>The program <em>gui/dvi-gl-viewer</em> is a DVI viewer demonstrator with a rendering accelerated by GPU
+using the OpenGL API.</p>
 <p>The program <em>gui/font-viewer</em> is a tool to display font glyph.</p>
 <p>To run the unit tests use this shell command:</p>
 <div class="highlight-python"><pre>for i in unit_test/*.py; do python $i; done</pre>
 </div>
 <p>To run the test programs do:</p>
-<div class="highlight-python"><pre>python test/test_dvi_machine.py tex-samples/text.cmr.latin1.dvi
+<div class="highlight-python"><pre>python test/test-dvi-machine tex-samples/text.cmr.latin1.dvi
 python test/test_encoding.py ec.enc
 python test/test_font_manager.py
 python test/test_font_map.py pdftex.map
