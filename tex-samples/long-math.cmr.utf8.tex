@@ -1,0 +1,62 @@
+\documentclass[12pt]{article}
+
+%**** Page settings *********************
+
+\usepackage[%
+paper=a4paper,%
+%includeheadfoot,%
+margin=1cm,%
+headsep=0cm, footskip=0cm,%
+dvips,%
+]{geometry}
+
+%**** Encoding **************************
+
+\usepackage[utf8]{inputenc}
+
+%****************************************
+
+\usepackage{esint}
+% \boldsymbol{\ell}
+
+%****************************************
+
+\pagestyle{empty}
+
+\begin{document}
+
+\section{Maxwell's Equations}
+Gauss's law:
+$$ \oiint_{\scriptstyle\partial \Omega} \mathbf{E} \cdot \mathrm{d} \mathbf{S}
+= \frac{1}{\varepsilon_0} \iiint_\Omega \rho \,\mathrm{d}V $$
+$$ \nabla \cdot \mathbf{E} = \frac {\rho} {\varepsilon_0} $$
+%
+Gauss's law for magnetism:
+$$ \oiint_{\scriptstyle\partial \Omega} \mathbf{B} \cdot \mathrm{d} \mathbf{S} = 0 $$
+$$\nabla \cdot \mathbf{B} = 0$$
+%
+Maxwell–Faraday equation:
+$$ \oint_{\partial \Sigma} \mathbf{E} \cdot \mathrm{d} \mathbf{l}
+= - \frac{d}{dt} \iint_{\Sigma} \mathbf{B} \cdot \mathrm{d} \mathbf{S} $$
+$$ \nabla \times \mathbf{E} = - \frac{\partial \mathbf{B}}{\partial t} $$
+%
+Ampère's circuital law:
+$$ \oint_{\partial \Sigma} \mathbf{B} \cdot \mathrm{d} \mathbf{l}
+= \mu_0 \iint_{\Sigma} \mathbf{J} \cdot \mathrm{d} \mathbf{S}
++ \mu_0 \varepsilon_0 \frac{d}{dt} \iint_{\Sigma} \mathbf{E} \cdot \mathrm{d} \mathbf{S} $$
+$$ \nabla \times \mathbf{B}
+= \mu_0 \left( \mathbf{J} + \varepsilon_0 \frac{\partial \mathbf{E}} {\partial t} \right) $$
+
+\section{Schrödinger's equation}
+$$ i \hbar \frac{\partial}{\partial t} \Psi(\mathbf{r},t)
+= \left[ \frac{-\hbar^2}{2\mu}\nabla^2 + V(\mathbf{r},t) \right] \Psi(\mathbf{r},t) $$
+
+\section{Navier–Stokes's equations}
+$$ \rho \left( \frac{\partial \mathbf{v}}{\partial t} + \mathbf{v} \cdot \nabla \mathbf{v} \right)
+= -\nabla p + \nabla \cdot \mathbf{T} + \mathbf{f} $$
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
