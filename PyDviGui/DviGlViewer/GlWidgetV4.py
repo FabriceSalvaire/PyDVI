@@ -60,28 +60,21 @@ class GlWidget(GlWidgetBase):
         self._application = QtGui.QApplication.instance()
         self._main_window = main_window # self._application.main_window # not yet initialised
 
-    ##############################################
-
-    def wheelEvent(self, event):
-
-        self._logger.debug('Wheel Event')
-        return self.wheel_zoom(event)
+        self.x_step = 5 # mm
+        self.y_step = 5 # mm
+        self.zoom_step = 1.10 # must be float
 
     ##############################################
 
     def init_glortho2d(self):
 
         # Set max_area so as to correspond to max_binning zoom centered at the origin
-        # Fixme: from dvi machine
-        page_width = 210 # mm 
-        page_height = 297
-        # max_area = IntervalInt2D([0, page_width], [0, page_height])
-        # max_area.enlarge(100)
-        area_size = 10**3
-        max_area = IntervalInt2D([-area_size, area_size], [-area_size, area_size])
+        a0_width = 840 # mm 
+        a0_height = 1189
+        max_area = IntervalInt2D([0, a0_height], [0, a0_height])
+        max_area.enlarge(a0_height)
 
         super(GlWidget, self).init_glortho2d(max_area, zoom_manager=None)
-        self.zoom_interval(IntervalInt2D((0, 210), (0, 297))) # Fixme
 
     ##############################################
 
@@ -94,7 +87,7 @@ class GlWidget(GlWidgetBase):
         GL.glEnable(GL.GL_LINE_SMOOTH) #compat# 
 
         self._init_shader()
-        self.create_vertex_array_objects()
+        self._paint_page = False
 
     ##############################################
 
@@ -127,19 +120,7 @@ class GlWidget(GlWidgetBase):
 
     ##############################################
 
-    def create_vertex_array_objects(self):
-
-        self.create_page_layout()
-        self._paint_page = False
-
-    ##############################################
-
-    def create_page_layout(self): # , page_bounding_box
-
-        # Fixme: from dvi machine
-
-        page_width = 210 # mm
-        page_height = 297
+    def _create_page_layout(self, width, height):
 
         # (page_x_min, page_y_min,
         #  text_width, text_height) = map(sp2mm,
@@ -149,7 +130,7 @@ class GlWidget(GlWidgetBase):
         #                                  page_bounding_box.y.length(),
         #                                  ))
 
-        rectangles = (Rectangle(Point(0, 0), Offset(page_width, page_height)),)
+        rectangles = (Rectangle(Point(0, 0), Offset(width, height)),)
         self.rectangle_vertex_array = GlRectangleVertexArray(rectangles)
         self.rectangle_vertex_array.bind_to_shader(self.position_shader_interface.attributes.position)
 
@@ -157,16 +138,16 @@ class GlWidget(GlWidgetBase):
 
         grid_spacing = 5
         x = grid_spacing
-        while x < page_width:
+        while x < width:
             p1 = Point(x, 0)
-            p2 = Point(x, page_height)
+            p2 = Point(x, height)
             segments.append(Segment(p1, p2))
             x += grid_spacing
 
         y = grid_spacing
-        while y < page_height:
+        while y < height:
             p1 = Point(0, y)
-            p2 = Point(page_width, y)
+            p2 = Point(width, y)
             segments.append(Segment(p1, p2))
             y += grid_spacing
         
@@ -178,7 +159,6 @@ class GlWidget(GlWidgetBase):
     def update_dvi(self, dvi_machine):
 
         self._logger.info('Update DVI')
-
 
         self._text_vertex_arrays = []
         for font_id, glyphs in dvi_machine.glyphs.iteritems():
@@ -204,26 +184,38 @@ class GlWidget(GlWidgetBase):
                                                    dvi_machine.rule_colours))
         self._rule_vertex_array.bind_to_shader(self.rule_shader_interface.attributes)
 
-        self._logger.info('update DVI done')
+        width = dvi_machine.current_opcode_program.width
+        height = dvi_machine.current_opcode_program.height
+        if not width or not height: 
+            first_page = dvi_machine.dvi_program[0]
+            width, height = first_page.width, first_page.height
+        if not width or not height:
+            self._logger.warning('Page size is null')
+            width, height = 210, 297 # use A4
+        self._create_page_layout(width, height)
+
+        interval = IntervalInt2D((0, width), (0, height))
+        interval.enlarge(10) # mm
+        self.zoom_interval(interval)
 
         self._paint_page = True
-        self.update()
+        self._logger.info('update DVI done')
 
     ##############################################
 
     def paint(self):
 
-        self._logger.debug('')
+        self._logger.info('')
         # Clear the buffer using white colour (white paper)
         GL.glClearColor(1, 1, 1, 1)
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
         if self._paint_page:
-            self.paint_page_layout()
-            self.paint_text()
+            self._paint_page_layout()
+            self._paint_text()
 
     ##############################################
 
-    def paint_page_layout(self):
+    def _paint_page_layout(self):
 
         self._logger.debug('')
         shader_program = self.shader_manager.rectangle_shader_program
@@ -242,7 +234,7 @@ class GlWidget(GlWidgetBase):
 
     ##############################################
 
-    def paint_text(self):
+    def _paint_text(self):
 
         shader_program = self.shader_manager.text_shader_program
         # shader_program.bind()
@@ -265,6 +257,13 @@ class GlWidget(GlWidgetBase):
         shader_program = self.shader_manager.rule_shader_program
         shader_program.bind()
         self._rule_vertex_array.draw()
+
+    ##############################################
+
+    def wheelEvent(self, event):
+
+        self._logger.debug('Wheel Event')
+        return self.wheel_zoom(event)
 
     ##############################################
 

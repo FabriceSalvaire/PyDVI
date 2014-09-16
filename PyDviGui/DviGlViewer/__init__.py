@@ -91,7 +91,7 @@ class Application(ApplicationBase):
 
         dvi_stream = FileStream(dvi_path)
         dvi_program = self._dvi_parser.process_stream(dvi_stream)
-        dvi_program.print_summary()
+        # dvi_program.print_summary()
         self.number_of_pages = len(dvi_program.pages)
 
         self._dvi_machine.load_dvi_program(dvi_program)

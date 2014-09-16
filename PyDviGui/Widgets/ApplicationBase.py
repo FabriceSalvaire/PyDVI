@@ -24,6 +24,7 @@
 
 import logging
 import sys
+import traceback
 
 from PyQt4 import QtGui
 
@@ -47,6 +48,8 @@ class ApplicationBase(QtGui.QApplication):
 
         super(ApplicationBase, self).__init__(sys.argv)
 
+        sys.excepthook = self._exception_hook
+
         self._args = args
         self._platform = Platform()
 
@@ -68,10 +71,19 @@ class ApplicationBase(QtGui.QApplication):
         return self._main_window
 
     ##############################################
-    
-    def exit(self):
 
-        sys.exit(0)
+    def _exception_hook(self, exception_type, exception_value, exception_traceback):
+
+        # return sys.__excepthook__(exception_type, exception_value, exception_traceback)
+
+        traceback.print_exception(exception_type, exception_value, exception_traceback)
+        # self.exit(1) # Fixme: ValueError: out of axis area from PyOpenGLng.HighLevelApi.Ortho2D
+
+    ##############################################
+    
+    def exit(self, rc=0):
+
+        sys.exit(rc)
 
     ##############################################
 

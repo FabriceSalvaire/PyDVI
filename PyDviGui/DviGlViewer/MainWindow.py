@@ -133,7 +133,7 @@ class MainWindow(MainWindowBase):
         dvi_machine = self._application.run_page(self._page_index)
         if dvi_machine is not None:
             self.graphics_view.update_dvi(dvi_machine)
-            
+
     ##############################################
 
     def previous_page(self):

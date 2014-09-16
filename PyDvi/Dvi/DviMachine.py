@@ -792,7 +792,7 @@ class DviProgramPage(list):
 
     def set_paper_size(self, height, width):
 
-        """ Set the paper size. """
+        """ Set the paper size in mm. """
 
         self.height, self.width = height, width
 
@@ -1285,9 +1285,12 @@ class DviSimplifyMachine(DviMachine):
 
         _module_logger.info("Transform the xxx colour opcode: '%s'" % xxx_code)
 
+        # color pop
+        # color push  Black
+        # color push rgb 1 0 0
+        # color push gray .5
+        # color push cmyk .1 .8 .5 .0
         words = xxx_code.split()
-
-
         try:
             operation = words[1]
             if operation == 'pop':
@@ -1319,9 +1322,10 @@ class DviSimplifyMachine(DviMachine):
 
         _module_logger.info("Transform the xxx paper size opcode: '%s'" % xxx_code)
 
+        # papersize=597.50787pt,845.04684pt
         start = xxx_code.rfind('=') +1
         dimensions = xxx_code[start:]
-        height, width = [float(x[:-2]) for x in dimensions.split(',')]
+        width, height = [pt2mm(float(x[:-2])) for x in dimensions.split(',')]
 
         program_page.set_paper_size(height, width)
 
@@ -1335,6 +1339,7 @@ class DviSimplifyMachine(DviMachine):
 
         _module_logger.info("Transform the paper orientation opcode: '%s'" % xxx_code)
 
+        # ! /landplus90 true store
         if xxx_code == self.xxx_landscape:
             program_page.set_paper_orientation = paper_orientation_enum.landscape
  
