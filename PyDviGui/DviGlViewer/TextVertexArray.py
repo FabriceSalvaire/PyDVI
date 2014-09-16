@@ -90,6 +90,22 @@ class TextVertexArray(GlVertexArrayObject):
     
     def draw(self, shader_program):
 
+        # Freetype renders glyph as grayscale: white foreground on black background
+        #   If the LCD filter is enabled then the pixels on border are coloured.
+        #   black fragment should be discarded
+        #
+        # Blending equation for transparency:
+        #   O = (1-Sa)*D + Sa*S
+        #     if Sa = 1 then O = S overwrite
+        #           = 0 then O = D keep the value
+        #
+        # Grayscale case:
+        #   S = luminosity * colour   grayscale = luminosity
+        #   Sa = average luminosity * alpha ???
+        #
+        # LCD case:
+        #   white -> red : (1,1,1) -> (1,0,0)
+
         # Blending: O = Sf*S + Df*D
         #  where S is the colour from the fragment shader and D the colour from the framebuffer
         #   alpha: fully transparent = 0 and fully opaque = 1
@@ -98,9 +114,7 @@ class TextVertexArray(GlVertexArrayObject):
         # Set (Sf, Df) for transparency: O = Sa*S + (1-Sa)*D 
 
         GL.glEnable(GL.GL_BLEND)
-        # GL.glBlendEquation(GL.GL_FUNC_ADD)
-        # GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
-        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_SRC_ALPHA) # Fixme: check cf. fragment shader
+        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
         shader_program.bind()
         self._image_texture.bind()

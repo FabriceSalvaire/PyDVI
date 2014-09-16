@@ -69,11 +69,18 @@ void main()
   // Standard LCD Gamma: Out = IN**2.2
   vec3 rgb = pow(vec3(r,g,b), vec3(gamma));
 
-  // note: black colour is null
-  fragment_colour.rgb = rgb * vertex.colour.rgb;
-  // alpha = 1 means fully opaque while alpha = 0 means fully transparent
+  if (rgb == vec3(0))
+    discard;
+
   float average_luminosity = (rgb.r + rgb.g + rgb.b)/3.;
-  fragment_colour.a = 1 - (average_luminosity * vertex.colour.a); // Fixme: check cf. blending
+
+  // alpha = 1 means fully opaque while alpha = 0 means fully transparent
+
+  // fragment_colour.rgb = rgb * vertex.colour.rgb;
+  // fragment_colour.a = 1; // average_luminosity * vertex.colour.a;
+
+  fragment_colour.a = average_luminosity;
+  fragment_colour.rgb = vertex.colour.rgb;
 }
 
 /* *********************************************************************************************** *

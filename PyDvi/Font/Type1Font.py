@@ -306,7 +306,7 @@ class FontSize(object):
 
     ##############################################
  
-    def load_glyph(self, glyph_index, lcd=True):
+    def load_glyph(self, glyph_index, lcd=False):
 
         # Fixme: lcd steering
 

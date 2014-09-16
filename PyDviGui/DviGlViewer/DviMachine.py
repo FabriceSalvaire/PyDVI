@@ -120,7 +120,7 @@ class GlDviMachine(DviSimplifyMachine):
         positions[glyph_index] = xg_mm, yg_mm, width, height
         bounding_boxes[glyph_index] = x_mm, y_mm, box_width, box_height
         texture_coordinates[glyph_index] = glyph.texture_coordinates
-        colours[glyph_index] = (1, 1, 1, 1)
+        colours[glyph_index] = self.current_colour.colour
         self._glyph_indexes[font_id] += 1
 
         # horizontal_offset = -glyph.horizontal_offset
