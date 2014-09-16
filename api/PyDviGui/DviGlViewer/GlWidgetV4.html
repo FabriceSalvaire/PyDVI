@@ -65,13 +65,28 @@
 <em class="property">class </em><tt class="descclassname">PyDviGui.DviGlViewer.GlWidgetV4.</tt><tt class="descname">GlWidget</tt><big>(</big><em>parent</em>, <em>main_window</em><big>)</big><a class="reference internal" href="../../../_modules/PyDviGui/DviGlViewer/GlWidgetV4.html#GlWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyOpenGLng.HighLevelApi.GlWidgetBase.GlWidgetBase</span></tt></p>
 <dl class="method">
+<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget._create_page_layout">
+<tt class="descname">_create_page_layout</tt><big>(</big><em>width</em>, <em>height</em><big>)</big><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget._create_page_layout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget._init_shader">
 <tt class="descname">_init_shader</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDviGui/DviGlViewer/GlWidgetV4.html#GlWidget._init_shader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget._init_shader" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget._logger">
-<tt class="descname">_logger</tt><em class="property"> = &lt;logging.Logger object at 0x77801d0&gt;</em><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget._logger" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">_logger</tt><em class="property"> = &lt;logging.Logger object at 0x9d123d0&gt;</em><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget._logger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget._paint_page_layout">
+<tt class="descname">_paint_page_layout</tt><big>(</big><big>)</big><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget._paint_page_layout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget._paint_text">
+<tt class="descname">_paint_text</tt><big>(</big><big>)</big><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget._paint_text" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -80,13 +95,18 @@
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.create_page_layout">
-<tt class="descname">create_page_layout</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDviGui/DviGlViewer/GlWidgetV4.html#GlWidget.create_page_layout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.create_page_layout" title="Permalink to this definition">¶</a></dt>
+<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget._update_zoom_status">
+<tt class="descname">_update_zoom_status</tt><big>(</big><big>)</big><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget._update_zoom_status" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.create_vertex_array_objects">
-<tt class="descname">create_vertex_array_objects</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDviGui/DviGlViewer/GlWidgetV4.html#GlWidget.create_vertex_array_objects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.create_vertex_array_objects" title="Permalink to this definition">¶</a></dt>
+<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.fit_document">
+<tt class="descname">fit_document</tt><big>(</big><big>)</big><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.fit_document" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.fit_width">
+<tt class="descname">fit_width</tt><big>(</big><big>)</big><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.fit_width" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -105,18 +125,33 @@
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.mousePressEvent">
+<tt class="descname">mousePressEvent</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.mousePressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.paint">
 <tt class="descname">paint</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDviGui/DviGlViewer/GlWidgetV4.html#GlWidget.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.paint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.paint_page_layout">
-<tt class="descname">paint_page_layout</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDviGui/DviGlViewer/GlWidgetV4.html#GlWidget.paint_page_layout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.paint_page_layout" title="Permalink to this definition">¶</a></dt>
+<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.resizeGL">
+<tt class="descname">resizeGL</tt><big>(</big><em>width</em>, <em>height</em><big>)</big><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.resizeGL" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.paint_text">
-<tt class="descname">paint_text</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDviGui/DviGlViewer/GlWidgetV4.html#GlWidget.paint_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.paint_text" title="Permalink to this definition">¶</a></dt>
+<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.translate_x">
+<tt class="descname">translate_x</tt><big>(</big><em>dx</em><big>)</big><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.translate_x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.translate_y">
+<tt class="descname">translate_y</tt><big>(</big><em>dy</em><big>)</big><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.translate_y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.update">
+<tt class="descname">update</tt><big>(</big><big>)</big><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.update" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -132,6 +167,11 @@
 <dl class="method">
 <dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.wheelEvent">
 <tt class="descname">wheelEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="../../../_modules/PyDviGui/DviGlViewer/GlWidgetV4.html#GlWidget.wheelEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.wheelEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.zoom_in_out">
+<tt class="descname">zoom_in_out</tt><big>(</big><em>direction</em><big>)</big><a class="headerlink" href="#PyDviGui.DviGlViewer.GlWidgetV4.GlWidget.zoom_in_out" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
