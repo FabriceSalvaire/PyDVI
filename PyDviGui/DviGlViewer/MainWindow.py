@@ -151,6 +151,7 @@ class MainWindow(MainWindowBase):
     def _create_toolbar(self):
 
         self._page_index_line_edit = QtGui.QLineEdit()
+        self._page_index_line_edit.setMaximumWidth(50)
         size_policy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Preferred)
         self._page_index_line_edit.setSizePolicy(size_policy)
         self._last_page_index_label = QtGui.QLabel()

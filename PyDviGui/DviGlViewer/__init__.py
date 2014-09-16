@@ -75,7 +75,7 @@ class Application(ApplicationBase):
     def _post_init(self):
          
         # QtCore.QTimer.singleShot(0, self._open_dvi)
-        self.show_message('Welcome to PyDvi')
+        self.show_message('Welcome to the hardware accelerated DVI viewer of PyDVI!')
         self._open_dvi()
         # return to main and then enter to event loop
 
