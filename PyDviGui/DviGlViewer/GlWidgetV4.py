@@ -213,7 +213,7 @@ class GlWidget(GlWidgetBase):
 
     def paint(self):
 
-        self._logger.info('')
+        self._logger.debug('')
         # Clear the buffer using white colour (white paper)
         GL.glClearColor(1, 1, 1, 1)
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
@@ -225,7 +225,7 @@ class GlWidget(GlWidgetBase):
 
     def paint_page_layout(self):
 
-        self._logger.info('')
+        self._logger.debug('')
         shader_program = self.shader_manager.rectangle_shader_program
         shader_program.bind()
         # GL.glLineWidth(1.)
@@ -248,19 +248,19 @@ class GlWidget(GlWidgetBase):
         # shader_program.bind()
         # shader_program.uniforms. ...
         for text_vertex_array in self._text_vertex_arrays:
-            self._logger.info('paint text')
+            self._logger.debug('paint text')
             text_vertex_array.draw(shader_program)
         # shader_program.unbind()
 
         if False:
-            self._logger.info('Paint char bounding boxes')
+            self._logger.debug('Paint char bounding boxes')
             shader_program = self.shader_manager.rectangle_shader_program
             shader_program.bind()
             # GL.glLineWidth(1.)
             shader_program.uniforms.colour = (1., 0., 0.)
             self._char_bounding_box_vertex_array.draw()
 
-        self._logger.info('Paint rules')
+        self._logger.debug('Paint rules')
         # Fixme: anti-alias
         shader_program = self.shader_manager.rule_shader_program
         shader_program.bind()

@@ -274,7 +274,7 @@ class DviParser(object):
 
         """ Process the preamble where we get the magnification. """
 
-        self._logger.info('Process the preamble')
+        self._logger.debug('Process the preamble')
 
         stream = self.stream
 
@@ -295,7 +295,7 @@ class DviParser(object):
                                             dvi_format,
                                             numerator, denominator, magnification)
 
-        self._logger.info('Preamble end at {}'.format(stream.tell() -1))
+        self._logger.debug('Preamble end at {}'.format(stream.tell() -1))
 
     ##############################################
 
@@ -311,7 +311,7 @@ class DviParser(object):
         #     dvi format
         #   EOF_SIGNATURE [at least 4 times]
 
-        self._logger.info('Process the postamble')
+        self._logger.debug('Process the postamble')
 
         stream = self.stream
 
@@ -334,7 +334,7 @@ class DviParser(object):
 
         # Move to Postamble
         stream.seek(self.post_pointer)
-        self._logger.info('Postamble start at {}'.format(stream.tell()))
+        self._logger.debug('Postamble start at {}'.format(stream.tell()))
 
         if stream.read_unsigned_byte1() != dvi_opcodes.POST:
             raise BadDviStream
@@ -369,8 +369,8 @@ class DviParser(object):
         self.number_of_pages = number_of_pages
         self.dvi_program.set_postambule_data(max_height, max_width, stack_depth, number_of_pages)
 
-        self._logger.info('Number of pages: {}'.format(number_of_pages))
-        self._logger.info('Stack depth: {}'.format(stack_depth))
+        self._logger.debug('Number of pages: {}'.format(number_of_pages))
+        self._logger.debug('Stack depth: {}'.format(stack_depth))
 
     ##############################################
 
@@ -379,7 +379,7 @@ class DviParser(object):
         """ Process the pages in backward order.
         """
 
-        self._logger.info('Process the pages in backward order.')
+        self._logger.debug('Process the pages in backward order.')
 
         stream = self.stream
         self.page_number = self.number_of_pages
@@ -390,7 +390,7 @@ class DviParser(object):
         while bop_pointer >= 0:
             stream.seek(bop_pointer)
             self.page_number -= 1
-            self._logger.info('BOP at {}, page # {}'.format(stream.tell(), self.page_number))
+            self._logger.debug('BOP at {}, page # {}'.format(stream.tell(), self.page_number))
 
             opcode = stream.read_unsigned_byte1()
             if opcode != dvi_opcodes.BOP:
@@ -417,7 +417,7 @@ class DviParser(object):
         else:
             self.page_number += 1
         self.dvi_program.append_page(self.page_number)
-        self._logger.info('BOP at {}, page # {}'.format(stream.tell(), self.page_number))
+        self._logger.debug('BOP at {}, page # {}'.format(stream.tell(), self.page_number))
 
         opcode = stream.read_unsigned_byte1()
         if opcode != dvi_opcodes.BOP:
@@ -459,7 +459,7 @@ class DviParser(object):
             else:
                 opcode_parser = self.opcode_parser_set[opcode]
                 parameters = opcode_parser.read_parameters(self)
-                self._logger.info('Opcode {} {} {}'.format(opcode, opcode_parser.name, parameters))
+                # self._logger.debug('Opcode {} {} {}'.format(opcode, opcode_parser.name, parameters))
 
                 # count characters by font
                 is_font = dvi_opcodes.FONT_00 <= opcode <= dvi_opcodes.FNT4

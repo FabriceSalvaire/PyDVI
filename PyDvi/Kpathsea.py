@@ -77,10 +77,10 @@ def kpsewhich(filename, file_format=None, options=None):
     command.append(filename)
 
     shell_command = ' '.join(command)
-    _module_logger.info('Run shell command: ' + shell_command)
+    _module_logger.debug('Run shell command: ' + shell_command)
     pipe = subprocess.Popen(shell_command, shell=True, stdout=subprocess.PIPE)
     stdout = pipe.communicate()[0]
-    _module_logger.info('stdout:\n' + stdout)
+    _module_logger.debug('stdout:\n' + stdout)
     path = stdout.rstrip()
     path = path if path else None # Fixme: could raise an exception
 

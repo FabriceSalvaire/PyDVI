@@ -176,7 +176,7 @@ class FontManager(object):
             font_map_entry = self._font_map[tex_font_name]
             # font_map_entry.print_summary()
             font_class = self._get_font_class_by_filename(font_map_entry.pfb_filename)
-            _module_logger.info("Font %s is mapped to %s" % (tex_font_name, font_map_entry.pfb_filename))
+            _module_logger.debug("Font %s is mapped to %s" % (tex_font_name, font_map_entry.pfb_filename))
         except:
             raise NameError("Could not found a mapped font for %s" % (tex_font_name))
             # return self.load_font(font_types.Pk, tex_font_name)

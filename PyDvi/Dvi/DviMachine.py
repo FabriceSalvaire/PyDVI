@@ -156,7 +156,7 @@ class Opcode_putset_char(Opcode):
                                            [registers.v - char_height, registers.v + char_depth])
 
             if compute_bounding_box:
-                self._logger.info('Char bounding box\n{}'.format(char_bounding_box))
+                # self._logger.info('Char bounding box\n{}'.format(char_bounding_box))
                 if bounding_box is None:
                     bounding_box = char_bounding_box
                 else:
@@ -171,9 +171,9 @@ class Opcode_putset_char(Opcode):
             if self.set_char:
                 registers.h += char_width
 
-            self._logger.info('{} char {:3} "{}" width {:8} h {:10}'.format(self.opcode_name,
-                                                                            char_code, chr(char_code),
-                                                                            char_width, registers.h))
+            # self._logger.info('{} char {:3} "{}" width {:8} h {:10}'.format(self.opcode_name,
+            #                                                                 char_code, chr(char_code),
+            #                                                                 char_width, registers.h))
             
         if compute_bounding_box:
             return bounding_box
@@ -1152,14 +1152,14 @@ class DviMachine(object):
 
         self._reset()
         self.current_opcode_program = self.dvi_program.get_page(page_index)
-        self._logger.info('Program Length: {}'.format(len(self.current_opcode_program)))
+        # self._logger.info('Program Length: {}'.format(len(self.current_opcode_program)))
         self.begin_run_page()
         for opcode in self.current_opcode_program:
-            self._logger.info(opcode)
+            # self._logger.info(opcode)
             opcode.run(self)
-            self._logger.info('Registers:\n'
-                              'level {}\n'
-                              '{}'.format(len(self._registers_stack), self.registers))
+            # self._logger.info('Registers:\n'
+            #                   'level {}\n'
+            #                   '{}'.format(len(self._registers_stack), self.registers))
         self.end_run_page()
 
     ##############################################
@@ -1182,22 +1182,22 @@ class DviMachine(object):
         for opcode in opcode_program:
             self._logger.info(str(opcode))
             opcode_bounding_box = opcode.run(self, compute_bounding_box=True)
-            self._logger.info('Register Stack level {}\n{}'.format(len(self._registers_stack), self.registers))
+            # self._logger.info('Register Stack level {}\n{}'.format(len(self._registers_stack), self.registers))
             if opcode_bounding_box is not None:
-                self._logger.info('Opcode bounding box {}'.format(opcode_bounding_box))
+                # self._logger.info('Opcode bounding box {}'.format(opcode_bounding_box))
                 if bounding_box is None:
                     bounding_box = opcode_bounding_box
                 else:
                     bounding_box |= opcode_bounding_box
-                self._logger.info('Current page bounding box {}'.format(bounding_box))
+                # self._logger.info('Current page bounding box {}'.format(bounding_box))
 
         (x_min_mm, x_max_mm,
          y_min_mm, y_max_mm) = [sp2mm(x) for x in (bounding_box.x.inf, bounding_box.x.sup,
                                                    bounding_box.y.inf, bounding_box.y.sup)]
-        self._logger.info('Page bounding box\n {} sp\n'
-                          '  [{:.2f}, {:.2f}]*[{:.2f}, {:.2f}] mm'.format(bounding_box,
-                                                                          x_min_mm, x_max_mm,
-                                                                          y_min_mm, y_max_mm) )
+        # self._logger.info('Page bounding box\n {} sp\n'
+        #                   '  [{:.2f}, {:.2f}]*[{:.2f}, {:.2f}] mm'.format(bounding_box,
+        #                                                                   x_min_mm, x_max_mm,
+        #                                                                   y_min_mm, y_max_mm) )
 
         return bounding_box
 

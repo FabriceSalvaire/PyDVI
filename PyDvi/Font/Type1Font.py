@@ -92,8 +92,8 @@ class Type1Font(Font):
 
         self._init_index()
 
-        self._log_face_information()
-        self._log_glyph_table()
+        # self._log_face_information()
+        # self._log_glyph_table()
 
         self._font_size = {}
 
@@ -137,12 +137,12 @@ class Type1Font(Font):
 
     def get_glyph(self, tex_glyph_index, size, resolution=600):
 
-        self._logger.info("glyph[{}] @size {} @resolution {} dpi".format(tex_glyph_index, size, resolution))
+        # self._logger.info("glyph[{}] @size {} @resolution {} dpi".format(tex_glyph_index, size, resolution))
 
         font_size = self.font_size(size, resolution)
 
         glyph_index, name = self._charcode_to_index[tex_glyph_index]
-        self._logger.info("retrieve glyph {} {}".format(glyph_index, name))
+        # self._logger.info("retrieve glyph {} {}".format(glyph_index, name))
         glyph = font_size[glyph_index]
 
         return glyph

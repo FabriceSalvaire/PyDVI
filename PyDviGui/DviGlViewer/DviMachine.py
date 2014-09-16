@@ -80,7 +80,7 @@ class GlDviMachine(DviSimplifyMachine):
     
     def paint_rule(self, x, y, w, h):
 
-        self._logger.info("\nrule ({}, {}) +({}, {})".format(x, y, w, h))
+        # self._logger.info("\nrule ({}, {}) +({}, {})".format(x, y, w, h))
         x_mm, y_mm, w_mm, h_mm = [sp2mm(z) for z in (x, y, w, h)]
         y_mm = 297 - y_mm # Fixme: opengl frame
 
@@ -95,8 +95,8 @@ class GlDviMachine(DviSimplifyMachine):
 
         font_id = dvi_font.id
 
-        self._logger.info("\nchar ({}, {}) {} {}[{}]@{}".format(xg, yg, char_bounding_box,
-                                                                font.name, glyph_index, dvi_font.magnification))
+        # self._logger.info("\nchar ({}, {}) {} {}[{}]@{}".format(xg, yg, char_bounding_box,
+        #                                                         font.name, glyph_index, dvi_font.magnification))
 
         textures_font = self.texture_fonts[font_id]
 

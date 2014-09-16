@@ -40,7 +40,7 @@ class TextureFont(object):
 
     def __init__(self, font):
 
-        self._logger.info('')
+        # self._logger.info('')
 
         self._font = font
 
@@ -65,7 +65,7 @@ class TextureFont(object):
  
     def _load_glyph(self, glyph_index, magnification):
 
-        self._logger.info("load glyph[{}]*{}".format(glyph_index, magnification))
+        # self._logger.info("load glyph[{}]*{}".format(glyph_index, magnification))
 
         atlas = self._atlas
 
