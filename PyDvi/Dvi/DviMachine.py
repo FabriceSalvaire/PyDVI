@@ -50,10 +50,10 @@ __all__ = ['Opcode_set_char',
            'Opcode_font',
            'Opcode_xxx',
            'DviFont',
-           'DviColorBlack',
-           'DviColorGray',
-           'DviColorRGB',
-           'DviColorCMYK',
+           'DviColourBlack',
+           'DviColourGray',
+           'DviColourRGB',
+           'DviColourCMYK',
            'DviProgam',
            'DviProgramPage',
            'DviMachine',
@@ -668,11 +668,13 @@ class DviFont(object):
 
 ####################################################################################################
 
-class DviColor(object):
+class DviColour(object):
 
     ##############################################
 
-    def __init__(self, red, green, blue, alpha=0):
+    def __init__(self, red, green, blue, alpha=1):
+
+        # alpha = 1 means fully opaque
 
         self.red, self.green, self.blue = red, green, blue
         self.alpha = alpha
@@ -685,7 +687,7 @@ class DviColor(object):
  
 ####################################################################################################
 
-class DviColorBlack(DviColor):
+class DviColourBlack(DviColour):
 
     """ This class implements the black colour. """
 
@@ -693,7 +695,7 @@ class DviColorBlack(DviColor):
 
     def __init__(self):
 
-        super(DviColorBlack, self).__init__(0, 0, 0)
+        super(DviColourBlack, self).__init__(0, 0, 0)
 
     ##############################################
 
@@ -703,7 +705,7 @@ class DviColorBlack(DviColor):
 
 ####################################################################################################
 
-class DviColorGray(DviColor):
+class DviColourGray(DviColour):
 
     """ This class implements gray colour. """
 
@@ -713,7 +715,7 @@ class DviColorGray(DviColor):
 
         self.gray_level = gray_level
 
-        super(DviColorGray, self).__init__(gray_level, gray_level, gray_level)
+        super(DviColourGray, self).__init__(gray_level, gray_level, gray_level)
 
     ##############################################
 
@@ -723,7 +725,7 @@ class DviColorGray(DviColor):
 
 ####################################################################################################
 
-class DviColorRGB(DviColor):
+class DviColourRGB(DviColour):
 
     """ This class implements RGB colour. """
 
@@ -735,7 +737,7 @@ class DviColorRGB(DviColor):
 
 ####################################################################################################
 
-class DviColorCMYK(DviColor):
+class DviColourCMYK(DviColour):
 
     """ This class implements CMYK colour. """
 
@@ -749,7 +751,7 @@ class DviColorCMYK(DviColor):
         green = (1 - magenta) * luminosity
         blue = (1 - yellow) * luminosity
 
-        super(DviColorCMYK, self).__init__(red, green, blue)
+        super(DviColourCMYK, self).__init__(red, green, blue)
 
         self.cyan, self.magenta, self.yellow, self.dark = cyan, magenta, yellow, dark
 
@@ -757,7 +759,9 @@ class DviColorCMYK(DviColor):
 
     def __str__(self):
 
-        return 'Colour CMYK (%.1f, %.1f, %.1f, %.1f)' % (self.cyan, self.magenta, self.yellow, self.dark)
+        template = 'Colour CMYK (%.1f, %.1f, %.1f, %.1f) RGB (%.1f, %.1f, %.1f)'
+        return  template % (self.cyan, self.magenta, self.yellow, self.dark,
+                            self.red, self.green, self.blue)
 
 ####################################################################################################
 
@@ -1033,7 +1037,7 @@ class DviMachine(object):
         self.current_opcode_program = None
         self.current_font_id = None
         self._registers_stack = [DviMachineRegisters()]
-        self._colour_stack = [DviColorBlack()]
+        self._colour_stack = [DviColourBlack()]
 
     ##############################################
 
@@ -1283,6 +1287,7 @@ class DviSimplifyMachine(DviMachine):
 
         words = xxx_code.split()
 
+
         try:
             operation = words[1]
             if operation == 'pop':
@@ -1291,13 +1296,13 @@ class DviSimplifyMachine(DviMachine):
             elif operation == 'push':
                 colour_class = words[2]
                 if colour_class == 'Black':
-                    colour = DviColorBlack()
+                    colour = DviColourBlack()
                 elif colour_class == 'gray':
-                    colour = DviColorGray(float(words[3]))
+                    colour = DviColourGray(float(words[3]))
                 elif colour_class == 'rgb':
-                    colour = DviColorRGB(* [float(x) for x in words[3:6]])
+                    colour = DviColourRGB(* [float(x) for x in words[3:6]])
                 elif colour_class == 'cmyk':
-                    colour = DviColorCMYK(* [float(x) for x in words[3:7]])
+                    colour = DviColourCMYK(* [float(x) for x in words[3:7]])
                 else:
                     raise ValueError('Unknown colour type')
                 return Opcode_push_colour(colour)
