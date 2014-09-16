@@ -42,8 +42,9 @@ class ApplicationStatusBar(object):
 
         self._status_bar = parent.statusBar()
 
-        label_definitions = (('coordinate_label', 'Coordinate of the pointer'),
-                             ('message_label', 'Message'),
+        label_definitions = (('message_label', 'Message'),
+                             ('coordinate_label', 'Coordinate of the pointer'),
+                             ('zoom_label', 'Zoom'),
                              )
 
         for attribute_name, tool_tip in label_definitions:
@@ -53,9 +54,11 @@ class ApplicationStatusBar(object):
         coordinate_max = 10**5
         self.update_coordinate_status(coordinate_max, coordinate_max)
         self.update_status_message('W'*30)
+        self.update_zoom_status(1)
 
-        for widget in (self.coordinate_label,
-                       self.message_label,
+        for widget in (self.message_label,
+                       self.coordinate_label,
+                       self.zoom_label,
                        ):
             # Permanently means that the widget may not be obscured by temporary messages. It is is
             # located at the far right of the status bar.
@@ -77,6 +80,13 @@ class ApplicationStatusBar(object):
 
         text = '({:.1f}, {:.1f}) mm'.format(x, y)
         self.coordinate_label.setText(text)
+
+    ##############################################
+
+    def update_zoom_status(self, zoom):
+
+        text = '{:.1f} %'.format(zoom*100)
+        self.zoom_label.setText(text)
 
 ####################################################################################################
 #

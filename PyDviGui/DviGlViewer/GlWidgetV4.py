@@ -31,6 +31,7 @@ from PyOpenGLng.HighLevelApi.Buffer import GlUniformBuffer
 from PyOpenGLng.HighLevelApi.Geometry import Point, Offset, Segment, Rectangle
 from PyOpenGLng.HighLevelApi.GlWidgetBase import GlWidgetBase
 from PyOpenGLng.HighLevelApi.ImageTexture import ImageTexture
+from PyOpenGLng.HighLevelApi.Ortho2D import XAXIS, YAXIS
 from PyOpenGLng.HighLevelApi.PrimitiveVertexArray import GlSegmentVertexArray, GlRectangleVertexArray
 from PyOpenGLng.Tools.Interval import IntervalInt2D
 
@@ -122,6 +123,9 @@ class GlWidget(GlWidgetBase):
 
     def _create_page_layout(self, width, height):
 
+        self._page_width = width
+        self._page_height = height
+
         # (page_x_min, page_y_min,
         #  text_width, text_height) = map(sp2mm,
         #                                 (page_bounding_box.x.inf,
@@ -194,12 +198,44 @@ class GlWidget(GlWidgetBase):
             width, height = 210, 297 # use A4
         self._create_page_layout(width, height)
 
-        interval = IntervalInt2D((0, width), (0, height))
-        interval.enlarge(10) # mm
-        self.zoom_interval(interval)
+        self._logger.info('update DVI done')
 
         self._paint_page = True
-        self._logger.info('update DVI done')
+
+        self.fit_document()
+
+    ##############################################
+
+    def update(self):
+
+        super(GlWidget, self).update()
+        if self._paint_page:
+            self._update_zoom_status()
+
+    ##############################################
+
+    def resizeGL(self, width, height):
+
+        super(GlWidget, self).resizeGL(width, height)
+
+        dpi = self._application.platform.screens[0].dpi[0]
+        self._width_widget_mm = width/float(dpi)*25.4
+
+    ##############################################
+
+    def _update_zoom_status(self):
+
+        # xdpyinfo:
+        #   dimensions:    1600x900 pixels (423x238 millimeters) # Wrong !!!
+        #   resolution:    96x96 dots per inch
+        # monitor-edid:
+        #   Screen size: 30.9 cm x 17.4 cm (13.96 inches, aspect ratio 16/9 = 1.78)
+        # 1600/(309./25.4) -> 131 dpi
+
+        # gl_zoom = self.glortho2d.zoom_manager.zoom_factor
+        area = self.glortho2d.viewport_area.area
+        zoom = self._width_widget_mm / area.x.length() 
+        self._main_window.status_bar.update_zoom_status(zoom)
 
     ##############################################
 
@@ -267,6 +303,13 @@ class GlWidget(GlWidgetBase):
 
     ##############################################
 
+    def mousePressEvent(self, event):
+
+        if event.buttons() & QtCore.Qt.LeftButton:
+            self._show_coordinate(event)
+
+    ##############################################
+
     def mouseMoveEvent(self, event):
 
         self._show_coordinate(event)
@@ -277,7 +320,59 @@ class GlWidget(GlWidgetBase):
 
         coordinate = self.window_to_gl_coordinate(event)
         x, y = coordinate
+        y = self._page_height - y
         self._main_window.status_bar.update_coordinate_status(x, y)
+
+    ##############################################
+
+    def fit_width(self):
+
+        if self._paint_page:
+            self.glortho2d.fit_axis(self._page_width, XAXIS)
+            self.update()
+
+    ##############################################
+
+    def fit_document(self):
+
+        if self._paint_page:
+            interval = IntervalInt2D((0, self._page_width), (0, self._page_height))
+            interval.enlarge(10) # mm
+            self.zoom_interval(interval)
+
+    ##############################################
+
+    def translate_x(self, dx):
+
+        area = self.glortho2d.viewport_area.area
+        # Fixme: cf. check_axis_interval
+        if ((dx > 0 and area.x.sup + dx <= self._page_width)
+            or (dx < 0 and area.x.inf + dx >= 0)):
+            self.glortho2d.translate(dx, XAXIS)
+            self.update()
+
+    ##############################################
+
+    def translate_y(self, dy):
+
+        area = self.glortho2d.viewport_area.area
+        # Fixme: cf. check_axis_interval
+        if ((dy > 0 and area.y.sup + dy <= self._page_height)
+            or (dy < 0 and area.y.inf + dy >= 0)):
+            self.glortho2d.translate(dy, YAXIS)
+            self.update()
+
+    ##############################################
+
+    def zoom_in_out(self, direction):
+
+        zoom_factor = self.glortho2d.zoom_manager.zoom_factor
+        if direction > 0:
+            zoom_factor *= self.zoom_step
+        else:
+            zoom_factor /= self.zoom_step
+        self.glortho2d.zoom_at_center(zoom_factor)
+        self.update()
 
 ####################################################################################################
 #

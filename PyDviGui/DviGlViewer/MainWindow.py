@@ -96,6 +96,56 @@ class MainWindow(MainWindowBase):
                           shortcutContext=QtCore.Qt.ApplicationShortcut,
                           )
 
+        self._zoom_in_action = \
+            QtGui.QAction(icon_loader['zoom-in'],
+                          'Zoom in',
+                          self,
+                          toolTip='Zoom in',
+                          triggered=lambda: self.zoom_in(),
+                          shortcut='Ctrl++',
+                          shortcutContext=QtCore.Qt.ApplicationShortcut,
+                          )
+
+        self._zoom_out_action = \
+            QtGui.QAction(icon_loader['zoom-out'],
+                          'Zoom out',
+                          self,
+                          toolTip='Zoom out',
+                          triggered=lambda: self.zoom_out(),
+                          shortcut='Ctrl+-',
+                          shortcutContext=QtCore.Qt.ApplicationShortcut,
+                          )
+
+        self._fit_width_action = \
+            QtGui.QAction(icon_loader['zoom-fit-width'],
+                          'Fit Width',
+                          self,
+                          toolTip='Fit width',
+                          triggered=lambda: self.fit_width(),
+                          shortcut='Ctrl+W',
+                          shortcutContext=QtCore.Qt.ApplicationShortcut,
+                          )
+
+        self._fit_document_action = \
+            QtGui.QAction(icon_loader['zoom-fit-best'],
+                          'Fit document',
+                          self,
+                          toolTip='Fit document',
+                          triggered=lambda: self.fit_document(),
+                          shortcut='Ctrl+B',
+                          shortcutContext=QtCore.Qt.ApplicationShortcut,
+                          )
+
+        self._refresh_action = \
+            QtGui.QAction(icon_loader['view-refresh'],
+                          'Refresh',
+                          self,
+                          toolTip='Refresh',
+                          triggered=lambda: self.refresh(),
+                          shortcut='Ctrl+R',
+                          shortcutContext=QtCore.Qt.ApplicationShortcut,
+                          )
+
     ##############################################
     
     def _create_toolbar(self):
@@ -110,6 +160,11 @@ class MainWindow(MainWindowBase):
                      self._page_index_line_edit,
                      self._last_page_index_label,
                      self._next_page_action,
+                     self._refresh_action,
+                     self._zoom_in_action,
+                     self._zoom_out_action,
+                     self._fit_width_action,
+                     self._fit_document_action,
                     ):
             if isinstance(item,QtGui.QAction):
                 self._page_tool_bar.addAction(item)
@@ -149,6 +204,36 @@ class MainWindow(MainWindowBase):
         if self._page_index < (self._application.number_of_pages - 1):
             self._page_index += 1
             self._run_page()
+
+    ##############################################
+
+    def refresh(self):
+
+        self.graphics_view.update()
+
+    ##############################################
+
+    def zoom_in(self):
+
+        self.graphics_view.zoom_in_out(direction=1)
+
+    ##############################################
+
+    def zoom_out(self):
+
+        self.graphics_view.zoom_in_out(direction=-1)
+
+    ##############################################
+
+    def fit_width(self):
+
+        self.graphics_view.fit_width()
+
+    ##############################################
+
+    def fit_document(self):
+
+        self.graphics_view.fit_document()
 
 ####################################################################################################
 #
