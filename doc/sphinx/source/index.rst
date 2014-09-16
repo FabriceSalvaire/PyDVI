@@ -15,7 +15,7 @@ Welcome to the PyDvi documentation!
     git repository after each commit.
 
     As opposite the |PyDviHomePage|_ is built manually and is thus less prone to errors.
-     
+
 .. include:: introduction.txt
 
 ==============
