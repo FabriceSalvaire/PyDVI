@@ -28,6 +28,10 @@ A DVI stream can come from a file or a TeX daemon in order to render TeX inputs 
 The DVI parser of PyDvi builds a program from a DVI stream that could be later processed by the
 provided DVI machine which is designed to be subclassed by the user.
 
+.. image:: /images/dvi-gl-viewer.scaled.png
+  :scale: 50%	   
+  :align: right
+
 The source code includes as exemple an experimental DVI viewer which uses the OpenGL API for the
 rendering and thus feature an hardware accelerated rendering. PyDvi and the viewer can be used as an
 platform to experiment complex text rendering on GPU.

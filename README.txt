@@ -17,6 +17,8 @@ Written by `Fabrice Salvaire <http://fabrice-salvaire.pagesperso-orange.fr>`_.
 
 -----
 
+.. image:: https://raw.github.com/FabriceSalvaire/PyDvi/master/doc/sphinx/source/images/dvi-gl-viewer.scaled.png
+
 .. include:: introduction.txt
 
 .. include:: installation.rst
