@@ -26,7 +26,7 @@ import sys
 
 ####################################################################################################
 
-from PyDvi.Font.VfFont import VfFont
+from PyDvi.Font.VirtualFont import VirtualFont
 from PyDvi.Kpathsea import kpsewhich
 
 ####################################################################################################
@@ -47,7 +47,7 @@ if vf_file is None:
     print 'VF file %s not found' % (args.font)
     sys.exit(1)
 
-vf_font = VfFont(font_manager=None, font_id=0, name=args.font)
+vf_font = VirtualFont(font_manager=None, font_id=0, name=args.font)
 vf_font.print_summary()
 
 ####################################################################################################

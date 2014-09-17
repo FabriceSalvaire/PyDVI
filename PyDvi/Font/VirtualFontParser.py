@@ -18,13 +18,14 @@
 # 
 ####################################################################################################
 
-"""
-The VfFontParser module provides a tool to parse virtual font files.  They have the ".vf" extension.
+"""The VirtualFontParser module provides a tool to parse virtual font files.  They have the ".vf"
+extension.
+
 """
 
 ####################################################################################################
 
-__all__ = ['VfFontParser']
+__all__ = ['VirtualFontParser']
 
 ####################################################################################################
 
@@ -136,9 +137,9 @@ opcode_definitions = (
     ( vf_opcodes.POST, 'post', 'postamble beginning', None, None ),
     )
 
-class VfFontParser(object):
+class VirtualFontParser(object):
 
-    _logger = _module_logger.getChild('VfFontParser')
+    _logger = _module_logger.getChild('VirtualFontParser')
 
     opcode_parser_set = OpcodeParserSet(opcode_definitions)
 
@@ -147,7 +148,7 @@ class VfFontParser(object):
     @staticmethod
     def parse(vf_font):
 
-        VfFontParser(vf_font)
+        VirtualFontParser(vf_font)
 
     ##############################################
 

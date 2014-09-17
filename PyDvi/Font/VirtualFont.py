@@ -20,13 +20,13 @@
 
 ####################################################################################################
 
-__all__ = ['VfFont']
+__all__ = ['VirtualFont']
 
 ####################################################################################################
 
 from ..Tools.Logging import print_card
 from .Font import Font, font_types
-from .VfFontParser import VfFontParser
+from .VirtualFontParser import VirtualFontParser
 
 ####################################################################################################
 
@@ -42,7 +42,7 @@ class VirtualCharacter(object):
 
 ####################################################################################################
 
-class VfFont(Font):
+class VirtualFont(Font):
 
     """This class implements the virtual font type in the font manager. """
 
@@ -54,11 +54,11 @@ class VfFont(Font):
 
     def __init__(self, font_manager, font_id, name):
 
-        super(VfFont, self).__init__(font_manager, font_id, name)
+        super(VirtualFont, self).__init__(font_manager, font_id, name)
 
         self.fonts = {}
         self._characters = {}
-        VfFontParser.parse(self)
+        VirtualFontParser.parse(self)
 
     ##############################################
  

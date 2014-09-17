@@ -67,11 +67,11 @@ import logging
 
 from ..Kpathsea import kpsewhich
 from ..Tools.FuncTools import get_filename_extension
-from .Font import font_types, sort_font_class
+from .Font import font_types, sort_font_class, FontNotFound
 from .FontMap import FontMap
 from .PkFont import PkFont
 from .Type1Font import Type1Font
-from .VfFont import VfFont
+from .VirtualFont import VirtualFont
 
 ####################################################################################################
 
@@ -85,9 +85,11 @@ class FontManager(object):
 
     """
 
-    _font_classes = sort_font_class(PkFont, Type1Font, VfFont)
+    _font_classes = sort_font_class(PkFont, Type1Font, VirtualFont)
 
     _extension_to_font_class = {x.extension:x for x in _font_classes}
+
+    _logger = _module_logger.getChild('FontManager')
 
     ##############################################
 
@@ -137,10 +139,14 @@ class FontManager(object):
             font = self._fonts[font_name]
         else:
             # Fixme: why code differs?
-            if self._use_pk:
-                font = self._load_font(font_types.Pk, font_name)
-            else:
-                font = self._fonts[font_name] = self._load_mapped_font(font_name)
+            try:
+                if self._use_pk:
+                    font = self._load_font(font_types.Pk, font_name)
+                else:
+                    font = self._fonts[font_name] = self._load_mapped_font(font_name)
+            except FontNotFound:
+                # We try to load a virtual font as a last resort
+                font = self._fonts[font_name] = self._load_virtual_font(font_name)
 
         return font
 
@@ -176,13 +182,21 @@ class FontManager(object):
         try:
             font_map_entry = self._font_map[tex_font_name]
             # font_map_entry.print_summary()
-            font_class = self._get_font_class_by_filename(font_map_entry.pfb_filename)
-            _module_logger.debug("Font %s is mapped to %s" % (tex_font_name, font_map_entry.pfb_filename))
-        except:
-            raise NameError("Could not found a mapped font for %s" % (tex_font_name))
-            # return self.load_font(font_types.Pk, tex_font_name)
+            filename = font_map_entry.pfb_filename
+            font_class = self._get_font_class_by_filename(filename)
+            self._logger.debug("Font %s is mapped to %s" % (tex_font_name, filename))
+            return font_class(self, self._get_new_font_id(), filename)
+        except KeyError:
+            raise FontNotFound("Could not found a mapped font for %s" % (tex_font_name))
 
-        return font_class(self, self._get_new_font_id(), font_map_entry.pfb_filename)
+    ##############################################
+  
+    def _load_virtual_font(self, tex_font_name):
+        
+        try:
+            return VirtualFont(self, self._get_new_font_id(), tex_font_name)
+        except KeyError:
+            raise FontNotFound("Could not found a mapped font for %s" % (tex_font_name))
 
 ####################################################################################################
 #

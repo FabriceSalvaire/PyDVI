@@ -58,6 +58,11 @@ def sort_font_class(*args):
 
 ####################################################################################################
 
+class FontNotFound(NameError):
+    pass
+
+####################################################################################################
+
 class Font(object):
 
     """This class is a base class for font managed by the Font Manager.
@@ -109,7 +114,7 @@ class Font(object):
         basename = self.basename()
         self.filename = kpsewhich(basename, options=kpsewhich_options)
         if self.filename is None:
-            raise NameError("Font file %s not found" % (basename))
+            raise FontNotFound("Font file %s not found" % (basename))
 
     ##############################################
 
