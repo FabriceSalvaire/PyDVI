@@ -13,5 +13,8 @@
   Font/Tfm
   Font/TfmParser
   Font/Type1Font
+  Font/VfFont
+  Font/VfFontParser
+  Font/VirtualCharacter
 
 .. End
