@@ -12,8 +12,8 @@
 PyDvi is a |Python|_ module which is able to read the DVI (DeVice Independent) file format, the
 native output of the famous TeX typesetting program implemented by |Knuth|_.
 
-PyDvi is also able to read most of the file formats associated to the TeX world like Packed Font,
-TeX Font Metric, Font Map and Font Encoding.
+PyDvi is also able to read most of the file formats associated to the TeX world like packed font,
+virtual font, TeX font metric, font map and font encoding.
 
 Basically a DVI file describes the layout of a page by a list of opcodes that interact with a
 register machine to update the position on the page, to load fonts and to paint glyphs and rules. In

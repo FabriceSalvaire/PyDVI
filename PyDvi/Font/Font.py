@@ -50,7 +50,7 @@ from .TfmParser import TfmParser
 # Fixme: we could use a metaclass to register the font classes
 
 #: Font Type Enumerate 
-font_types = EnumFactory('FontTypes', ('Pk', 'Type1', 'TrueType', 'OpenType'))
+font_types = EnumFactory('FontTypes', ('Pk', 'Vf', 'Type1', 'TrueType', 'OpenType'))
 
 def sort_font_class(*args):
     """ Sort a list of :class:`Font` instance by font type enumerate. """
@@ -133,7 +133,7 @@ class Font(object):
 
     ##############################################
 
-    def _print_header(self):
+    def print_header(self):
 
         string_format = """%s %s
 
@@ -151,7 +151,7 @@ class Font(object):
 
     def print_summary(self):
 
-        print_card(self._print_header())
+        print_card(self.print_header())
 
 ####################################################################################################
 #

@@ -71,6 +71,7 @@ from .Font import font_types, sort_font_class
 from .FontMap import FontMap
 from .PkFont import PkFont
 from .Type1Font import Type1Font
+from .VfFont import VfFont
 
 ####################################################################################################
 
@@ -84,7 +85,7 @@ class FontManager(object):
 
     """
 
-    _font_classes = sort_font_class(PkFont, Type1Font)
+    _font_classes = sort_font_class(PkFont, Type1Font, VfFont)
 
     _extension_to_font_class = {x.extension:x for x in _font_classes}
 

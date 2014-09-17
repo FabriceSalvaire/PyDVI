@@ -1,14 +1,8 @@
 ####################################################################################################
-#
-# PyDvi - A Python Library to Process DVI Stream.
-# Copyright (C) 2011 Salvaire Fabrice
-#
-####################################################################################################
-
-####################################################################################################
-#
-# Audit
-#
+# 
+# @Project@ - @ProjectDescription@.
+# Copyright (C) 2014 Fabrice Salvaire
+# 
 ####################################################################################################
 
 ####################################################################################################
@@ -19,9 +13,8 @@ import sys
 
 ####################################################################################################
 
+from PyDvi.Font.VfFont import VfFont
 from PyDvi.Kpathsea import kpsewhich
-from PyDvi.Font.PkFont import PkFont
-from PyDvi.Font.PkFontParser import PkFontParser
 
 ####################################################################################################
 
@@ -29,19 +22,20 @@ logging.basicConfig(level=logging.DEBUG)
 
 ####################################################################################################
 
-parser = argparse.ArgumentParser(description='Test PK Font.')
-parser.add_argument('font', metavar='Font',
-                    help='Font name, e.g. cmr10')
+parser = argparse.ArgumentParser(description='Test Virtual Font.')
+parser.add_argument('font', metavar='VirtualFont',
+                    help='Font name, e.g. phvr7t')
 args = parser.parse_args()
 
 ####################################################################################################
 
-pk_file = kpsewhich(args.font, file_format='pk', options='-mode nextscrn -dpi 100 -mktex=pk')
-if pk_file is None:
-    print 'PK file %s not found' % (args.font)
+vf_file = kpsewhich(args.font, file_format='vf')
+if vf_file is None:
+    print 'VF file %s not found' % (args.font)
     sys.exit(1)
 
-pk_font = PkFont(font_manager=None, font_id=0, name=args.font)
+vf_font = VfFont(font_manager=None, font_id=0, name=args.font)
+vf_font.print_summary()
 
 ####################################################################################################
 #
