@@ -2,7 +2,7 @@
  Device-Independent File Format
 ================================
 
-The Device-independent file format in descriped in the :file:`dvitype.web` file from Web2C.  Part of
+The Device-independent file format is described in the :file:`dvitype.web` file from Web2C.  Part of
 this documentation comes from this file.
 
 The DVI format was designed by David R. Fuchs in 1979.
@@ -11,7 +11,7 @@ A DVI file is a stream of 8-bit bytes, which may be regarded as a series of comm
 machine-like language.  The first byte of each command is the operation code, and this code is
 followed by zero or more bytes that provide parameters to the command.  The parameters themselves
 may consist of several consecutive bytes; for example, the ``set_rule`` command has two parameters,
-each of which is four bytes long.  Parameters are usually regarded as nonnegative integers; but
+each of which is four bytes long.  Parameters are usually regarded as non negative integers; but
 four-byte-long parameters, and shorter parameters that denote distances, can be either positive or
 negative.  Such parameters are given in two's complement notation.  For example, a two-byte-long
 distance parameter has a value between -2**15 and 2**15 -1.
@@ -88,7 +88,7 @@ Imagine that.
 its bottom left corner at ``(h, v)``.  Then set ``h = h + b``.  If either ``a <= 0`` or ``b <= 0``,
 nothing should be typeset.  Note that if ``b < 0``, the value of ``h`` will decrease even though
 nothing else happens.  Programs that typeset from DVI files should be careful to make the rules line
-up carefully with digitized characters, as explained in connection with the rule pixels subroutine
+up carefully with digitised characters, as explained in connection with the rule pixels subroutine
 below.
 
 ``put1 133 c[1]``.  Typeset character number ``c`` from font ``f`` such that the reference point of
@@ -140,7 +140,7 @@ moves left.
 ``right4 146 b[4]``.  Same as ``right1``, except that ``b`` is a four-byte quantity in the range
 ``-2**31 <= b < 2**31``.
 
-``w0 147``.  Set  ``h = h + w``; i.e. move right ``w`` units.  With luck, this parameterless command will
+``w0 147``.  Set  ``h = h + w``; i.e. move right ``w`` units.  With luck, this parameter-less command will
 usually suffice, because the same kind of motion will occur several times in succession; the
 following commands explain how ``w`` gets particular values.
 
@@ -180,7 +180,7 @@ moves up.
 ``down4 160 a[4]``.  Same as ``down1``, except that ``a`` is a four-byte quantity in the range
 ``-2**31 <= a < 2**31``.
 
-``y0 161``.  Set ``v = v + y``; i.e. move down ``y`` units.  With luck, this parameterless command
+``y0 161``.  Set ``v = v + y``; i.e. move down ``y`` units.  With luck, this parameter-less command
 will usually suffice, because the same kind of motion will occur several times in succession; the
 following commands explain how ``y`` gets particular values.
 
@@ -218,7 +218,7 @@ respectively.
 
 ``fnt2 236 k[2]``.  Same as ``fnt1``, except that ``k`` is two bytes long, so it is in the range ``0
 <= k < 65536``.  TEX82 never generates this command, but large font numbers may prove useful for
-specifications of color or texture, or they may be used for special fonts that have fixed numbers in
+specifications of colour or texture, or they may be used for special fonts that have fixed numbers in
 some external coding scheme.
 
 ``fnt3 237 k[3]``.  Same as ``fnt1``, except that ``k`` is three bytes long, so it can be as large
@@ -270,7 +270,7 @@ typesetting.
 The next two parameters, ``num`` and ``den``, are positive integers that define the units of
 measurement; they are the numerator and denominator of a fraction by which all dimensions in the DVI
 file could be multiplied in order to get lengths in units of 1e-7 meters.  (For example, there are
-exactly 7227 TEX points in 254 centimeters, and TEX82 works with scaled points where there are 216
+exactly 7227 TEX points in 254 centimetres, and TEX82 works with scaled points where there are 216
 sp in a point, so TEX82 sets ``num = 25400000`` and ``den = 7227 * 2**16 = 473628672``.)
 
 The ``mag`` parameter is what TEX82 calls ``mag``, i.e. 1000 times the desired magnification.  The
@@ -308,7 +308,7 @@ if at all.  Like ``nop`` commands, font definitions can appear before the first 
 an ``eop`` and a ``bop``.
 
 The last page in a DVI file is followed by ``post``; this command introduces the postamble, which
-summarizes important facts that TEX has accumulated about the file, making it possible to print
+summarises important facts that TEX has accumulated about the file, making it possible to print
 subsets of the data with reasonable efficiency.  The postamble has the form::
 
   post p[4] num[4] den [4] mag[4] l[4] u[4] s[2] t[2]
@@ -323,7 +323,7 @@ of the widest page, in the same units as other dimensions of the file.  These nu
 by a DVI-reading program to position individual "pages" on large sheets of film or paper; however,
 the standard convention for output on normal size paper is to position each page so that the upper
 left-hand corner is exactly one inch from the left and the top.  Experience has shown that it is
-unwise to design DVI-to-printer software that attempts cleverly to center the output; a fixed
+unwise to design DVI-to-printer software that attempts cleverly to centre the output; a fixed
 position of the upper left corner is easiest for users to understand and to work with.  Therefore
 ``l`` and ``u`` are often ignored.
 
@@ -341,10 +341,10 @@ definitions, contains ``q``, a pointer to the ``post`` command that started the 
 identification byte ``i``, comes next; this currently equals 2, as in the preamble.
 
 The ``i`` byte is followed by four or more bytes that are all equal to the decimal number 223.  TEX
-puts out four to seven of these trailing bytes, until the total length of the le is a multiple of
-four bytes, since this works out best on machines that pack four bytes per word; but any number of
-223's is allowed, as long as there are at least four of them.  In effect, 223 is a sort of signature
-that is added at the very end.
+puts out four to seven of these trailing bytes, until the total length of the file length is a
+multiple of four bytes, since this works out best on machines that pack four bytes per word; but any
+number of 223's is allowed, as long as there are at least four of them.  In effect, 223 is a sort of
+signature that is added at the very end.
 
 This curious way to finish off a DVI file makes it feasible for DVI-reading programs to find the
 postamble first, on most computers, even though TEX wants to write the postamble last.  Most

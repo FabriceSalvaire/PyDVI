@@ -58,14 +58,14 @@
             
   <div class="section" id="device-independent-file-format">
 <h1>4.1. Device-Independent File Format<a class="headerlink" href="#device-independent-file-format" title="Permalink to this headline">¶</a></h1>
-<p>The Device-independent file format in descriped in the <tt class="file docutils literal"><span class="pre">dvitype.web</span></tt> file from Web2C.  Part of
+<p>The Device-independent file format is described in the <tt class="file docutils literal"><span class="pre">dvitype.web</span></tt> file from Web2C.  Part of
 this documentation comes from this file.</p>
 <p>The DVI format was designed by David R. Fuchs in 1979.</p>
 <p>A DVI file is a stream of 8-bit bytes, which may be regarded as a series of commands in a
 machine-like language.  The first byte of each command is the operation code, and this code is
 followed by zero or more bytes that provide parameters to the command.  The parameters themselves
 may consist of several consecutive bytes; for example, the <tt class="docutils literal"><span class="pre">set_rule</span></tt> command has two parameters,
-each of which is four bytes long.  Parameters are usually regarded as nonnegative integers; but
+each of which is four bytes long.  Parameters are usually regarded as non negative integers; but
 four-byte-long parameters, and shorter parameters that denote distances, can be either positive or
 negative.  Such parameters are given in two&#8217;s complement notation.  For example, a two-byte-long
 distance parameter has a value between -2**15 and 2**15 -1.</p>
@@ -130,7 +130,7 @@ Imagine that.</p>
 its bottom left corner at <tt class="docutils literal"><span class="pre">(h,</span> <span class="pre">v)</span></tt>.  Then set <tt class="docutils literal"><span class="pre">h</span> <span class="pre">=</span> <span class="pre">h</span> <span class="pre">+</span> <span class="pre">b</span></tt>.  If either <tt class="docutils literal"><span class="pre">a</span> <span class="pre">&lt;=</span> <span class="pre">0</span></tt> or <tt class="docutils literal"><span class="pre">b</span> <span class="pre">&lt;=</span> <span class="pre">0</span></tt>,
 nothing should be typeset.  Note that if <tt class="docutils literal"><span class="pre">b</span> <span class="pre">&lt;</span> <span class="pre">0</span></tt>, the value of <tt class="docutils literal"><span class="pre">h</span></tt> will decrease even though
 nothing else happens.  Programs that typeset from DVI files should be careful to make the rules line
-up carefully with digitized characters, as explained in connection with the rule pixels subroutine
+up carefully with digitised characters, as explained in connection with the rule pixels subroutine
 below.</p>
 <p><tt class="docutils literal"><span class="pre">put1</span> <span class="pre">133</span> <span class="pre">c[1]</span></tt>.  Typeset character number <tt class="docutils literal"><span class="pre">c</span></tt> from font <tt class="docutils literal"><span class="pre">f</span></tt> such that the reference point of
 the character is at <tt class="docutils literal"><span class="pre">(h,</span> <span class="pre">v)</span></tt>.  (The <tt class="docutils literal"><span class="pre">put</span></tt> commands are exactly like the <tt class="docutils literal"><span class="pre">set</span></tt> commands, except
@@ -167,7 +167,7 @@ moves left.</p>
 <tt class="docutils literal"><span class="pre">-2**23</span> <span class="pre">&lt;=</span> <span class="pre">b</span> <span class="pre">&lt;</span> <span class="pre">2**23</span></tt>.</p>
 <p><tt class="docutils literal"><span class="pre">right4</span> <span class="pre">146</span> <span class="pre">b[4]</span></tt>.  Same as <tt class="docutils literal"><span class="pre">right1</span></tt>, except that <tt class="docutils literal"><span class="pre">b</span></tt> is a four-byte quantity in the range
 <tt class="docutils literal"><span class="pre">-2**31</span> <span class="pre">&lt;=</span> <span class="pre">b</span> <span class="pre">&lt;</span> <span class="pre">2**31</span></tt>.</p>
-<p><tt class="docutils literal"><span class="pre">w0</span> <span class="pre">147</span></tt>.  Set  <tt class="docutils literal"><span class="pre">h</span> <span class="pre">=</span> <span class="pre">h</span> <span class="pre">+</span> <span class="pre">w</span></tt>; i.e. move right <tt class="docutils literal"><span class="pre">w</span></tt> units.  With luck, this parameterless command will
+<p><tt class="docutils literal"><span class="pre">w0</span> <span class="pre">147</span></tt>.  Set  <tt class="docutils literal"><span class="pre">h</span> <span class="pre">=</span> <span class="pre">h</span> <span class="pre">+</span> <span class="pre">w</span></tt>; i.e. move right <tt class="docutils literal"><span class="pre">w</span></tt> units.  With luck, this parameter-less command will
 usually suffice, because the same kind of motion will occur several times in succession; the
 following commands explain how <tt class="docutils literal"><span class="pre">w</span></tt> gets particular values.</p>
 <p><tt class="docutils literal"><span class="pre">w1</span> <span class="pre">148</span> <span class="pre">b[1]</span></tt>.  Set <tt class="docutils literal"><span class="pre">w</span> <span class="pre">=</span> <span class="pre">b</span></tt> and <tt class="docutils literal"><span class="pre">h</span> <span class="pre">=</span> <span class="pre">h</span> <span class="pre">+</span> <span class="pre">b</span></tt>.  The value of <tt class="docutils literal"><span class="pre">b</span></tt> is a signed quantity in two&#8217;s
@@ -193,7 +193,7 @@ moves up.</p>
 <tt class="docutils literal"><span class="pre">-2**23</span> <span class="pre">&lt;=</span> <span class="pre">a</span> <span class="pre">&lt;</span> <span class="pre">2**23</span></tt>.</p>
 <p><tt class="docutils literal"><span class="pre">down4</span> <span class="pre">160</span> <span class="pre">a[4]</span></tt>.  Same as <tt class="docutils literal"><span class="pre">down1</span></tt>, except that <tt class="docutils literal"><span class="pre">a</span></tt> is a four-byte quantity in the range
 <tt class="docutils literal"><span class="pre">-2**31</span> <span class="pre">&lt;=</span> <span class="pre">a</span> <span class="pre">&lt;</span> <span class="pre">2**31</span></tt>.</p>
-<p><tt class="docutils literal"><span class="pre">y0</span> <span class="pre">161</span></tt>.  Set <tt class="docutils literal"><span class="pre">v</span> <span class="pre">=</span> <span class="pre">v</span> <span class="pre">+</span> <span class="pre">y</span></tt>; i.e. move down <tt class="docutils literal"><span class="pre">y</span></tt> units.  With luck, this parameterless command
+<p><tt class="docutils literal"><span class="pre">y0</span> <span class="pre">161</span></tt>.  Set <tt class="docutils literal"><span class="pre">v</span> <span class="pre">=</span> <span class="pre">v</span> <span class="pre">+</span> <span class="pre">y</span></tt>; i.e. move down <tt class="docutils literal"><span class="pre">y</span></tt> units.  With luck, this parameter-less command
 will usually suffice, because the same kind of motion will occur several times in succession; the
 following commands explain how <tt class="docutils literal"><span class="pre">y</span></tt> gets particular values.</p>
 <p><tt class="docutils literal"><span class="pre">y1</span> <span class="pre">162</span> <span class="pre">a[1]</span></tt>.  Set <tt class="docutils literal"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">a</span></tt> and <tt class="docutils literal"><span class="pre">v</span> <span class="pre">=</span> <span class="pre">v</span> <span class="pre">+</span> <span class="pre">a</span></tt>.  The value of <tt class="docutils literal"><span class="pre">a</span></tt> is a signed quantity in two&#8217;s
@@ -218,7 +218,7 @@ respectively.</p>
 <span class="pre">256</span></tt>.</p>
 <p><tt class="docutils literal"><span class="pre">fnt2</span> <span class="pre">236</span> <span class="pre">k[2]</span></tt>.  Same as <tt class="docutils literal"><span class="pre">fnt1</span></tt>, except that <tt class="docutils literal"><span class="pre">k</span></tt> is two bytes long, so it is in the range <tt class="docutils literal"><span class="pre">0</span>
 <span class="pre">&lt;=</span> <span class="pre">k</span> <span class="pre">&lt;</span> <span class="pre">65536</span></tt>.  TEX82 never generates this command, but large font numbers may prove useful for
-specifications of color or texture, or they may be used for special fonts that have fixed numbers in
+specifications of colour or texture, or they may be used for special fonts that have fixed numbers in
 some external coding scheme.</p>
 <p><tt class="docutils literal"><span class="pre">fnt3</span> <span class="pre">237</span> <span class="pre">k[3]</span></tt>.  Same as <tt class="docutils literal"><span class="pre">fnt1</span></tt>, except that <tt class="docutils literal"><span class="pre">k</span></tt> is three bytes long, so it can be as large
 as <tt class="docutils literal"><span class="pre">2**24</span> <span class="pre">-</span> <span class="pre">1</span></tt>.</p>
@@ -253,7 +253,7 @@ typesetting.</p>
 <p>The next two parameters, <tt class="docutils literal"><span class="pre">num</span></tt> and <tt class="docutils literal"><span class="pre">den</span></tt>, are positive integers that define the units of
 measurement; they are the numerator and denominator of a fraction by which all dimensions in the DVI
 file could be multiplied in order to get lengths in units of 1e-7 meters.  (For example, there are
-exactly 7227 TEX points in 254 centimeters, and TEX82 works with scaled points where there are 216
+exactly 7227 TEX points in 254 centimetres, and TEX82 works with scaled points where there are 216
 sp in a point, so TEX82 sets <tt class="docutils literal"><span class="pre">num</span> <span class="pre">=</span> <span class="pre">25400000</span></tt> and <tt class="docutils literal"><span class="pre">den</span> <span class="pre">=</span> <span class="pre">7227</span> <span class="pre">*</span> <span class="pre">2**16</span> <span class="pre">=</span> <span class="pre">473628672</span></tt>.)</p>
 <p>The <tt class="docutils literal"><span class="pre">mag</span></tt> parameter is what TEX82 calls <tt class="docutils literal"><span class="pre">mag</span></tt>, i.e. 1000 times the desired magnification.  The
 actual fraction by which dimensions are multiplied is therefore <tt class="docutils literal"><span class="pre">mn/1000d</span></tt>.  Note that if a TEX
@@ -283,7 +283,7 @@ the postamble as well as in the pages, so in this sense each font number is defi
 if at all.  Like <tt class="docutils literal"><span class="pre">nop</span></tt> commands, font definitions can appear before the first <tt class="docutils literal"><span class="pre">bop</span></tt>, or between
 an <tt class="docutils literal"><span class="pre">eop</span></tt> and a <tt class="docutils literal"><span class="pre">bop</span></tt>.</p>
 <p>The last page in a DVI file is followed by <tt class="docutils literal"><span class="pre">post</span></tt>; this command introduces the postamble, which
-summarizes important facts that TEX has accumulated about the file, making it possible to print
+summarises important facts that TEX has accumulated about the file, making it possible to print
 subsets of the data with reasonable efficiency.  The postamble has the form:</p>
 <div class="highlight-python"><pre>post p[4] num[4] den [4] mag[4] l[4] u[4] s[2] t[2]
 font definitions
@@ -296,7 +296,7 @@ of the widest page, in the same units as other dimensions of the file.  These nu
 by a DVI-reading program to position individual &#8220;pages&#8221; on large sheets of film or paper; however,
 the standard convention for output on normal size paper is to position each page so that the upper
 left-hand corner is exactly one inch from the left and the top.  Experience has shown that it is
-unwise to design DVI-to-printer software that attempts cleverly to center the output; a fixed
+unwise to design DVI-to-printer software that attempts cleverly to centre the output; a fixed
 position of the upper left corner is easiest for users to understand and to work with.  Therefore
 <tt class="docutils literal"><span class="pre">l</span></tt> and <tt class="docutils literal"><span class="pre">u</span></tt> are often ignored.</p>
 <p>Parameter <tt class="docutils literal"><span class="pre">s</span></tt> is the maximum stack depth (i.e. the largest excess of <tt class="docutils literal"><span class="pre">push</span></tt> commands over
@@ -310,10 +310,10 @@ once in the postamble.</p>
 definitions, contains <tt class="docutils literal"><span class="pre">q</span></tt>, a pointer to the <tt class="docutils literal"><span class="pre">post</span></tt> command that started the postamble.  An
 identification byte <tt class="docutils literal"><span class="pre">i</span></tt>, comes next; this currently equals 2, as in the preamble.</p>
 <p>The <tt class="docutils literal"><span class="pre">i</span></tt> byte is followed by four or more bytes that are all equal to the decimal number 223.  TEX
-puts out four to seven of these trailing bytes, until the total length of the le is a multiple of
-four bytes, since this works out best on machines that pack four bytes per word; but any number of
-223&#8217;s is allowed, as long as there are at least four of them.  In effect, 223 is a sort of signature
-that is added at the very end.</p>
+puts out four to seven of these trailing bytes, until the total length of the file length is a
+multiple of four bytes, since this works out best on machines that pack four bytes per word; but any
+number of 223&#8217;s is allowed, as long as there are at least four of them.  In effect, 223 is a sort of
+signature that is added at the very end.</p>
 <p>This curious way to finish off a DVI file makes it feasible for DVI-reading programs to find the
 postamble first, on most computers, even though TEX wants to write the postamble last.  Most
 operating systems permit random access to individual words or bytes of a file, so the DVI reader can

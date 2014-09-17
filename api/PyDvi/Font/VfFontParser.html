@@ -1,0 +1,159 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1.3.12. VfFontParser &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="3.1.3. Font" href="../Font.html" />
+    <link rel="next" title="3.1.3.13. VirtualCharacter" href="VirtualCharacter.html" />
+    <link rel="prev" title="3.1.3.11. VfFont" href="VfFont.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="VirtualCharacter.html" title="3.1.3.13. VirtualCharacter"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="VfFont.html" title="3.1.3.11. VfFont"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li>
+          <li><a href="../Font.html" accesskey="U">3.1.3. <tt class="docutils literal"><span class="pre">Font</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-PyDvi.Font.VfFontParser">
+<span id="vffontparser"></span><h1>3.1.3.12. <tt class="xref py py-mod docutils literal"><span class="pre">VfFontParser</span></tt><a class="headerlink" href="#module-PyDvi.Font.VfFontParser" title="Permalink to this headline">¶</a></h1>
+<p>The VfFontParser module provides a tool to parse virtual font files.  They have the &#8221;.vf&#8221; extension.</p>
+<dl class="class">
+<dt id="PyDvi.Font.VfFontParser.VfFontParser">
+<em class="property">class </em><tt class="descclassname">PyDvi.Font.VfFontParser.</tt><tt class="descname">VfFontParser</tt><big>(</big><em>vf_font</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/VfFontParser.html#VfFontParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.VfFontParser.VfFontParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="attribute">
+<dt id="PyDvi.Font.VfFontParser.VfFontParser._logger">
+<tt class="descname">_logger</tt><em class="property"> = &lt;logging.Logger object at 0x5479250&gt;</em><a class="headerlink" href="#PyDvi.Font.VfFontParser.VfFontParser._logger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Font.VfFontParser.VfFontParser._process_file">
+<tt class="descname">_process_file</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/VfFontParser.html#VfFontParser._process_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.VfFontParser.VfFontParser._process_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the characters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PyDvi.Font.VfFontParser.VfFontParser._process_preambule">
+<tt class="descname">_process_preambule</tt><big>(</big><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/VfFontParser.html#VfFontParser._process_preambule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.VfFontParser.VfFontParser._process_preambule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the preamble.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="PyDvi.Font.VfFontParser.VfFontParser.opcode_parser_set">
+<tt class="descname">opcode_parser_set</tt><em class="property"> = [&lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479390&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54793d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479410&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479450&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479490&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54794d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479510&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479550&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479590&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54795d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479610&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479650&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479690&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54796d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479710&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479750&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479790&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54797d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479810&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479850&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479890&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54798d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479910&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479950&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479990&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54799d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479a10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479a50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479a90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479ad0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479b10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479b50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479b90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479bd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479c10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479c50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479c90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479cd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479d10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479d50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479d90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479dd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479e10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479e50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479e90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479ed0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479f10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479f50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479f90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x5479fd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf050&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf090&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf0d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf110&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf150&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf190&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf1d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf210&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf250&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf290&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf2d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf310&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf350&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf390&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf3d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf410&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf450&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf490&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf4d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf510&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf550&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf590&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf5d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf610&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf650&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf690&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf6d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf710&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf750&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf790&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf7d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf810&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf850&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf890&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf8d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf910&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf950&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf990&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bf9d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfa10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfa50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfa90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfad0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfb10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfb50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfb90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfbd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfc10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfc50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfc90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfcd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfd10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfd50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfd90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfdd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfe10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfe50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfe90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bfed0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bff10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bff50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bff90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54bffd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2050&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2090&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c20d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2110&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2150&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2190&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c21d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2210&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2250&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2290&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c22d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2310&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2350&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2390&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c23d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2410&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2450&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2490&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c24d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2510&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2550&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2590&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c25d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2610&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2650&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2690&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c26d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2710&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2750&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2790&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c27d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2810&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2850&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2890&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c28d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2910&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2950&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2990&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c29d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2a10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2a50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2a90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2ad0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2b10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2b50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2b90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2bd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2c10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2c50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2c90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2cd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2d10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2d50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2d90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2dd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2e10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2e50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2e90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2ed0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2f10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2f50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2f90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c2fd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5050&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5090&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c50d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5110&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5150&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5190&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c51d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5210&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5250&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5290&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c52d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5310&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5350&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5390&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c53d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5410&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5450&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5490&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c54d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5510&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5550&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5590&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c55d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5610&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5650&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5690&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c56d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5710&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5750&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5790&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c57d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5810&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5850&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5890&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c58d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5910&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5950&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5990&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c59d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5a10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5a50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5a90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5ad0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5b10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5b50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5b90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5bd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5c10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5c50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5c90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5cd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5d10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5d50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5d90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5dd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5e10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5e50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5e90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5ed0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5f10&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5f50&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5f90&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c5fd0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c7050&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c7090&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c70d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_char object at 0x54c7110&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_fnt_def object at 0x54c7150&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_fnt_def object at 0x54c7190&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_fnt_def object at 0x54c71d0&gt;, &lt;PyDvi.Font.VfFontParser.OpcodeParser_fnt_def object at 0x54c7210&gt;, &lt;PyDvi.OpcodeParser.OpcodeParser object at 0x54c7250&gt;, &lt;PyDvi.OpcodeParser.OpcodeParser object at 0x54c7290&gt;, None, None, None, None, None, None, None]</em><a class="headerlink" href="#PyDvi.Font.VfFontParser.VfFontParser.opcode_parser_set" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="PyDvi.Font.VfFontParser.VfFontParser.parse">
+<em class="property">static </em><tt class="descname">parse</tt><big>(</big><em>vf_font</em><big>)</big><a class="reference internal" href="../../../_modules/PyDvi/Font/VfFontParser.html#VfFontParser.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyDvi.Font.VfFontParser.VfFontParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="VfFont.html"
+                        title="previous chapter">3.1.3.11. <tt class="docutils literal"><span class="pre">VfFont</span></tt></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="VirtualCharacter.html"
+                        title="next chapter">3.1.3.13. <tt class="docutils literal"><span class="pre">VirtualCharacter</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api/PyDvi/Font/VfFontParser.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="VirtualCharacter.html" title="3.1.3.13. VirtualCharacter"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="VfFont.html" title="3.1.3.11. VfFont"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../../../reference-manual.html" >3. API Documentation</a> &raquo;</li>
+          <li><a href="../../PyDvi.html" >3.1. <tt class="docutils literal"><span class="pre">PyDvi</span></tt></a> &raquo;</li>
+          <li><a href="../Font.html" >3.1.3. <tt class="docutils literal"><span class="pre">Font</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

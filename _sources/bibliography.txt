@@ -22,6 +22,7 @@ A copy of this documentation is available here and later in the API documentatio
 
    dvi-format.rst
    pk-format.rst
+   vf-format.rst
 
 Other relevant information could be found here:
 

@@ -63,8 +63,8 @@ git repository after each commit.</p>
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
 <p>PyDvi is a <a class="reference external" href="http://python.org">Python</a> module which is able to read the DVI (DeVice Independent) file format, the
 native output of the famous TeX typesetting program implemented by <a class="reference external" href="http://www-cs-faculty.stanford.edu/~uno">Donald E. Knuth</a>.</p>
-<p>PyDvi is also able to read most of the file formats associated to the TeX world like Packed Font,
-TeX Font Metric, Font Map and Font Encoding.</p>
+<p>PyDvi is also able to read most of the file formats associated to the TeX world like packed font,
+virtual font, TeX font metric, font map and font encoding.</p>
 <p>Basically a DVI file describes the layout of a page by a list of opcodes that interact with a
 register machine to update the position on the page, to load fonts and to paint glyphs and rules. In
 short it contains the glyphs and their positions on the page. Since TeX was designed to layout the
@@ -75,7 +75,6 @@ opcode which can contains any text like Postscript snippets.</p>
 <p>A DVI stream can come from a file or a TeX daemon in order to render TeX inputs on-the-fly.</p>
 <p>The DVI parser of PyDvi builds a program from a DVI stream that could be later processed by the
 provided DVI machine which is designed to be subclassed by the user.</p>
-<a class="reference internal image-reference" href="images/dvi-gl-viewer.scaled.png"><img alt="images/dvi-gl-viewer.scaled.png" class="align-right" src="images/dvi-gl-viewer.scaled.png" style="width: 400.0px; height: 218.5px;" /></a>
 <p>The source code includes as exemple an experimental DVI viewer which uses the OpenGL API for the
 rendering and thus feature an hardware accelerated rendering. PyDvi and the viewer can be used as an
 platform to experiment complex text rendering on GPU.</p>
@@ -154,14 +153,15 @@ glyphs and their positions.</p>
 <li class="toctree-l1"><a class="reference internal" href="bibliography.html">4. Bibliography</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="dvi-format.html">4.1. Device-Independent File Format</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pk-format.html">4.2. Packet Font File Format</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reference-links.html">4.3. Relevant Softwares</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="reference-links.html#tex-engine">4.3.1. TeX Engine</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference-links.html#scientific-plotting">4.3.2. Scientific Plotting</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference-links.html#dvi-to-image-converter">4.3.3. DVI to Image Converter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference-links.html#dvi-viewer">4.3.4. DVI Viewer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference-links.html#dvi-tools">4.3.5. DVI Tools</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference-links.html#tex-fonts">4.3.6. TeX Fonts</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference-links.html#font-viewer">4.3.7. Font Viewer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vf-format.html">4.3. Virtual Font File Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reference-links.html">4.4. Relevant Softwares</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="reference-links.html#tex-engine">4.4.1. TeX Engine</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference-links.html#scientific-plotting">4.4.2. Scientific Plotting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference-links.html#dvi-to-image-converter">4.4.3. DVI to Image Converter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference-links.html#dvi-viewer">4.4.4. DVI Viewer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference-links.html#dvi-tools">4.4.5. DVI Tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference-links.html#tex-fonts">4.4.6. TeX Fonts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reference-links.html#font-viewer">4.4.7. Font Viewer</a></li>
 </ul>
 </li>
 </ul>
