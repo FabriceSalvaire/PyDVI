@@ -2,7 +2,7 @@
  Packet Font File Format
 =========================
 
-The Packet Font file format in descriped in the :file:`pktype.web` file from Web2C.  Part of this
+The Packet Font file format is described in the :file:`pktype.web` file from Web2C.  Part of this
 documentation comes from this file.
 
 The packed file format is a compact representation of the data contained in a GF file.  The
@@ -14,7 +14,7 @@ bounding box for each character is explicit in the format, and does not need to 
 the GF format.  Finally, the width and escapement values are combined with the raster information
 into character "packets", making it simpler in many cases to process a character.
 
-A PK file is organized as a stream of 8-bit bytes.  At times, these bytes might be split into 4-bit
+A PK file is organised as a stream of 8-bit bytes.  At times, these bytes might be split into 4-bit
 nybbles or single bits, or combined into multiple byte parameters.  When bytes are split into
 smaller pieces, the "first" piece is always the most significant of the byte.  For instance, the
 first bit of a byte is the bit with value 128; the first nybble can be found by dividing a byte by
@@ -28,7 +28,7 @@ definition, and those that do not.  The values that introduce a character defini
 are called flag bytes, and various fields within the byte indicate various things about how the
 character definition is encoded.  Command bytes have zero or more parameters, and can never appear
 within a character definition or between parameters of another command, where they would be
-interpeted as data.
+interpreted as data.
 
 A PK file consists of a preamble, followed by a sequence of one or more character definitions,
 followed by a postamble.  The preamble command must be the first byte in the file, followed
@@ -62,7 +62,7 @@ keyword followed by possible parameters relevant to that keyword.
 ``pk_xxx3 242 k[3] x[k]``.  Like ``pk_xxx1``, but ``0 <= k < 224``.  METAFONT uses this when sending
 a special string whose length exceeds 255.
 
-``pk_xxx4 243 k[4] x[k]``.  Like ``pk_xxx1``, but ``k`` can be ridiculously large; ``k`` musn't be
+``pk_xxx4 243 k[4] x[k]``.  Like ``pk_xxx1``, but ``k`` can be ridiculously large; ``k`` mustn't be
 negative.
 
 ``pk yyy 244 y[4]``.  This command is undefined in general; it functions as a five-byte ``no_op``
@@ -89,7 +89,7 @@ the font with specific device resolutions, magnifications, and "at sizes".  Usua
 PK file is formed by concatenating the font name (e.g., cmr10) with the resolution at which the font
 is prepared in pixels per inch multiplied by the magnification factor, and the letters ``pk``.  For
 instance, cmr10 at 300 dots per inch should be named ``cmr10.300pk``; at one thousand dots per inch
-and magstephalf, it should be named ``cmr10.1095pk``.
+and ``magstephalf``, it should be named ``cmr10.1095pk``.
 
 The PK format has two conflicting goals: to pack character raster and size information as compactly
 as possible, while retaining ease of translation into raster and other forms.  A suitable compromise
@@ -161,7 +161,7 @@ run from 0 through 15.  Thus, the two-nybble values will run from ``dyn_f +1 .. 
 dyn_f``.  We have our definition of large run count values now, being all counts greater than ``(13
 - dyn_f) * 16 + dyn_f``.
 
-We can analyze our several dozen pixel files and determine an optimal value of ``dyn_f``, and use
+We can analyse our several dozen pixel files and determine an optimal value of ``dyn_f``, and use
 this value for all of the characters.  Unfortunately, values of ``dyn_f`` that pack small characters
 well tend to pack the large characters poorly, and values that pack large characters well are not
 efficient for the smaller characters.  Thus, we choose the optimal ``dyn_f`` on a character basis,
@@ -179,7 +179,7 @@ sixteen through 255 occupy three, the values 256 through 4095 require five, etc.
 For our purposes, however, we have already represented the numbers one through ``(13 - dyn_f ) * 16
 + dyn_f ``.  In addition, the one-nybble values have already been taken by our other commands, which
 means that only the values from sixteen up are available to us for long run counts.  Thus, we simply
-normalize our long run counts, by subtracting ``(13 - dyn_f ) * 16 + dyn_f +1`` and adding 16, and
+normalise our long run counts, by subtracting ``(13 - dyn_f ) * 16 + dyn_f +1`` and adding 16, and
 then we represent the result according to the scheme above.
 
 The final algorithm for decoding the run counts based on the above scheme looks like this, assuming
