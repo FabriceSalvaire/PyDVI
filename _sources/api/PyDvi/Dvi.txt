@@ -3,6 +3,7 @@
 ************
 
 .. toctree::
+  Dvi/.#DviMachine
   Dvi/DviMachine
   Dvi/DviParser
 
