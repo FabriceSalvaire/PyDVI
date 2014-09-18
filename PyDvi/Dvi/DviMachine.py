@@ -68,11 +68,9 @@ import logging
 
 ####################################################################################################
 
-from ..Font.VirtualFont import VirtualFont
 from ..TeXUnit import *
 from ..Tools.EnumFactory import EnumFactory
 from ..Tools.Interval import Interval2D
-from .DviFont import DviFont
 
 ####################################################################################################
 
@@ -145,7 +143,7 @@ class Opcode_putset_char(Opcode):
     def run(self, dvi_machine, compute_bounding_box=False):
 
         font = dvi_machine.current_font
-        if isinstance(font, VirtualFont):
+        if font.is_virtual:
             # Fixme: bounding_box
             for char_code in self.characters:
                 virtual_character = font._characters[char_code]
@@ -627,6 +625,77 @@ class Opcode_xxx(Opcode):
 
 ####################################################################################################
 
+class DviFont(object):
+
+    """ This class implements a DVI Font. """
+
+    ##############################################
+
+    def __init__(self, font_id, name, checksum, scale_factor, design_size):
+
+        self.id = font_id
+        self.name = name
+        self.checksum = checksum
+        self.scale_factor = scale_factor
+        self.design_size = design_size
+
+        self.magnification = fractions.Fraction(scale_factor, design_size)
+
+        self.global_id = None
+
+    ##############################################
+
+    def __repr__(self):
+
+        return 'Dvi Font[{}] {}'.format(self.id, self.name)
+
+    ##############################################
+
+    def __str__(self):
+
+        string_format = '''Font ID %u
+ - Name          %s
+ - Checksum      %u
+ - Design size   %u
+ - Scale factor  %u
+ - Magnification %u %%
+'''
+        
+        return string_format % (
+            self.id,
+            self.name,
+            self.checksum,
+            self.scale_factor,
+            self.design_size,
+            self.magnification * 100,
+            )
+
+    ##############################################
+
+    def char_scaled_width(self, tfm_char):
+
+        """ Return the scale width for the :class:`PyDvi.TfmChar` instance. """
+
+        return tfm_char.scaled_width(self.scale_factor)
+
+    ##############################################
+
+    def char_scaled_height(self, tfm_char):
+
+        """ Return the scale height for the :class:`PyDvi.TfmChar` instance. """
+
+        return tfm_char.scaled_height(self.scale_factor)
+
+    ##############################################
+
+    def char_scaled_depth(self, tfm_char):
+
+        """ Return the scale depth for the :class:`PyDvi.TfmChar` instance. """
+
+        return tfm_char.scaled_depth(self.scale_factor)
+
+####################################################################################################
+
 class DviColour(object):
 
     ##############################################
@@ -1104,7 +1173,7 @@ class DviMachine(object):
         for dvi_font in self.dvi_program.dvi_font_iterator():
             font = self.font_manager[dvi_font.name]
             self.fonts[dvi_font.id] = font
-            if isinstance(font, VirtualFont):
+            if font.is_virtual:
                 self.virtual_fonts[dvi_font.id] = font
                 font.load_dvi_fonts()
 

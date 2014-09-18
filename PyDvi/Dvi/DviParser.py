@@ -31,7 +31,6 @@ import os
 from ..OpcodeParser import OpcodeParserSet, OpcodeParser
 from ..Tools.EnumFactory import EnumFactory, ExplicitEnumFactory
 from ..Tools.Stream import AbstractStream
-from .DviFont import DviFont
 from .DviMachine import *
 
 ####################################################################################################

@@ -33,7 +33,7 @@ import logging
 
 ####################################################################################################
 
-from ..Dvi.DviFont import DviFont
+from ..Dvi.DviMachine import DviFont
 from ..OpcodeParser import OpcodeParserSet, OpcodeParser
 from ..Tools.EnumFactory import EnumFactory
 from ..Tools.Stream import to_fix_word, AbstractStream, FileStream
