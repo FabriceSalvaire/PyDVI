@@ -69,7 +69,7 @@ class GlDviMachine(DviSimplifyMachine):
                                 np.zeros((number_of_chars, 4), dtype='f'), # texture coordinates
                                 np.zeros((number_of_chars, 4), dtype='f')) # colours
                        for font_id, number_of_chars in program.number_of_chars.iteritems()}
-        
+
         self._rule_index = 0
         # rule = [vec2 (x,y) position, vec2 (width,height) dimension, vec4 rgba colour]
         self.rule_positions = np.zeros((program.number_of_rules, 2), dtype='f')
@@ -103,7 +103,12 @@ class GlDviMachine(DviSimplifyMachine):
 
         textures_font = self.texture_fonts[font_id]
 
-        glyph = textures_font.glyph(glyph_index, dvi_font.magnification)
+        # if font.tfm is not None:
+        #     size = dvi_font.magnification * font.tfm.design_font_size # pt
+        # else:
+        size = dvi_font.magnification * sp2pt(dvi_font.design_size) # pt
+
+        glyph = textures_font.glyph(glyph_index, size)
 
         xg_mm = sp2mm(xg) + glyph.px_to_mm(glyph.offset[0])
         yg_mm = sp2mm(yg) + glyph.px_to_mm(glyph.size[1] - glyph.offset[1]) # offset = top - origin

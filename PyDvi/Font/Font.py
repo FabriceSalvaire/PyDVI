@@ -61,6 +61,9 @@ def sort_font_class(*args):
 class FontNotFound(NameError):
     pass
 
+class FontMetricNotFound(NameError):
+    pass
+
 ####################################################################################################
 
 class Font(object):
@@ -130,9 +133,8 @@ class Font(object):
 
         tfm_file = kpsewhich(self.name, file_format='tfm')
         if tfm_file is None:
-            # Fixme: look for afm instead
-            # raise NameError("TFM file %s not found" % (self.name))
-            self.tfm_file = None
+            # raise FontMetricNotFound("TFM file was not found for font {}".format(self.name))
+            self.tfm = None
         else:
             self.tfm = TfmParser.parse(self.name, tfm_file)
 

@@ -19,15 +19,6 @@
 ####################################################################################################
 
 ####################################################################################################
-#
-# Audit
-#
-# - 18/12/2011 fabrice
-#    char code 0 -> 127 + 1 = 128
-#
-####################################################################################################
-
-####################################################################################################
 
 __all__ = ['Type1Font']
 
@@ -42,7 +33,8 @@ import freetype
 
 ####################################################################################################
 
-from .Font import Font, font_types
+from ..Kpathsea import kpsewhich
+from .Font import Font, font_types, FontMetricNotFound
 
 ####################################################################################################
 
@@ -83,11 +75,14 @@ class Type1Font(Font):
             self._face = freetype.Face(self.filename)
         except:
             raise NameError("Freetype can't open file %s" % (self.filename))
+        
+        if self.tfm is None:
+            self._find_afm()
 
-        encodings = [charmap.encoding_name for charmap in self._face.charmaps]
-        if 'FT_ENCODING_ADOBE_CUSTOM' in encodings:
+        encodings = [charmap.encoding for charmap in self._face.charmaps]
+        if freetype.FT_ENCODING_ADOBE_CUSTOM in encodings:
             encoding = freetype.FT_ENCODING_ADOBE_CUSTOM
-        elif 'FT_ENCODING_ADOBE_STANDARD' in encodings:
+        elif freetype.FT_ENCODING_ADOBE_STANDARD in encodings:
             encoding = freetype.FT_ENCODING_ADOBE_STANDARD
         else:
             # encoding = freetype.FT_ENCODING_UNICODE
@@ -100,6 +95,22 @@ class Type1Font(Font):
         # self._log_glyph_table()
 
         self._font_size = {}
+
+    ##############################################
+
+    def _find_afm(self):
+
+        # try:
+        #     super(Type1Font, self)._find_tfm()
+        # except FontMetricNotFound:
+
+        afm_file = kpsewhich(self.name, file_format='afm')
+        print afm_file
+        if afm_file is None:
+            raise NameError("AFM file was not found for font {}".format(self.name))
+        else:
+            self._logger.info("Attach AFM {}".format(afm_file))
+            self._face.attach_file(afm_file)
 
     ##############################################
 
@@ -328,17 +339,18 @@ class FontSize(object):
             flags |= freetype.FT_LOAD_TARGET_LCD
 
         face.load_glyph(glyph_index, flags)
+        slot = face.glyph
 
-        bitmap = face.glyph.bitmap # a list
-        width = face.glyph.bitmap.width
-        rows = face.glyph.bitmap.rows
-        pitch = face.glyph.bitmap.pitch # stride / number of bytes taken by one bitmap row
+        bitmap = slot.bitmap # a list
+        width = slot.bitmap.width
+        rows = slot.bitmap.rows
+        pitch = slot.bitmap.pitch # stride / number of bytes taken by one bitmap row
         # left: The left-side bearing, i.e., the horizontal distance from the current pen position
         #   to the left border of the glyph bitmap.
         # top: The top-side bearing, i.e., the vertical distance from the current pen position to
         #   the top border of the glyph bitmap. This distance is positive for upwards y!
-        left = face.glyph.bitmap_left
-        top = face.glyph.bitmap_top
+        left = slot.bitmap_left
+        top = slot.bitmap_top
 
         # Remove padding
         data = np.array(bitmap.buffer).reshape(rows, pitch)
@@ -354,8 +366,16 @@ class FontSize(object):
         # Build glyph
         size = glyph_bitmap.shape[1], glyph_bitmap.shape[0]
         offset = left, top
-        advance = face.glyph.advance.x, face.glyph.advance.y
-        glyph = Glyph(self, glyph_index, size, offset, advance)
+        advance = slot.advance.x, slot.advance.y
+
+        metrics = slot.metrics
+        metrics_px = [from_64th_point(x) for x in (metrics.width,
+                                                   metrics.height,
+                                                   metrics.horiBearingX,
+                                                   metrics.horiBearingY,
+                                                   metrics.horiAdvance)]
+
+        glyph = Glyph(self, glyph_index, size, offset, advance, metrics_px)
         glyph.glyph_bitmap = glyph_bitmap # Fixme:
         self._glyphs[glyph_index] = glyph
 
@@ -405,7 +425,7 @@ class Glyph(object):
     of a single character. It is generally built automatically by a Font.
     """
 
-    def __init__(self, font_size, glyph_index, size, offset, advance):
+    def __init__(self, font_size, glyph_index, size, offset, advance, metrics):
 
         """
 
@@ -424,6 +444,12 @@ class Glyph(object):
         self.size = size
         self.offset = offset
         self.advance = advance
+
+        (self.width_px,
+         self.height_px,
+         self.horizontal_bearing_x_px,
+         self.horizontal_bearing_y_px,
+         self.horizontal_advance_px) = metrics
 
     ##############################################
 

@@ -77,9 +77,9 @@ class OpcodeParser_char(OpcodeParser):
 
     ##############################################
 
-    def read_parameters(self, vf_parser):
+    def read_parameters(self, virtual_font_parser):
 
-        stream = vf_parser.stream
+        stream = virtual_font_parser.stream
 
         self._logger.debug("opcode {}".format(self.opcode))
 
@@ -94,7 +94,7 @@ class OpcodeParser_char(OpcodeParser):
         dvi = stream.read(dvi_length)
 
         character = VirtualCharacter(char_code, width, dvi)
-        vf_parser.vf_font.register_character(character)
+        virtual_font_parser.virtual_font.register_character(character)
 
 ####################################################################################################
 
@@ -117,18 +117,23 @@ class OpcodeParser_fnt_def(OpcodeParser):
 
     ##############################################
 
-    def read_parameters(self, vf_parser):
+    def read_parameters(self, virtual_font_parser):
 
-        stream = vf_parser.stream
+        stream = virtual_font_parser.stream
 
         font_id = self.read_unsigned_byten(stream)
-        font_checksum = stream.read_unsigned_byte4()
-        font_scale_factor = stream.read_unsigned_byte4()
-        font_design_size = stream.read_unsigned_byte4()
-        font_name = str(stream.read(stream.read_unsigned_byte1() + stream.read_unsigned_byte1()))
+        checksum = stream.read_unsigned_byte4()
+        scale_factor = stream.read_unsigned_byte4()
+        design_size = stream.read_unsigned_byte4()
+        name = str(stream.read(stream.read_unsigned_byte1() + stream.read_unsigned_byte1()))
 
-        font = DviFont(font_id, font_name, font_checksum, font_scale_factor, font_design_size)
-        vf_parser.vf_font.register_font(font)
+        virtual_font = virtual_font_parser.virtual_font
+        # The font scale factor is relative to the design size of the virtual font, thus 2**20 means
+        # the font has the same size than the virtual font.
+        # Fixme: right?
+        scale_factor = int(to_fix_word(scale_factor) * design_size / virtual_font.design_font_size)
+        dvi_font = DviFont(font_id, name, checksum, scale_factor, design_size)
+        virtual_font.register_font(dvi_font)
 
 ####################################################################################################
 
@@ -150,17 +155,17 @@ class VirtualFontParser(object):
     ##############################################
 
     @staticmethod
-    def parse(vf_font):
+    def parse(virtual_font):
 
-        VirtualFontParser(vf_font)
+        VirtualFontParser(virtual_font)
 
     ##############################################
 
-    def __init__(self, vf_font):
+    def __init__(self, virtual_font):
 
-        self.vf_font = vf_font
+        self.virtual_font = virtual_font
 
-        self.stream = FileStream(vf_font.filename)
+        self.stream = FileStream(virtual_font.filename)
 
         self._process_preambule()
         self._process_file()
@@ -178,9 +183,9 @@ class VirtualFontParser(object):
         if stream.read_unsigned_byte1() != vf_opcodes.PRE:
             raise NameError("Virtual font file don't start by PRE opcode")
 
-        vf_id = stream.read_unsigned_byte1()
-        if vf_id != VF_ID:
-            raise NameError("Unknown VF ID")
+        file_id = stream.read_unsigned_byte1()
+        if file_id != VF_ID:
+            raise NameError("Unknown file ID")
 
         comment = stream.read(stream.read_unsigned_byte1())
         checksum = stream.read_signed_byte4()
@@ -194,14 +199,14 @@ class VirtualFontParser(object):
 #   - Checksum     %u
 # '''
 #         print string_template % (
-#             vf_id,
+#             file_id,
 #             comment,
 #             design_font_size,
 #             checksum,
 #             )
        
         
-        self.vf_font._set_preambule_data(vf_id, comment, design_font_size, checksum)
+        self.virtual_font._set_preambule_data(file_id, comment, design_font_size, checksum)
 
     ##############################################
 

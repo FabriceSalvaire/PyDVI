@@ -63,16 +63,11 @@ class TextureFont(object):
 
     ##############################################
  
-    def _load_glyph(self, glyph_index, magnification):
+    def _load_glyph(self, glyph_index, size):
 
         # self._logger.info("load glyph[{}]*{}".format(glyph_index, magnification))
 
         atlas = self._atlas
-
-        try:
-            size = magnification * self._font.tfm.design_font_size # pt
-        except:
-            size = magnification * 10
 
         glyph = self._font.get_glyph(glyph_index, size)
         glyph_bitmap = glyph.glyph_bitmap
@@ -101,11 +96,11 @@ class TextureFont(object):
 
     ##############################################
  
-    def glyph(self, glyph_index, magnification):
+    def glyph(self, glyph_index, size):
 
-        key = "{}-{}".format(glyph_index, magnification)
+        key = "{}-{}".format(glyph_index, size)
         if key not in self._glyphs:
-            self._glyphs[key] = self._load_glyph(glyph_index, magnification)
+            self._glyphs[key] = self._load_glyph(glyph_index, size)
         return self._glyphs[key]
 
 ####################################################################################################

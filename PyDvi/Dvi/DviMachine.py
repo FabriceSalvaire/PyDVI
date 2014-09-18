@@ -142,12 +142,17 @@ class Opcode_putset_char(Opcode):
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
+        registers = dvi_machine.registers
         font = dvi_machine.current_font
+        dvi_font = dvi_machine.current_dvi_font
         if font.is_virtual:
             # Fixme: bounding_box
             for char_code in self.characters:
                 virtual_character = font._characters[char_code]
                 dvi_machine.run_subroutine(virtual_character.subroutine)
+                tfm_char = font.tfm[char_code]
+                char_width = dvi_font.char_scaled_width(tfm_char)
+                registers.h += char_width
         else:
             self._run(dvi_machine, compute_bounding_box)
 
@@ -161,16 +166,18 @@ class Opcode_putset_char(Opcode):
 
         bounding_box = None
         for char_code in self.characters:
-            try: # Fixme:
+            if font.tfm is not None:
                 tfm_char = font.tfm[char_code]
-
                 char_width = dvi_font.char_scaled_width(tfm_char)
                 char_depth = dvi_font.char_scaled_depth(tfm_char)
                 char_height = dvi_font.char_scaled_height(tfm_char)
-            except:
-                char_width = 10
-                char_depth = 10
-                char_height = 10
+            else: # Fixme:
+                size = dvi_font.magnification * sp2pt(dvi_font.design_size)
+                glyph = font.get_glyph(char_code, size)
+                print glyph.advance, glyph.size, glyph.width_px
+                char_width = glyph.px_to_mm(glyph.width_px)
+                char_depth = glyph.px_to_mm(glyph.height_px - glyph.horizontal_bearing_y_px)
+                char_height = glyph.px_to_mm(glyph.horizontal_bearing_y_px)
 
             char_bounding_box = Interval2D([registers.h, registers.h + char_width],
                                            [registers.v - char_height, registers.v + char_depth])
@@ -637,7 +644,7 @@ class DviFont(object):
         self.name = name
         self.checksum = checksum
         self.scale_factor = scale_factor
-        self.design_size = design_size
+        self.design_size = design_size # pt
 
         self.magnification = fractions.Fraction(scale_factor, design_size)
 
@@ -1177,16 +1184,13 @@ class DviMachine(object):
                 self.virtual_fonts[dvi_font.id] = font
                 font.load_dvi_fonts()
 
-        # Fixme: We should merge the fonts
-        #  if font is not in self.fonts
-        #    generate a new font id 
+        # Merge the embedded fonts in the virtual fonts
         last_font_id = max([font_id for font_id in self.fonts])
         for virtual_font in self.virtual_fonts.itervalues():
             for font in virtual_font.fonts.itervalues():
                 last_font_id += 1
-                font_id = last_font_id
-                font.global_id = font_id
-                self.fonts[font_id] = font
+                font.global_id = last_font_id
+                self.fonts[last_font_id] = font
             virtual_font.update_font_id_map()
             for font_id, dvi_font in virtual_font.dvi_fonts.iteritems():
                 global_font_id = virtual_font.font_id_map[font_id]
@@ -1195,20 +1199,9 @@ class DviMachine(object):
                 
         if self.virtual_fonts:
             # Fixme: program_page vs opcode_program
-             for program_page in self.dvi_program:
-                 self._adjust_opcode_counts_for_virtual_characters(program_page)
-
-        # Process the virtual fonts
-        # for virtual_font in self.virtual_fonts.itervalues():
-        #     print virtual_font
-        #     print virtual_font.fonts
-        #     for character in virtual_font._characters.itervalues():
-        #         print character
-
-        # if self.virtual_fonts:
-        #     # Fixme: should be done on demand for long document
-        #     for program_page in self.dvi_program:
-        #         self._merge_virtual_font(program_page)
+            for program_page in self.dvi_program:
+                self._adjust_opcode_counts_for_virtual_characters(program_page)
+                # self._merge_virtual_font(program_page)
 
     ##############################################
 
@@ -1268,18 +1261,23 @@ class DviMachine(object):
             elif isinstance(opcode, Opcode_putset_char) and is_virtual:
                 virtual_font = self.current_font
                 opcode_program.number_of_chars[current_font_id] -= 1
-                for char_code in opcode.characters:
-                    character = virtual_font[char_code]
-                    subroutine = character.subroutine
-                    opcode_program.number_of_rules += subroutine.number_of_rules
-                    for local_font_id, count in subroutine.number_of_chars.iteritems():
-                        if local_font_id is None:
-                            local_font_id = virtual_font.first_font
-                        global_font_id = virtual_font.font_id_map[local_font_id]
-                        if global_font_id in opcode_program.number_of_chars:
-                            opcode_program.number_of_chars[global_font_id] += count
-                        else:
-                            opcode_program.number_of_chars[global_font_id] = count
+                self._adjust_opcode_counts(opcode_program, virtual_font, opcode.characters)
+
+    ##############################################
+
+    def _adjust_opcode_counts(self, opcode_program, virtual_font, characters):
+
+        for char_code in characters:
+            subroutine = virtual_font[char_code].subroutine
+            opcode_program.number_of_rules += subroutine.number_of_rules
+            for local_font_id, count in subroutine.number_of_chars.iteritems():
+                if local_font_id is None:
+                    local_font_id = virtual_font.first_font
+                global_font_id = virtual_font.font_id_map[local_font_id]
+                if global_font_id in opcode_program.number_of_chars:
+                    opcode_program.number_of_chars[global_font_id] += count
+                else:
+                    opcode_program.number_of_chars[global_font_id] = count
 
     ##############################################
 
@@ -1315,7 +1313,7 @@ class DviMachine(object):
         self._current_font_id = self._virtual_font.font_id_map[self._virtual_font.first_font]
         self.push_registers(reset=True) # colour ?
 
-        # Fixme: dimension are * design size
+        # Fixme: dimension are 2**-20 * virtual font design size
         for opcode in subroutine:
             self._logger.info(opcode)
             opcode.run(self)

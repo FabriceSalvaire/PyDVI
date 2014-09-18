@@ -42,10 +42,6 @@ loggers:
     level: WARNING
     handlers: [console]
 
-  PyOpenGLng.HighLevelApi.Ortho2D:
-    level: DEBUG
-    handlers: [console]
-
 #   PyDviGui:
 #     level: DEBUG
 #     #level: INFO
