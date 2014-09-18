@@ -42,14 +42,14 @@ and the design size ``d`` is absolute:
 
 * ``fnt def1 243 k[1] c[4] s[4] d[4] a[1] l[1] n[a + l]``. Define font ``k``, where 0 ≤ k < 256.
 * ``fnt def2 244 k[2] c[4] s[4] d[4] a[1] l[1] n[a + l]``. Define font ``k``, where 0 ≤ k < 65536.
-* ``fnt def3 245 k[3] c[4] s[4] d[4] a[1] l[1] n[a + l]``. Define font ``k``, where 0 ≤ k < 224.
-* ``fnt def4 246 k[4] c[4] s[4] d[4] a[1] l[1] n[a + l]``. Define font ``k``, where −231 ≤ k < 231.
+* ``fnt def3 245 k[3] c[4] s[4] d[4] a[1] l[1] n[a + l]``. Define font ``k``, where 0 ≤ k < 2**24.
+* ``fnt def4 246 k[4] c[4] s[4] d[4] a[1] l[1] n[a + l]``. Define font ``k``, where −2**31 ≤ k < 2**31.
 
 These font numbers ``k`` are “local”; they have no relation to font numbers defined in the DVI file
 that uses this virtual font. The dimension ``s``, which represents the scaled size of the local font
 being defined, is a fix word relative to the design size of the virtual font. Thus if the local font
 is to be used at the same size as the design size of the virtual font itself, ``s`` will be the
-integer value 220. The value of ``s`` must be positive and less than 224 (thus less than 16 when
+integer value 2**20. The value of ``s`` must be positive and less than 2**24 (thus less than 16 when
 considered as a fix word ). The dimension d is a fix word in units of printer’s points; hence it is
 identical to the design size found in the corresponding TFM file.
 
@@ -58,7 +58,7 @@ byte that is < 243. Character packets have two formats, one long and one short:
 
 * ``long char 242 pl [4] cc [4] tfm [4] dvi [pl ]``. This long form specifies a virtual character in the general case.
 * ``short char0 ... short char241 pl [1] cc [1] tfm [3] dvi [pl ]``. This short form specifies a
-  virtual character in the common case when 0 ≤ pl < 242 and 0 ≤ cc < 256 and 0 ≤ tfm < 224.
+  virtual character in the common case when 0 ≤ pl < 242 and 0 ≤ cc < 256 and 0 ≤ tfm < 2**24.
 
 Here ``pl`` denotes the packet length following the tfm value; ``cc`` is the character code; and
 ``tfm`` is the character width copied from the TFM file for this virtual font. There should be at
@@ -70,10 +70,11 @@ pop.  All DVI operations are permitted except ``bop``, ``eop``, and commands wit
 preamble.
 
 Dimensions that appear in the DVI instructions are analogous to fix word quantities; i.e., they are
-integer multiples of 2−20 times the design size of the virtual font. For example, if the virtual
+integer multiples of 2**−20 times the design size of the virtual font. For example, if the virtual
 font has design size 10 pt, the DVI command to move down 5 pt would be a down instruction with
-parameter 219. The virtual font itself might be used at a different size, say 12 pt; then that down
-instruction would move down 6 pt instead. Each dimension must be less than 224 in absolute value.
+parameter 2**19. The virtual font itself might be used at a different size, say 12 pt; then that
+down instruction would move down 6 pt instead. Each dimension must be less than 2**24 in absolute
+value.
 
 Device drivers processing VF files treat the sequences of dvi bytes as subroutines or macros,
 implicitly enclosing them with push and pop. Each subroutine begins with ``w = x = y = z = 0``, and
