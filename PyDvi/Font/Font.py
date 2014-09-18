@@ -107,6 +107,12 @@ class Font(object):
 
     ##############################################
 
+    def __repr__(self):
+
+        return 'Font {}.{}'.format(self.name, self.extension)
+
+    ##############################################
+
     def _find_font(self, kpsewhich_options=None):
 
         """ Find the font file location in the system using Kpathsea. """
@@ -124,7 +130,9 @@ class Font(object):
 
         tfm_file = kpsewhich(self.name, file_format='tfm')
         if tfm_file is None:
-            raise NameError("TFM file %s not found" % (self.name))
+            # Fixme: look for afm instead
+            # raise NameError("TFM file %s not found" % (self.name))
+            self.tfm_file = None
         else:
             self.tfm = TfmParser.parse(self.name, tfm_file)
 
@@ -135,6 +143,12 @@ class Font(object):
         """ Return the basename. """
 
         return self.name + '.' + self.extension
+
+    ##############################################
+
+    @property
+    def is_virtual(self):
+        return self.font_type == font_types.Vf
 
     ##############################################
 

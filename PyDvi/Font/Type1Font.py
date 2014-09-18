@@ -84,11 +84,15 @@ class Type1Font(Font):
         except:
             raise NameError("Freetype can't open file %s" % (self.filename))
 
-        try:
-            # FT_ENCODING_UNICODE FT_ENCODING_ADOBE_CUSTOM
-            self._face.select_charmap(freetype.FT_ENCODING_ADOBE_CUSTOM)
-        except:
-            raise NameError("Font %s doesn't have an Unicode char map" % (self.name))
+        encodings = [charmap.encoding_name for charmap in self._face.charmaps]
+        if 'FT_ENCODING_ADOBE_CUSTOM' in encodings:
+            encoding = freetype.FT_ENCODING_ADOBE_CUSTOM
+        elif 'FT_ENCODING_ADOBE_STANDARD' in encodings:
+            encoding = freetype.FT_ENCODING_ADOBE_STANDARD
+        else:
+            # encoding = freetype.FT_ENCODING_UNICODE
+            raise NameError("Font %s doesn't have an Adobe encoding" % (self.name))
+        self._face.select_charmap(encoding)
 
         self._init_index()
 

@@ -18,14 +18,6 @@
 # 
 ####################################################################################################
 
-####################################################################################################
-#
-# Audit
-#
-#  - 16/01/2010 fabrice
-#
-####################################################################################################
-
 """ This modules provides tools to parse TeX stream like DVI file and PK Font.
 """
 
@@ -80,6 +72,12 @@ class OpcodeParser(object):
             else:
                 read_byten = AbstractStream.read_signed_byten
             self.parameter_readers.append(read_byten[abs(number_of_bytes) -1])
+
+    ##############################################
+
+    def __repr__(self):
+
+        return 'opcode %3u %s %s' % (self.opcode, self.name)
 
     ##############################################
 

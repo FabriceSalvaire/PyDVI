@@ -93,7 +93,10 @@ class GlDviMachine(DviSimplifyMachine):
 
     def paint_char(self, xg, yg, char_bounding_box, font, dvi_font, glyph_index):
 
-        font_id = dvi_font.id
+        if dvi_font.global_id is not None:
+            font_id = dvi_font.global_id
+        else:
+            font_id = dvi_font.id
 
         # self._logger.info("\nchar ({}, {}) {} {}[{}]@{}".format(xg, yg, char_bounding_box,
         #                                                         font.name, glyph_index, dvi_font.magnification))

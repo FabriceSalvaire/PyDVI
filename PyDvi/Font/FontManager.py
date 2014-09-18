@@ -196,7 +196,7 @@ class FontManager(object):
         try:
             return VirtualFont(self, self._get_new_font_id(), tex_font_name)
         except KeyError:
-            raise FontNotFound("Could not found a mapped font for %s" % (tex_font_name))
+            raise FontNotFound("Could not found a virtual font for %s" % (tex_font_name))
 
 ####################################################################################################
 #

@@ -69,7 +69,10 @@ class TextureFont(object):
 
         atlas = self._atlas
 
-        size = magnification * self._font.tfm.design_font_size # pt
+        try:
+            size = magnification * self._font.tfm.design_font_size # pt
+        except:
+            size = magnification * 10
 
         glyph = self._font.get_glyph(glyph_index, size)
         glyph_bitmap = glyph.glyph_bitmap

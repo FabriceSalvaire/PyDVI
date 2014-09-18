@@ -28,10 +28,11 @@ import os
 
 ####################################################################################################
 
-from .DviMachine import *
 from ..OpcodeParser import OpcodeParserSet, OpcodeParser
 from ..Tools.EnumFactory import EnumFactory, ExplicitEnumFactory
 from ..Tools.Stream import AbstractStream
+from .DviFont import DviFont
+from .DviMachine import *
 
 ####################################################################################################
 
@@ -184,6 +185,52 @@ class OpcodeParser_fnt_def(OpcodeParser):
 
 ####################################################################################################
 
+opcode_definitions = (
+    ( [dvi_opcodes.SETC_000,
+       dvi_opcodes.SETC_127], OpcodeParser_set_char ),
+    ( dvi_opcodes.SET1, 'set', set_char_description, [1,4], Opcode_set_char ),
+    # ... to SET4
+    ( dvi_opcodes.SET_RULE, 'set rule', 'typeset a rule and move right', (4,4), Opcode_set_rule ),
+    ( dvi_opcodes.PUT1, 'put', 'typeset a character', [1,4], Opcode_put_char ),
+    # ... to PUT4
+    ( dvi_opcodes.PUT_RULE, 'put rule', 'typeset a rule', (4,4), Opcode_put_rule ),
+    ( dvi_opcodes.NOP, 'nop', 'no operation', None, None ),
+    ( dvi_opcodes.BOP, 'bop', 'beginning of page', tuple([4]*9 + [-4]), None ),
+    ( dvi_opcodes.EOP, 'eop', 'ending of page', None, None ),
+    ( dvi_opcodes.PUSH, 'push', 'save the current positions', None, Opcode_push ),
+    ( dvi_opcodes.POP, 'pop', 'restore previous positions', None, Opcode_pop ),
+    ( dvi_opcodes.RIGHT1, 'right', 'move right', [-1,-4], Opcode_right ),
+    # ... to RIGHT4
+    ( dvi_opcodes.W0, 'w0', 'move right by w', None, Opcode_w0 ),
+    ( dvi_opcodes.W1, 'w', 'move right and set w', [-1,-4], Opcode_w ),
+    # ... to W4
+    ( dvi_opcodes.X0, 'x0', 'move right by x', None, Opcode_x0 ),
+    ( dvi_opcodes.X1, 'x', 'move right and set x', [-1,-4], Opcode_x ),
+    # ... to X4
+    ( dvi_opcodes.DOWN1, 'down', 'move down', [-1,-4], Opcode_down ),
+    # ... to DOWN4
+    ( dvi_opcodes.Y0, 'y0', 'move down by y', None, Opcode_y0 ),
+    ( dvi_opcodes.Y1, 'y', 'move down and set y', [-1,-4], Opcode_y ),
+    # ... to Y4
+    ( dvi_opcodes.Z0, 'z0', 'move down by z', None, Opcode_z0 ),
+    ( dvi_opcodes.Z1, 'z', 'move down and set z', [-1,-4], Opcode_z ),
+    # ... to Z4
+    ( [dvi_opcodes.FONT_00,
+       dvi_opcodes.FONT_63], OpcodeParser_font ),
+    ( dvi_opcodes.FNT1, 'fnt', 'set current font', [1,4], Opcode_font ),
+    ( [dvi_opcodes.XXX1,
+       dvi_opcodes.XXX4], OpcodeParser_xxx ),
+    ( [dvi_opcodes.FNT_DEF1,
+       dvi_opcodes.FNT_DEF4], OpcodeParser_fnt_def ),
+    ( dvi_opcodes.PRE, 'pre', 'preamble', (), None ),
+    ( dvi_opcodes.POST, 'post', 'postamble beginning', None, None ),
+    ( dvi_opcodes.POST_POST, 'post post', 'postamble ending', None, None ),
+    )
+
+opcode_parser_set = OpcodeParserSet(opcode_definitions)
+
+####################################################################################################
+
 BadDviStream = NameError('Bad DVI stream')
 
 ####################################################################################################
@@ -194,50 +241,6 @@ class DviParser(object):
     """
 
     _logger = _module_logger.getChild('DviParser')
-
-    opcode_definitions = (
-        ( [dvi_opcodes.SETC_000,
-           dvi_opcodes.SETC_127], OpcodeParser_set_char ),
-        ( dvi_opcodes.SET1, 'set', set_char_description, [1,4], Opcode_set_char ),
-        # ... to SET4
-        ( dvi_opcodes.SET_RULE, 'set rule', 'typeset a rule and move right', (4,4), Opcode_set_rule ),
-        ( dvi_opcodes.PUT1, 'put', 'typeset a character', [1,4], Opcode_put_char ),
-        # ... to PUT4
-        ( dvi_opcodes.PUT_RULE, 'put rule', 'typeset a rule', (4,4), Opcode_put_rule ),
-        ( dvi_opcodes.NOP, 'nop', 'no operation', None, None ),
-        ( dvi_opcodes.BOP, 'bop', 'beginning of page', tuple([4]*9 + [-4]), None ),
-        ( dvi_opcodes.EOP, 'eop', 'ending of page', None, None ),
-        ( dvi_opcodes.PUSH, 'push', 'save the current positions', None, Opcode_push ),
-        ( dvi_opcodes.POP, 'pop', 'restore previous positions', None, Opcode_pop ),
-        ( dvi_opcodes.RIGHT1, 'right', 'move right', [-1,-4], Opcode_right ),
-        # ... to RIGHT4
-        ( dvi_opcodes.W0, 'w0', 'move right by w', None, Opcode_w0 ),
-        ( dvi_opcodes.W1, 'w', 'move right and set w', [-1,-4], Opcode_w ),
-        # ... to W4
-        ( dvi_opcodes.X0, 'x0', 'move right by x', None, Opcode_x0 ),
-        ( dvi_opcodes.X1, 'x', 'move right and set x', [-1,-4], Opcode_x ),
-        # ... to X4
-        ( dvi_opcodes.DOWN1, 'down', 'move down', [-1,-4], Opcode_down ),
-        # ... to DOWN4
-        ( dvi_opcodes.Y0, 'y0', 'move down by y', None, Opcode_y0 ),
-        ( dvi_opcodes.Y1, 'y', 'move down and set y', [-1,-4], Opcode_y ),
-        # ... to Y4
-        ( dvi_opcodes.Z0, 'z0', 'move down by z', None, Opcode_z0 ),
-        ( dvi_opcodes.Z1, 'z', 'move down and set z', [-1,-4], Opcode_z ),
-        # ... to Z4
-        ( [dvi_opcodes.FONT_00,
-           dvi_opcodes.FONT_63], OpcodeParser_font ),
-        ( dvi_opcodes.FNT1, 'fnt', 'set current font', [1,4], Opcode_font ),
-        ( [dvi_opcodes.XXX1,
-           dvi_opcodes.XXX4], OpcodeParser_xxx ),
-        ( [dvi_opcodes.FNT_DEF1,
-           dvi_opcodes.FNT_DEF4], OpcodeParser_fnt_def ),
-        ( dvi_opcodes.PRE, 'pre', 'preamble', (), None ),
-        ( dvi_opcodes.POST, 'post', 'postamble beginning', None, None ),
-        ( dvi_opcodes.POST_POST, 'post post', 'postamble ending', None, None ),
-        )
-
-    opcode_parser_set = OpcodeParserSet(opcode_definitions)
    
     ##############################################
 
@@ -354,7 +357,7 @@ class DviParser(object):
         while True:
             opcode = stream.read_unsigned_byte1()
             if dvi_opcodes.FNT_DEF1 <= opcode <= dvi_opcodes.FNT_DEF4:
-                self.opcode_parser_set[opcode].read_parameters(self)
+                opcode_parser_set[opcode].read_parameters(self)
             elif opcode != dvi_opcodes.NOP:
                 break
             # Fixme: else
@@ -436,7 +439,7 @@ class DviParser(object):
     def process_page(self):
 
         stream = self.stream
-        opcode_program = self.dvi_program.get_page(self.page_number)
+        opcode_program = self.dvi_program[self.page_number]
 
         # Define some counters to track fonts, characters and rules
         # These counters are intended to allocate memory at the beginning of a page rendering.
@@ -457,7 +460,7 @@ class DviParser(object):
             if opcode == dvi_opcodes.EOP:
                 break
             else:
-                opcode_parser = self.opcode_parser_set[opcode]
+                opcode_parser = opcode_parser_set[opcode]
                 parameters = opcode_parser.read_parameters(self)
                 # self._logger.debug('Opcode {} {} {}'.format(opcode, opcode_parser.name, parameters))
 
@@ -499,6 +502,89 @@ class DviParser(object):
 
         opcode_program.number_of_chars = char_counter
         opcode_program.number_of_rules = rule_counter
+
+####################################################################################################
+
+class DviSubroutineParser(object):
+
+    ##############################################
+
+    def __init__(self, stream):
+
+        self.stream = stream
+
+    ##############################################
+
+    def parse(self):
+
+        stream = self.stream
+        opcode_program = DviSubroutine()
+
+        # Define some counters to track fonts, characters and rules
+        # These counters are intended to allocate memory at the beginning of a page rendering.
+        font_id = None
+        char_counter = {}
+        rule_counter = 0
+
+        # opcode tracker to merge char opcode
+        previous_opcode_obj = None
+        previous_opcode_was_set = None
+
+        # Fixme: tracking versus program simplification
+        #   could merge same opcode using a test and a merge method
+        #   char pop push positionning
+
+        while True:
+            if stream.end_of_stream():
+                break
+            opcode = stream.read_unsigned_byte1()
+            if opcode == dvi_opcodes.EOP:
+                break
+            else:
+                opcode_parser = opcode_parser_set[opcode]
+                parameters = opcode_parser.read_parameters(self)
+                # self._logger.debug('Opcode {} {} {}'.format(opcode, opcode_parser.name, parameters))
+
+                # count characters by font
+                is_font = dvi_opcodes.FONT_00 <= opcode <= dvi_opcodes.FNT4
+                is_set_char = opcode <= dvi_opcodes.SET4 # SET1 == 0
+                is_put_char = dvi_opcodes.PUT1 <= opcode <= dvi_opcodes.PUT4
+                is_char = is_set_char or is_put_char
+                if is_char:
+                    if font_id in char_counter:
+                        char_counter[font_id] += 1
+                    else:
+                        char_counter[font_id] = 1
+
+                # count rules
+                is_rule = opcode == dvi_opcodes.SET_RULE or opcode == dvi_opcodes.PUT_RULE
+                if is_rule:
+                    rule_counter += 1
+
+                # If the current and the previous opcode correspond to set/put char then the new
+                # char is concatenated.
+                if (is_char
+                    and previous_opcode_obj is not None
+                    and previous_opcode_was_set == is_set_char):
+                    previous_opcode_obj.append(parameters[0])
+                else:
+                    opcode_obj = opcode_parser.to_opcode(parameters) 
+                    if opcode_obj is not None:
+                        opcode_program.append(opcode_obj)
+                    if is_font:
+                        font_id = opcode_obj.font_id
+                    if is_char:
+                        previous_opcode_obj = opcode_obj
+                        previous_opcode_was_set = is_set_char
+                    else:
+                        previous_opcode_obj = None
+                        previous_opcode_was_set = None
+        # end of while loop
+
+        opcode_program.number_of_chars = char_counter
+        opcode_program.number_of_rules = rule_counter
+
+        return opcode_program
 
 ####################################################################################################
 #

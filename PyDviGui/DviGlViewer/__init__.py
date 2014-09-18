@@ -104,7 +104,7 @@ class Application(ApplicationBase):
         if page_index >= 0 and page_index < self.number_of_pages:
             self._logger.info("Run page: {}".format(page_index))
             # page_bounding_box = self._dvi_machine.compute_page_bounding_box(page_index)
-            program_page = self._dvi_machine.dvi_program.get_page(page_index) # Fixme: simplify
+            program_page = self._dvi_machine.dvi_program[page_index] # Fixme: simplify
             self._dvi_machine.process_page_xxx_opcodes(program_page)
             self._dvi_machine.run_page(page_index)
             return self._dvi_machine

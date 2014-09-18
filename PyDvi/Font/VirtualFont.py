@@ -56,7 +56,10 @@ class VirtualFont(Font):
 
         super(VirtualFont, self).__init__(font_manager, font_id, name)
 
+        self.dvi_fonts = {}
+        self.first_font = None
         self.fonts = {}
+        self.font_id_map = {}
         self._characters = {}
         VirtualFontParser.parse(self)
 
@@ -97,8 +100,10 @@ class VirtualFont(Font):
 
         """ Register a :class:`DviFont` instance. """
 
-        if font.id not in self.fonts:
-            self.fonts[font.id] = font
+        if font.id not in self.dvi_fonts:
+            self.dvi_fonts[font.id] = font
+        if self.first_font is None:
+            self.first_font = font.id
         # else:
         #     print 'Font ID %u already registered' % (font.id)
 
@@ -128,6 +133,20 @@ Preambule
             )
 
         print_card(message)
+
+    ##############################################
+
+    def load_dvi_fonts(self):
+
+        self.fonts = {font_id:self.font_manager[dvi_font.name]
+                      for font_id, dvi_font in self.dvi_fonts.iteritems()}
+
+    ##############################################
+
+    def update_font_id_map(self):
+
+        self.font_id_map = {font_id:font.global_id
+                            for font_id, font in self.fonts.iteritems()}
 
 ####################################################################################################
 #

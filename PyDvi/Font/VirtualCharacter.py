@@ -24,15 +24,37 @@ __all__ = ['VirtualCharacter']
 
 ####################################################################################################
 
+from ..Tools.Stream import ByteStream
+
+####################################################################################################
+
 class VirtualCharacter(object):
 
     ##############################################
 
-    def __init__(self, char_code, tfm, dvi):
+    def __init__(self, char_code, width, dvi):
 
         self.char_code = char_code
-        self.tfm = tfm
-        self.dvi = dvi
+        self.width = width
+        self._dvi = dvi
+        self._subroutine = None
+
+    ##############################################
+
+    def __repr__(self):
+
+        return "Virtual Character {}".format(self.char_code)
+
+    ##############################################
+
+    @property
+    def subroutine(self):
+
+        if self._subroutine is None:
+            from ..Dvi.DviParser import DviSubroutineParser # Fixme: circular import ?
+            parser = DviSubroutineParser(ByteStream(self._dvi))
+            self._subroutine = parser.parse()
+        return self._subroutine
 
 ####################################################################################################
 #

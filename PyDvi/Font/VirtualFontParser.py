@@ -33,7 +33,7 @@ import logging
 
 ####################################################################################################
 
-from ..Dvi.DviMachine import DviFont
+from ..Dvi.DviFont import DviFont
 from ..OpcodeParser import OpcodeParserSet, OpcodeParser
 from ..Tools.EnumFactory import EnumFactory
 from ..Tools.Stream import to_fix_word, AbstractStream, FileStream
@@ -64,6 +64,8 @@ class OpcodeParser_char(OpcodeParser):
 
     """ This class parse the ``char`` opcode. """
 
+    _logger = _module_logger.getChild('OpcodeParser_char')
+
     ##############################################
 
     def __init__(self, opcode):
@@ -79,17 +81,19 @@ class OpcodeParser_char(OpcodeParser):
 
         stream = vf_parser.stream
 
+        self._logger.debug("opcode {}".format(self.opcode))
+
         if self._long_char:
             dvi_length = stream.read_unsigned_byte4()
             char_code = stream.read_unsigned_byte4()
-            tfm = stream.read_unsigned_byte4()
+            width = stream.read_unsigned_byte4()
         else:
-            dvi_length = stream.read_unsigned_byte1()
+            dvi_length = self.opcode
             char_code = stream.read_unsigned_byte1()
-            tfm = stream.read_unsigned_byte3()
+            width = stream.read_unsigned_byte3()
         dvi = stream.read(dvi_length)
 
-        character = VirtualCharacter(char_code, tfm, dvi)
+        character = VirtualCharacter(char_code, width, dvi)
         vf_parser.vf_font.register_character(character)
 
 ####################################################################################################

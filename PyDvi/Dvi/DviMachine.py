@@ -56,6 +56,7 @@ __all__ = ['Opcode_set_char',
            'DviColourCMYK',
            'DviProgam',
            'DviProgramPage',
+           'DviSubroutine',
            'DviMachine',
            'DviSimplifyMachine',
            ]
@@ -67,9 +68,11 @@ import logging
 
 ####################################################################################################
 
+from ..Font.VirtualFont import VirtualFont
 from ..TeXUnit import *
 from ..Tools.EnumFactory import EnumFactory
 from ..Tools.Interval import Interval2D
+from .DviFont import DviFont
 
 ####################################################################################################
 
@@ -141,17 +144,36 @@ class Opcode_putset_char(Opcode):
 
     def run(self, dvi_machine, compute_bounding_box=False):
 
+        font = dvi_machine.current_font
+        if isinstance(font, VirtualFont):
+            # Fixme: bounding_box
+            for char_code in self.characters:
+                virtual_character = font._characters[char_code]
+                dvi_machine.run_subroutine(virtual_character.subroutine)
+        else:
+            self._run(dvi_machine, compute_bounding_box)
+
+    ##############################################
+
+    def _run(self, dvi_machine, compute_bounding_box=False):
+
         registers = dvi_machine.registers
         font = dvi_machine.current_font
         dvi_font = dvi_machine.current_dvi_font
 
         bounding_box = None
         for char_code in self.characters:
-            tfm_char = font.tfm[char_code]
-            char_width  = dvi_font.char_scaled_width(tfm_char)
-            char_depth  = dvi_font.char_scaled_depth(tfm_char)
-            char_height = dvi_font.char_scaled_height(tfm_char)
-            
+            try: # Fixme:
+                tfm_char = font.tfm[char_code]
+
+                char_width = dvi_font.char_scaled_width(tfm_char)
+                char_depth = dvi_font.char_scaled_depth(tfm_char)
+                char_height = dvi_font.char_scaled_height(tfm_char)
+            except:
+                char_width = 10
+                char_depth = 10
+                char_height = 10
+
             char_bounding_box = Interval2D([registers.h, registers.h + char_width],
                                            [registers.v - char_height, registers.v + char_depth])
 
@@ -605,69 +627,6 @@ class Opcode_xxx(Opcode):
 
 ####################################################################################################
 
-class DviFont(object):
-
-    """ This class implements a DVI Font. """
-
-    ##############################################
-
-    def __init__(self, font_id, name, checksum, scale_factor, design_size):
-
-        self.id = font_id
-        self.name = name
-        self.checksum = checksum
-        self.scale_factor = scale_factor
-        self.design_size = design_size
-
-        self.magnification = fractions.Fraction(scale_factor, design_size)
-
-    ##############################################
-
-    def __str__(self):
-
-        string_format = '''Font ID %u
- - Name          %s
- - Checksum      %u
- - Design size   %u
- - Scale factor  %u
- - Magnification %u %%
-'''
-        
-        return string_format % (
-            self.id,
-            self.name,
-            self.checksum,
-            self.scale_factor,
-            self.design_size,
-            self.magnification * 100,
-            )
-
-    ##############################################
-
-    def char_scaled_width(self, tfm_char):
-
-        """ Return the scale width for the :class:`PyDvi.TfmChar` instance. """
-
-        return tfm_char.scaled_width(self.scale_factor)
-
-    ##############################################
-
-    def char_scaled_height(self, tfm_char):
-
-        """ Return the scale height for the :class:`PyDvi.TfmChar` instance. """
-
-        return tfm_char.scaled_height(self.scale_factor)
-
-    ##############################################
-
-    def char_scaled_depth(self, tfm_char):
-
-        """ Return the scale depth for the :class:`PyDvi.TfmChar` instance. """
-
-        return tfm_char.scaled_depth(self.scale_factor)
-
-####################################################################################################
-
 class DviColour(object):
 
     ##############################################
@@ -765,6 +724,19 @@ class DviColourCMYK(DviColour):
 
 ####################################################################################################
 
+class DviSubroutine(list):
+
+    ##############################################
+
+    def __init__(self):
+
+        super(DviSubroutine, self).__init__()
+
+        self.number_of_rules = None
+        self.number_of_chars = None
+
+####################################################################################################
+
 class DviProgramPage(list):
 
     """ This class defines a page. """
@@ -842,6 +814,7 @@ class DviProgam(object):
 
     def __getitem__(self, i):
 
+        # Fixme: for long document, the dvi stream should be read on demand: lazy loading
         return self.pages[i]
 
     ##############################################
@@ -922,14 +895,6 @@ class DviProgam(object):
 
     ##############################################
 
-    # Fixme: property ?
-    def get_page(self, i):
-
-        # Fixme: for long document, the dvi stream should be read on demand: lazy loading
-        return self.pages[i]
-
-    ##############################################
-
     def print_summary(self):
 
         string_format = '''DVI Program
@@ -1005,11 +970,14 @@ class DviMachineRegisters(object):
 
     ##############################################
 
-    def clone(self):
+    def clone(self, reset=False):
 
         """ Clone the set of registers. """
 
-        return DviMachineRegisters(self.h, self.v, self.w, self.x, self.y, self.z)
+        if reset:
+            return DviMachineRegisters(self.h, self.v, 0, 0, 0, 0)
+        else:
+            return DviMachineRegisters(self.h, self.v, self.w, self.x, self.y, self.z)
 
 ####################################################################################################
 
@@ -1025,6 +993,7 @@ class DviMachine(object):
 
         self.font_manager = font_manager
 
+        self.virtual_fonts = {}
         self.fonts = {} # indexed by TeX font id which is not an incremental number starting from 0
         self._reset()
 
@@ -1035,7 +1004,9 @@ class DviMachine(object):
         """ Reset the machine. """
 
         self.current_opcode_program = None
-        self.current_font_id = None
+        self._current_font_id = None
+        self._virtual_font = None
+        self.in_subroutine = False
         self._registers_stack = [DviMachineRegisters()]
         self._colour_stack = [DviColourBlack()]
 
@@ -1048,9 +1019,9 @@ class DviMachine(object):
 
     ##############################################
 
-    def push_registers(self):
+    def push_registers(self, reset=False):
         """ Push the register set. """
-        self._registers_stack.append(self.registers.clone())
+        self._registers_stack.append(self.registers.clone(reset))
 
     ##############################################
 
@@ -1082,16 +1053,36 @@ class DviMachine(object):
     ##############################################
 
     @property
+    def current_font_id(self):
+        return self._current_font_id
+
+    ##############################################
+
+    @current_font_id.setter
+    def current_font_id(self, font_id):
+        if self._virtual_font is not None:
+            font_id = self._virtual_font.font_id_map[font_id]
+        self._current_font_id = font_id
+
+    ##############################################
+
+    @property
     def current_font(self):
         """ Return the current font. """
-        return self.fonts[self.current_font_id]
+        return self.fonts[self._current_font_id]
+
+    ##############################################
+
+    @property
+    def is_current_font_virtual(self):
+        return self.current_font.is_virtual
 
     ##############################################
 
     @property
     def current_dvi_font(self):
         """ Return the current dvi font. """
-        return self.dvi_program.get_font(self.current_font_id)
+        return self.dvi_program.get_font(self._current_font_id)
 
     ##############################################
 
@@ -1111,7 +1102,58 @@ class DviMachine(object):
 
         # Load the Fonts
         for dvi_font in self.dvi_program.dvi_font_iterator():
-            self.fonts[dvi_font.id] = self.font_manager[dvi_font.name]
+            font = self.font_manager[dvi_font.name]
+            self.fonts[dvi_font.id] = font
+            if isinstance(font, VirtualFont):
+                self.virtual_fonts[dvi_font.id] = font
+                font.load_dvi_fonts()
+
+        # Fixme: We should merge the fonts
+        #  if font is not in self.fonts
+        #    generate a new font id 
+        last_font_id = max([font_id for font_id in self.fonts])
+        for virtual_font in self.virtual_fonts.itervalues():
+            for font in virtual_font.fonts.itervalues():
+                last_font_id += 1
+                font_id = last_font_id
+                font.global_id = font_id
+                self.fonts[font_id] = font
+            virtual_font.update_font_id_map()
+            for font_id, dvi_font in virtual_font.dvi_fonts.iteritems():
+                global_font_id = virtual_font.font_id_map[font_id]
+                dvi_font.global_id = global_font_id
+                self.dvi_program.fonts[global_font_id] = dvi_font
+                
+        if self.virtual_fonts:
+            # Fixme: program_page vs opcode_program
+             for program_page in self.dvi_program:
+                 self._adjust_opcode_counts_for_virtual_characters(program_page)
+
+        # Process the virtual fonts
+        # for virtual_font in self.virtual_fonts.itervalues():
+        #     print virtual_font
+        #     print virtual_font.fonts
+        #     for character in virtual_font._characters.itervalues():
+        #         print character
+
+        # if self.virtual_fonts:
+        #     # Fixme: should be done on demand for long document
+        #     for program_page in self.dvi_program:
+        #         self._merge_virtual_font(program_page)
+
+    ##############################################
+
+    # def _merge_virtual_font(self, opcode_program):
+
+    #     self._reset()
+    #     current_font_id = None
+    #     for opcode in opcode_program:
+    #         if isinstance(opcode, Opcode_font):
+    #             opcode.run(self)
+    #             current_font_id = self._current_font_id
+    #         elif (isinstance(opcode, Opcode_putset_char) and
+    #               current_font_id in self.virtual_fonts):
+    #             print 'virtual character'
 
     ##############################################
 
@@ -1125,33 +1167,57 @@ class DviMachine(object):
 
     ##############################################
 
-    def count_opcodes(self, page_index):
+    def count_opcodes(self, opcode_program):
 
         self._reset()
-        self.current_opcode_program = self.dvi_program.get_page(page_index)
-        self._logger.info('Program Length: {}'.format(len(self.current_opcode_program)))
         number_of_rules = 0
         number_of_chars = {font_id:0 for font_id in self.fonts}
         current_font_id = None
-        total_number_of_chars = 0
-        for opcode in self.current_opcode_program:
+        for opcode in opcode_program:
             if isinstance(opcode, Opcode_font):
                 opcode.run(self)
-                current_font_id = self.current_font_id
+                current_font_id = self._current_font_id
             elif isinstance(opcode, Opcode_putset_rule):
                 number_of_rules += 1
             elif isinstance(opcode, Opcode_putset_char):
-                total_number_of_chars += len(opcode)
                 number_of_chars[current_font_id] += len(opcode)
 
         return number_of_rules, number_of_chars
 
     ##############################################
 
+    def _adjust_opcode_counts_for_virtual_characters(self, opcode_program):
+
+        self._reset()
+        current_font_id = None
+        is_virtual = False
+        for opcode in opcode_program:
+            if isinstance(opcode, Opcode_font):
+                opcode.run(self)
+                current_font_id = self._current_font_id
+                is_virtual = self.is_current_font_virtual
+            elif isinstance(opcode, Opcode_putset_char) and is_virtual:
+                virtual_font = self.current_font
+                opcode_program.number_of_chars[current_font_id] -= 1
+                for char_code in opcode.characters:
+                    character = virtual_font[char_code]
+                    subroutine = character.subroutine
+                    opcode_program.number_of_rules += subroutine.number_of_rules
+                    for local_font_id, count in subroutine.number_of_chars.iteritems():
+                        if local_font_id is None:
+                            local_font_id = virtual_font.first_font
+                        global_font_id = virtual_font.font_id_map[local_font_id]
+                        if global_font_id in opcode_program.number_of_chars:
+                            opcode_program.number_of_chars[global_font_id] += count
+                        else:
+                            opcode_program.number_of_chars[global_font_id] = count
+
+    ##############################################
+
     def run_page(self, page_index):
 
         self._reset()
-        self.current_opcode_program = self.dvi_program.get_page(page_index)
+        self.current_opcode_program = self.dvi_program[page_index]
         # self._logger.info('Program Length: {}'.format(len(self.current_opcode_program)))
         self.begin_run_page()
         for opcode in self.current_opcode_program:
@@ -1172,11 +1238,34 @@ class DviMachine(object):
 
     ##############################################
 
+    def run_subroutine(self, subroutine):
+
+        self.in_subroutine = True
+        self._virtual_font = self.current_font
+        current_font_id = self._current_font_id # the virtual font
+        self._current_font_id = self._virtual_font.font_id_map[self._virtual_font.first_font]
+        self.push_registers(reset=True) # colour ?
+
+        # Fixme: dimension are * design size
+        for opcode in subroutine:
+            self._logger.info(opcode)
+            opcode.run(self)
+            # self._logger.info('Registers:\n'
+            #                   'level {}\n'
+            #                   '{}'.format(len(self._registers_stack), self.registers))
+
+        self.pop_registers()
+        self._current_font_id = current_font_id
+        self._virtual_font = None
+        self.in_subroutine = False
+
+    ##############################################
+
     def compute_page_bounding_box(self, page_index):
 
         self._reset()
 
-        opcode_program = self.dvi_program.get_page(page_index)
+        opcode_program = self.dvi_program[page_index]
 
         bounding_box = None
         for opcode in opcode_program:
