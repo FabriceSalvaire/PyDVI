@@ -1,0 +1,35 @@
+StartFontMetrics 3.0
+MetricsSets 0
+FontName Ryumin-Light-Ext-H
+IsBaseFont false
+Characters 7520
+FontBBox -10 -305 1000 903
+EncodingScheme ExtJIS12-88-CFEncoding
+MappingScheme 2
+FullName Ryumin Light Extended JIS Encoded Horizontal Composite Font
+FamilyName Ryumin
+Weight Light
+Version 001.001
+Notice Copyright 1987, 1988, 1989 Adobe Systems ...[truncated]
+StartDirection 0
+ItalicAngle 0
+EndDirection
+StartCharMetrics 7520
+CH <2121> ; W0X 1000 ; B 0 0 0 0 ;
+CH <2122> ; W0X 1000 ; B 80 -75 329 170 ;
+CH <2123> ; W0X 1000 ; B 80 -75 380 225 ;
+CH <2124> ; W0X 1000 ; B 94 -140 240 120 ;
+CH <2125> ; W0X 1000 ; B 100 -20 240 120 ;
+CH <2126> ; W0X 1000 ; B 430 288 571 429 ;
+CH <2127> ; W0X 1000 ; B 429 -21 572 666 ;
+CH <2128> ; W0X 1000 ; B 423 -95 574 666 ;
+Comment ... -- lines omitted for brevity --
+CH <2921> ; W0X 500 ; B 185 -40 315 788 ;
+CH <2922> ; W0X 500 ; B 69 552 382 794 ;
+CH <2923> ; W0X 500 ; B 87 0 413 725 ;
+CH <2924> ; W0X 500 ; B 106 -128 400 831 ;
+Comment ... -- lines omitted for brevity --
+CH <737D> ; W0X 1000 ; B 60 -63 967 827 ;
+CH <737E> ; W0X 1000 ; B 54 -85 970 840 ;
+EndCharMetrics
+EndFontMetrics

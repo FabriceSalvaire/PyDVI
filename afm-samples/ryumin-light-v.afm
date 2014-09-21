@@ -1,0 +1,29 @@
+StartFontMetrics 3.0
+MetricsSets 1
+FontName Ryumin-Light-V
+IsBaseFont false
+Characters 7238
+FontBBox -500 -1185 500 23
+EncodingScheme JIS12-88-CFEncoding
+MappingScheme 2
+FullName Ryumin Light 1983 JIS Standard Vertical ...[truncated]
+Weight Light
+Version 001.001
+Notice Copyright 1987, 1988, 1989 Adobe Systems ...[truncated]
+StartDirection 1
+ItalicAngle 0
+CharWidth 0 -1000
+EndDirection
+StartCharMetrics 7238
+CH <2121> ; B 0 0 0 0 ;
+CH <2122> ; B 211 -337 435 -81 ;
+CH <2123> ; B 134 -370 430 -71 ;
+CH <2124> ; B -406 -1020 -260 -760 ;
+CH <2125> ; B -400 -900 -260 -760 ;
+CH <2126> ; B -70 -592 71 -451 ;
+CH <2127> ; B -71 -901 72 -214 ;
+Comment ... -- lines omitted for brevity --
+CH <747D> ; B 0 0 0 0 ;
+CH <747E> ; B 0 0 0 0 ;
+EndCharMetrics
+EndFontMetrics

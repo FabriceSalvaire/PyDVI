@@ -1,0 +1,37 @@
+StartFontMetrics 4.0
+MetricsSets 2
+FontName Ryumin-Light
+Weight Light
+FontBBox -170 -331 1024 903
+Version 3.003
+CharacterSet Adobe-Japan1-2
+Characters 8720
+IsBaseFont true
+IsCIDFont true
+Ascender 903
+Descender -331
+CapHeight 903
+StartDirection 2
+UnderlinePosition -100
+UnderlineThickness 50
+ItalicAngle 0
+IsFixedPitch false
+EndDirection
+StartCharMetrics 8720
+C -1 ; W0X 1000 ; N 0 ; B 0 0 0 0 ;
+C -1 ; W0X 250 ; N 1 ; B 0 0 0 0 ;
+C -1 ; W0X 333 ; N 2 ; B 109 -14 224 676 ;
+C -1 ; W0X 408 ; N 3 ; B 70 445 337 685 ;
+C -1 ; W0X 500 ; N 4 ; B 4 0 495 662 ;
+C -1 ; W0X 500 ; N 5 ; B 44 -87 456 727 ;
+C -1 ; W0X 833 ; N 6 ; B 61 -14 772 676 ;
+C -1 ; W0X 778 ; N 7 ; B 42 -14 750 676 ;
+C -1 ; W0X 180 ; N 8 ; B 47 445 133 685 ;
+C -1 ; W0X 333 ; N 9 ; B 49 -177 304 676 ;
+Comment ... - - lines omitted for brevity - -
+C -1 ; W0X 1000 ; N 8716 ; B 24 -89 936 848 ;
+C -1 ; W0X 1000 ; N 8717 ; B 36 -68 955 832 ;
+C -1 ; W0X 500 ; N 8718 ; B 24 194 474 475 ;
+C -1 ; W0X 500 ; N 8719 ; B 42 -8 458 706 ;
+EndCharMetrics
+EndFontMetrics
