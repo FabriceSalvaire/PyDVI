@@ -2,8 +2,8 @@
 
 ####################################################################################################
 # 
-# PyDvi - A Python Library to Process DVI Stream..
-# Copyright (C) 2012 Salvaire Fabrice
+# PyOpenGLng - An OpenGL Python Wrapper with a High Level API.
+# Copyright (C) 2013 Salvaire Fabrice
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,11 +27,15 @@
 root_dir=`dirname $0`
 root_dir=`dirname ${root_dir}`
 
-rm -rf ${root_dir}/build
-rm -rf ${root_dir}/dist
-find ${root_dir} -name "*pyc" -exec rm {} \;
-find ${root_dir} -name "*~" -exec rm {} \;
-find ${root_dir} -name "*_flymake.py" -exec rm {} \;
+if [ "x${root_dir}" == 'x/' ]; then
+  echo Error: The file was sourced!
+else
+  rm -rf ${root_dir}/build
+  rm -rf ${root_dir}/dist
+  find ${root_dir} -name "*pyc" -exec rm {} \;
+  find ${root_dir} -name "*~" -exec rm {} \;
+  find ${root_dir} -name "*_flymake.py" -exec rm {} \;
+fi
 
 ####################################################################################################
 #
