@@ -152,7 +152,7 @@ class Opcode_putset_char(Opcode):
                 dvi_machine.run_subroutine(virtual_character.subroutine)
                 tfm_char = font.tfm[char_code]
                 char_width = dvi_font.char_scaled_width(tfm_char)
-                registers.h += char_width
+                registers.h += char_width # Fixme: properly scaled
         else:
             self._run(dvi_machine, compute_bounding_box)
 
@@ -1281,12 +1281,12 @@ class DviMachine(object):
 
     ##############################################
 
-    def run_page(self, page_index):
+    def run_page(self, page_index, **kwargs):
 
         self._reset()
         self.current_opcode_program = self.dvi_program[page_index]
         # self._logger.info('Program Length: {}'.format(len(self.current_opcode_program)))
-        self.begin_run_page()
+        self.begin_run_page(**kwargs)
         for opcode in self.current_opcode_program:
             # self._logger.info(opcode)
             opcode.run(self)
