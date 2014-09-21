@@ -59,7 +59,7 @@ class Type1Font(Font):
 
     _logger = _module_logger.getChild('Type1Font')
 
-    font_type = font_types.Pk
+    font_type = font_types.Type1
     font_type_string = 'PostScript Type1 Font'
     extension = 'pfb'
 
