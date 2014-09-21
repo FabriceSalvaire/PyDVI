@@ -3,6 +3,7 @@
 *************
 
 .. toctree::
+  Font/AfmParser
   Font/Encoding
   Font/Font
   Font/FontManager

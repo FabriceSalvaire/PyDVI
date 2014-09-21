@@ -21,6 +21,7 @@ Contents:
   :maxdepth: 2
 
   api/PyDvi
+  api/PyDviPng
   api/PyDviGui
 
 Indexes
