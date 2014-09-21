@@ -1,0 +1,37 @@
+\documentclass{article}
+
+\usepackage{type1cm}
+\renewcommand{\rmdefault}{pnc}
+\usepackage{helvet}
+\usepackage{courier}
+\usepackage{textcomp}
+\usepackage{ucs}
+
+%**** Encoding **************************
+
+\usepackage[utf8x]{inputenc}
+
+%**** Page settings *********************
+
+% \usepackage[papersize={72in,72in},body={70in,70in},margin={1in,1in}]{geometry}
+\usepackage[%
+paper=a4paper,%
+%includeheadfoot,%
+margin=1cm,%
+headsep=0cm, footskip=0cm,%
+dvips,%
+]{geometry}
+
+%****************************************
+
+\pagestyle{empty}
+
+\begin{document}
+\fontsize{16.000000}{20.000000}{%
+\sffamily \TeX\ is Number $\displaystyle\sum_{n=1}^\infty\frac{-e^{i\pi}}{2^n}$!}
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 
