@@ -1,0 +1,248 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyDviPng.DviMachine &mdash; PyDvi 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
+    <link rel="top" title="PyDvi 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for PyDviPng.DviMachine</h1><div class="highlight"><pre>
+<span class="c">####################################################################################################</span>
+<span class="c"># </span>
+<span class="c"># PyDvi - A Python Library to Process DVI Stream</span>
+<span class="c"># Copyright (C) 2014 Fabrice Salvaire</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c"># </span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c"># </span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c"># </span>
+<span class="c">####################################################################################################</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span><span class="p">,</span> <span class="n">ImageDraw</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="kn">from</span> <span class="nn">PyDvi.Dvi.DviMachine</span> <span class="kn">import</span> <span class="n">DviMachine</span><span class="p">,</span> <span class="n">DviSimplifyMachine</span>
+<span class="kn">from</span> <span class="nn">PyDvi.Font.PkFont</span> <span class="kn">import</span> <span class="n">PkFont</span>
+<span class="kn">from</span> <span class="nn">PyDvi.Font.Type1Font</span> <span class="kn">import</span> <span class="n">Type1Font</span>
+<span class="kn">from</span> <span class="nn">PyDvi.TeXUnit</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c">####################################################################################################</span>
+
+<span class="n">_module_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="c">####################################################################################################</span>
+
+<div class="viewcode-block" id="rint"><a class="viewcode-back" href="../../api/PyDviPng/DviMachine.html#PyDviPng.DviMachine.rint">[docs]</a><span class="k">def</span> <span class="nf">rint</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+
+<span class="c">####################################################################################################</span>
+</div>
+<div class="viewcode-block" id="ImageDviMachine"><a class="viewcode-back" href="../../api/PyDviPng/DviMachine.html#PyDviPng.DviMachine.ImageDviMachine">[docs]</a><span class="k">class</span> <span class="nc">ImageDviMachine</span><span class="p">(</span><span class="n">DviSimplifyMachine</span><span class="p">):</span>
+
+    <span class="n">_logger</span> <span class="o">=</span> <span class="n">_module_logger</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="s">&#39;ImageDviMachine&#39;</span><span class="p">)</span>
+    
+    <span class="c">##############################################</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">font_manager</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">ImageDviMachine</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">font_manager</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+
+<div class="viewcode-block" id="ImageDviMachine.begin_run_page"><a class="viewcode-back" href="../../api/PyDviPng/DviMachine.html#PyDviPng.DviMachine.ImageDviMachine.begin_run_page">[docs]</a>    <span class="k">def</span> <span class="nf">begin_run_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">png_path</span><span class="p">,</span> <span class="n">dpi</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dpi</span> <span class="o">=</span> <span class="n">dpi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_png_path</span> <span class="o">=</span> <span class="n">png_path</span>
+
+        <span class="n">program</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_opcode_program</span>
+
+        <span class="n">width</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">width</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">height</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">width</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">height</span><span class="p">:</span> 
+            <span class="n">first_page</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dvi_program</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">first_page</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">first_page</span><span class="o">.</span><span class="n">height</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">width</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">height</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;Page size is null&#39;</span><span class="p">)</span>
+            <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">210</span><span class="p">,</span> <span class="mi">297</span> <span class="c"># use A4</span>
+
+        <span class="n">width_px</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm_to_px</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+        <span class="n">height_px</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm_to_px</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Image dimension (width, height) = ({},{})&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">width_px</span><span class="p">,</span> <span class="n">height_px</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s">&#39;RGB&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">width_px</span><span class="p">,</span> <span class="n">height_px</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_draw</span> <span class="o">=</span> <span class="n">ImageDraw</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="ImageDviMachine.end_run_page"><a class="viewcode-back" href="../../api/PyDviPng/DviMachine.html#PyDviPng.DviMachine.ImageDviMachine.end_run_page">[docs]</a>    <span class="k">def</span> <span class="nf">end_run_page</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_png_path</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="ImageDviMachine.mm_to_px"><a class="viewcode-back" href="../../api/PyDviPng/DviMachine.html#PyDviPng.DviMachine.ImageDviMachine.mm_to_px">[docs]</a>    <span class="k">def</span> <span class="nf">mm_to_px</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c"># Fixme: better unit ?</span>
+        <span class="k">return</span> <span class="n">rint</span><span class="p">(</span><span class="n">mm2in</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_dpi</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+    </div>
+<div class="viewcode-block" id="ImageDviMachine.paint_rule"><a class="viewcode-back" href="../../api/PyDviPng/DviMachine.html#PyDviPng.DviMachine.ImageDviMachine.paint_rule">[docs]</a>    <span class="k">def</span> <span class="nf">paint_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+
+        <span class="c"># self._logger.info(&quot;\nrule ({}, {}) +({}, {})&quot;.format(x, y, w, h))</span>
+        <span class="n">x_mm</span><span class="p">,</span> <span class="n">y_mm</span><span class="p">,</span> <span class="n">w_mm</span><span class="p">,</span> <span class="n">h_mm</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp2mm</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)]</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_draw</span><span class="o">.</span><span class="n">rectangle</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">mm_to_px</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">x_mm</span><span class="p">,</span> <span class="n">y_mm</span> <span class="o">-</span> <span class="n">h_mm</span><span class="p">,</span> <span class="n">x_mm</span> <span class="o">+</span> <span class="n">w_mm</span><span class="p">,</span> <span class="n">y_mm</span><span class="p">)],</span>
+                             <span class="n">fill</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">current_colour</span><span class="o">.</span><span class="n">colour</span><span class="p">)</span>
+
+    <span class="c">##############################################</span>
+</div>
+<div class="viewcode-block" id="ImageDviMachine.paint_char"><a class="viewcode-back" href="../../api/PyDviPng/DviMachine.html#PyDviPng.DviMachine.ImageDviMachine.paint_char">[docs]</a>    <span class="k">def</span> <span class="nf">paint_char</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xg</span><span class="p">,</span> <span class="n">yg</span><span class="p">,</span> <span class="n">char_bounding_box</span><span class="p">,</span> <span class="n">font</span><span class="p">,</span> <span class="n">dvi_font</span><span class="p">,</span> <span class="n">glyph_index</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">dvi_font</span><span class="o">.</span><span class="n">global_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">font_id</span> <span class="o">=</span> <span class="n">dvi_font</span><span class="o">.</span><span class="n">global_id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">font_id</span> <span class="o">=</span> <span class="n">dvi_font</span><span class="o">.</span><span class="n">id</span>
+
+        <span class="c"># self._logger.info(&quot;\nchar ({}, {}) {} {}[{}]@{}&quot;.format(xg, yg, char_bounding_box,</span>
+        <span class="c">#                                                         font.name, glyph_index, dvi_font.magnification))</span>
+
+        <span class="c"># if font.tfm is not None:</span>
+        <span class="c">#     size = dvi_font.magnification * font.tfm.design_font_size # pt</span>
+        <span class="c"># else:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">dvi_font</span><span class="o">.</span><span class="n">magnification</span> <span class="o">*</span> <span class="n">sp2pt</span><span class="p">(</span><span class="n">dvi_font</span><span class="o">.</span><span class="n">design_size</span><span class="p">)</span> <span class="c"># pt</span>
+
+        <span class="n">glyph</span> <span class="o">=</span> <span class="n">font</span><span class="o">.</span><span class="n">get_glyph</span><span class="p">(</span><span class="n">glyph_index</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dpi</span><span class="p">)</span>
+        <span class="n">glyph_bitmap</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">glyph</span><span class="o">.</span><span class="n">glyph_bitmap</span> <span class="o">-</span> <span class="mi">255</span><span class="p">)</span>
+        <span class="n">height_px</span><span class="p">,</span> <span class="n">width_px</span> <span class="o">=</span> <span class="n">glyph_bitmap</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="c"># depth</span>
+
+        <span class="n">xg_mm</span> <span class="o">=</span> <span class="n">sp2mm</span><span class="p">(</span><span class="n">xg</span><span class="p">)</span> <span class="o">+</span> <span class="n">glyph</span><span class="o">.</span><span class="n">px_to_mm</span><span class="p">(</span><span class="n">glyph</span><span class="o">.</span><span class="n">offset</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">yg_mm</span> <span class="o">=</span> <span class="n">sp2mm</span><span class="p">(</span><span class="n">yg</span><span class="p">)</span> <span class="o">+</span> <span class="n">glyph</span><span class="o">.</span><span class="n">px_to_mm</span><span class="p">(</span><span class="n">glyph</span><span class="o">.</span><span class="n">size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">glyph</span><span class="o">.</span><span class="n">offset</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c"># offset = top - origin</span>
+        <span class="c"># width = glyph.px_to_mm(glyph.size[0])</span>
+        <span class="c"># height = glyph.px_to_mm(glyph.size[1])</span>
+
+        <span class="n">x_px</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm_to_px</span><span class="p">(</span><span class="n">xg_mm</span><span class="p">)</span>
+        <span class="n">y_px</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mm_to_px</span><span class="p">(</span><span class="n">yg_mm</span><span class="p">)</span>
+
+        <span class="n">glyph_image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">glyph_bitmap</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">glyph_image</span><span class="p">,</span> <span class="p">[</span><span class="n">x_px</span><span class="p">,</span> <span class="n">y_px</span> <span class="o">-</span> <span class="n">height_px</span><span class="p">,</span> <span class="n">x_px</span> <span class="o">+</span> <span class="n">width_px</span><span class="p">,</span> <span class="n">y_px</span><span class="p">])</span>
+
+        <span class="c"># x_mm = sp2mm(char_bounding_box.x.inf)</span>
+        <span class="c"># y_mm = sp2mm(char_bounding_box.y.inf)</span>
+        <span class="c"># box_width  = sp2mm(char_bounding_box.x.length())</span>
+        <span class="c"># box_height = sp2mm(char_bounding_box.y.length())</span>
+        <span class="c"># y_mm -= box_height</span>
+
+        <span class="c"># glyph_index = self._glyph_indexes[font_id]</span>
+        <span class="c"># positions, bounding_boxes, texture_coordinates, colours = self.glyphs[font_id]</span>
+        <span class="c"># positions[glyph_index] = xg_mm, yg_mm, width, height</span>
+        <span class="c"># bounding_boxes[glyph_index] = x_mm, y_mm, box_width, box_height</span>
+        <span class="c"># texture_coordinates[glyph_index] = glyph.texture_coordinates</span>
+        <span class="c"># colours[glyph_index] = self.current_colour.colour</span>
+
+<span class="c">####################################################################################################</span>
+<span class="c"># </span>
+<span class="c"># End</span>
+<span class="c"># </span>
+<span class="c">####################################################################################################</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">PyDvi 0.1.0 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Fabrice Salvaire.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

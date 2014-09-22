@@ -19,8 +19,16 @@ PyDvi requires the following dependencies:
 
  * |Python|_
  * |Numpy|_
- * PyQt
- * freetype
+ * |freetype-py|_ for Type1 font rendering
+
+The OpenGL DVI viewer requires these additional dependencies:
+
+ * |PyQt|_
+ * |PyOpenGLng|_
+
+The DVI to PNG tool requires these additional dependencies:
+
+ * |pillow|_
 
 Also it is recommanded to have these Python modules:
 
