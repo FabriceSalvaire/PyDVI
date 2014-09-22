@@ -22,16 +22,13 @@
 
 import logging
 
-import numpy as np
-
 from PIL import Image, ImageDraw
 
 ####################################################################################################
 
-from PyDvi.Dvi.DviMachine import DviMachine, DviSimplifyMachine
-from PyDvi.Font.PkFont import PkFont
-from PyDvi.Font.Type1Font import Type1Font
+from PyDvi.Dvi.DviMachine import DviSimplifyMachine
 from PyDvi.TeXUnit import *
+from PyDvi.Tools.Interval import Interval2D
 
 ####################################################################################################
 
@@ -56,10 +53,13 @@ class ImageDviMachine(DviSimplifyMachine):
 
     ##############################################
 
-    def begin_run_page(self, png_path, dpi):
+    def begin_run_page(self, png_path, dpi, tight=False):
 
-        self._dpi = dpi
         self._png_path = png_path
+        self._dpi = dpi
+        self._tight = tight
+
+        self._sp_to_px = self._dpi * sp2in(1)
 
         program = self.current_opcode_program
 
@@ -72,35 +72,50 @@ class ImageDviMachine(DviSimplifyMachine):
             self._logger.warning('Page size is null')
             width, height = 210, 297 # use A4
 
-        width_px = self.mm_to_px(width)
-        height_px = self.mm_to_px(height)
+        width_px = self.mm2px(width)
+        height_px = self.mm2px(height)
 
         self._logger.info("Image dimension (width, height) = ({},{})".format(width_px, height_px))
 
         self._image = Image.new('RGB', (width_px, height_px), color=(255, 255, 255))
         self._draw = ImageDraw.Draw(self._image)
 
+        self._bounding_box = None
+
     ##############################################
 
     def end_run_page(self):
 
-        self._image.save(self._png_path)
+        if self._tight:
+            image = self._image.crop(self._bounding_box.bounding_box())
+        else:
+            image = self._image
+        image.save(self._png_path)
 
     ##############################################
 
-    def mm_to_px(self, x):
-        # Fixme: better unit ?
+    def mm2px(self, x):
         return rint(mm2in(x)*self._dpi)
+
+    ##############################################
+
+    def sp2px(self, x):
+        return rint(self._sp_to_px * x)
 
     ##############################################
     
     def paint_rule(self, x, y, w, h):
 
         # self._logger.info("\nrule ({}, {}) +({}, {})".format(x, y, w, h))
-        x_mm, y_mm, w_mm, h_mm = [sp2mm(z) for z in (x, y, w, h)]
-        
-        self._draw.rectangle([self.mm_to_px(x) for x in (x_mm, y_mm - h_mm, x_mm + w_mm, y_mm)],
+        x0, y0, x1, y1 = [self.sp2px(x) for x in (x, y - h, x + w, y)]
+        self._draw.rectangle((x0, y0, x1, y1),
                              fill=self.current_colour.colour)
+
+        rule_bounding_box = Interval2D([x0, x1], [y0, y1])
+        if self._bounding_box is None:
+            self._bounding_box = rule_bounding_box
+        else:
+            self._bounding_box |= rule_bounding_box
 
     ##############################################
 
@@ -120,32 +135,22 @@ class ImageDviMachine(DviSimplifyMachine):
         size = dvi_font.magnification * sp2pt(dvi_font.design_size) # pt
 
         glyph = font.get_glyph(glyph_index, size, resolution=self._dpi)
-        glyph_bitmap = -(glyph.glyph_bitmap - 255)
-        height_px, width_px = glyph_bitmap.shape[:2] # depth
+        glyph_bitmap = 255 - glyph.glyph_bitmap # inverse: paint black on white
+        height, width = glyph_bitmap.shape[:2] # depth
 
-        xg_mm = sp2mm(xg) + glyph.px_to_mm(glyph.offset[0])
-        yg_mm = sp2mm(yg) + glyph.px_to_mm(glyph.size[1] - glyph.offset[1]) # offset = top - origin
-        # width = glyph.px_to_mm(glyph.size[0])
-        # height = glyph.px_to_mm(glyph.size[1])
+        x = self.sp2px(xg) + glyph.offset[0]
+        y = self.sp2px(yg) + glyph.size[1] - glyph.offset[1] # offset = top - origin
 
-        x_px = self.mm_to_px(xg_mm)
-        y_px = self.mm_to_px(yg_mm)
+        x0, y0, x1, y1 = [x, y - height, x + width, y]
 
         glyph_image = Image.fromarray(glyph_bitmap)
-        self._image.paste(glyph_image, [x_px, y_px - height_px, x_px + width_px, y_px])
+        self._image.paste(glyph_image, (x0, y0, x1, y1))
 
-        # x_mm = sp2mm(char_bounding_box.x.inf)
-        # y_mm = sp2mm(char_bounding_box.y.inf)
-        # box_width  = sp2mm(char_bounding_box.x.length())
-        # box_height = sp2mm(char_bounding_box.y.length())
-        # y_mm -= box_height
-
-        # glyph_index = self._glyph_indexes[font_id]
-        # positions, bounding_boxes, texture_coordinates, colours = self.glyphs[font_id]
-        # positions[glyph_index] = xg_mm, yg_mm, width, height
-        # bounding_boxes[glyph_index] = x_mm, y_mm, box_width, box_height
-        # texture_coordinates[glyph_index] = glyph.texture_coordinates
-        # colours[glyph_index] = self.current_colour.colour
+        char_bounding_box = Interval2D([x0, x1], [y0, y1])
+        if self._bounding_box is None:
+            self._bounding_box = char_bounding_box
+        else:
+            self._bounding_box |= char_bounding_box
 
 ####################################################################################################
 # 

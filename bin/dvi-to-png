@@ -48,12 +48,16 @@ parser.add_argument('png_file', metavar='FILE.png',
                     help='PNG File')
 
 parser.add_argument('--page',
-                    type=int, default=0,
-                    help='page')
+                    type=int, default=1,
+                    help='page index from 1')
 
 parser.add_argument('--dpi',
                     type=int, default=300,
-                    help='resolution')
+                    help='resolution in dpi')
+
+parser.add_argument('--tight',
+                    action='store_true', default=False,
+                    help='crop the page to the bounding box')
 
 args = parser.parse_args()
 
@@ -61,7 +65,7 @@ args = parser.parse_args()
 
 dvi_png = DviPng()
 dvi_png.process_dvi_stream(args.dvi_file)
-dvi_png.run_page(args.png_file, args.page, args.dpi)
+dvi_png.run_page(args.png_file, args.page -1, args.dpi, args.tight)
 
 ####################################################################################################
 #

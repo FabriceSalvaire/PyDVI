@@ -58,6 +58,8 @@ import fractions
 
 ####################################################################################################
 
+# x_in_y means number of x corresponding to 1 y
+
 # 1 in = 72 bp
 big_point_in_inch = 72
 # 1 cc = 12 dd
@@ -74,6 +76,7 @@ scaled_point_in_point = 2**16
 inch_in_mm = 1 / mm_in_inch
 point_in_mm = point_in_inch * inch_in_mm
 inch_in_point = 1 / point_in_inch
+
 mm_in_point = 1 / point_in_mm
 pt_in_sp = fractions.Fraction(1, scaled_point_in_point)
 

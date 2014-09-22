@@ -60,16 +60,16 @@ print
 dvi_program.print_summary()
 
 dvi_machine.load_dvi_program(dvi_program)
-print line
-dvi_program[0].print_program()
-print line
-dvi_machine.simplify_dvi_program()
-print line
-dvi_program[0].print_program()
-print line
+# print line
+# dvi_program[0].print_program()
+# print line
+# dvi_machine.simplify_dvi_program()
+# print line
+# dvi_program[0].print_program()
+# print line
 
-print 'Compute bounding box of the first page:'
-dvi_machine.compute_page_bounding_box(0)
+# print 'Compute bounding box of the first page:'
+# dvi_machine.compute_page_bounding_box(0)
 
 print line
 print 'Run the first page:'
