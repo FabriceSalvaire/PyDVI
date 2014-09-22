@@ -70,8 +70,8 @@
 .. _MathJax: http://www.mathjax.org
 
 .. A DVI-to-PNG converter
-.. |Dvipng| replace:: Dvipng
-.. _Dvipng: http://savannah.nongnu.org/projects/dvipng
+.. |dvipng| replace:: dvipng
+.. _dvipng: http://savannah.nongnu.org/projects/dvipng
 
 .. |Matplotlib| replace:: Matplotlib
 .. _Matplotlib: http://matplotlib.org
@@ -84,6 +84,18 @@
 
 .. |Circuit_macros| replace:: Circuit_macros
 .. _Circuit_macros: https://ece.uwaterloo.ca/~aplevich/Circuit_macros
+
+.. |pyqt| replace:: pyqt
+.. _pyqt: http://www.riverbankcomputing.co.uk/software/pyqt/intro
+
+.. |pillow| replace:: pillow
+.. _pillow: http://pillow.readthedocs.org/en/latest/index.html
+
+.. |PyOpenGLng| replace:: PyOpenGLng
+.. _PyOpenGLng: https://github.com/FabriceSalvaire/PyOpenGLng
+
+.. |freetype-py| replace:: freetype-py
+.. _freetype-py: https://github.com/rougier/freetype-py
 
 .. End
 
@@ -110,14 +122,14 @@ Written by `Fabrice Salvaire <http://fabrice-salvaire.pagesperso-orange.fr>`_.
  Introduction
 ==============
 
-.. is able to ...
 .. link to TUG
+.. library versus module
 
-PyDvi is a |Python|_ module which is able to read the DVI (DeVice Independent) file format, the
-native output of the famous TeX typesetting program implemented by |Knuth|_.
+PyDvi is a |Python|_ library to read and process DVI (DeVice Independent) files, the native output
+of the famous TeX typesetting program implemented by |Knuth|_.
 
-PyDvi is also able to read most of the file formats associated to the TeX world like Packed Font,
-TeX Font Metric, Font Map and Font Encoding.
+PyDvi is also able to read most of the file formats associated to the TeX world like packed font,
+virtual font, TeX font metric, font map and font encoding. It can also read Adobe Font Metrics files.
 
 Basically a DVI file describes the layout of a page by a list of opcodes that interact with a
 register machine to update the position on the page, to load fonts and to paint glyphs and rules. In
@@ -125,20 +137,23 @@ short it contains the glyphs and their positions on the page. Since TeX was desi
 series of books *The Art of Computer Programming* at the beginning of the eighties, it focuses on
 texts and mathematical expressions. Thus DVI is much simpler than Postscript or its successor PDF
 which are designed for graphics. However we can extend the capabilities of DVI using the *special*
-opcode which can contains any text like Postscript snippets.
+opcode which can contain any text like Postscript snippets.
 
 A DVI stream can come from a file or a TeX daemon in order to render TeX inputs on-the-fly.
 
 The DVI parser of PyDvi builds a program from a DVI stream that could be later processed by the
 provided DVI machine which is designed to be subclassed by the user.
 
-The source code includes as exemple an experimental DVI viewer which uses the OpenGL API for the
-rendering and thus feature an hardware accelerated rendering. PyDvi and the viewer can be used as an
+The source code includes an experimental DVI viewer as exemple which uses the OpenGL API for the
+rendering and thus feature an hardware accelerated rendering. PyDvi and the viewer can be used as a
 platform to experiment complex text rendering on GPU.
+
+The source code includes also a clone of the |dvipng| tool to render DVI to PNG image. This tool is
+mainly intended to check the compliance of PyDvi by image comparison.
 
 .. The aim of PyDvi is multiple
 
-PyDvi can be user for several purpose, we will review them in the followings:
+PyDvi can be used for several purpose, we will review them in the followings:
 
 TeX is a major and historical typesetting program. PyDvi can serve to read and process its output
 using Python. The user can be a curious pearson who want to lean TeX or somebody interested by TeX
@@ -149,12 +164,12 @@ algorithms do the right job, its ecosystem is rich and its code is not so simple
 succeeds to reimplement it up to now, excepted its mathematical layout algorithms by the |Mathjax|_
 Javascript library which is intended to bring Mathematical layout to web browser. Before the
 delivery of Mathjax, the only solution to render properly mathematical content was to generate an
-image using a program like |Dvipng|_. It is what does the engine of Wikipedia behind the
-scene. |Matplotlib|_ uses also this approach to render LaTeX labels. Usually these programs like
-|Asymptote|_ or |Circuit_macros|_ generate the graphics as a PDF document and then include this
-document in a LaTeX document which contains the labels placed at absolute postion in the page. With
-PyDvi we can try another approach which consists to send TeX content to a daemon and get back the
-glyphs and their positions.
+image using a program like |Dvipng|_. It is what does the engine of Wikipedia behind the scene.
+Usually these programs like |Asymptote|_ or |Circuit_macros|_ generate the graphics as a PDF
+document and then include this document in a LaTeX document which contains the labels placed at
+absolute positions in the page. With PyDvi we can try another approach which consists to send TeX
+content to a daemon and get back the glyphs and their positions. |Matplotlib|_ uses this approach to
+render LaTeX labels.
 
 .. -*- Mode: rst -*-
 
@@ -181,8 +196,16 @@ PyDvi requires the following dependencies:
 
  * |Python|_
  * |Numpy|_
- * PyQt
- * freetype
+ * |freetype-py|_ for Type1 font rendering
+
+The OpenGL DVI viewer requires these additional dependencies:
+
+ * |PyQt|_
+ * |PyOpenGLng|_
+
+The DVI to PNG tool requires these additional dependencies:
+
+ * |pillow|_
 
 Also it is recommanded to have these Python modules:
 

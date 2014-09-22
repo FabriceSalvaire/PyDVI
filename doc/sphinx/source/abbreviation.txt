@@ -26,8 +26,8 @@
 .. _MathJax: http://www.mathjax.org
 
 .. A DVI-to-PNG converter
-.. |Dvipng| replace:: Dvipng
-.. _Dvipng: http://savannah.nongnu.org/projects/dvipng
+.. |dvipng| replace:: dvipng
+.. _dvipng: http://savannah.nongnu.org/projects/dvipng
 
 .. |Matplotlib| replace:: Matplotlib
 .. _Matplotlib: http://matplotlib.org
@@ -41,17 +41,11 @@
 .. |Circuit_macros| replace:: Circuit_macros
 .. _Circuit_macros: https://ece.uwaterloo.ca/~aplevich/Circuit_macros
 
-.. |dvipng| replace:: dvipng
-.. _dvipng: http://savannah.nongnu.org/projects/dvipng
-
 .. |pyqt| replace:: pyqt
 .. _pyqt: http://www.riverbankcomputing.co.uk/software/pyqt/intro
 
 .. |pillow| replace:: pillow
 .. _pillow: http://pillow.readthedocs.org/en/latest/index.html
-
-.. |dvipng| replace:: dvipng
-.. _dvipng: http://savannah.nongnu.org/projects/dvipng
 
 .. |PyOpenGLng| replace:: PyOpenGLng
 .. _PyOpenGLng: https://github.com/FabriceSalvaire/PyOpenGLng
