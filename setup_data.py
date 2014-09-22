@@ -72,9 +72,9 @@ setup_dict = dict(
     version='0.1.0',
     author='Fabrice Salvaire',
     author_email='fabrice.salvaire@orange.fr',
-    description='A Python Library to Process DVI Stream.',
+    description='A library to read and process DVI (DeVice Independent) files, the native output of TeX. The source code provides also a PNG converter and a viewer featuring an hardware acceleration based on the OpenGL API.',
     license="GPLv3",
-    keywords="tex, latex, dvi",
+    keywords="tex, latex, dvi, read, process, pk, font, tfm, fontmap, afm, viewer, gpu, convert, png",
     url='https://github.com/FabriceSalvaire/PyDVI',
     scripts=[],
     packages=['PyDvi', # Fixme: 
@@ -86,6 +86,7 @@ setup_dict = dict(
               'PyDviGui',
               'PyDviGui.DviViewer',
               'PyDviGui.FontViewer',
+              'PyDviPng',
           ],
     # package_dir = {'PyDvi': 'PyDvi'},
     data_files=[],
@@ -102,7 +103,8 @@ setup_dict = dict(
     # install_requires=[
     #     'numpy',
     #     'pyqt>=4.9',
-    #     'freetype',
+    #     'freetype-py',
+    #     'pillow',
     #     ],
     )
 
